@@ -1,1 +1,4 @@
-bundle: specialists
+bundle:
+  active: specialists
+  added:
+    specialists: file:///Users/chrispark/Projects/specialists
