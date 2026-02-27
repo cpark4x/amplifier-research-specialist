@@ -150,6 +150,8 @@ Before proceeding to synthesis, check:
 
 Maximum 3 Quality Gate cycles before accepting remaining gaps as genuinely inaccessible. After 3 cycles, flag them explicitly and proceed.
 
+**`quality_threshold: maximum`:** After 3 cycles, if Low confidence claims remain for high-priority sub-questions, do NOT silently degrade — surface the failure explicitly in the `QUALITY THRESHOLD RESULT` section of the output. The caller asked for maximum and must know if it wasn't achieved.
+
 Do not skip the Quality Gate. Do not return output before passing it.
 
 ### Stage 7: Synthesizer
@@ -176,6 +178,7 @@ FINDINGS:
   Tier: [primary | secondary | tertiary]
   Confidence: [high | medium | low]
   Corroborated by: [count] independent sources
+  Contradicted by: [source — URL] (only when another source conflicts with this claim)
   Direct quote: [yes | no]
   Published: [date if known]
 
@@ -187,6 +190,11 @@ EVIDENCE GAPS:
 
 QUALITY SCORE RATIONALE:
 [Brief explanation of overall confidence level]
+
+QUALITY THRESHOLD RESULT: [MET | NOT MET | N/A]
+Requested: [low | medium | high | maximum]
+Achieved: [low | medium | high]
+Unresolved: [N claims remain single-source or Low confidence after 3 cycles] (only when NOT MET)
 
 FOLLOW-UP QUESTIONS:
 1. [question that would most improve confidence]
