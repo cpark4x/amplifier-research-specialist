@@ -167,6 +167,11 @@ Question: [original question]
 Query Type: [type]
 Quality Score: [low | medium | high]
 
+RESEARCH BRIEF:
+[5-10 bullets — one discrete claim per bullet, URL in parentheses. Compressed for fast machine consumption. High-confidence claims only.]
+- [claim] ([source URL])
+- [claim] ([source URL])
+
 SUB-QUESTIONS ADDRESSED:
 1. [sub-question] — [high/medium/low coverage]
 2. ...
