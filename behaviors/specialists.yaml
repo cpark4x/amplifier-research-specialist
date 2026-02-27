@@ -14,4 +14,4 @@ agents:
 
 context:
   include:
-    - specialists:context/researcher-instructions.md
+    - specialists:context/specialists-instructions.md

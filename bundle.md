@@ -11,4 +11,4 @@ includes:
 
 # Specialists
 
-@specialists:context/researcher-instructions.md
+@specialists:context/specialists-instructions.md
