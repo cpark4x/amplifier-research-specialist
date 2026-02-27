@@ -1,0 +1,16 @@
+bundle:
+  name: specialists-behavior
+  version: 1.0.0
+  description: Adds researcher specialist with web capabilities
+
+tools:
+  - module: tool-web
+    source: git+https://github.com/microsoft/amplifier-module-tool-web@main
+
+agents:
+  include:
+    - specialists:specialists/researcher
+
+context:
+  include:
+    - specialists:context/researcher-instructions.md
