@@ -67,6 +67,7 @@ The output schema is the contract. Other specialists and orchestrators depend on
 - Extract the common framework from researcher + writer patterns (what every specialist shares vs. what's domain-specific)
 - Template and docs for adding new specialists
 - Candidates: analyst, editor, fact-checker
+- **Citation mapping in Writer** — inline `[S1]`-style markers in output prose, mapped back to exact source material in a Citations block; closes the source fidelity gap identified in competitive analysis
 
 ---
 

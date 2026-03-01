@@ -30,6 +30,7 @@ Key fields in the metadata block:
 - `Word count` — approximate length
 - `Coverage` — `full` or `partial`
 - `Coverage gaps` — what could not be written from the source material (`none` if full coverage)
+- `Citations` — one entry per inline `[Sn]` marker: source text snippet (≤20 words) + document location where the marker appears; enables callers to verify any output claim against source material
 
 ### Can Do
 
