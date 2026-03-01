@@ -1,3 +1,4 @@
 .amplifier/settings.local.yaml
 .amplifier/cache/
 *.local.yaml
+*.html
