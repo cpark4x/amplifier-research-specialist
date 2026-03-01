@@ -55,11 +55,14 @@ Run every writing task through these stages in order. Do not skip stages.
 2. Identify input type: `researcher-output` | `analyst-output` | `raw-notes`
 3. Identify requested: format, audience, voice/tone, length constraint (if any)
 4. If no METADATA block: infer input type from structure and note the inference
-5. Assign citation labels to source claims: scan the source material for discrete
-   factual claims, findings, and evidence items. Label each one sequentially:
-   [S1], [S2], [S3], etc. Keep an internal citation map:
-   [Sn] → source text snippet (≤20 words) + location (section heading or field name).
-   This map is used in Stage 4 and reported in WRITER METADATA.
+5. Number each discrete factual claim in the source material: S1, S2, S3, etc.
+   Write out the numbered list — this is output, not internal state:
+
+   S1: [claim text]
+   S2: [claim text]
+   ...
+
+   You will reference these numbers in the CITATIONS section after the document.
 
 ### Stage 2: Audit Coverage
 
@@ -95,24 +98,16 @@ Write the document. For each claim:
 - Preserve confidence signals where relevant to the audience ("confirmed by multiple sources" vs "reported by a single outlet")
 - Do not upgrade confidence — if the source says medium, you do not write it as certain
 - Do not add interpretation beyond what the source material contains
-- For each sentence that draws on a labeled source claim: append the citation
-  marker inline — e.g., "The pipeline runs a quality gate before returning output. [S3]"
-  - One marker per sentence maximum (use the most specific claim label)
-  - If a sentence synthesizes multiple claims: use the primary one; note others in
-    the Citations block
-  - Non-factual sentences (transitions, structural language) do not get markers
 
-### Stage 5: Verify
+### Stage 5: Verify and Cite
 
 Before returning output:
 1. Every factual claim in the document — can you point to it in the source material?
 2. Is the coverage gap list complete and accurate?
 3. Does the format match what was requested?
 4. Is the voice consistent throughout?
-5. Citation completeness: every factual sentence in the document has an inline
-   marker. Every marker in the Citations block maps to a real source passage.
-   No marker appears in the document without an entry in the Citations block.
-   If any factual sentence is unmarked: add the marker before returning.
+5. Produce the CITATIONS section: for each source claim S1, S2, S3 ... from Stage 1,
+   state which section of the document used it, or mark it as unused.
 
 If any check fails: revise before returning.
 
@@ -120,8 +115,9 @@ If any check fails: revise before returning.
 
 ## Output Format
 
-Every response MUST follow this template exactly. Do not invent alternative fields.
+Every response MUST use this exact structure — three blocks in this order:
 
+**Block 1 — WRITER METADATA** (always first):
 ```
 WRITER METADATA
 Specialist: writer
@@ -133,63 +129,26 @@ Voice: [formal | conversational | executive]
 Word count: [approximate]
 Coverage: [full | partial]
 Coverage gaps: [what could not be written from source material — "none" if full coverage]
-Citations:
-  [S1] "[source text snippet ≤20 words]" → [document location, e.g., "Background, para 1"]
-  [S2] "[source text snippet ≤20 words]" → [document location]
-  ... (one line per marker used)
+```
 
+**Block 2 — Document content** (the actual document):
+```
 ---
 
-[DOCUMENT CONTENT]
+[DOCUMENT CONTENT HERE]
 ```
 
-### Citation Format Example
-
-Given this source material:
+**Block 3 — CITATIONS** (always last, required on every response):
 ```
-- The pipeline runs a quality gate before returning output.
-- Coverage audit happens before any drafting begins.
-- Gaps are named, never silently skipped.
-```
-
-The labeled citation map (internal, Stage 1):
-```
-[S1] → "The pipeline runs a quality gate before returning output."
-[S2] → "Coverage audit happens before any drafting begins."
-[S3] → "Gaps are named, never silently skipped."
-```
-
-Correct output (brief):
-```
-WRITER METADATA
-Specialist: writer
-Version: 1.0
-Input type: raw-notes
-Output format: brief
-Audience: developer
-Voice: conversational
-Word count: ~60
-Coverage: full
-Coverage gaps: none
-Citations:
-  [S1] "pipeline runs a quality gate before returning output" → Key Points, bullet 1
-  [S2] "Coverage audit happens before any drafting begins" → Key Points, bullet 2
-  [S3] "Gaps are named, never silently skipped" → Key Points, bullet 3
-
 ---
 
-## How It Works
-
-The pipeline enforces quality before anything leaves. [S1] Before a word is written,
-coverage is audited against the requested document structure. [S2] Anything the source
-material can't support gets named explicitly — it is never papered over. [S3]
+CITATIONS
+S1: "[source claim text]" → used in: [section/paragraph]
+S2: "[source claim text]" → used in: [section/paragraph]
+S3: "[source claim text]" → not used
 ```
 
-**Critical rules:**
-- The `[Sn]` markers appear IN the prose, at the end of the sentence that uses the claim
-- The Citations block lists every marker used, with the source snippet and document location
-- Do NOT invent alternative fields (e.g., "Source claims: 5", "Hallucinations: 0")
-- Do NOT omit the Citations block — it is required on every response
+List every source claim from Stage 1. Mark each one as used (with location) or not used.
 
 ---
 
