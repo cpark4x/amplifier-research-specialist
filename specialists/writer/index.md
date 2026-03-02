@@ -127,6 +127,9 @@ Before returning output:
    the confidence from your Stage 1 list. Use the fixed mapping:
      high → 0.9 | medium → 0.6 | low → 0.3 | unrated → unrated (no numeric)
    Every Sn that appears in an attribution line must appear in the CITATIONS block.
+7. Add `Confidence distribution` to WRITER METADATA: count high/medium/low/unrated
+   from your Stage 1 claim list (include all claims, used and unused).
+   Format: `Confidence distribution: [n] high · [n] medium · [n] low · [n] unrated`
 
 If any check fails: revise before returning.
 
