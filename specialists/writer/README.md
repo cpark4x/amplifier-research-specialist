@@ -30,7 +30,8 @@ Key fields in the metadata block:
 - `Word count` — approximate length
 - `Coverage` — `full` or `partial`
 - `Coverage gaps` — what could not be written from the source material (`none` if full coverage)
-- `Citations` — one entry per inline `[Sn]` marker: source text snippet (≤20 words) + document location where the marker appears; enables callers to verify any output claim against source material
+- `Citations` — one entry per inline `[Sn]` marker: source text snippet (≤20 words) + document location + confidence (`high (0.9)`, `medium (0.6)`, `low (0.3)`, or `unrated`); enables callers to filter or weight output claims by source trustworthiness
+- `Confidence distribution` — count of high/medium/low/unrated citations (e.g. `3 high · 1 medium · 0 low · 2 unrated`); enables quick assessment of overall document trustworthiness without reading all CITATIONS entries
 - `Section attribution` — a `> *Sources: Sn (label)*` blockquote after every factual section in the document; enables trust verification at the point of reading without consulting the full CITATIONS index
 
 ### Can Do
