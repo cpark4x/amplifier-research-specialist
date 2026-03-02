@@ -95,6 +95,64 @@ interchangeable with a continuously-measured confidence score.
 
 ---
 
+## CompetitiveAnalysisOutput
+
+The canonical output of the Competitive Analysis specialist.
+
+```typescript
+interface CompetitiveAnalysisOutput {
+  // What was analyzed
+  query: string
+  comparison_type: 'head-to-head' | 'landscape'
+  subjects: string[]
+  dimensions_analyzed: number
+
+  // The comparison grid — one entry per subject+dimension
+  comparison_matrix: ComparisonEntry[]
+
+  // Summary profile per subject (facts only)
+  profiles: SubjectProfile[]
+
+  // Strategic inferences — clearly labeled, traceable to matrix
+  win_conditions: WinCondition[]
+  positioning_gaps: PositioningGap[]
+
+  // What couldn't be verified
+  evidence_gaps: EvidenceGap[]   // reuse from ResearchOutput
+
+  // Overall trustworthiness signal
+  quality_score: 'low' | 'medium' | 'high'
+  quality_threshold_met: boolean
+}
+
+interface ComparisonEntry {
+  subject: string
+  dimension: string
+  rating: 'strong' | 'moderate' | 'weak' | 'unknown'
+  confidence: 'high' | 'medium' | 'low'
+  evidence: string            // one-sentence fact with source
+}
+
+interface SubjectProfile {
+  subject: string
+  primary_advantage: string   // one phrase — what this subject has that others lack
+  key_weakness: string        // one phrase — where this subject is consistently weaker
+}
+
+interface WinCondition {
+  subject: string
+  wins_when: string           // "When the buyer prioritizes X..."
+  loses_when: string          // "When the buyer prioritizes X..."
+}
+
+interface PositioningGap {
+  gap: string                 // "Subject A has no [capability]"
+  benefits: string            // which competitor benefits from this gap
+}
+```
+
+---
+
 ## Schema Version
 
 `v1.0` — established 2026-02-26. Changes require version bump and coordinated update to all callers.
