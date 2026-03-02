@@ -123,8 +123,10 @@ Before returning output:
    `> *Sources: ...*` line. If any factual section is missing one, add it
    before returning.
 6. Produce the CITATIONS section: for each source claim S1, S2, S3 ... from Stage 1,
-   state which section of the document used it, or mark it as unused. Every Sn that
-   appears in an attribution line must appear in the CITATIONS block.
+   state which section of the document used it (or mark it as unused), and include
+   the confidence from your Stage 1 list. Use the fixed mapping:
+     high → 0.9 | medium → 0.6 | low → 0.3 | unrated → unrated (no numeric)
+   Every Sn that appears in an attribution line must appear in the CITATIONS block.
 
 If any check fails: revise before returning.
 
