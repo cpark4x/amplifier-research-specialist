@@ -58,9 +58,12 @@ Run every writing task through these stages in order. Do not skip stages.
 5. Number each discrete factual claim in the source material: S1, S2, S3, etc.
    Write out the numbered list — this is output, not internal state:
 
-   S1: [claim text]
-   S2: [claim text]
+   S1: [claim text] | confidence: [high|medium|low|unrated]
+   S2: [claim text] | confidence: [high|medium|low|unrated]
    ...
+
+   - If input type is `researcher-output`: read the `confidence` field from the corresponding Finding
+   - If input type is `analyst-output` or `raw-notes`: mark every claim as `unrated`
 
    You will reference these numbers in the CITATIONS section after the document.
 
