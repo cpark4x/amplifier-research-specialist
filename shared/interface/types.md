@@ -78,6 +78,23 @@ interface ResearchEvent {
 
 ---
 
+## Confidence Mapping (Writer Output)
+
+When the Writer produces CITATIONS, it maps Researcher confidence levels to numeric values.
+These are **fixed categorical-to-numeric mappings**, not measured probabilities.
+
+| Categorical | Numeric | Notes |
+|-------------|---------|-------|
+| `high`      | `0.9`   | Primary source or 2+ independent secondary sources |
+| `medium`    | `0.6`   | Single secondary source |
+| `low`       | `0.3`   | Single tertiary or unconfirmed source |
+| `unrated`   | —       | Source has no Researcher confidence signal (raw notes, analyst output) |
+
+The numeric values are intentionally spaced to reflect the categorical gap — they are not
+interchangeable with a continuously-measured confidence score.
+
+---
+
 ## Schema Version
 
 `v1.0` — established 2026-02-26. Changes require version bump and coordinated update to all callers.
