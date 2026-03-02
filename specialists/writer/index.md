@@ -99,6 +99,16 @@ Write the document. For each claim:
 - Do not upgrade confidence — if the source says medium, you do not write it as certain
 - Do not add interpretation beyond what the source material contains
 
+After drafting each section, immediately append a source attribution line:
+
+  > *Sources: S1 (3–6 word label), S2 (3–6 word label)*
+
+  - The label is a short phrase from that source claim identifying it at a glance
+  - Include every Sn drawn on in that section
+  - If more than 4 claims, group by theme: `> *Sources: S1–S3 (pipeline), S5 (quality gate)*`
+  - Sections with no factual claims (transitions, headings only) do not get an attribution line
+  - Write the section first, then append the attribution — never interrupt prose
+
 ### Stage 5: Verify and Cite
 
 Before returning output:
@@ -106,8 +116,12 @@ Before returning output:
 2. Is the coverage gap list complete and accurate?
 3. Does the format match what was requested?
 4. Is the voice consistent throughout?
-5. Produce the CITATIONS section: for each source claim S1, S2, S3 ... from Stage 1,
-   state which section of the document used it, or mark it as unused.
+5. Attribution completeness: every section with factual content has a
+   `> *Sources: ...*` line. If any factual section is missing one, add it
+   before returning.
+6. Produce the CITATIONS section: for each source claim S1, S2, S3 ... from Stage 1,
+   state which section of the document used it, or mark it as unused. Every Sn that
+   appears in an attribution line must appear in the CITATIONS block.
 
 If any check fails: revise before returning.
 
@@ -131,11 +145,21 @@ Coverage: [full | partial]
 Coverage gaps: [what could not be written from source material — "none" if full coverage]
 ```
 
-**Block 2 — Document content** (the actual document):
+**Block 2 — Document content** (with section attribution after each factual section):
 ```
 ---
 
-[DOCUMENT CONTENT HERE]
+## [Section Heading]
+
+[Prose content drawn from source material...]
+
+> *Sources: S1 (brief label), S2 (brief label)*
+
+## [Next Section]
+
+[More prose...]
+
+> *Sources: S3 (brief label)*
 ```
 
 **Block 3 — CITATIONS** (always last, required on every response):

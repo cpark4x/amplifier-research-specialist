@@ -31,6 +31,7 @@ Key fields in the metadata block:
 - `Coverage` — `full` or `partial`
 - `Coverage gaps` — what could not be written from the source material (`none` if full coverage)
 - `Citations` — one entry per inline `[Sn]` marker: source text snippet (≤20 words) + document location where the marker appears; enables callers to verify any output claim against source material
+- `Section attribution` — a `> *Sources: Sn (label)*` blockquote after every factual section in the document; enables trust verification at the point of reading without consulting the full CITATIONS index
 
 ### Can Do
 
