@@ -1,6 +1,8 @@
 # Adding a Specialist
 
-This guide walks through creating a new specialist in this repo.
+This guide walks through creating a new specialist in this repo — from the first file to the final wiring that makes it callable.
+
+---
 
 ## Before You Start
 
@@ -10,6 +12,31 @@ A specialist is a domain expert agent with a **focused persona, domain-specific 
 2. **What does it accept?** Define the input contract before writing instructions.
 3. **What does it return?** Define the output schema before writing instructions. If the output type already exists in `shared/interface/types.md`, use it. If not, define it there first.
 4. **What can it do?** List the tools it needs. Don't include tools it doesn't need.
+
+---
+
+## Bundle Architecture
+
+Before writing any files, understand how the pieces connect:
+
+```
+bundle.md
+└── behaviors/specialists.yaml       ← declares tools, registers agents, injects context
+    ├── tools: tool-web              ← web_search + web_fetch for all specialists
+    ├── agents.include:              ← which specialists are loaded and callable
+    │   ├── specialists/researcher
+    │   └── specialists/writer
+    └── context.include:             ← injected into every session using this bundle
+        └── context/specialists-instructions.md
+```
+
+**`bundle.md`** — the entry point. Declares the bundle identity and includes the behavior.
+
+**`behaviors/specialists.yaml`** — the wiring layer. Tools are provided here and agents are registered here. A specialist that exists in `specialists/` but isn't in this file is **invisible to callers**.
+
+**`context/specialists-instructions.md`** — the runtime dispatch guide. Injected into every session. Tells the orchestrator which specialists exist and when to route to each. A specialist missing from here **won't be selected automatically**.
+
+---
 
 ## Structure
 
@@ -22,6 +49,8 @@ specialists/
     ├── README.md     # Interface contract — what it accepts, returns, can do
     └── tools/        # Specialist-specific tools (if any)
 ```
+
+---
 
 ## index.md Format
 
@@ -46,7 +75,7 @@ meta:
 
 ## [Main methodology / pipeline / approach]
 
-[Deep instructions. This is where quality lives. Be specific.]
+[Deep instructions. This is where quality lives. Be specific about each stage.]
 
 ---
 
@@ -54,6 +83,8 @@ meta:
 
 [Explicit boundaries. What the specialist does NOT do.]
 ```
+
+---
 
 ## README.md Format
 
@@ -67,9 +98,18 @@ Sections:
 - **Cannot Do** — explicit boundaries (important for orchestrators choosing specialists)
 - **Design Notes** — any behavior a caller should be aware of (e.g., "takes longer by design")
 
+---
+
 ## Shared Interface Types
 
 If your specialist introduces a new output type, define it in `shared/interface/types.md` first. The schema is the stable contract — define it carefully before writing instructions, because it's harder to change later.
+
+When to define a new type vs. reuse an existing one:
+- Reuse `ResearchOutput` if your specialist produces source-tiered evidence
+- Define a new type if the output structure is meaningfully different
+- Always bump the schema version and update all callers if you change an existing type
+
+---
 
 ## Design Principles to Follow
 
@@ -83,6 +123,91 @@ Every specialist in this repo follows these:
 
 **No UI knowledge.** A specialist never knows it's being called from Canvas, a CLI, or anywhere else. The interface contract is the only boundary it knows.
 
+---
+
 ## Adding to the Registry
 
-Once your specialist is ready, add it to the table in `README.md`.
+Once your specialist files are complete, register it in **three places**. Missing any one means the specialist won't work.
+
+### 1. Add to `README.md`
+
+Add a row to the Specialists table:
+
+```markdown
+| [specialist-name](specialists/specialist-name/) | [one-line domain description] | v1 |
+```
+
+### 2. Wire into `behaviors/specialists.yaml`
+
+Add your specialist to the `agents.include` list:
+
+```yaml
+agents:
+  include:
+    - specialists:specialists/researcher
+    - specialists:specialists/writer
+    - specialists:specialists/[your-specialist-name]   # ← add this line
+```
+
+Without this step, the specialist file exists but is never loaded when the bundle is included.
+
+### 3. Add to `context/specialists-instructions.md`
+
+Add your specialist to the **Available Specialists** list and the **When to Use Each** section:
+
+```markdown
+- **[specialist-name]** — [One sentence: what it does and what it returns.]
+
+**Delegate to `specialists:[specialist-name]` when:**
+- [Trigger condition 1]
+- [Trigger condition 2]
+```
+
+Without this step, the orchestrator won't know the specialist exists and won't route to it automatically.
+
+---
+
+## Testing Your Specialist
+
+Before opening a PR:
+
+### 1. Invoke locally
+
+Start an Amplifier session with the bundle active and call your specialist directly:
+
+```python
+delegate(
+    agent="specialists:specialists/[your-name]",
+    instruction="[test input that matches your input contract]"
+)
+```
+
+### 2. Verify the output contract
+
+Check that:
+- Every required field defined in `shared/interface/types.md` is present in the output
+- Evidence/coverage gaps are explicitly listed, not silently omitted
+- The output passes cleanly as input to any downstream specialist it's designed to feed
+
+### 3. Test a boundary case
+
+Run at least one input that should hit your "What You Do Not Do" section — confirm the specialist declines or redirects gracefully rather than attempting the task badly.
+
+### 4. Test the chain (if applicable)
+
+If your specialist is designed to feed into another (e.g., feeds Writer), run the full chain and verify output passes through without a manual translation step.
+
+---
+
+## Pre-Merge Checklist
+
+- [ ] `specialists/[name]/index.md` — persona + pipeline instructions complete
+- [ ] `specialists/[name]/README.md` — interface contract documented (accepts, returns, can do, cannot do)
+- [ ] `shared/interface/types.md` — output type defined (if new) or existing type reused
+- [ ] `README.md` — added to specialists table
+- [ ] `behaviors/specialists.yaml` — added to `agents.include`
+- [ ] `context/specialists-instructions.md` — added to available specialists + when-to-use section
+- [ ] Local invocation tested
+- [ ] Output contract verified
+- [ ] Boundary case tested
+- [ ] Chain tested end-to-end (if applicable)
