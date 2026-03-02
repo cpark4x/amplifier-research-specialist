@@ -25,7 +25,7 @@ A library of best-in-class, single-domain AI specialist agents for knowledge wor
 | 01 | [Research Specialist](02-requirements/epics/01-research-specialist.md) | Complete | Structured, source-tiered research output with confidence scoring, evidence gaps, and a typed `ResearchOutput` contract |
 | 02 | [Writer Specialist](02-requirements/epics/02-writer-specialist.md) | Complete | Transforms source material into polished prose with inline citations, coverage audit, and machine-readable metadata |
 | 03 | Storyteller | Planned | Transforms research/analysis into compelling narratives |
-| 04 | Competitive Analysis | Planned | Dedicated pipeline for competitive intelligence: feature comparison, positioning gaps, structured matrices |
+| 04 | [Competitive Analysis](02-requirements/epics/04-competitive-analysis.md) | In Progress | Structured competitive intelligence with comparison matrices, positioning gaps, and win conditions — head-to-head and landscape modes |
 | 05 | Design | Planned | Translates briefs and research into structured design direction |
 | 06 | Demo Generator | Planned | Reverse-engineers a persuasive arc from a product; sequences wow moments, generates script |
 | 07 | Presentation Builder | Planned | Slide-by-slide deck outlines with speaker notes from any specialist output |
