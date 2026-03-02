@@ -151,6 +151,7 @@ Voice: [formal | conversational | executive]
 Word count: [approximate]
 Coverage: [full | partial]
 Coverage gaps: [what could not be written from source material — "none" if full coverage]
+Confidence distribution: [n high · n medium · n low · n unrated]
 ```
 
 **Block 2 — Document content** (with section attribution after each factual section):
@@ -175,9 +176,10 @@ Coverage gaps: [what could not be written from source material — "none" if ful
 ---
 
 CITATIONS
-S1: "[source claim text]" → used in: [section/paragraph]
-S2: "[source claim text]" → used in: [section/paragraph]
-S3: "[source claim text]" → not used
+S1: "[source claim text]" → used in: [section/paragraph] | confidence: high (0.9)
+S2: "[source claim text]" → used in: [section/paragraph] | confidence: medium (0.6)
+S3: "[source claim text]" → not used | confidence: low (0.3)
+S4: "[source claim text]" → used in: [section/paragraph] | confidence: unrated
 ```
 
 List every source claim from Stage 1. Mark each one as used (with location) or not used.
