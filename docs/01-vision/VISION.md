@@ -30,6 +30,18 @@ Specialists are **stateless and UI-independent.** They live as a composable Ampl
 
 ---
 
+## Philosophy
+
+Three principles drive every design decision:
+
+1. **Philosophy-driven** — like Amplifier itself, specialists are built on explicit principles, not preferences. When a design choice is hard, the philosophy decides it — not taste, not convenience.
+
+2. **Model and platform agnostic** — a specialist works identically regardless of which LLM calls it or which app it runs in. Canvas, CLI, a third-party orchestrator — the contract is the same. No specialist should depend on a specific model's behavior or a specific platform's affordances.
+
+3. **One thing, exceptionally well** — a specialist that does two things is two bad specialists. Each one has a single domain, a rigorous pipeline for that domain, and a quality bar it won't compromise. Breadth is the generalist's job.
+
+---
+
 ## Target Audience
 
 **Primary:** Developers building Amplifier orchestration pipelines who need reliable, trustworthy specialist output they can compose into larger workflows.
