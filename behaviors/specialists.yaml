@@ -1,11 +1,13 @@
 bundle:
   name: specialists-behavior
   version: 1.0.0
-  description: Adds researcher specialist with web capabilities
+  description: Adds researcher and writer specialists with web and rendering capabilities
 
 tools:
   - module: tool-web
     source: git+https://github.com/microsoft/amplifier-module-tool-web@main
+  - module: tool-canvas-renderer
+    source: ./modules/tool-canvas-renderer
 
 agents:
   include:
