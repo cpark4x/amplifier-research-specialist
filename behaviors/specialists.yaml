@@ -13,6 +13,7 @@ agents:
   include:
     - specialists:specialists/researcher
     - specialists:specialists/writer
+    - specialists:specialists/competitive-analysis
 
 context:
   include:
