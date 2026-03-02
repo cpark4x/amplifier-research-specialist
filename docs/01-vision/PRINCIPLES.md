@@ -1,5 +1,8 @@
 # Principles
 
+**Owner:** Chris Park  
+**Last Updated:** 2026-03-02  
+
 > Decisions made, why they were made, and what they rule out.
 > Add a principle when a decision is made. Not before.
 

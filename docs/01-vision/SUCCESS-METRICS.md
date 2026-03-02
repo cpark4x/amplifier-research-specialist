@@ -2,7 +2,21 @@
 
 **How we measure if Canvas Specialists is achieving its vision**
 
-**Last Updated:** 2026-02-28
+**Owner:** Chris Park  
+**Last Updated:** 2026-02-28  
+
+---
+
+## Table of Contents
+
+1. [Summary](#summary)
+2. [Primary Success Indicator](#primary-success-indicator)
+3. [V1 Metrics: Research Quality](#v1-metrics-research-quality)
+4. [V2 Metrics: Writing Quality](#v2-metrics-writing-quality)
+5. [V3 Metrics: Ecosystem Maturity](#v3-metrics-ecosystem-maturity)
+6. [What We Don't Measure](#what-we-dont-measure)
+7. [Success Criteria by Phase](#success-criteria-by-phase)
+8. [The Standard](#the-standard)
 
 ---
 
@@ -179,3 +193,12 @@ Every other metric is downstream of this. A specialist that doesn't improve on i
 **If a metric doesn't help us answer "does the specialist produce more trustworthy output than inline work?", we don't track it.**
 
 Specialists exist to raise the quality floor. Every measurement should connect back to that.
+
+---
+
+## Change History
+
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| v1.1 | 2026-03-02 | Chris Park | Added Owner, Table of Contents, Change History; aligned with SUCCESS_METRICS_TEMPLATE |
+| v1.0 | 2026-02-28 | Chris Park | Initial success metrics document |
