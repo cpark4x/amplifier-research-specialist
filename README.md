@@ -64,6 +64,7 @@ See [docs/examples/researcher-to-writer.md](docs/examples/researcher-to-writer.m
 |---|---|---|
 | [researcher](specialists/researcher/) | Structured web research with source tiering, quality gates, and confidence-rated findings | v1 |
 | [writer](specialists/writer/) | Transforms structured source material into polished prose with inline citations and coverage auditing | v1 |
+| [competitive-analysis](specialists/competitive-analysis/) | Structured competitive intelligence with comparison matrices, positioning gaps, and win conditions — head-to-head and landscape modes | v1 |
 
 More specialists are planned — see [docs/BACKLOG.md](docs/BACKLOG.md) for the full roadmap (Storyteller, Competitive Analysis, Presentation Builder, and more).
 
