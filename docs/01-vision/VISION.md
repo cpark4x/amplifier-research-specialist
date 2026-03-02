@@ -44,9 +44,9 @@ Three principles drive every design decision:
 
 ## Target Audience
 
-**Primary:** Developers building Amplifier orchestration pipelines who need reliable, trustworthy specialist output they can compose into larger workflows.
+**Primary:** Knowledge workers and consumers — people doing real work: researching, writing, analyzing, planning, presenting, communicating. Specialists serve these scenarios first.
 
-**Secondary:** Any Amplifier orchestrator that needs to delegate deep domain work — research, writing, analysis — without managing the methodology itself.
+**Secondary:** Developers building Amplifier orchestration pipelines who need reliable, trustworthy specialist output they can compose into larger workflows.
 
 ---
 
