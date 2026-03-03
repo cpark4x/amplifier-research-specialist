@@ -5,11 +5,9 @@
 
 ---
 
-## User Story
+## Capability
 
-**As an** orchestrator,
-**I want** every writer response to begin with a machine-readable WRITER METADATA block,
-**So that** I can parse coverage status, gaps, and format without reading the full document.
+Every writer response begins with a machine-readable WRITER METADATA block containing format, coverage status, and gap list — so downstream agents can parse document quality without reading the prose.
 
 ---
 
@@ -38,12 +36,6 @@
 
 ---
 
-## Implementation History
-
-| Version | Date | Person | Changes |
-|---------|------|--------|---------|
-| v1.0 | 2026-02-27 | Chris Park | WRITER METADATA block as first element of every response |
-
----
+**Created:** 2026-02-27 by Chris Park
 
 **Epic:** [02. Writer Specialist](../../epics/02-writer-specialist.md)

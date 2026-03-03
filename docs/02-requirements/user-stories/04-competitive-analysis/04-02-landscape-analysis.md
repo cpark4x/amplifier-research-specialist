@@ -5,11 +5,9 @@
 
 ---
 
-## User Story
+## Capability
 
-**As an** orchestrator,
-**I want** to request a landscape analysis for a subject area,
-**So that** I receive a structured map of all relevant competitors and how they compare — without needing to specify them upfront.
+The specialist can discover and profile all relevant competitors in a subject area without the caller specifying them upfront, returning a full landscape matrix.
 
 ---
 
@@ -29,12 +27,6 @@
 
 ---
 
-## Implementation History
-
-| Version | Date | Person | Changes |
-|---------|------|--------|---------|
-| v1.0 | 2026-03-02 | Chris Park | Landscape mode with competitor discovery step before profiling |
-
----
+**Created:** 2026-03-02 by Chris Park
 
 **Epic:** [04. Competitive Analysis Specialist](../../epics/04-competitive-analysis.md)

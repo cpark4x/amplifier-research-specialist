@@ -5,11 +5,9 @@
 
 ---
 
-## User Story
+## Capability
 
-**As an** orchestrator or human reader,
-**I want** every factual claim in the document to be traceable to its source material,
-**So that** I can verify any claim without re-reading the entire source.
+Every writer response includes section-level source attribution (> *Sources: S1, S2*) after each factual section and a full CITATIONS index at the end — giving human readers trust signals at the point of reading and agents a parseable citation map.
 
 ---
 
@@ -39,13 +37,6 @@
 
 ---
 
-## Implementation History
-
-| Version | Date | Person | Changes |
-|---------|------|--------|---------|
-| v1.1 | 2026-03-02 | Chris Park | Section-level attribution blockquotes added (`> *Sources: Sn*` after each factual section) |
-| v1.0 | 2026-02-28 | Chris Park | Post-document CITATIONS section; source claims numbered S1, S2... at parse time |
-
----
+**Created:** 2026-02-28 by Chris Park
 
 **Epic:** [02. Writer Specialist](../../epics/02-writer-specialist.md)

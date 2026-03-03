@@ -5,11 +5,9 @@
 
 ---
 
-## User Story
+## Capability
 
-**As an** orchestrator,
-**I want** to read `evidence_gaps` in the output to know what the Researcher tried and couldn't verify,
-**So that** I make decisions with honest uncertainty rather than false completeness.
+ResearchOutput includes an evidence_gaps section listing everything the Researcher tried and couldn't verify, so the orchestrator makes decisions with honest uncertainty rather than false completeness.
 
 ---
 
@@ -38,12 +36,6 @@
 
 ---
 
-## Implementation History
-
-| Version | Date | Person | Changes |
-|---------|------|--------|---------|
-| v1.0 | 2026-02-26 | Chris Park | Evidence gaps as first-class output; paywall fallback ladder logged |
-
----
+**Created:** 2026-02-26 by Chris Park
 
 **Epic:** [01. Research Specialist](../../epics/01-research-specialist.md)

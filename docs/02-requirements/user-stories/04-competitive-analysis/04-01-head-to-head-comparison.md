@@ -5,11 +5,9 @@
 
 ---
 
-## User Story
+## Capability
 
-**As an** orchestrator,
-**I want** to request a structured head-to-head comparison between two or more products or services,
-**So that** I receive a comparison matrix with facts and inferences clearly separated, not a narrative summary.
+The specialist produces a structured CompetitiveAnalysisOutput with a comparison matrix and win conditions for two or more subjects, with facts and inferences explicitly separated — not a narrative summary.
 
 ---
 
@@ -41,12 +39,6 @@
 
 ---
 
-## Implementation History
-
-| Version | Date | Person | Changes |
-|---------|------|--------|---------|
-| v1.0 | 2026-03-02 | Chris Park | Head-to-head mode with structured CompetitiveAnalysisOutput and facts/inferences separation |
-
----
+**Created:** 2026-03-02 by Chris Park
 
 **Epic:** [04. Competitive Analysis Specialist](../../epics/04-competitive-analysis.md)

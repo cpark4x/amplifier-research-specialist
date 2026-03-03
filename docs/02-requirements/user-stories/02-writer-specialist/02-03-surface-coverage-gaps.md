@@ -5,11 +5,9 @@
 
 ---
 
-## User Story
+## Capability
 
-**As an** orchestrator,
-**I want** the writer to audit source material coverage before drafting and surface critical gaps,
-**So that** I know upfront what the document can and cannot cover rather than discovering gaps in the output.
+The writer audits source material coverage before drafting begins. Critical gaps halt execution and surface to the caller; non-critical gaps are documented in WRITER METADATA. Nothing is silently papered over.
 
 ---
 
@@ -39,12 +37,6 @@
 
 ---
 
-## Implementation History
-
-| Version | Date | Person | Changes |
-|---------|------|--------|---------|
-| v1.0 | 2026-02-27 | Chris Park | Pre-draft coverage audit as Stage 2; critical gaps halt execution |
-
----
+**Created:** 2026-02-27 by Chris Park
 
 **Epic:** [02. Writer Specialist](../../epics/02-writer-specialist.md)

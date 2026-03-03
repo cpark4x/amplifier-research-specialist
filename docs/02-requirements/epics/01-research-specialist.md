@@ -5,6 +5,18 @@
 **Contributors:** Chris Park
 **Last Updated:** 2026-02-27
 
+<!--
+Derive ownership and history from git - don't guess or assume:
+
+Contributors by commit count:
+git log --format="%an" -- <relevant-files> | sort | uniq -c | sort -rn
+
+Full history with dates:
+git log --format="%ad %an - %s" --date=short -- <relevant-files>
+
+Example: git log --format="%an" -- "backend/src/agent/*.ts" | sort | uniq -c | sort -rn
+-->
+
 ---
 
 ## 1. Summary
@@ -34,7 +46,7 @@ Orchestrators receive structured evidence they can trust and compose — not ans
 ### Implemented
 
 | # | Story | Owner | Created | Last Updated |
-|---|-------|-------|---------|--------------|
+|---|-------|-------|---------|--------------| 
 | [01-01](../user-stories/01-research-specialist/01-01-delegate-research-question.md) | Delegate research question and receive structured ResearchOutput | Chris Park | 2026-02-26 | — |
 | [01-02](../user-stories/01-research-specialist/01-02-set-quality-threshold.md) | Set quality threshold (medium / high / maximum) per request | Chris Park | 2026-02-26 | — |
 | [01-03](../user-stories/01-research-specialist/01-03-inspect-source-tier-confidence.md) | Inspect source tier and confidence of each finding | Chris Park | 2026-02-26 | — |
@@ -81,29 +93,9 @@ Orchestrators receive structured evidence they can trust and compose — not ans
 
 ---
 
-## 7. Risks & Mitigations
-
-| Risk | Impact | Probability | Strategic Response |
-|------|--------|-------------|-------------------|
-| Quality gate bypassed under time pressure | H | M | `quality_threshold` is a required input; no silent degradation at `maximum` |
-| Source availability varies by domain | M | H | Paywall fallback ladder; gaps are first-class outputs |
-| LLM fabricates sources | H | L | Sources verified via web_fetch before inclusion; no URL = no finding |
-| Schema changes break downstream consumers | H | L | Output schema is a versioned contract; breaking changes require all consumers updated |
-
----
-
-## 8. Open Questions
+## 7. Open Questions
 
 - [ ] Should `ResearchOutput` include a `recommended_followup` field to explicitly signal when the Researcher believes deeper investigation is warranted before acting?
 - [ ] How should structurally contradicted claims be represented — as a dedicated `ContradictedFinding` type, or surfaced within `evidence_gaps` with both sources attached?
 - [ ] What is the correct behavior for `quality_threshold: maximum` when a practical ceiling (search count, fetch failures) is hit — hard fail with explanation, or return with a quality warning flag?
 - [ ] Should the Researcher support a `focus_sources` parameter to prioritize specific domains or URLs for domain-expert workflows?
-
----
-
-## 9. Change History
-
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| v1.1 | 2026-03-02 | Chris Park | Brought to full template conformance: added header fields, converted user stories to table format, added Risks & Mitigations, renumbered sections, added Change History |
-| v1.0 | 2026-02-26 | Chris Park | Initial epic |

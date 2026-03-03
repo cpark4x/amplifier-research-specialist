@@ -5,11 +5,9 @@
 
 ---
 
-## User Story
+## Capability
 
-**As an** orchestrator,
-**I want** to set a `quality_threshold` (medium / high / maximum) when delegating research,
-**So that** I control the depth-vs-speed tradeoff for different use cases.
+The orchestrator can set a quality_threshold (medium / high / maximum) per research request, controlling the depth-vs-speed tradeoff. At maximum, failure is explicit — not silent degradation.
 
 ---
 
@@ -38,12 +36,6 @@
 
 ---
 
-## Implementation History
-
-| Version | Date | Person | Changes |
-|---------|------|--------|---------|
-| v1.0 | 2026-02-26 | Chris Park | Quality threshold with 3-cycle gate; `maximum` fails loud not silent |
-
----
+**Created:** 2026-02-26 by Chris Park
 
 **Epic:** [01. Research Specialist](../../epics/01-research-specialist.md)

@@ -5,11 +5,9 @@
 
 ---
 
-## User Story
+## Capability
 
-**As an** orchestrator,
-**I want** the writer to produce a document in the exact format I requested (report, brief, proposal, executive summary, email, memo),
-**So that** I don't have to reformat or post-process the output before using it.
+The writer produces a document in the exact format requested (report, brief, proposal, executive summary, email, memo) with format-specific structure and conventions applied — not a generic output labelled with the requested format.
 
 ---
 
@@ -38,12 +36,6 @@
 
 ---
 
-## Implementation History
-
-| Version | Date | Person | Changes |
-|---------|------|--------|---------|
-| v1.0 | 2026-02-27 | Chris Park | 5-stage pipeline with format-specific structure for 6 document types |
-
----
+**Created:** 2026-02-27 by Chris Park
 
 **Epic:** [02. Writer Specialist](../../epics/02-writer-specialist.md)

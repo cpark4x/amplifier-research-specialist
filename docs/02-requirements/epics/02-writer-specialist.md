@@ -97,26 +97,7 @@ Every response begins with a machine-readable **WRITER METADATA** block (format,
 
 ---
 
-## 7. Risks & Mitigations
-
-| Risk | Impact | Probability | Strategic Response |
-|------|--------|-------------|-------------------|
-| Source material is ambiguous — same claim appears in multiple sources with different wording | M | M | Citation map built at parse stage; each `[Sn]` resolves to a single authoritative source location |
-| Coverage audit identifies a critical gap but orchestrator expects a complete document | M | L | `gap_policy` input (planned) lets orchestrators configure block vs. warn vs. pass behavior |
-| Format conventions differ significantly by industry or audience | L | M | Voice and style config (planned); current implementation handles 6 core formats |
-
----
-
-## 8. Open Questions
+## 7. Open Questions
 
 - [ ] Should `WRITER METADATA` include a structured `citations_count` field so downstream agents can assess citation density without parsing the full CITATIONS section?
 - [ ] When source material confidence is `low`, should the Writer degrade prose confidence signals or flag it in WRITER METADATA?
-
----
-
-## 9. Change History
-
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| v1.1 | 2026-03-02 | Chris Park | Expanded to full epic format; added all template sections |
-| v1.0 | 2026-02-27 | Chris Park | Initial epic (reference card format) |

@@ -5,11 +5,9 @@
 
 ---
 
-## User Story
+## Capability
 
-**As an** orchestrator,
-**I want** to pass existing `ResearchOutput` from the Researcher specialist into the competitive analysis specialist,
-**So that** I skip the research phase and get structured competitive intelligence from evidence I've already gathered.
+The specialist accepts an existing ResearchOutput from the Researcher specialist and skips its internal research phase — enabling a clean Researcher → Competitive Analysis → Writer chain without redundant web searches.
 
 ---
 
@@ -40,12 +38,6 @@
 
 ---
 
-## Implementation History
-
-| Version | Date | Person | Changes |
-|---------|------|--------|---------|
-| v1.0 | 2026-03-02 | Chris Park | Conditional research phase — skipped when ResearchOutput is provided |
-
----
+**Created:** 2026-03-02 by Chris Park
 
 **Epic:** [04. Competitive Analysis Specialist](../../epics/04-competitive-analysis.md)

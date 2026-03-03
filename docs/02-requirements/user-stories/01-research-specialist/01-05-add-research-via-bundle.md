@@ -5,11 +5,9 @@
 
 ---
 
-## User Story
+## Capability
 
-**As a** developer building an Amplifier workflow,
-**I want** to include the `specialists` bundle to immediately add research capability to any project,
-**So that** I don't have to build my own research pipeline from scratch.
+A developer can add production-quality research capability to any Amplifier project by including a single bundle — no custom research pipeline required.
 
 ---
 
@@ -28,12 +26,6 @@
 
 ---
 
-## Implementation History
-
-| Version | Date | Person | Changes |
-|---------|------|--------|---------|
-| v1.0 | 2026-02-26 | Chris Park | Bundle registered and wired; researcher available as `specialists:specialists/researcher` |
-
----
+**Created:** 2026-02-26 by Chris Park
 
 **Epic:** [01. Research Specialist](../../epics/01-research-specialist.md)

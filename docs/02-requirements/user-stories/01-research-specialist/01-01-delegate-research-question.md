@@ -5,11 +5,9 @@
 
 ---
 
-## User Story
+## Capability
 
-**As an** orchestrator,
-**I want** to delegate a research question with a `query_type` and receive a structured `ResearchOutput`,
-**So that** I don't mix research execution with decision-making in the same agent.
+The orchestrator can delegate a research question with a query_type and receive a structured ResearchOutput, keeping research execution and decision-making in separate agents.
 
 ---
 
@@ -40,12 +38,6 @@
 
 ---
 
-## Implementation History
-
-| Version | Date | Person | Changes |
-|---------|------|--------|---------|
-| v1.0 | 2026-02-26 | Chris Park | Initial researcher specialist with 7-stage pipeline and ResearchOutput contract |
-
----
+**Created:** 2026-02-26 by Chris Park
 
 **Epic:** [01. Research Specialist](../../epics/01-research-specialist.md)
