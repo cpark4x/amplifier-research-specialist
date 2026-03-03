@@ -172,7 +172,7 @@ Every response MUST use this exact structure — three blocks in this order:
 WRITER METADATA
 Specialist: writer
 Version: 1.0
-Input type: [researcher-output | analyst-output | raw-notes]
+Input type: [researcher-output | analyst-output | raw-notes | analysis-output]
 Output format: [report | brief | proposal | executive-summary | email | memo]
 Audience: [specified audience]
 Voice: [formal | conversational | executive]
@@ -216,7 +216,7 @@ List every source claim from Stage 1. Mark each one as used (with location) or n
 **Block 4 — CLAIMS TO VERIFY** (analyst-output, raw-notes, or analysis-output only; omit entirely for researcher-output):
 ```
 CLAIMS TO VERIFY
-Unrated claims containing specific values — verify before citing externally.
+Unrated claims (and, for analysis-output, inference claims) containing specific values — verify before citing externally.
 S3: "87ms load time" | type: specific measurement
 S7: "50-row database cap" | type: specific number
 S12: "8,000+ Zapier integrations" | type: specific count
