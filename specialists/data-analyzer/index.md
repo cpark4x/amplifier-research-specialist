@@ -65,7 +65,8 @@ which format you received and extract findings accordingly. Both formats produce
 same F1, F2, F3... numbered findings for Stages 2–4.
 
 **Format A — Canonical RESEARCH OUTPUT block:**
-Starts with the literal line `RESEARCH OUTPUT`. Findings appear in the `FINDINGS:`
+Starts with the literal text `RESEARCH OUTPUT` on the very first line (no `---`,
+no `#`, no markdown formatting before it). Findings appear in the `FINDINGS:`
 section using the multi-line key-value format:
 ```
 - Claim: [statement]
@@ -75,6 +76,14 @@ section using the multi-line key-value format:
 ```
 Extract each finding directly. Claim → claim, Source → source_url, Tier → tier,
 Confidence → confidence.
+
+**Format C — Partially-canonical (RESEARCH OUTPUT header present, narrative findings):**
+Input contains the text `RESEARCH OUTPUT` (possibly with `---`, `#`, or `##` before it)
+but findings appear in narrative tables, bullet lists, or prose sections rather than
+the key-value `Claim:` / `Source:` / `Tier:` / `Confidence:` blocks of Format A.
+Treat as Format B for extraction: scan narrative sections for discrete claims with
+source attribution. Preserve any `EVIDENCE GAPS` or `QUALITY THRESHOLD RESULT`
+sections that are explicitly labeled.
 
 **Format B — Narrative markdown (structured research document):**
 Starts with a markdown title or section header. Findings appear in tables, bullet
