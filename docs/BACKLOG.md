@@ -2,18 +2,18 @@
 
 **Purpose:** Strategic planning view for canvas-specialists — a library of best-in-class, single-domain AI specialist agents for knowledge worker and consumer scenarios  
 **Owner:** Chris Park  
-**Last Updated:** March 2, 2026  
+**Last Updated:** March 3, 2026  
 
 ---
 
 ## Current Status Summary
 
-**11 epics tracked:** ✅ 2 complete, 🔄 0 in progress, ⏸️ 0 paused, 9 planned
+**11 epics tracked:** ✅ 3 complete, 🔄 0 in progress, ⏸️ 0 paused, 8 planned
 
 - ✅ Epic 01 — Researcher
 - ✅ Epic 02 — Writer
 - 🆕 Epic 03 — Storyteller
-- 🆕 Epic 04 — Competitive Analysis
+- ✅ Epic 04 — Competitive Analysis
 - 🆕 Epic 05 — Design
 - 🆕 Epic 06 — Demo Generator
 - 🆕 Epic 07 — Presentation Builder
@@ -32,7 +32,12 @@
 
 | Item | Epic | Owner | Completed | Notes |
 |------|------|-------|-----------|-------|
-| Inline citations | 02 | Chris | Feb 28, 2026 | `[S1]`-style inline markers in Writer output mapped to post-document CITATIONS block |
+| Template improvements | 01/02/04 | Chris | Mar 3, 2026 | Trimmed to 7 sections; Capability format; Why This Matters required; Created line |
+| tool-canvas-renderer | 02 | Chris | Mar 3, 2026 | Local pandoc tool module; markdown → DOCX; full Amplifier Tool protocol |
+| Section-level source attribution | 02 | Chris | Mar 3, 2026 | `> *Sources: S1, S2*` after each factual section; trust signals at point of reading |
+| Competitive Analysis specialist | 04 | Chris | Mar 2, 2026 | 6-stage pipeline; head-to-head + landscape modes; CompetitiveAnalysisOutput schema |
+| Citation confidence scoring | 02 | Chris | Mar 2, 2026 | Per-claim confidence in CITATIONS block; no new LLM calls |
+| Inline citations | 02 | Chris | Feb 28, 2026 | Post-document CITATIONS block with S1/S2 numbered source claims |
 | Writer specialist | 02 | Chris | Feb 27, 2026 | 5-stage pipeline: parse → audit coverage → structure → draft → verify & cite |
 | WRITER METADATA block | 02 | Chris | Feb 27, 2026 | Machine-readable header block for downstream agent parsing |
 | Coverage auditing | 02 | Chris | Feb 27, 2026 | Pre-write gap analysis surfaces critical gaps before drafting begins |
@@ -47,7 +52,6 @@
 | # | Item | Epic | Owner | Effort | Impact | Why Now |
 |---|------|------|-------|--------|--------|---------|
 | 1 | Data Analyzer specialist | 08 | Chris | L | H | Unlocks the core pipeline: Researcher → Analyzer → Writer; facts vs. inferences explicitly labeled |
-| 2 | Citation confidence scoring | 02 | Chris | S | H | Per-claim confidence in CITATIONS block, no new LLM calls — no competitor does this |
 
 ### Near-term (Next 1-2 Sprints)
 
@@ -55,12 +59,11 @@
 |---|------|------|-------|--------|--------|-----------|
 | 1 | Storyteller specialist | 03 | Chris | L | H | Transforms research/analysis into compelling narratives; high-demand for knowledge workers |
 | 2 | Presentation Builder specialist | 07 | Chris | L | H | Closes the research → write → present chain; slide deck output is a top knowledge worker use case |
-| 3 | Competitive Analysis specialist | 04 | Chris | L | H | Dedicated pipeline for competitive intelligence: compare features, surface gaps, structure positioning |
-| 4 | Recipe: encode competitive-analysis → writer chain | 04 | Chris | S | H | Chain is proven but manually dispatched; a single invokable recipe removes orchestration friction *(from test log 2026-03-02)* |
-| 5 | Researcher-first default for product comparisons | 04 | Chris | S | H | Self-research path skips source tiering; Researcher pre-pass surfaces per-claim confidence before competitive-analysis runs *(from test log 2026-03-02)* |
-| 6 | Writer: "claims to verify" block for unsourced specifics | 02 | Chris | S | M | When upstream output contains specific numerical claims without citations, Writer should flag them rather than passing at uniform confidence *(from test log 2026-03-02)* |
-| 7 | Coverage audit severity levels | 02 | Chris | S | M | `gap_policy` input lets orchestrators decide what gap severity blocks vs. warns vs. passes |
-| 8 | Researcher: conservative confidence scoring for analyst estimates | 01 | Chris | S | M | Financial figures (ARR, market share) from secondary/circulated sources rated high confidence alongside audited data — needs stronger source-tier guidance for analyst estimates vs. primary financial data *(from test log 2026-03-02)* |
+| 3 | Recipe: encode competitive-analysis → writer chain | 04 | Chris | S | H | Chain is proven but manually dispatched; a single invokable recipe removes orchestration friction *(from test log 2026-03-02)* |
+| 4 | Researcher-first default for product comparisons | 04 | Chris | S | H | Self-research path skips source tiering; Researcher pre-pass surfaces per-claim confidence before competitive-analysis runs *(from test log 2026-03-02)* |
+| 5 | Writer: "claims to verify" block for unsourced specifics | 02 | Chris | S | M | When upstream output contains specific numerical claims without citations, Writer should flag them rather than passing at uniform confidence *(from test log 2026-03-02)* |
+| 6 | Coverage audit severity levels | 02 | Chris | S | M | `gap_policy` input lets orchestrators decide what gap severity blocks vs. warns vs. passes |
+| 7 | Researcher: conservative confidence scoring for analyst estimates | 01 | Chris | S | M | Financial figures (ARR, market share) from secondary/circulated sources rated high confidence alongside audited data — needs stronger source-tier guidance for analyst estimates vs. primary financial data *(from test log 2026-03-02)* |
 
 ### Medium-term (Next Quarter)
 
@@ -79,7 +82,6 @@
 **Epic 02 — Writer Enhancements:**
 - Brand voice / style configuration (`voice_config` input: prohibited terms, tone directives, required terminology)
 - Source confidence threshold (`min_source_confidence` filter; claims below threshold flagged in coverage audit)
-- Rendering integration (pipe output to Documentero or Box DocGen for PDF/DOCX)
 
 ### Long-term (Future Quarters)
 
@@ -99,9 +101,9 @@
 | Epic | Implemented | Future | % Complete |
 |------|-------------|--------|------------|
 | 01 — Researcher | Researcher V1, source tiering, quality gate, ResearchOutput v1.0 | Source confidence threshold | 90% |
-| 02 — Writer | Writer V1, coverage audit, inline citations, WRITER METADATA | Citation confidence scoring, brand voice config, audit severity, rendering | 60% |
+| 02 — Writer | Writer V1, coverage audit, citations + attribution, WRITER METADATA, citation confidence, rendering (pandoc) | Brand voice config, audit severity, source confidence threshold | 80% |
 | 03 — Storyteller | — | Full specialist implementation | 0% |
-| 04 — Competitive Analysis | — | Full specialist implementation | 0% |
+| 04 — Competitive Analysis | 6-stage pipeline, head-to-head + landscape modes, CompetitiveAnalysisOutput schema | Recipe encoding, researcher-first default | 100% |
 | 05 — Design | — | Full specialist implementation | 0% |
 | 06 — Demo Generator | — | Full specialist implementation | 0% |
 | 07 — Presentation Builder | — | Full specialist implementation | 0% |
@@ -110,7 +112,7 @@
 | 10 — Prioritizer | — | Full specialist implementation | 0% |
 | 11 — Platform Integrations | — | LangChain wrapper, rendering integrations | 0% |
 
-**Overall: 2 specialists shipped, 8 planned, 1 integrations epic**
+**Overall: 3 specialists shipped, 7 planned, 1 integrations epic**
 
 ---
 
@@ -148,6 +150,7 @@
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v1.3 | Mar 3, 2026 | Chris | Marked Epic 04 complete; added tool-canvas-renderer, section attribution, citation confidence to recently completed; removed shipped items from future work; updated Epic 02 to 80%, Epic 04 to 100%; 3 specialists shipped |
 | v1.2 | Mar 2, 2026 | Chris | Added 3 near-term items from Notion/Obsidian test log: recipe encoding, researcher-first default, writer confidence gap surfacing |
 | v1.1 | Mar 2, 2026 | Chris | Expanded to 10 specialists; updated target audience to knowledge workers + consumers; retired ROADMAP.md |
 | v1.0 | Mar 2, 2026 | Chris | Initial backlog |
