@@ -52,7 +52,7 @@ Run every writing task through these stages in order. Do not skip stages.
 ### Stage 1: Parse Input
 
 1. Read the METADATA block from the source material (if present)
-2. Identify input type: `researcher-output` | `analyst-output` | `raw-notes`
+2. Identify input type: `researcher-output` | `analyst-output` | `raw-notes` | `analysis-output`
 3. Identify requested: format, audience, voice/tone, length constraint (if any)
 4. If no METADATA block: infer input type from structure and note the inference
 5. Number each discrete factual claim in the source material: S1, S2, S3, etc.
@@ -64,6 +64,9 @@ Run every writing task through these stages in order. Do not skip stages.
 
    - If input type is `researcher-output`: read the `confidence` field from the corresponding Finding
    - If input type is `analyst-output` or `raw-notes`: mark every claim as `unrated`
+   - If input type is `analysis-output`:
+     - For findings (F1, F2...): read confidence from the finding's confidence field (high|medium|low)
+     - For inferences: mark as `confidence: inference` — these are labeled conclusions, not unrated facts
 
    You will reference these numbers in the CITATIONS section after the document.
 
@@ -101,6 +104,10 @@ Write the document. For each claim:
 - Preserve confidence signals where relevant to the audience ("confirmed by multiple sources" vs "reported by a single outlet")
 - Do not upgrade confidence — if the source says medium, you do not write it as certain
 - Do not add interpretation beyond what the source material contains
+- For inferences from `analysis-output` input: the Analyzer has already done the
+  interpretive work. Present each inference as a conclusion the evidence supports —
+  not as established fact. Use framing like "the evidence suggests...", "this points
+  to...", "based on [X], it appears...". Never present an inference as a sourced fact.
 
 After drafting each section, immediately append a source attribution line:
 
@@ -127,12 +134,19 @@ Before returning output:
    the confidence from your Stage 1 list. Use the fixed mapping:
      high → 0.9 | medium → 0.6 | low → 0.3 | unrated → unrated (no numeric)
    Every Sn that appears in an attribution line must appear in the CITATIONS block.
+   For `analysis-output` input: inferences appear in CITATIONS with `type: inference`:
+     Sx: "[inference claim]" → used in: [section] | type: inference | confidence: high (0.9)
+   Use the numeric mapping as normal (high→0.9, medium→0.6, low→0.3) but add `type: inference`
+   to distinguish these from sourced facts.
 7. Add `Confidence distribution` to WRITER METADATA: count high/medium/low/unrated
    from your Stage 1 claim list (include all claims, used and unused).
    Format: `Confidence distribution: [n] high · [n] medium · [n] low · [n] unrated`
 
-8. Produce the CLAIMS TO VERIFY block — only when `input type` is `analyst-output`
-   or `raw-notes`. When input type is `researcher-output`, skip this step entirely.
+8. Produce the CLAIMS TO VERIFY block — only when `input type` is `analyst-output`,
+   `raw-notes`, or `analysis-output`. When input type is `researcher-output`, skip
+   this step entirely.
+   For `analysis-output`: flag both unrated findings AND any inferences containing
+   specific numerical values, measurements, percentages, or named statistics.
    - From your Stage 1 claim list, scan all `unrated` claims
    - Flag any claim containing a specific value: a number with a unit (87ms, 50-row,
      $10/mo, 2,000ms), a percentage (40%, 60%), a count with magnitude (200+, 8,000+),
