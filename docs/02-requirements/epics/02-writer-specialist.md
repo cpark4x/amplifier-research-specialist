@@ -101,3 +101,4 @@ Every response begins with a machine-readable **WRITER METADATA** block (format,
 
 - [ ] Should `WRITER METADATA` include a structured `citations_count` field so downstream agents can assess citation density without parsing the full CITATIONS section?
 - [ ] When source material confidence is `low`, should the Writer degrade prose confidence signals or flag it in WRITER METADATA?
+- [ ] **Writer output format compliance for `analysis-output` input** — Chain test (2026-03-03, ai-pair-programming) found the Writer produced a polished brief but omitted: `WRITER METADATA` block, `CITATIONS` section (with `type: inference` labels), and `CLAIMS TO VERIFY` section. These are required by spec for `analysis-output` input type. Downstream callers rely on CITATIONS to distinguish facts from inferences and CLAIMS TO VERIFY to flag numerics before publication. Verify whether gap is consistent across `analysis-output` runs or situational. *(from test log 2026-03-03)*
