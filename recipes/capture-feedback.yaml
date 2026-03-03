@@ -1,0 +1,164 @@
+name: "capture-feedback"
+description: "Capture a structured test log entry for a specialist chain run, triage action items to the right destinations, and commit everything."
+version: "1.0.0"
+tags: ["testing", "feedback", "documentation", "logging"]
+
+steps:
+  - id: "collect-metadata"
+    agent: "self"
+    prompt: |
+      You are helping capture a structured test log for the canvas-specialists project.
+
+      Infer the following four metadata values from this session's context:
+
+      - **specialist**: The entry-point specialist for this run. One of: researcher, writer, competitive-analysis
+      - **chain**: The full chain string if this was a multi-step run (e.g., "researcher → writer"), or null if it was a single specialist
+      - **topic**: A short URL-safe slug describing the topic (e.g., "notion-vs-obsidian", "ai-tools-comparison")
+      - **date**: Today's date in YYYY-MM-DD format
+
+      Present your inferences to the user clearly — one per line — and ask them to confirm or correct each value before proceeding. Do not move on until the user has confirmed all four values.
+
+      Once all four are confirmed, output them in this exact format:
+      ```
+      specialist: <value>
+      chain: <value or null>
+      topic: <value>
+      date: <YYYY-MM-DD>
+      ```
+    output: "metadata"
+    timeout: 1800
+
+  - id: "capture-body"
+    agent: "self"
+    prompt: |
+      You are capturing the body of a test log entry. Walk through the following 5 sections one at a time. Ask the user for their input on each section, wait for their response, then move to the next.
+
+      1. **What worked** — What performed well in this run? What met or exceeded expectations?
+      2. **What didn't / concerns** — What fell short? Any edge cases, gaps, or concerns that surfaced?
+      3. **Confidence & accuracy** — How accurate was the output? Were there any hallucinations, factual errors, or uncertain claims?
+      4. **Coverage assessment** — Was the topic covered thoroughly? What was missing or underrepresented?
+      5. **Action items** — Specific, concrete next steps. Format each as a `- [ ]` checkbox.
+
+      After collecting all 5 sections, output the complete log body as clean markdown with these section headers:
+
+      ```
+      ## What worked
+
+      ## What didn't / concerns
+
+      ## Confidence & accuracy
+
+      ## Coverage assessment
+
+      ## Action items
+      ```
+    output: "log_body"
+    timeout: 1800
+
+  - id: "assess-quality"
+    agent: "self"
+    prompt: |
+      Ask the user for a single top-level quality signal for this test run.
+
+      The valid values are:
+      - **pass** — Output met expectations overall; usable with minor or no adjustments
+      - **mixed** — Some things worked, others didn't; notable gaps or concerns that matter
+      - **fail** — Output did not meet expectations; significant problems or unusable result
+
+      Confirm their choice. Output only the signal value (pass, mixed, or fail) with no extra text.
+    output: "quality_signal"
+    timeout: 600
+
+  - id: "write-log"
+    agent: "self"
+    prompt: |
+      Write the test log file for this run using the information below.
+
+      Metadata:
+      {{metadata}}
+
+      Log body:
+      {{log_body}}
+
+      Quality signal: {{quality_signal}}
+
+      **Determine the file path:**
+      - If chain is not null → `docs/test-log/chains/{date}-{topic}.md`
+      - If chain is null (single specialist run) → `docs/test-log/{specialist}/{date}-{topic}.md`
+
+      Substitute the actual values from the metadata when constructing the path.
+
+      **Write the file with this exact structure:**
+
+      ```
+      ---
+      specialist: {specialist}
+      chain: {chain or null}
+      topic: {topic}
+      date: {date}
+      quality_signal: {quality_signal}
+      action_items_promoted: false
+      ---
+
+      {the full 5-section log body}
+      ```
+
+      Write the file to the project root at /Users/chrispark/Projects/canvas-specialists, creating any intermediate directories as needed.
+
+      Output only the relative file path that was written (e.g., `docs/test-log/chains/2026-03-02-notion-vs-obsidian.md`).
+    output: "log_file_path"
+    timeout: 300
+
+  - id: "triage-action-items"
+    agent: "self"
+    prompt: |
+      Review the action items from the log that was just written.
+
+      Log file: {{log_file_path}}
+      Log body (for reference): {{log_body}}
+      Metadata (for reference): {{metadata}}
+
+      For each `- [ ]` item in the Action items section, route it to the appropriate destination using these rules:
+
+      - **Consistent quality gap** — a gap that would appear in any run on this kind of topic → append to `BACKLOG.md`
+      - **Edge case in one specialist** — a narrow issue specific to one specialist's behavior → append to the relevant epic file under `docs/02-requirements/epics/`
+      - **Pattern across runs** — a recurring structural theme suggesting changes to how specialists are added or composed → append to `docs/adding-a-specialist.md`
+      - **Confidence systematically off** — accuracy or confidence calibration issues for this specialist → append to `specialists/{specialist}/index.md`
+
+      For each action item:
+      1. Decide the destination using the rules above
+      2. Append it to that destination file (add a `## Action Items` section if one doesn't exist)
+      3. Note which file it went to
+
+      After routing all items, update the YAML front matter in {{log_file_path}}:
+      - Set `action_items_promoted: true` if every item was successfully routed
+      - Set `action_items_promoted: partial` if only some were routed (explain why in a comment in the file)
+      - Leave `action_items_promoted: false` only if nothing was routed
+
+      Output a brief triage summary listing each action item and where it was sent.
+    output: "triage_summary"
+    timeout: 600
+
+  - id: "commit"
+    agent: "foundation:git-ops"
+    prompt: |
+      Commit all files that were created or modified during this feedback capture session.
+
+      Metadata for the commit message:
+      {{metadata}}
+
+      Log file written: {{log_file_path}}
+
+      Triage summary (files that may have been modified):
+      {{triage_summary}}
+
+      **Commit message format:**
+      - If chain is not null in the metadata:
+        `docs: add test log entry for {chain} chain ({topic})`
+      - If chain is null (single specialist):
+        `docs: add test log entry for {specialist} ({topic})`
+
+      Substitute the actual values from the metadata into the commit message.
+
+      Stage all new and modified files touched during this session (the log file plus any destination files that received action items), then create the commit.
+    timeout: 300
