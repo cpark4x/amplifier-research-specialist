@@ -62,7 +62,7 @@
 | # | Item | Epic | Owner | Effort | Impact | Rationale |
 |---|------|------|-------|--------|--------|-----------|
 | 1 | Storyteller specialist | 03 | Chris | L | H | Transforms research/analysis into compelling narratives; high-demand for knowledge workers |
-| 2 | Presentation Builder specialist | 07 | Chris | L | H | Closes the research → write → present chain; slide deck output is a top knowledge worker use case |
+| 2 | Presentation Builder specialist | 07 | Gurkaran Singh | L | H | Closes the research → write → present chain; slide deck output is a top knowledge worker use case |
 | 3 | Coverage audit severity levels | 02 | Chris | S | M | `gap_policy` input lets orchestrators decide what gap severity blocks vs. warns vs. passes |
 | 5 | Researcher: conservative confidence scoring for analyst estimates | 01 | Chris | S | M | Financial figures (ARR, market share) from secondary/circulated sources rated high confidence alongside audited data — needs stronger source-tier guidance for analyst estimates vs. primary financial data *(from test log 2026-03-02)* |
 
