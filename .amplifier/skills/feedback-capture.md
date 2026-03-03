@@ -1,3 +1,8 @@
+---
+name: feedback-capture
+description: Use when a specialist run or chain completes and findings should be logged — captures test log with quality signal and routes action items to backlog, epics, or specialist instructions.
+---
+
 # feedback-capture
 
 Structured protocol for capturing test log feedback after specialist runs and routing findings to the right destinations in the repo.
