@@ -209,6 +209,27 @@ RESEARCH EVENTS:
 [Condensed log of what was attempted — sources hit, paywalls encountered, corroboration found]
 ```
 
+**COMPLIANCE NOTE — machine-parseable output required:**
+
+The block format above is the only acceptable Stage 7 output format. This is a pipeline
+contract, not a style preference — downstream specialists parse this structure automatically.
+
+- **Your response MUST begin with `RESEARCH OUTPUT`** — no preamble, no markdown headers,
+  no executive summary before it. The first four characters of your output are `RESE`.
+- **FINDINGS must use the exact multi-line key-value format:** `Claim:` / `Source:` /
+  `Tier:` / `Confidence:` — one finding per block, blank line between findings. Do not
+  convert FINDINGS into a table, a prose paragraph, or a single-line format.
+- **Narrative prose output is a spec violation.** Thematic section headers, embedded
+  markdown tables, and flowing paragraph summaries are not acceptable — they break
+  automated parsing by the Data Analyzer.
+- **RESEARCH BRIEF bullets are single-line claims with an inline URL in parentheses.**
+  One bullet per claim. Not multi-paragraph descriptions. Not grouped by theme.
+- **The opening `RESEARCH OUTPUT` line is a machine signal.** Write nothing before it —
+  not even a blank line.
+
+If your draft response begins with anything other than `RESEARCH OUTPUT`, reformat it
+before returning.
+
 ---
 
 ## Source Tiers — Reference
