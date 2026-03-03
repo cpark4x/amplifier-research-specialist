@@ -214,6 +214,11 @@ RESEARCH EVENTS:
 The block format above is the only acceptable Stage 7 output format. This is a pipeline
 contract, not a style preference — downstream specialists parse this structure automatically.
 
+**The very first character of your response is `R`, not `#`.** Do not begin with a
+markdown header, a title, an emoji, an executive summary, or any other content. The
+literal string `RESEARCH OUTPUT` is the first thing in your response — nothing before it,
+not even a blank line.
+
 - **Your response MUST begin with `RESEARCH OUTPUT`** — no preamble, no markdown headers,
   no executive summary before it. The first four characters of your output are `RESE`.
 - **FINDINGS must use the exact multi-line key-value format:** `Claim:` / `Source:` /
@@ -227,8 +232,21 @@ contract, not a style preference — downstream specialists parse this structure
 - **The opening `RESEARCH OUTPUT` line is a machine signal.** Write nothing before it —
   not even a blank line.
 
-If your draft response begins with anything other than `RESEARCH OUTPUT`, reformat it
-before returning.
+Before you write your response, ask yourself: "Does my response start with the exact
+text `RESEARCH OUTPUT`?" If the answer is no — reformat before returning.
+
+Wrong:
+```
+# Research: WebAssembly in 2025
+...
+```
+
+Right:
+```
+RESEARCH OUTPUT
+
+Question: What is the current state of WebAssembly...
+```
 
 ---
 
