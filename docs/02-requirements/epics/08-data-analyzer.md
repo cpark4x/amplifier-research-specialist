@@ -88,8 +88,8 @@ Returns `AnalysisOutput` — defined in `shared/interface/types.md`.
 ## 7. Open Questions
 
 - [ ] Should the Analyzer accept CompetitiveAnalysisOutput as well as ResearchOutput, or is that a separate specialist's job?
-- [ ] **Format compliance with non-standard input** — Post-build registration test (2026-03-03) with simplified inline findings produced narrative prose instead of the required `ANALYSIS OUTPUT / Specialist: data-analyzer / Version: 1.0` block format. Input used informal inline text, not proper ResearchOutput format. Confirm: does the agent comply with structured output when given proper ResearchOutput input? Run a format-compliance E2E test against the canonical schema before closing.
-- [ ] **Behavior for non-ResearchOutput input** — The spec is silent on what to do when findings arrive as informal inline text. Options: (a) best-effort parse + produce structured output, (b) return a structured error block, (c) reject with a clear message. Document the chosen behavior in `index.md`.
+- [x] **Format compliance with non-standard input** — ~~Post-build registration test (2026-03-03) with simplified inline findings produced narrative prose.~~ **CLOSED 2026-03-03:** Follow-up test with canonical ResearchOutput format confirmed full compliance — `ANALYSIS OUTPUT / Specialist: data-analyzer / Version: 1.0` block, all sections, `type:` labels on every inference. Prose output was input-format-dependent, not a regression. See `docs/test-log/data-analyzer/2026-03-03-format-compliance.md`.
+- [x] **Behavior for non-ResearchOutput input** — **CLOSED 2026-03-03: accepted, no change.** In real pipeline use the Researcher always produces canonical ResearchOutput; informal-input edge cases are testing artifacts, not production scenarios. README already states the contract ("only processes ResearchOutput"). No Stage 0 validation added — keeping the spec minimal.
 
 ---
 
