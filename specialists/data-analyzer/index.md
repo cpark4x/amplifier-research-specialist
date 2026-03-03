@@ -84,11 +84,21 @@ For each cluster of related findings:
      - `high` — 2+ high/medium findings from independent sources confirm it
      - `medium` — 1 high finding or 2 medium findings support it
      - `low` — only low-confidence findings support it
-   - Assign type:
-     - `pattern` — multiple findings pointing the same direction
-     - `causal` — a finding that explains another ("X because Y")
-     - `evaluative` — a judgment the evidence supports ("X is strong/weak/ready/not-ready")
-     - `predictive` — a forward-looking conclusion the evidence warrants
+   - Assign type — you MUST use exactly one of these four values. No other values are valid:
+     - `pattern` — multiple findings pointing the same direction (use for: convergent signals,
+       dominant trends, "consistently true across sources", contradiction-preserving synthesis
+       where the overall picture itself is the finding)
+     - `causal` — a finding that explains another ("X because Y", "X drives Y", "X results in Y")
+       (use for: mechanism, root cause, driver identification)
+     - `evaluative` — a judgment the evidence supports ("X is strong/weak/ready/not-ready",
+       "X matters more than Y") (use for: readiness assessments, quality judgments, comparisons,
+       single-source inferences that need corroboration — note the corroboration gap explicitly)
+     - `predictive` — a forward-looking conclusion the evidence warrants ("X suggests Y will...",
+       "X is likely to...") (use for: trend extrapolation, likely outcomes)
+
+     **Type selection rule:** If the inference doesn't fit cleanly, choose the closest of the
+     four. Do NOT invent new type names. When in doubt: `pattern` for observational groupings,
+     `evaluative` for judgments and assessments.
    - Record the specific finding IDs it traces to (e.g., F3, F7, F12)
 
 3. If the evidence does NOT support a confident inference:
