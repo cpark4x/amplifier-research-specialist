@@ -20,6 +20,11 @@ Delegate to these agents when quality and trustworthiness matter more than speed
   comparison matrices, positioning gaps, and win conditions. Handles head-to-head and
   landscape modes. Output is designed for downstream agents (Writer) to consume.
 
+- **data-analyzer** — Draws labeled inferences from ResearchOutput. Returns
+  `AnalysisOutput` — findings projected from ResearchOutput plus explicit inferences
+  that each trace to specific findings. Use between Researcher and Writer when you
+  need facts and conclusions explicitly separated.
+
 ## When to Use Each
 
 **Delegate to `specialists:researcher` when:**
@@ -32,6 +37,12 @@ Delegate to these agents when quality and trustworthiness matter more than speed
 - Turning researcher output into a report, brief, or email
 - Any writing task where substance already exists but needs clear expression
 
+**Delegate to `specialists:specialists/data-analyzer` when:**
+- You have ResearchOutput and need conclusions drawn before writing
+- You want facts and inferences explicitly separated and labeled
+- The Writer needs more than raw findings — it needs "what the evidence means"
+- Any Researcher → Analyzer → Writer chain
+
 **Delegate to `specialists:specialists/competitive-analysis` when:**
 - Comparing two or more companies, products, or services head-to-head
 - Mapping the competitive landscape for a subject ("who competes with X?")
@@ -43,6 +54,11 @@ Delegate to these agents when quality and trustworthiness matter more than speed
 For most knowledge work tasks:
 1. `specialists:researcher` → gathers and validates evidence
 2. `specialists:writer` → transforms evidence into the requested document
+
+For analytical tasks requiring explicit fact/inference separation:
+1. `specialists:researcher` → gathers and validates evidence
+2. `specialists:specialists/data-analyzer` → draws labeled inferences from the evidence
+3. `specialists:writer` → transforms facts + labeled inferences into the requested document
 
 For competitive intelligence tasks:
 1. `specialists:researcher` → gathers evidence (optional — competitive-analysis can research itself)
