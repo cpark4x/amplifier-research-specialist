@@ -1,0 +1,54 @@
+name: "competitive-analysis-brief-researched"
+description: "High-fidelity competitive brief with Researcher pre-pass. Researcher gathers sourced evidence first, competitive-analysis builds the matrix from that evidence, writer produces the document."
+version: "1.0.0"
+tags: ["competitive-analysis", "research", "writing", "chain"]
+
+steps:
+  - id: "research"
+    agent: "specialists:specialists/researcher"
+    prompt: |
+      Research the following competitive question. Gather sourced evidence for all
+      relevant subjects across key competitive dimensions.
+
+      Query: {{query}}
+
+      Follow your full research pipeline. Return your standard ResearchOutput format
+      with source tiering and per-claim confidence scores.
+    output: "research_output"
+    timeout: 2700
+
+  - id: "analyze"
+    agent: "specialists:specialists/competitive-analysis"
+    prompt: |
+      Run a competitive analysis using the pre-gathered research below.
+      Skip Stage 2 (Research) — the research field is provided.
+
+      Query: {{query}}
+      Research: {{research_output}}
+
+      If subjects or dimensions were provided, use them:
+      Subjects: {{subjects}}
+      Dimensions: {{dimensions}}
+
+      Begin at Stage 3 (Profile). Return your output in the standard
+      CompetitiveAnalysisOutput format.
+    output: "competitive_analysis_output"
+    timeout: 1800
+
+  - id: "write"
+    agent: "specialists:specialists/writer"
+    prompt: |
+      Transform the following competitive analysis output into a polished document.
+
+      Source material:
+      {{competitive_analysis_output}}
+
+      Output format: {{format}}
+      Audience: {{audience}}
+
+      If format or audience are empty, default to: format=report, audience=general.
+
+      Follow your full 5-stage pipeline. Return WRITER METADATA, document content
+      with section attribution lines, CITATIONS, and CLAIMS TO VERIFY blocks.
+    output: "final_document"
+    timeout: 900
