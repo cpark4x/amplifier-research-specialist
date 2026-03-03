@@ -44,6 +44,7 @@ Key sections:
 - Identify which findings don't support inferences and explain why
 - Focus inference work on a specific question via `focus_question`
 - Accept any ResearchOutput regardless of domain (market, person, technical, event)
+
 ### Cannot Do
 
 - Research new facts — use Researcher
