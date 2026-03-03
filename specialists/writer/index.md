@@ -235,6 +235,21 @@ S5: "[inference claim]" → used in: [section/paragraph] | type: inference | con
 
 List every source claim from Stage 1. Mark each one as used (with location) or not used.
 
+**COMPLIANCE NOTE — structured output required:**
+
+The three-block structure above is a pipeline contract, not a style preference. Downstream
+callers parse these blocks automatically.
+
+- **Your response MUST begin with `WRITER METADATA`** — not a markdown header, not a prose
+  paragraph, not the document title. The first line of your response is `WRITER METADATA`.
+- **CITATIONS must appear after the document** — every Sn from your Stage 1 numbered list,
+  marked used or not used. Omitting CITATIONS is a spec violation.
+- **Do not return the document without all required blocks.** If you have drafted document
+  content first, prepend WRITER METADATA and append CITATIONS (and CLAIMS TO VERIFY if
+  applicable) before returning.
+- **The first word of your response is WRITER.** If your draft begins with anything else —
+  a `#` header, a word, a blank line — reformat before returning.
+
 **Block 4 — CLAIMS TO VERIFY** (analyst-output, raw-notes, or analysis-output only; omit entirely for researcher-output):
 ```
 CLAIMS TO VERIFY
