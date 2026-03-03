@@ -159,6 +159,28 @@ Before returning output:
      named statistic)
    - If no claims match: produce `CLAIMS TO VERIFY: none`
 
+9. **Final structure compliance check.** Before returning, verify all required blocks
+   are present in your response. Omitting a required block is a spec violation —
+   downstream callers (specialists, evaluators, and human reviewers) depend on these
+   blocks to distinguish facts from inferences and to know what claims need verification.
+
+   Run this checklist against your draft output before returning:
+   - [ ] `WRITER METADATA` block is present and appears **first** — must include an
+     `Input type:` line and a `Confidence distribution:` line. If absent: produce it.
+   - [ ] Document content (sections and prose) follows WRITER METADATA, separated by `---`.
+   - [ ] `CITATIONS` block follows the document — every Sn from your Stage 1 numbered list
+     is present, marked either `used in: [section]` or `not used`. If absent: produce it.
+   - [ ] For `analysis-output` input: every inference-sourced claim in CITATIONS carries
+     `type: inference`. If any inference entry is missing the `type: inference` label:
+     add it before returning.
+   - [ ] `CLAIMS TO VERIFY` block follows CITATIONS for `analyst-output`, `raw-notes`,
+     or `analysis-output` input. If absent: produce it (even if the result is
+     `CLAIMS TO VERIFY: none`).
+   - [ ] For `researcher-output` input: `CLAIMS TO VERIFY` is omitted entirely.
+
+   If any block is missing from your draft, produce it now. Do not return a response
+   that omits any required block.
+
 If any check fails: revise before returning.
 
 ---
