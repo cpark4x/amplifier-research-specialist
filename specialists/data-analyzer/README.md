@@ -1,22 +1,25 @@
 # Data Analyzer
 
-Takes ResearchOutput and produces AnalysisOutput — findings projected from ResearchOutput
-plus labeled inferences drawn from the evidence. Sits between Researcher and Writer in the
-pipeline. The only specialist authorized to draw conclusions from sourced facts.
+A domain expert agent for producing **traceable, labeled inferences from structured research evidence**.
+
+The Data Analyzer's job is precisely: take ResearchOutput and return grounded conclusions —
+pattern, causal, evaluative, or predictive — each traced to the findings that support them.
+It does not research, and it does not write. It is the only specialist authorized to draw
+conclusions from sourced facts.
 
 ---
 
-## Accepts
+## Interface Contract
 
-| Field | Required | Type | Description |
-|---|---|---|---|
-| `research` | Yes | ResearchOutput | Output from the Researcher specialist |
-| `focus_question` | No | string | Aim inferences at a specific question. If omitted, analyzes all findings. |
-| `quality_threshold` | No | `low \| medium \| high` | Minimum confidence for inferences. Default: `medium`. Note: `maximum` (ResearchOutput vocabulary) is treated as `high`. |
+### Accepts
 
----
+| Field | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `research` | ResearchOutput | Yes | — | Output from the Researcher specialist |
+| `focus_question` | string | No | null | Aim inferences at a specific question. If omitted, analyzes all findings. |
+| `quality_threshold` | `low \| medium \| high` | No | `medium` | Minimum confidence for inferences to be included. |
 
-## Returns
+### Returns
 
 `AnalysisOutput` — defined in `shared/interface/types.md`
 
@@ -32,22 +35,16 @@ Key sections:
 - **INFERENCES** — conclusions drawn from the evidence. Each has type (pattern/causal/evaluative/predictive), confidence, and the finding IDs they trace to.
 - **UNUSED FINDINGS** — findings that didn't yield an inference. Every finding is accounted for here or in INFERENCES.
 - **EVIDENCE GAPS** — normalized to single-line `gap: [...] | reason: [...]` format; passthrough from ResearchOutput.
-- **QUALITY THRESHOLD RESULT** — `MET` or `NOT MET`
+- **QUALITY THRESHOLD RESULT** — `MET` or `NOT MET`. When `NOT MET`, output is still returned and structured normally — callers may use it with awareness that confidence is below the requested floor, lower the threshold, or pass `focus_question` to narrow scope.
 
----
-
-## Can Do
+### Can Do
 
 - Draw pattern, causal, evaluative, and predictive inferences from research findings
 - Rate inference confidence based on the quality of supporting findings
 - Identify which findings don't support inferences and explain why
 - Focus inference work on a specific question via `focus_question`
 - Accept any ResearchOutput regardless of domain (market, person, technical, event)
-- Coerce `quality_threshold: maximum` from ResearchOutput vocabulary to `high`
-
----
-
-## Cannot Do
+### Cannot Do
 
 - Research new facts — use Researcher
 - Write prose or produce documents — use Writer
@@ -70,6 +67,8 @@ ratings are preserved unchanged. The Analyzer does not re-source or re-tier find
 
 **Takes longer by design.** The Quality Gate reviews inference traceability before
 output is returned. Speed is not the optimization target — inference trustworthiness is.
+
+**`quality_threshold: maximum` is accepted.** This value (ResearchOutput vocabulary) is treated as `high`. Prevents pipeline breakage when ResearchOutput is passed directly without threshold translation.
 
 ---
 
