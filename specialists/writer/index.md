@@ -58,8 +58,8 @@ Run every writing task through these stages in order. Do not skip stages.
 5. Number each discrete factual claim in the source material: S1, S2, S3, etc.
    Write out the numbered list — this is output, not internal state:
 
-   S1: [claim text] | confidence: [high|medium|low|unrated]
-   S2: [claim text] | confidence: [high|medium|low|unrated]
+   S1: [claim text] | confidence: [high|medium|low|unrated|inference]
+   S2: [claim text] | confidence: [high|medium|low|unrated|inference]
    ...
 
    - If input type is `researcher-output`: read the `confidence` field from the corresponding Finding
@@ -141,13 +141,16 @@ Before returning output:
 7. Add `Confidence distribution` to WRITER METADATA: count high/medium/low/unrated
    from your Stage 1 claim list (include all claims, used and unused).
    Format: `Confidence distribution: [n] high · [n] medium · [n] low · [n] unrated`
+   For `analysis-output`, add an `inference` bucket:
+   `Confidence distribution: [n] high · [n] medium · [n] low · [n] unrated · [n] inference`
 
 8. Produce the CLAIMS TO VERIFY block — only when `input type` is `analyst-output`,
    `raw-notes`, or `analysis-output`. When input type is `researcher-output`, skip
    this step entirely.
    For `analysis-output`: flag both unrated findings AND any inferences containing
    specific numerical values, measurements, percentages, or named statistics.
-   - From your Stage 1 claim list, scan all `unrated` claims
+   - From your Stage 1 claim list, scan all `unrated` claims; for `analysis-output`
+     also scan all `confidence: inference` claims
    - Flag any claim containing a specific value: a number with a unit (87ms, 50-row,
      $10/mo, 2,000ms), a percentage (40%, 60%), a count with magnitude (200+, 8,000+),
      or a named statistic presented as fact
@@ -205,11 +208,12 @@ S1: "[source claim text]" → used in: [section/paragraph] | confidence: high (0
 S2: "[source claim text]" → used in: [section/paragraph] | confidence: medium (0.6)
 S3: "[source claim text]" → not used | confidence: low (0.3)
 S4: "[source claim text]" → used in: [section/paragraph] | confidence: unrated
+S5: "[inference claim]" → used in: [section/paragraph] | type: inference | confidence: high (0.9)
 ```
 
 List every source claim from Stage 1. Mark each one as used (with location) or not used.
 
-**Block 4 — CLAIMS TO VERIFY** (analyst-output or raw-notes only; omit entirely for researcher-output):
+**Block 4 — CLAIMS TO VERIFY** (analyst-output, raw-notes, or analysis-output only; omit entirely for researcher-output):
 ```
 CLAIMS TO VERIFY
 Unrated claims containing specific values — verify before citing externally.
