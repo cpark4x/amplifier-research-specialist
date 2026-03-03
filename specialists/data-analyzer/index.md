@@ -58,7 +58,49 @@ Run every task through these stages in order. Do not skip stages.
 
 ### Stage 1: Parse
 
-1. Number each finding from ResearchOutput: F1, F2, F3...
+**Step 0: Detect input format and extract findings.**
+
+The Researcher specialist produces output in two formats depending on context. Detect
+which format you received and extract findings accordingly. Both formats produce the
+same F1, F2, F3... numbered findings for Stages 2–4.
+
+**Format A — Canonical RESEARCH OUTPUT block:**
+Starts with the literal line `RESEARCH OUTPUT`. Findings appear in the `FINDINGS:`
+section using the multi-line key-value format:
+```
+- Claim: [statement]
+  Source: [URL]
+  Tier: [primary|secondary|tertiary]
+  Confidence: [high|medium|low]
+```
+Extract each finding directly. Claim → claim, Source → source_url, Tier → tier,
+Confidence → confidence.
+
+**Format B — Narrative markdown (structured research document):**
+Starts with a markdown title or section header. Findings appear in tables, bullet
+lists, or prose paragraphs — each carrying an explicit or inferable source, tier,
+and confidence rating. Extract findings by scanning for:
+- Rows in markdown tables with source and confidence columns
+- Bullet points with inline source attribution and explicit tier/confidence labels
+- Named claims with "Source:", "Tier:", "Confidence:" labels in any proximity
+
+When extracting from Format B:
+- **Claim**: the specific, discrete assertion (not the section header or theme)
+- **Source**: the URL or named publication cited
+- **Tier**: use the explicit label if present; infer from source type if absent
+  (official docs/company blog → primary; news/analyst → secondary; aggregator → tertiary)
+- **Confidence**: use the explicit label if present; infer from corroboration signals
+  in the text if absent (2+ sources → high; 1 named secondary → medium; unattributed → low)
+
+Treat each discrete claim as a separate finding. If a table row contains multiple
+claims, split them. Do not merge separate claims into one finding.
+
+If Format B input includes a section that is already labeled `EVIDENCE GAPS` or
+`QUALITY THRESHOLD RESULT`, preserve those values in Stage 4's output.
+
+**Steps 1–6 apply to both formats:**
+
+1. Number each extracted finding: F1, F2, F3...
 2. Note confidence level of each finding (high / medium / low)
 3. Note which sub-questions are well-evidenced (2+ findings) vs. thin (1 or zero)
 4. If `focus_question` provided: identify which findings are relevant to it;
@@ -67,7 +109,7 @@ Run every task through these stages in order. Do not skip stages.
    If `quality_threshold: maximum` is received (ResearchOutput vocabulary), treat it as `high`.
 6. State your parse summary before proceeding:
    ```
-   Parsed: [n] findings | [n] sub-questions | focus=[question or "full research"] | threshold=[level]
+   Parsed: [n] findings | format=[A|B] | [n] sub-questions | focus=[question or "full research"] | threshold=[level]
    ```
 
 ### Stage 2: Analyze
