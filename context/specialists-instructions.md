@@ -48,3 +48,10 @@ For competitive intelligence tasks:
 1. `specialists:researcher` → gathers evidence (optional — competitive-analysis can research itself)
 2. `specialists:specialists/competitive-analysis` → structures evidence into competitive intelligence
 3. `specialists:writer` → transforms competitive intelligence into a brief or report
+
+## Feedback Capture
+
+After a specialist chain completes, offer once to capture a test log entry:
+> "Want to log this run? I can capture what worked, any concerns, and route action items to the backlog."
+
+For the full procedure, load the `feedback-capture` skill.
