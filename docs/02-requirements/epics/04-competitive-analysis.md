@@ -65,9 +65,9 @@ Returns `CompetitiveAnalysisOutput` — structured data the Writer consumes dire
 
 | # | Story | Owner | Created | Contributors | Last Updated |
 |---|-------|-------|---------|--------------|--------------| 
-| 04-01 | Head-to-head comparison with structured matrix | Chris Park | 2026-03-02 | - | - |
-| 04-02 | Landscape analysis — discover and compare competitive field | Chris Park | 2026-03-02 | - | - |
-| 04-03 | Accept existing ResearchOutput to skip research phase | Chris Park | 2026-03-02 | - | - |
+| [04-01](../user-stories/04-competitive-analysis/04-01-head-to-head-comparison.md) | Head-to-head comparison with structured matrix | Chris Park | 2026-03-02 | - | - |
+| [04-02](../user-stories/04-competitive-analysis/04-02-landscape-analysis.md) | Landscape analysis — discover and compare competitive field | Chris Park | 2026-03-02 | - | - |
+| [04-03](../user-stories/04-competitive-analysis/04-03-accept-existing-research-output.md) | Accept existing ResearchOutput to skip research phase | Chris Park | 2026-03-02 | - | - |
 
 **Date Format:** Always use ISO 8601 format (YYYY-MM-DD).
 

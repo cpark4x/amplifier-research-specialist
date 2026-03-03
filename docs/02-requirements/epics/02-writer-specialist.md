@@ -53,10 +53,10 @@ Every response begins with a machine-readable **WRITER METADATA** block (format,
 
 | # | Story | Owner | Created | Contributors | Last Updated |
 |---|-------|-------|---------|--------------|--------------| 
-| 02-01 | Produce format-faithful document from source material | Chris Park | 2026-02-27 | - | - |
-| 02-02 | Return WRITER METADATA block on every response | Chris Park | 2026-02-27 | - | - |
-| 02-03 | Surface coverage gaps before drafting begins | Chris Park | 2026-02-27 | - | - |
-| 02-04 | Inline citation markers mapped to post-document CITATIONS section | Chris Park | 2026-02-28 | - | - |
+| [02-01](../user-stories/02-writer-specialist/02-01-produce-format-faithful-document.md) | Produce format-faithful document from source material | Chris Park | 2026-02-27 | - | - |
+| [02-02](../user-stories/02-writer-specialist/02-02-return-writer-metadata-block.md) | Return WRITER METADATA block on every response | Chris Park | 2026-02-27 | - | - |
+| [02-03](../user-stories/02-writer-specialist/02-03-surface-coverage-gaps.md) | Surface coverage gaps before drafting begins | Chris Park | 2026-02-27 | - | - |
+| [02-04](../user-stories/02-writer-specialist/02-04-citations-and-source-attribution.md) | Citations and source attribution (section attribution + CITATIONS index) | Chris Park | 2026-02-28 | - | 2026-03-02 |
 
 **Date Format:** Always use ISO 8601 format (YYYY-MM-DD).
 

@@ -35,11 +35,11 @@ Orchestrators receive structured evidence they can trust and compose — not ans
 
 | # | Story | Owner | Created | Last Updated |
 |---|-------|-------|---------|--------------|
-| 01-01 | As an orchestrator, I can delegate a research question with a `query_type` and receive a structured `ResearchOutput`, so I don't mix research execution with decision-making in the same agent. | Chris Park | 2026-02-26 | — |
-| 01-02 | As an orchestrator, I can set a `quality_threshold` (medium / high / maximum) when delegating research, so I control the depth-vs-speed tradeoff for different use cases. | Chris Park | 2026-02-26 | — |
-| 01-03 | As an orchestrator, I can inspect the `source_tier` and `confidence` of each finding, so I know whether a claim came from a primary source or a speculative third-party summary. | Chris Park | 2026-02-26 | — |
-| 01-04 | As an orchestrator, I can read `evidence_gaps` in the output to know what the Researcher tried and couldn't verify, so I make decisions with honest uncertainty rather than false completeness. | Chris Park | 2026-02-26 | — |
-| 01-05 | As a developer building an Amplifier workflow, I can include the `specialists` bundle to immediately add research capability to any project without building my own research pipeline. | Chris Park | 2026-02-26 | — |
+| [01-01](../user-stories/01-research-specialist/01-01-delegate-research-question.md) | Delegate research question and receive structured ResearchOutput | Chris Park | 2026-02-26 | — |
+| [01-02](../user-stories/01-research-specialist/01-02-set-quality-threshold.md) | Set quality threshold (medium / high / maximum) per request | Chris Park | 2026-02-26 | — |
+| [01-03](../user-stories/01-research-specialist/01-03-inspect-source-tier-confidence.md) | Inspect source tier and confidence of each finding | Chris Park | 2026-02-26 | — |
+| [01-04](../user-stories/01-research-specialist/01-04-read-evidence-gaps.md) | Read evidence gaps — what was tried but couldn't be verified | Chris Park | 2026-02-26 | — |
+| [01-05](../user-stories/01-research-specialist/01-05-add-research-via-bundle.md) | Add research capability to any project via bundle include | Chris Park | 2026-02-26 | — |
 
 ### Future
 
