@@ -32,6 +32,8 @@
 
 | Item | Epic | Owner | Completed | Notes |
 |------|------|-------|-----------|-------|
+| CLAIMS TO VERIFY block (Writer) | 02 | Chris | Mar 3, 2026 | Writer flags specific numerical claims from upstream without cited sources |
+| competitive-analysis-brief recipes (x2) | 04 | Chris | Mar 3, 2026 | 2-step chain (competitive-analysis → writer) and 3-step with Researcher pre-pass |
 | Template improvements | 01/02/04 | Chris | Mar 3, 2026 | Trimmed to 7 sections; Capability format; Why This Matters required; Created line |
 | tool-canvas-renderer | 02 | Chris | Mar 3, 2026 | Local pandoc tool module; markdown → DOCX; full Amplifier Tool protocol |
 | Section-level source attribution | 02 | Chris | Mar 3, 2026 | `> *Sources: S1, S2*` after each factual section; trust signals at point of reading |
@@ -59,11 +61,9 @@
 |---|------|------|-------|--------|--------|-----------|
 | 1 | Storyteller specialist | 03 | Chris | L | H | Transforms research/analysis into compelling narratives; high-demand for knowledge workers |
 | 2 | Presentation Builder specialist | 07 | Chris | L | H | Closes the research → write → present chain; slide deck output is a top knowledge worker use case |
-| 3 | Recipe: encode competitive-analysis → writer chain | 04 | Chris | S | H | Chain is proven but manually dispatched; a single invokable recipe removes orchestration friction *(from test log 2026-03-02)* |
-| 4 | Researcher-first default for product comparisons | 04 | Chris | S | H | Self-research path skips source tiering; Researcher pre-pass surfaces per-claim confidence before competitive-analysis runs *(from test log 2026-03-02)* |
-| 5 | Writer: "claims to verify" block for unsourced specifics | 02 | Chris | S | M | When upstream output contains specific numerical claims without citations, Writer should flag them rather than passing at uniform confidence *(from test log 2026-03-02)* |
-| 6 | Coverage audit severity levels | 02 | Chris | S | M | `gap_policy` input lets orchestrators decide what gap severity blocks vs. warns vs. passes |
-| 7 | Researcher: conservative confidence scoring for analyst estimates | 01 | Chris | S | M | Financial figures (ARR, market share) from secondary/circulated sources rated high confidence alongside audited data — needs stronger source-tier guidance for analyst estimates vs. primary financial data *(from test log 2026-03-02)* |
+| 3 | Researcher-first default for product comparisons | 04 | Chris | S | H | Self-research path skips source tiering; Researcher pre-pass surfaces per-claim confidence before competitive-analysis runs *(from test log 2026-03-02)* |
+| 4 | Coverage audit severity levels | 02 | Chris | S | M | `gap_policy` input lets orchestrators decide what gap severity blocks vs. warns vs. passes |
+| 5 | Researcher: conservative confidence scoring for analyst estimates | 01 | Chris | S | M | Financial figures (ARR, market share) from secondary/circulated sources rated high confidence alongside audited data — needs stronger source-tier guidance for analyst estimates vs. primary financial data *(from test log 2026-03-02)* |
 
 ### Medium-term (Next Quarter)
 
