@@ -88,6 +88,16 @@ Run every writing task through these stages in order. Do not skip stages.
 
 ### Stage 1: Parse Input
 
+**First output — before any other content, print this parse line:**
+
+```
+Parsed: [n] claims | input=[type] | format=[format] | audience=[audience]
+```
+
+This single line must be the very first thing you write. It is a pipeline signal, not metadata. Write nothing before it — no title, no heading, no blank line.
+
+Then:
+
 1. Read the METADATA block from the source material (if present)
 2. Identify input type: `researcher-output` | `analyst-output` | `raw-notes` | `analysis-output`
 3. Identify requested: format, audience, voice/tone, length constraint (if any)
