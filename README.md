@@ -54,7 +54,9 @@ document = delegate(
 )
 ```
 
-See [docs/examples/researcher-to-writer.md](docs/examples/researcher-to-writer.md) for a complete walkthrough with sample inputs and outputs.
+See [docs/USING-SPECIALISTS.md](docs/USING-SPECIALISTS.md) for the full practical guide — invoking each specialist, understanding output, and chaining them together.
+
+For a detailed walkthrough of the researcher → writer chain with sample inputs and outputs, see [docs/examples/researcher-to-writer.md](docs/examples/researcher-to-writer.md).
 
 ---
 
