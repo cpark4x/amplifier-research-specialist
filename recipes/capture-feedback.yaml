@@ -120,7 +120,7 @@ steps:
 
       For each `- [ ]` item in the Action items section, route it to the appropriate destination using these rules:
 
-      - **Consistent quality gap** — a gap that would appear in any run on this kind of topic → append to `BACKLOG.md`
+      - **Consistent quality gap** — a gap that would appear in any run on this kind of topic → append to `docs/BACKLOG.md`
       - **Edge case in one specialist** — a narrow issue specific to one specialist's behavior → append to the relevant epic file under `docs/02-requirements/epics/`
       - **Pattern across runs** — a recurring structural theme suggesting changes to how specialists are added or composed → append to `docs/adding-a-specialist.md`
       - **Confidence systematically off** — accuracy or confidence calibration issues for this specialist → append to `specialists/{specialist}/index.md`

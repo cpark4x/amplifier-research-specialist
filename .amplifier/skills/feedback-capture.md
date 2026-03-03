@@ -77,7 +77,7 @@ After writing the file, route each `- [ ]` action item using this table:
 
 | Finding type | Destination |
 |---|---|
-| Consistent quality gap | New item in `BACKLOG.md` |
+| Consistent quality gap | New item in `docs/BACKLOG.md` |
 | Edge case in one specialist | Open question in `docs/02-requirements/epics/0{N}-{specialist}.md` |
 | Pattern across multiple runs | Note in `docs/adding-a-specialist.md` |
 | Confidence systematically off | Issue in `specialists/{specialist}/index.md` |
