@@ -153,6 +153,59 @@ interface PositioningGap {
 
 ---
 
+## AnalysisOutput
+
+The canonical output of the Data Analyzer specialist.
+
+```typescript
+interface AnalysisOutput {
+  // What was analyzed
+  question: string
+  focus_question: string | null   // null if not provided by caller
+  quality_threshold: 'low' | 'medium' | 'high'
+
+  // Findings passed through from ResearchOutput — unchanged, numbered F1...Fn
+  findings: AnalysisFinding[]
+
+  // The inference layer — new work by the Analyzer
+  inferences: Inference[]
+
+  // Findings that didn't yield inferences — every finding is accounted for
+  unused_findings: UnusedFinding[]
+
+  // Passed through from ResearchOutput — unchanged
+  evidence_gaps: EvidenceGap[]   // reuse from ResearchOutput
+
+  // Overall signal
+  quality_score: 'low' | 'medium' | 'high'
+  quality_threshold_met: boolean
+}
+
+interface AnalysisFinding {
+  id: string                    // "F1", "F2", "F3"...
+  claim: string                 // from ResearchOutput.Finding.claim — unchanged
+  source_url: string
+  source_tier: 'primary' | 'secondary' | 'tertiary'
+  confidence: 'high' | 'medium' | 'low'
+  is_direct_quote: boolean
+}
+
+interface Inference {
+  claim: string                 // the conclusion — specific and falsifiable
+  type: 'pattern' | 'causal' | 'evaluative' | 'predictive'
+  confidence: 'high' | 'medium' | 'low'
+  traces_to: string[]           // finding IDs: ["F3", "F7", "F12"]
+}
+
+interface UnusedFinding {
+  finding_id: string            // "F5"
+  reason: 'contradicted' | 'insufficient_evidence' | 'out_of_scope'
+  detail: string                // one sentence explaining why
+}
+```
+
+---
+
 ## Schema Version
 
 `v1.0` — established 2026-02-26. Changes require version bump and coordinated update to all callers.
