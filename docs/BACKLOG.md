@@ -8,7 +8,7 @@
 
 ## Current Status Summary
 
-**11 epics tracked:** ✅ 3 complete, 🔄 0 in progress, ⏸️ 0 paused, 8 planned
+**11 epics tracked:** ✅ 4 complete, 🔄 0 in progress, ⏸️ 0 paused, 7 planned
 
 - ✅ Epic 01 — Researcher
 - ✅ Epic 02 — Writer
@@ -17,7 +17,7 @@
 - 🆕 Epic 05 — Design
 - 🆕 Epic 06 — Demo Generator
 - 🆕 Epic 07 — Presentation Builder
-- 🆕 Epic 08 — Data Analyzer
+- ✅ Epic 08 — Data Analyzer
 - 🆕 Epic 09 — Planner
 - 🆕 Epic 10 — Prioritizer
 - 🆕 Epic 11 — Platform Integrations
@@ -32,6 +32,7 @@
 
 | Item | Epic | Owner | Completed | Notes |
 |------|------|-------|-----------|-------|
+| Data Analyzer specialist | 08 | Chris | Mar 3, 2026 | 4-stage pipeline (Parse → Analyze → Quality Gate → Synthesize); AnalysisOutput schema; Writer analysis-output input type; 6 E2E tests passed |
 | Researcher-first default for product comparisons | 04 | Chris | Mar 3, 2026 | Implemented as `competitive-analysis-brief-researched` recipe — 3-step chain with Researcher pre-pass |
 | CLAIMS TO VERIFY block (Writer) | 02 | Chris | Mar 3, 2026 | Writer flags specific numerical claims from upstream without cited sources |
 | competitive-analysis-brief recipes (x2) | 04 | Chris | Mar 3, 2026 | 2-step chain (competitive-analysis → writer) and 3-step with Researcher pre-pass |
@@ -54,7 +55,7 @@
 
 | # | Item | Epic | Owner | Effort | Impact | Why Now |
 |---|------|------|-------|--------|--------|---------|
-| 1 | Data Analyzer specialist | 08 | Chris | L | H | Unlocks the core pipeline: Researcher → Analyzer → Writer; facts vs. inferences explicitly labeled |
+| 1 | Storyteller specialist | 03 | Chris | L | H | Transforms research/analysis into compelling narratives; natural next specialist after Researcher → Analyzer → Writer chain is complete |
 
 ### Near-term (Next 1-2 Sprints)
 
@@ -107,12 +108,12 @@
 | 05 — Design | — | Full specialist implementation | 0% |
 | 06 — Demo Generator | — | Full specialist implementation | 0% |
 | 07 — Presentation Builder | — | Full specialist implementation | 0% |
-| 08 — Data Analyzer | — | Full specialist implementation | 0% |
+| 08 — Data Analyzer | 4-stage pipeline, AnalysisOutput schema, Writer analysis-output integration, 6 E2E tests | — | 100% |
 | 09 — Planner | — | Full specialist implementation | 0% |
 | 10 — Prioritizer | — | Full specialist implementation | 0% |
 | 11 — Platform Integrations | — | LangChain wrapper, rendering integrations | 0% |
 
-**Overall: 3 specialists shipped, 7 planned, 1 integrations epic**
+**Overall: 4 specialists shipped, 6 planned, 1 integrations epic**
 
 ---
 
@@ -150,6 +151,7 @@
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v1.5 | Mar 3, 2026 | Chris | Marked Epic 08 complete; Data Analyzer added to recently completed; Storyteller promoted to Immediate Next; 4 specialists shipped |
 | v1.4 | Mar 2, 2026 | Chris | Moved researcher-first default to recently completed (implemented as 3-step recipe); removed from near-term; updated Epic 04 completion row to reflect all shipped work |
 | v1.3 | Mar 3, 2026 | Chris | Marked Epic 04 complete; added tool-canvas-renderer, section attribution, citation confidence to recently completed; removed shipped items from future work; updated Epic 02 to 80%, Epic 04 to 100%; 3 specialists shipped |
 | v1.2 | Mar 2, 2026 | Chris | Added 3 near-term items from Notion/Obsidian test log: recipe encoding, researcher-first default, writer confidence gap surfacing |
