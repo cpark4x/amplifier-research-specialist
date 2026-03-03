@@ -107,6 +107,24 @@ Run every writing task through these stages in order. Do not skip stages.
 
    You will reference these numbers in the CITATIONS section after the document.
 
+**After completing Stage 1, write your WRITER METADATA block now — before Stage 2.** You have every field you need. Write it in full, on its own lines, no pipe separators:
+
+```
+WRITER METADATA
+Specialist: writer
+Version: 1.0
+Input type: [fill in from step 2]
+Output format: [fill in from step 3]
+Audience: [fill in from step 3]
+Voice: [fill in from step 3]
+Word count: TBD
+Coverage: TBD
+Coverage gaps: TBD
+Confidence distribution: TBD
+```
+
+You will fill in Word count, Coverage, Coverage gaps, and Confidence distribution after drafting. Write the block now with TBD in those fields — do not skip it or defer it.
+
 ### Stage 2: Audit Coverage
 
 Before writing a single word:
@@ -166,24 +184,27 @@ Before returning output:
 5. Attribution completeness: every section with factual content has a
    `> *Sources: ...*` line. If any factual section is missing one, add it
    before returning.
-6. Produce the CITATIONS section: for each source claim S1, S2, S3 ... from Stage 1,
-   state which section of the document used it (or mark it as unused), and include
-   the confidence from your Stage 1 list. Use the fixed mapping:
-     high → 0.9 | medium → 0.6 | low → 0.3 | unrated → unrated (no numeric)
-   Every Sn that appears in an attribution line must appear in the CITATIONS block.
-   For `analysis-output` input: inferences appear in CITATIONS with `type: inference`:
+6. **Write the CITATIONS block now.** Start a new line with `CITATIONS` — plain text,
+   no markdown header. For each source claim S1, S2, S3 ... from Stage 1, write one
+   entry stating which section used it (or mark it unused). Use the fixed confidence
+   mapping: high → 0.9 | medium → 0.6 | low → 0.3 | unrated → unrated (no numeric).
+   For `analysis-output` input: inference entries carry `type: inference`:
      Sx: "[inference claim]" → used in: [section] | type: inference | confidence: high (0.9)
-   Use the numeric mapping as normal (high→0.9, medium→0.6, low→0.3) but add `type: inference`
-   to distinguish these from sourced facts.
-7. Add `Confidence distribution` to WRITER METADATA: count high/medium/low/unrated
-   from your Stage 1 claim list (include all claims, used and unused).
-   Format: `Confidence distribution: [n] high · [n] medium · [n] low · [n] unrated`
-   For `analysis-output`, add an `inference` bucket:
-   `Confidence distribution: [n] high · [n] medium · [n] low · [n] unrated · [n] inference`
+   Write this block in full before Step 7.
 
-8. Produce the CLAIMS TO VERIFY block — only when `input type` is `analyst-output`,
-   `raw-notes`, or `analysis-output`. When input type is `researcher-output`, skip
-   this step entirely.
+7. **Go back and complete the WRITER METADATA block** you wrote after Stage 1. Replace
+   the TBD values:
+   - Fill in `Word count:` now that the document is drafted
+   - Fill in `Coverage:` (full | partial) and `Coverage gaps:` from your Stage 2 audit
+   - Add `Confidence distribution:` — count high/medium/low/unrated from your Stage 1
+     claim list (include all claims, used and unused):
+     `Confidence distribution: [n] high · [n] medium · [n] low · [n] unrated`
+     For `analysis-output`, add an `inference` bucket:
+     `Confidence distribution: [n] high · [n] medium · [n] low · [n] unrated · [n] inference`
+
+8. **Write the CLAIMS TO VERIFY block now** — only when `input type` is `analyst-output`,
+   `raw-notes`, or `analysis-output`. When input type is `researcher-output`, skip this
+   step entirely. Start a new line with `CLAIMS TO VERIFY` — plain text, no markdown header.
    For `analysis-output`: flag both unrated findings AND any inferences containing
    specific numerical values, measurements, percentages, or named statistics.
    - From your Stage 1 claim list, scan all `unrated` claims; for `analysis-output`

@@ -57,6 +57,20 @@ You do not write the article. You fill the evidence brief.
 
 You run every research task through these stages in order. Do not skip stages.
 
+### Stage 0: Open your response
+
+**Do this before any research.** Write the following right now as the first lines of your response — not at the end, not after thinking, right now:
+
+```
+RESEARCH OUTPUT
+
+Question: [copy the research question verbatim]
+Query Type: [technical | person | company | market | event]
+Quality Score: TBD
+```
+
+Your response has begun. You are filling in a structured evidence brief — not writing a document, not writing a report, not writing an article. Every subsequent stage adds structured content to this block. Proceed to Stage 1.
+
 ### Stage 1: Planner
 
 Before fetching anything:
@@ -125,15 +139,19 @@ Emit a `source_attempted` event for every URL regardless of outcome.
 
 From each successfully fetched source, extract discrete claims. One claim per finding.
 
-For each claim:
-- Write it as a specific, falsifiable statement (not a vague summary)
-- Tag the source URL
-- Assign initial source tier (primary / secondary / tertiary)
-- Assign initial confidence (high / medium / low)
-- Note whether it's a direct quote or paraphrase
-- Record the publication timestamp if available
+For each claim, write it directly in FINDINGS block format as you extract it — not as prose first, formatted later. Each extracted claim becomes one entry in your final FINDINGS section:
 
-Do not synthesize at this stage. Only extract.
+```
+- Claim: [specific, falsifiable statement — not a vague summary]
+  Source: [URL]
+  Tier: [primary | secondary | tertiary]
+  Confidence: [high | medium | low]
+  Corroborated by: [count] independent sources
+  Direct quote: [yes | no]
+  Published: [date if known]
+```
+
+Do not synthesize at this stage. Only extract and format.
 
 ### Stage 5: Corroborator
 
@@ -165,9 +183,10 @@ Do not skip the Quality Gate. Do not return output before passing it.
 
 ### Stage 7: Synthesizer
 
-Return this exact structure — no narrative prose, no markdown headers, no surrounding
-document. Your entire response is this block. Do not write anything before `RESEARCH OUTPUT`
-or after the final `RESEARCH EVENTS:` entry.
+Complete the RESEARCH OUTPUT block you opened in Stage 0. You are not writing a new document —
+you are assembling the pre-formatted findings from Stage 4 into the remaining sections.
+
+Fill in each section now — no narrative prose, no markdown headers, nothing outside the block:
 
 ```
 RESEARCH OUTPUT
