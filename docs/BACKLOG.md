@@ -60,6 +60,7 @@
 | 5 | Researcher-first default for product comparisons | 04 | Chris | S | H | Self-research path skips source tiering; Researcher pre-pass surfaces per-claim confidence before competitive-analysis runs *(from test log 2026-03-02)* |
 | 6 | Writer: "claims to verify" block for unsourced specifics | 02 | Chris | S | M | When upstream output contains specific numerical claims without citations, Writer should flag them rather than passing at uniform confidence *(from test log 2026-03-02)* |
 | 7 | Coverage audit severity levels | 02 | Chris | S | M | `gap_policy` input lets orchestrators decide what gap severity blocks vs. warns vs. passes |
+| 8 | Researcher: conservative confidence scoring for analyst estimates | 01 | Chris | S | M | Financial figures (ARR, market share) from secondary/circulated sources rated high confidence alongside audited data — needs stronger source-tier guidance for analyst estimates vs. primary financial data *(from test log 2026-03-02)* |
 
 ### Medium-term (Next Quarter)
 

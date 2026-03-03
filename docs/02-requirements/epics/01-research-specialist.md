@@ -99,3 +99,4 @@ Orchestrators receive structured evidence they can trust and compose — not ans
 - [ ] How should structurally contradicted claims be represented — as a dedicated `ContradictedFinding` type, or surfaced within `evidence_gaps` with both sources attached?
 - [ ] What is the correct behavior for `quality_threshold: maximum` when a practical ceiling (search count, fetch failures) is hit — hard fail with explanation, or return with a quality warning flag?
 - [ ] Should the Researcher support a `focus_sources` parameter to prioritize specific domains or URLs for domain-expert workflows?
+- [ ] Should the Researcher apply more conservative confidence scoring to analyst estimates and circulated financial figures (ARR, market share percentages)? Observed pattern: these figures receive `high` confidence despite being unaudited secondary data. A source-tier distinction between primary financial data and analyst estimates may be needed. *(from test log 2026-03-02)*
