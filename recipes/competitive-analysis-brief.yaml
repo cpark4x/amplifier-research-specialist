@@ -3,6 +3,13 @@ description: "Transform a competitive question into a polished document. Runs co
 version: "1.0.0"
 tags: ["competitive-analysis", "writing", "chain"]
 
+context:
+  query: ""       # Required: the competitive question to analyze
+  subjects: ""    # Optional: specific subjects to compare (e.g. "Notion, Obsidian, Roam")
+  dimensions: ""  # Optional: specific dimensions to evaluate (e.g. "pricing, features, UX")
+  format: ""      # Optional: output format (defaults to "report" if empty)
+  audience: ""    # Optional: target audience (defaults to "general" if empty)
+
 steps:
   - id: "analyze"
     agent: "specialists:specialists/competitive-analysis"
