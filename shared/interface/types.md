@@ -162,9 +162,9 @@ interface AnalysisOutput {
   // What was analyzed
   question: string
   focus_question: string | null   // null if not provided by caller
-  quality_threshold: 'low' | 'medium' | 'high'
+  quality_threshold: 'low' | 'medium' | 'high'   // Controls minimum inference confidence. Note: different vocab from ResearchOutput.quality_threshold ('medium'|'high'|'maximum') — ResearchOutput measures research rigor; this measures inference confidence floor.
 
-  // Findings passed through from ResearchOutput — unchanged, numbered F1...Fn
+  // Findings projected from ResearchOutput.Finding — subset of fields with Analyzer-assigned IDs (F1...Fn)
   findings: AnalysisFinding[]
 
   // The inference layer — new work by the Analyzer
@@ -183,7 +183,7 @@ interface AnalysisOutput {
 
 interface AnalysisFinding {
   id: string                    // "F1", "F2", "F3"...
-  claim: string                 // from ResearchOutput.Finding.claim — unchanged
+  claim: string                 // sourced from ResearchOutput.Finding.claim — not modified
   source_url: string
   source_tier: 'primary' | 'secondary' | 'tertiary'
   confidence: 'high' | 'medium' | 'low'
