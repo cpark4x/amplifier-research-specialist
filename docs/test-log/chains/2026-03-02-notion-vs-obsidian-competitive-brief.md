@@ -1,3 +1,12 @@
+---
+specialist: competitive-analysis
+chain: "competitive-analysis → writer"
+topic: notion-vs-obsidian
+date: 2026-03-02
+quality_signal: mixed
+action_items_promoted: true
+---
+
 # Notion vs. Obsidian — Knowledge Worker Comparison
 
 **Date:** 2026-03-02

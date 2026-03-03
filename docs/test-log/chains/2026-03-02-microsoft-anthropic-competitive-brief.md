@@ -1,3 +1,12 @@
+---
+specialist: researcher
+chain: "researcher → writer"
+topic: microsoft-anthropic-competitive-brief
+date: 2026-03-02
+quality_signal: mixed
+action_items_promoted: false
+---
+
 # Microsoft vs. Anthropic Competitive Positioning
 
 **Date:** 2026-03-02  
