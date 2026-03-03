@@ -1,0 +1,39 @@
+name: "competitive-analysis-brief"
+description: "Transform a competitive question into a polished document. Runs competitive-analysis then writer in sequence. For higher-fidelity runs with Researcher pre-pass, use competitive-analysis-brief-researched."
+version: "1.0.0"
+tags: ["competitive-analysis", "writing", "chain"]
+
+steps:
+  - id: "analyze"
+    agent: "specialists:specialists/competitive-analysis"
+    prompt: |
+      Run a full competitive analysis on the following question.
+
+      Query: {{query}}
+
+      If subjects or dimensions were provided, use them:
+      Subjects: {{subjects}}
+      Dimensions: {{dimensions}}
+
+      Follow your full 6-stage pipeline. Return your output in the standard
+      CompetitiveAnalysisOutput format.
+    output: "competitive_analysis_output"
+    timeout: 1800
+
+  - id: "write"
+    agent: "specialists:specialists/writer"
+    prompt: |
+      Transform the following competitive analysis output into a polished document.
+
+      Source material:
+      {{competitive_analysis_output}}
+
+      Output format: {{format}}
+      Audience: {{audience}}
+
+      If format or audience are empty, default to: format=report, audience=general.
+
+      Follow your full 5-stage pipeline. Return WRITER METADATA, document content
+      with section attribution lines, CITATIONS, and CLAIMS TO VERIFY blocks.
+    output: "final_document"
+    timeout: 900
