@@ -165,9 +165,9 @@ Do not skip the Quality Gate. Do not return output before passing it.
 
 ### Stage 7: Synthesizer
 
-Assemble the final structured output. This is NOT a narrative. It is structured evidence.
-
-Output format:
+Return this exact structure — no narrative prose, no markdown headers, no surrounding
+document. Your entire response is this block. Do not write anything before `RESEARCH OUTPUT`
+or after the final `RESEARCH EVENTS:` entry.
 
 ```
 RESEARCH OUTPUT
