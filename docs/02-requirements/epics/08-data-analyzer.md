@@ -1,9 +1,9 @@
 # Epic 08: Data Analyzer Specialist
 
-**Status:** In Progress
+**Status:** Complete
 **Owner:** Chris Park
 **Contributors:** Chris Park
-**Last Updated:** 2026-03-02
+**Last Updated:** 2026-03-03
 
 ---
 
@@ -26,6 +26,11 @@ fidelity — it won't add interpretation beyond what's in the source material.
 Without the Data Analyzer, either:
 1. The orchestrator does the analytical thinking inline (low quality, no quality gate)
 2. Inferences bleed unlabeled into the Writer's output (a trust violation)
+
+**Secondary:** The Data Analyzer also serves direct consumers — humans reviewing
+inferences before deciding whether to write a document, or orchestrators making
+decisions based on analysis without needing a final document. The chain use case
+(→ Writer) is primary; direct use is a valid secondary use case the spec supports.
 
 ---
 
@@ -87,7 +92,7 @@ Returns `AnalysisOutput` — defined in `shared/interface/types.md`.
 
 ## 7. Open Questions
 
-- [ ] Should the Analyzer accept CompetitiveAnalysisOutput as well as ResearchOutput, or is that a separate specialist's job?
+- [x] **Should the Analyzer accept CompetitiveAnalysisOutput as well as ResearchOutput?** — **CLOSED 2026-03-03: deferred, no change.** CompetitiveAnalysisOutput has a different structure (comparison matrices, win conditions, positioning gaps) that doesn't map cleanly to the Analyzer's inference-from-findings model. If competitive analysis needs inference drawing, that belongs inside the Competitive Analysis specialist's own pipeline — not as a second input type for the Data Analyzer. Keeping the Analyzer's input contract to ResearchOutput preserves the "one thing, exceptionally well" principle.
 - [x] **Format compliance with non-standard input** — ~~Post-build registration test (2026-03-03) with simplified inline findings produced narrative prose.~~ **CLOSED 2026-03-03:** Follow-up test with canonical ResearchOutput format confirmed full compliance — `ANALYSIS OUTPUT / Specialist: data-analyzer / Version: 1.0` block, all sections, `type:` labels on every inference. Prose output was input-format-dependent, not a regression. See `docs/test-log/data-analyzer/2026-03-03-format-compliance.md`.
 - [x] **Behavior for non-ResearchOutput input** — **CLOSED 2026-03-03: accepted, no change.** In real pipeline use the Researcher always produces canonical ResearchOutput; informal-input edge cases are testing artifacts, not production scenarios. README already states the contract ("only processes ResearchOutput"). No Stage 0 validation added — keeping the spec minimal.
 
@@ -98,4 +103,5 @@ Returns `AnalysisOutput` — defined in `shared/interface/types.md`.
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | v1.0 | 2026-03-02 | Chris Park | Initial epic |
+| v1.2 | 2026-03-03 | Chris Park | Status → Complete; added Tier 2 consumer use case to Problem section; closed CompetitiveAnalysisOutput open question |
 | v1.1 | 2026-03-03 | Chris Park | Add open questions from build-session feedback capture |

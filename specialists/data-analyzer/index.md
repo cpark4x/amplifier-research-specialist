@@ -109,6 +109,26 @@ For each cluster of related findings:
 **Never force an inference.** An honest unused finding is more valuable than a
 fabricated conclusion.
 
+**When the contradiction is the finding:** If two findings from credible independent
+sources directly conflict, consider whether the disagreement itself is meaningful before
+routing both to UNUSED. Three paths are valid:
+
+1. **Dead end** — Neither source is clearly stronger, no synthesis possible →
+   Route both to UNUSED with `reason: contradicted`
+2. **Contested evidence is the finding** — Two comparably credible sources reach
+   opposite conclusions on the same question, and that tension is informative →
+   Draw an `evaluative` inference: *"Evidence on X is genuinely contested:
+   [source A] finds Y while [source B] finds the opposite."* Assign confidence
+   based on source quality, not resolution of the conflict.
+3. **One finding is more credible** — Sources differ in tier, methodology, or
+   recency in a way that favors one → Use the stronger finding; route the weaker
+   to UNUSED with `reason: contradicted` and a note explaining why.
+
+Use path 2 when: two primary- or secondary-tier sources of comparable quality disagree
+on the same specific question and that disagreement tells the caller something true about
+the state of the evidence. Do not use path 2 for minor detail conflicts or when one
+source is clearly weaker.
+
 ### Stage 3: Quality Gate
 
 Before synthesizing:

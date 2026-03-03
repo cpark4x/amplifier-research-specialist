@@ -3,13 +3,15 @@
 > **For AI agents:** This document is the authoritative source for WHY this project exists, WHERE it is going, and HOW to make decisions. Read this before touching any code.
 
 **Owner:** Chris Park  
-**Last Updated:** 2026-03-02  
+**Last Updated:** 2026-03-03  
 
 ---
 
 ## Summary
 
 Canvas Specialists is a library of best-in-class, single-domain AI specialist agents for knowledge worker and consumer scenarios. Each specialist runs a rigorous multi-stage pipeline with explicit quality gates and returns structured, machine-parseable output — filling the gap between shallow generalist tools and custom one-off agents.
+
+The goal is output a user can **stake their reputation on**: output that is defensible, auditable, and honest about its limits. Every finding traces to a source. Every inference traces to a finding. Every limitation is named. Nothing is papered over.
 
 ---
 
@@ -135,12 +137,17 @@ Breaking it is a breaking change.
 
 ## What Success Looks Like
 
-- An orchestrator can delegate to `specialists:researcher` and get back structured
-  evidence it can parse and act on — not a narrative to summarize
-- A Writer specialist can consume researcher output directly without any translation layer
+- A user delegates to the specialist chain and receives output they are willing to share
+  externally, present to a decision-maker, or act on — without needing to verify every
+  claim themselves
+- Every finding traces to a source. Every inference traces to a finding. Every gap is
+  named. The output shows its work.
+- The full chain (Researcher → Data Analyzer → Writer) produces a usable document without
+  human editing between steps
 - Adding a new specialist takes hours, not days, because the framework handles the boilerplate
-- Output from specialists is measurably more trustworthy than generalist alternatives
-  (fewer hallucinations, explicit gaps, verified claims)
+- Output from specialists is measurably more trustworthy than generalist alternatives:
+  explicit sources, explicit confidence, explicit gaps — not confident-sounding prose that
+  can't be audited
 
 ---
 
@@ -164,6 +171,7 @@ Breaking it is a breaking change.
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| v1.3 | 2026-03-03 | Chris Park | Updated Summary with defensible/auditable goal framing; revised Primary Success Indicator to chain-centric; updated What Success Looks Like to chain-centric outcomes |
 | v1.2 | 2026-03-02 | Chris Park | Added metadata, Summary, ToC, Related Documentation, Change History; aligned with VISION_TEMPLATE |
 | v1.1 | 2026-03-02 | Chris Park | Added Philosophy section; updated Target Audience to knowledge workers + consumers first |
 | v1.0 | 2026-02-26 | Chris Park | Initial vision document |

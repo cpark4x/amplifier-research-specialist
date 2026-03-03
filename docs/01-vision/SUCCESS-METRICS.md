@@ -3,7 +3,7 @@
 **How we measure if Canvas Specialists is achieving its vision**
 
 **Owner:** Chris Park  
-**Last Updated:** 2026-02-28  
+**Last Updated:** 2026-03-03  
 
 ---
 
@@ -28,9 +28,27 @@ Success for Canvas Specialists is measured by one thing: does delegating to a sp
 
 ## Primary Success Indicator
 
-**Does an orchestrator that delegates to specialists produce more trustworthy, better-structured output than one that doesn't?**
+**Does including this specialist in the chain produce better output at the end of the chain than a chain that leaves it out — and does it do so by filling a role no other link in the chain is authorized to fill?**
 
-Every other metric is downstream of this. A specialist that doesn't improve on inline work isn't worth the delegation overhead.
+Every other metric is downstream of this. The comparison is not against inline work — it is against the chain without this link. A specialist that doesn't improve the final output, or whose job could be done by an adjacent specialist, isn't worth the delegation overhead.
+
+---
+
+## Universal Baseline Criteria
+
+Every specialist — regardless of domain — must satisfy all four before it is considered production-ready. These are the admission criteria for being called a specialist.
+
+**U1 — Output schema is a contract.**
+Whatever the specialist returns, downstream consumers can depend on it. Schema changes require coordinating all downstream consumers. Changing field names or removing sections is a breaking change.
+
+**U2 — Quality gate is real, not decorative.**
+Every specialist has a quality gate. The gate must be capable of returning NOT MET. A gate that always returns MET is not gating anything — it is providing false assurance.
+
+**U3 — Fails loud, not silent.**
+When the specialist cannot meet the requested quality level, that is stated explicitly. It never silently returns lower-quality output as if nothing happened.
+
+**U4 — Fills a role no other link in the chain is authorized to fill.**
+There must be at least one thing this specialist does that an adjacent specialist is explicitly prohibited from doing. If its job could be done by another specialist without violating that specialist's core principles, it is not a specialist — it is a duplicate.
 
 ---
 
@@ -111,6 +129,40 @@ Every other metric is downstream of this. A specialist that doesn't improve on i
 - "It added things that weren't in the research"
 - "The format said brief but it read like a report"
 - "It just ignored the gaps and wrote confidently anyway"
+
+---
+
+## Data Analyzer Metrics
+
+**Phase Goal:** Validate that the Data Analyzer fills the authorization gap between Researcher and Writer — drawing labeled, traceable inferences that neither adjacent specialist is authorized to produce.
+
+### Specialist-Specific Success Criteria
+
+**A1 — Inference traceability:** Every inference in AnalysisOutput traces to specific finding IDs. No ungrounded conclusions.
+
+**A2 — Finding coverage:** Every finding is accounted for — either in `traces_to` of an inference, or in UNUSED FINDINGS with a typed reason (`contradicted` | `insufficient_evidence` | `out_of_scope`). Nothing is silently omitted.
+
+**A3 — Threshold enforcement:** `QUALITY THRESHOLD RESULT: NOT MET` fires when evidence doesn't support inferences at the requested confidence level. The Analyzer never silently returns lower-quality output.
+
+**A4 — Inferences are specific and falsifiable:** Each inference must make a claim a skeptic could reasonably disagree with. An inference true by definition ("LLMs have security risks") fails this criterion regardless of traceability.
+
+### Chain Success Criteria (tested in full chain, not Analyzer alone)
+
+**C1 — AnalysisOutput passes to Writer without translation:** The Writer receives AnalysisOutput as `analysis-output` input type and produces a compliant document without manual reformatting between steps.
+
+**C2 — Writer labels inferences as conclusions, not facts:** Every inference-sourced claim in the Writer's document uses hedged framing ("the evidence suggests...", "this points to...") and carries `type: inference` in the CITATIONS block.
+
+### Qualitative Signals
+
+**Signals we want to hear:**
+- "The inference gave me something I wouldn't have drawn from reading the findings myself"
+- "I could see exactly which findings supported which conclusion"
+- "It told me what it couldn't conclude — and why"
+
+**Red flags:**
+- "The inferences were things I already knew from reading the findings"
+- "I couldn't tell which findings mattered to which conclusion"
+- "It just said 'the evidence is mixed' without naming the tension"
 
 ---
 
@@ -200,5 +252,6 @@ Specialists exist to raise the quality floor. Every measurement should connect b
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| v1.2 | 2026-03-03 | Chris Park | Updated Primary Success Indicator to chain-centric; added Universal Baseline Criteria (U1–U4); added Data Analyzer Metrics section (A1–A4, C1–C2, qualitative signals) |
 | v1.1 | 2026-03-02 | Chris Park | Added Owner, Table of Contents, Change History; aligned with SUCCESS_METRICS_TEMPLATE |
 | v1.0 | 2026-02-28 | Chris Park | Initial success metrics document |
