@@ -38,6 +38,12 @@ Prompt: *"Were confidence ratings calibrated correctly? Over-confident on hard-t
 
 Prompt: *"Did coverage flags fire at the right time? Were gaps named correctly, or were they missed?"*
 
+**Heuristic — no `Coverage: partial` flag was raised:**
+Scan the output for specific numerical claims (benchmarks, percentages, dollar figures, counts) and highly specific assertions (named internal features, roadmap details, attributed quotes). If any appear without a traceable primary source, the flag should have fired — note as a miss.
+
+**Heuristic — `Coverage: partial` was raised:**
+Check whether the flagged gaps are genuine (things the specialist actually couldn't source) vs. over-cautious (things that are well-documented and should have been findable). A flag on a verifiable public fact is a calibration issue in the opposite direction.
+
 ### 6. Action Items
 
 Prompt: *"What should change? Capture as `- [ ]` checkboxes, one per distinct finding."*
