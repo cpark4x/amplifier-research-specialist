@@ -32,6 +32,7 @@
 
 | Item | Epic | Owner | Completed | Notes |
 |------|------|-------|-----------|-------|
+| Researcher-first default for product comparisons | 04 | Chris | Mar 3, 2026 | Implemented as `competitive-analysis-brief-researched` recipe — 3-step chain with Researcher pre-pass |
 | CLAIMS TO VERIFY block (Writer) | 02 | Chris | Mar 3, 2026 | Writer flags specific numerical claims from upstream without cited sources |
 | competitive-analysis-brief recipes (x2) | 04 | Chris | Mar 3, 2026 | 2-step chain (competitive-analysis → writer) and 3-step with Researcher pre-pass |
 | Template improvements | 01/02/04 | Chris | Mar 3, 2026 | Trimmed to 7 sections; Capability format; Why This Matters required; Created line |
@@ -61,8 +62,7 @@
 |---|------|------|-------|--------|--------|-----------|
 | 1 | Storyteller specialist | 03 | Chris | L | H | Transforms research/analysis into compelling narratives; high-demand for knowledge workers |
 | 2 | Presentation Builder specialist | 07 | Chris | L | H | Closes the research → write → present chain; slide deck output is a top knowledge worker use case |
-| 3 | Researcher-first default for product comparisons | 04 | Chris | S | H | Self-research path skips source tiering; Researcher pre-pass surfaces per-claim confidence before competitive-analysis runs *(from test log 2026-03-02)* |
-| 4 | Coverage audit severity levels | 02 | Chris | S | M | `gap_policy` input lets orchestrators decide what gap severity blocks vs. warns vs. passes |
+| 3 | Coverage audit severity levels | 02 | Chris | S | M | `gap_policy` input lets orchestrators decide what gap severity blocks vs. warns vs. passes |
 | 5 | Researcher: conservative confidence scoring for analyst estimates | 01 | Chris | S | M | Financial figures (ARR, market share) from secondary/circulated sources rated high confidence alongside audited data — needs stronger source-tier guidance for analyst estimates vs. primary financial data *(from test log 2026-03-02)* |
 
 ### Medium-term (Next Quarter)
@@ -103,7 +103,7 @@
 | 01 — Researcher | Researcher V1, source tiering, quality gate, ResearchOutput v1.0 | Source confidence threshold | 90% |
 | 02 — Writer | Writer V1, coverage audit, citations + attribution, WRITER METADATA, citation confidence, rendering (pandoc) | Brand voice config, audit severity, source confidence threshold | 80% |
 | 03 — Storyteller | — | Full specialist implementation | 0% |
-| 04 — Competitive Analysis | 6-stage pipeline, head-to-head + landscape modes, CompetitiveAnalysisOutput schema | Recipe encoding, researcher-first default | 100% |
+| 04 — Competitive Analysis | 6-stage pipeline, head-to-head + landscape modes, CompetitiveAnalysisOutput schema, 2-step + 3-step recipes, researcher-first default, CLAIMS TO VERIFY block | — | 100% |
 | 05 — Design | — | Full specialist implementation | 0% |
 | 06 — Demo Generator | — | Full specialist implementation | 0% |
 | 07 — Presentation Builder | — | Full specialist implementation | 0% |
@@ -150,6 +150,7 @@
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v1.4 | Mar 2, 2026 | Chris | Moved researcher-first default to recently completed (implemented as 3-step recipe); removed from near-term; updated Epic 04 completion row to reflect all shipped work |
 | v1.3 | Mar 3, 2026 | Chris | Marked Epic 04 complete; added tool-canvas-renderer, section attribution, citation confidence to recently completed; removed shipped items from future work; updated Epic 02 to 80%, Epic 04 to 100%; 3 specialists shipped |
 | v1.2 | Mar 2, 2026 | Chris | Added 3 near-term items from Notion/Obsidian test log: recipe encoding, researcher-first default, writer confidence gap surfacing |
 | v1.1 | Mar 2, 2026 | Chris | Expanded to 10 specialists; updated target audience to knowledge workers + consumers; retired ROADMAP.md |
