@@ -7,6 +7,7 @@ bundle:
 includes:
   - bundle: git+https://github.com/microsoft/amplifier-foundation@main
   - bundle: specialists:behaviors/specialists
+  - bundle: git+https://github.com/cpark4x/amplifier-doc-driven-dev@main
 ---
 
 # Specialists
