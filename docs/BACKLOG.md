@@ -56,7 +56,10 @@
 | 1 | Storyteller specialist | 03 | Chris | L | H | Transforms research/analysis into compelling narratives; high-demand for knowledge workers |
 | 2 | Presentation Builder specialist | 07 | Chris | L | H | Closes the research → write → present chain; slide deck output is a top knowledge worker use case |
 | 3 | Competitive Analysis specialist | 04 | Chris | L | H | Dedicated pipeline for competitive intelligence: compare features, surface gaps, structure positioning |
-| 4 | Coverage audit severity levels | 02 | Chris | S | M | `gap_policy` input lets orchestrators decide what gap severity blocks vs. warns vs. passes |
+| 4 | Recipe: encode competitive-analysis → writer chain | 04 | Chris | S | H | Chain is proven but manually dispatched; a single invokable recipe removes orchestration friction *(from test log 2026-03-02)* |
+| 5 | Researcher-first default for product comparisons | 04 | Chris | S | H | Self-research path skips source tiering; Researcher pre-pass surfaces per-claim confidence before competitive-analysis runs *(from test log 2026-03-02)* |
+| 6 | Writer: "claims to verify" block for unsourced specifics | 02 | Chris | S | M | When upstream output contains specific numerical claims without citations, Writer should flag them rather than passing at uniform confidence *(from test log 2026-03-02)* |
+| 7 | Coverage audit severity levels | 02 | Chris | S | M | `gap_policy` input lets orchestrators decide what gap severity blocks vs. warns vs. passes |
 
 ### Medium-term (Next Quarter)
 
@@ -144,6 +147,7 @@
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v1.2 | Mar 2, 2026 | Chris | Added 3 near-term items from Notion/Obsidian test log: recipe encoding, researcher-first default, writer confidence gap surfacing |
 | v1.1 | Mar 2, 2026 | Chris | Expanded to 10 specialists; updated target audience to knowledge workers + consumers; retired ROADMAP.md |
 | v1.0 | Mar 2, 2026 | Chris | Initial backlog |
 

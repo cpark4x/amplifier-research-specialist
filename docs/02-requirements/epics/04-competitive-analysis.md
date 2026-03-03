@@ -121,6 +121,9 @@ Returns `CompetitiveAnalysisOutput` — structured data the Writer consumes dire
 
 - [ ] Should `CompetitiveAnalysisOutput` include a `COMPETITIVE BRIEF` fast-parse summary block at the top, mirroring `RESEARCH BRIEF` in ResearchOutput?
 - [ ] For landscape mode, should the specialist cap the number of competitors it discovers and profiles (to avoid unbounded research)?
+- [ ] Should the chain encode Researcher as a default first step for product comparisons? The self-research path skips source tiering and confidence scoring — a Researcher pre-pass would surface those explicitly before competitive-analysis runs. *(Surfaced: Notion/Obsidian test, 2026-03-02)*
+- [ ] Should the Writer surface a "claims to verify" block when the upstream `CompetitiveAnalysisOutput` contains highly specific numerical claims with no cited source? Currently those claims pass through at uniform confidence. *(Surfaced: Notion/Obsidian test, 2026-03-02)*
+- [ ] Should the `competitive-analysis → writer` chain be encoded as a single invokable recipe so callers don't have to manually dispatch both agents? *(Surfaced: Notion/Obsidian test, 2026-03-02)*
 
 ---
 
@@ -128,4 +131,5 @@ Returns `CompetitiveAnalysisOutput` — structured data the Writer consumes dire
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| v1.1 | 2026-03-02 | Chris Park | Added 3 open questions from live test run (Notion/Obsidian): recipe encoding, researcher-first default, writer confidence gap surfacing |
 | v1.0 | 2026-03-02 | Chris Park | Initial epic |
