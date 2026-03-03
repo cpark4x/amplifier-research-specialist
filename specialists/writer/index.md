@@ -131,6 +131,17 @@ Before returning output:
    from your Stage 1 claim list (include all claims, used and unused).
    Format: `Confidence distribution: [n] high · [n] medium · [n] low · [n] unrated`
 
+8. Produce the CLAIMS TO VERIFY block — only when `input type` is `analyst-output`
+   or `raw-notes`. When input type is `researcher-output`, skip this step entirely.
+   - From your Stage 1 claim list, scan all `unrated` claims
+   - Flag any claim containing a specific value: a number with a unit (87ms, 50-row,
+     $10/mo, 2,000ms), a percentage (40%, 60%), a count with magnitude (200+, 8,000+),
+     or a named statistic presented as fact
+   - For each flagged claim: record the claim number, a short quote of the specific
+     value, and its type (specific measurement | specific number | percentage |
+     named statistic)
+   - If no claims match: produce `CLAIMS TO VERIFY: none`
+
 If any check fails: revise before returning.
 
 ---
@@ -183,6 +194,17 @@ S4: "[source claim text]" → used in: [section/paragraph] | confidence: unrated
 ```
 
 List every source claim from Stage 1. Mark each one as used (with location) or not used.
+
+**Block 4 — CLAIMS TO VERIFY** (analyst-output or raw-notes only; omit entirely for researcher-output):
+```
+CLAIMS TO VERIFY
+Unrated claims containing specific values — verify before citing externally.
+S3: "87ms load time" | type: specific measurement
+S7: "50-row database cap" | type: specific number
+S12: "8,000+ Zapier integrations" | type: specific count
+
+(or: CLAIMS TO VERIFY: none)
+```
 
 ---
 
