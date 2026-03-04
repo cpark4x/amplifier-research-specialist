@@ -32,6 +32,7 @@
 
 | Item | Epic | Owner | Completed | Notes |
 |------|------|-------|-----------|-------|
+| Recipe output file-save step | 01/02/04 | Chris | Mar 3, 2026 | Added `save` step to all three recipes (research-chain, competitive-analysis-brief, competitive-analysis-brief-researched). Uses `foundation:file-ops` to write final_document to `docs/research-output/[kebab-slug].md` — fixes truncation of long documents in recipe summary display. All recipes bumped to v1.1.0. |
 | researcher-formatter specialist | 01 | Chris | Mar 3, 2026 | Format conversion specialist — receives any research narrative, produces canonical RESEARCH OUTPUT block. Architectural fix for Researcher format compliance. Registered in agent registry. |
 | research-chain recipe | 01 | Chris | Mar 3, 2026 | Full four-step pipeline: Researcher → Formatter → Data Analyzer → Writer. Normalizes format at Step 2 before DA/Writer. |
 | USING-SPECIALISTS.md | 01/02/04/08 | Chris | Mar 3, 2026 | Practical guide: invoking each specialist, understanding output, chaining patterns, real examples, known limitations. |
