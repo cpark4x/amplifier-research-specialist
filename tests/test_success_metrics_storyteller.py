@@ -7,13 +7,13 @@ Validates all acceptance criteria from the spec (task-08):
   (4) Last Updated date changed to 2026-03-04
 """
 
-from __future__ import annotations
-
 from pathlib import Path
 
 import pytest
 
-METRICS_PATH = Path(__file__).parent.parent / "docs" / "01-vision" / "SUCCESS-METRICS.md"
+METRICS_PATH = (
+    Path(__file__).parent.parent / "docs" / "01-vision" / "SUCCESS-METRICS.md"
+)
 
 
 @pytest.fixture(scope="module")
@@ -43,9 +43,7 @@ def test_change_history_has_v1_3(content: str) -> None:
 
 
 def test_change_history_v1_3_date(content: str) -> None:
-    assert "| v1.3 | 2026-03-04 |" in content, (
-        "v1.3 row must have date 2026-03-04"
-    )
+    assert "| v1.3 | 2026-03-04 |" in content, "v1.3 row must have date 2026-03-04"
 
 
 def test_change_history_v1_3_author(content: str) -> None:
@@ -57,17 +55,13 @@ def test_change_history_v1_3_author(content: str) -> None:
 def test_change_history_v1_3_mentions_storyteller(content: str) -> None:
     # Find the v1.3 row and check it mentions Storyteller Metrics
     lines = content.splitlines()
-    v13_line = next((l for l in lines if l.startswith("| v1.3 |")), None)
+    v13_line = next((line for line in lines if line.startswith("| v1.3 |")), None)
     assert v13_line is not None, "v1.3 row not found"
     assert "Storyteller Metrics" in v13_line, (
         "v1.3 row must mention 'Storyteller Metrics'"
     )
-    assert "ST1" in v13_line and "ST4" in v13_line, (
-        "v1.3 row must mention ST1 and ST4"
-    )
-    assert "SC1" in v13_line and "SC2" in v13_line, (
-        "v1.3 row must mention SC1 and SC2"
-    )
+    assert "ST1" in v13_line and "ST4" in v13_line, "v1.3 row must mention ST1 and ST4"
+    assert "SC1" in v13_line and "SC2" in v13_line, "v1.3 row must mention SC1 and SC2"
 
 
 def test_change_history_v1_3_appears_before_v1_2(content: str) -> None:
@@ -149,6 +143,7 @@ def test_storyteller_phase_goal(content: str) -> None:
 
 # Specialist-Specific Success Criteria ST1–ST4
 
+
 def test_st1_criterion_exists(content: str) -> None:
     assert "ST1" in content, "ST1 criterion must be present"
     assert "Narrative arc completeness" in content, (
@@ -163,9 +158,7 @@ def test_st2_criterion_exists(content: str) -> None:
     assert "Selection record complete" in content, (
         "ST2 must reference 'Selection record complete'"
     )
-    assert "NARRATIVE SELECTION" in content, (
-        "ST2 must mention 'NARRATIVE SELECTION'"
-    )
+    assert "NARRATIVE SELECTION" in content, "ST2 must mention 'NARRATIVE SELECTION'"
     assert "INCLUDED + OMITTED" in content, (
         "ST2 must mention 'INCLUDED + OMITTED = total findings'"
     )
@@ -174,12 +167,10 @@ def test_st2_criterion_exists(content: str) -> None:
 def test_st3_criterion_exists(content: str) -> None:
     assert "ST3" in content, "ST3 criterion must be present"
     assert "Source fidelity" in content, "ST3 must reference 'Source fidelity'"
-    assert "zero claims" in content.lower() or "Zero claims" in content, (
+    assert "zero claims" in content.lower(), (
         "ST3 must mention zero claims not traceable to source"
     )
-    assert "fabricated" in content, (
-        "ST3 must mention 'fabricated examples'"
-    )
+    assert "fabricated" in content, "ST3 must mention 'fabricated examples'"
 
 
 def test_st4_criterion_exists(content: str) -> None:
@@ -191,6 +182,7 @@ def test_st4_criterion_exists(content: str) -> None:
 
 
 # Chain Success Criteria SC1–SC2
+
 
 def test_sc1_criterion_exists(content: str) -> None:
     assert "SC1" in content, "SC1 criterion must be present"
@@ -207,9 +199,7 @@ def test_sc2_criterion_exists(content: str) -> None:
     assert "Narrative beats document" in content, (
         "SC2 must reference 'Narrative beats document'"
     )
-    assert "audience engagement" in content, (
-        "SC2 must mention 'audience engagement'"
-    )
+    assert "audience engagement" in content, "SC2 must mention 'audience engagement'"
     assert "qualitative signal" in content, (
         "SC2 must mention 'qualitative signal, human review'"
     )
@@ -217,19 +207,21 @@ def test_sc2_criterion_exists(content: str) -> None:
 
 # Qualitative Signals
 
+
 def test_storyteller_qualitative_signals_want_to_hear(content: str) -> None:
     assert "I could actually send this to the board without editing" in content, (
         "Qualitative signals must include board-ready signal"
     )
-    assert "It picked the three things that mattered and built a story around them" in content, (
-        "Qualitative signals must include picking signal"
-    )
-    assert "The selection record showed me exactly what it left out and why" in content, (
-        "Qualitative signals must include selection record signal"
-    )
-    assert "The story felt like a story, not a report with a dramatic opening" in content, (
-        "Qualitative signals must include story-not-report signal"
-    )
+    assert (
+        "It picked the three things that mattered and built a story around them"
+        in content
+    ), "Qualitative signals must include picking signal"
+    assert (
+        "The selection record showed me exactly what it left out and why" in content
+    ), "Qualitative signals must include selection record signal"
+    assert (
+        "The story felt like a story, not a report with a dramatic opening" in content
+    ), "Qualitative signals must include story-not-report signal"
 
 
 def test_storyteller_qualitative_signals_red_flags(content: str) -> None:
