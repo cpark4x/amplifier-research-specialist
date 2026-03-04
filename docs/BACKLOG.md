@@ -55,7 +55,7 @@
 
 | # | Item | Epic | Owner | Effort | Impact | Why Now |
 |---|------|------|-------|--------|--------|---------|
-| 0 | **Specialist output format compliance — architectural fix** | 01/02 | Chris | M | H | Spec-instruction approach failed 6+ times for Researcher and Writer. Three chain runs (1 pass, 2 mixed) confirm compliance is inconsistent. Need an architectural approach: (a) post-processing normalization between Researcher and Data Analyzer, (b) accept Researcher narrative and rely on Data Analyzer to normalize, or (c) document Writer structural blocks as requiring structured input. *(from test log 2026-03-03, rust-vs-go)* |
+| 0 | ~~**Specialist output format compliance — architectural fix**~~ | 01/02 | Chris | — | — | **Closed 2026-03-03: Option A accepted.** Writer produces world-class brief content; WRITER METADATA / CITATIONS / CLAIMS TO VERIFY are aspirational pipeline metadata not reliably producible via spec instructions. Data Analyzer is reliable. Researcher format is inconsistent but DA handles both formats. Accepted as known constraints; no architectural fix required at this time. Revisit if a concrete downstream agent requires machine-parseable Writer metadata. |
 | 1 | Storyteller specialist | 03 | Chris | L | H | Transforms research/analysis into compelling narratives; natural next specialist after Researcher → Analyzer → Writer chain is complete |
 
 ### Near-term (Next 1-2 Sprints)
