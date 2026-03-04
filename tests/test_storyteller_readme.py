@@ -116,8 +116,8 @@ def test_accepts_lists_competitive_analysis_output_input_type(content: str) -> N
 
 
 def test_accepts_lists_document_input_type(content: str) -> None:
-    assert "document" in content, (
-        "Accepts section must list 'document' as an accepted input type"
+    assert re.search(r"`document`", content), (
+        "Accepts section must list `document` as an accepted input type"
     )
 
 
@@ -241,7 +241,7 @@ def test_design_notes_covers_writer_storyteller_distinction(content: str) -> Non
         r"(writer|storyteller).*(distinction|different|authorization)",
         section,
         re.IGNORECASE,
-    ) or re.search(r"(authorization|authoriz)", section, re.IGNORECASE), (
+    ), (
         "Design Notes must cover Writer/Storyteller distinction (different authorizations)"
     )
 
@@ -254,8 +254,6 @@ def test_design_notes_covers_framework_tone_independence(content: str) -> None:
         r"framework.*tone.*independent|tone.*framework.*independent",
         section,
         re.IGNORECASE,
-    ) or re.search(
-        r"(structure|framework).*(register|tone).*independent", section, re.IGNORECASE
     ), (
         "Design Notes must cover framework/tone independence (framework=structure, tone=register)"
     )
