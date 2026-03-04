@@ -11,7 +11,7 @@ tools:
   - module: tool-skills
     config:
       skills:
-        - "git+https://github.com/cpark4x/amplifier-doc-driven-dev@main#subdirectory=skills"
+        - "@doc-driven-dev:skills"
 
 agents:
   include:
