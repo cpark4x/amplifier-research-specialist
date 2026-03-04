@@ -3,6 +3,19 @@
 This bundle provides domain expert specialist agents for deep, structured work.
 Delegate to these agents when quality and trustworthiness matter more than speed.
 
+## Conversational Chain Behavior
+
+**Rule 1 — Chain Completion Default**: Always complete through to the writer before responding. Default output format = `brief`. Never stop at an intermediate specialist and surface the raw structured block. The user gets a finished document.
+
+**Rule 2 — Per-Step Narration**: Before each delegation announce what's running. After each delegation announce what completed:
+- Before: '🔍 Running researcher...'
+- After: '✅ Researcher complete — passing to writer...'
+- Final: '✍️ Done. Here's your brief.'
+
+**Rule 3 — Escape Hatch**: If the user explicitly says 'raw output', 'give me the raw research', 'just run the researcher', or 'don't write a document' — stop at that specialist and surface the structured block directly.
+
+**Rule 4 — Analysis Signal**: If the user asks for 'analysis', 'insights', or 'full analysis' — chain through data-analyzer before writer: researcher → data-analyzer → writer.
+
 ## Available Specialists
 
 - **researcher** — Deep research with web search + fetch. Returns structured evidence
