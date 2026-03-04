@@ -1,6 +1,6 @@
 name: "competitive-analysis-brief"
 description: "Transform a competitive question into a polished document. Runs competitive-analysis then writer in sequence. For higher-fidelity runs with Researcher pre-pass, use competitive-analysis-brief-researched."
-version: "1.0.0"
+version: "1.1.0"
 tags: ["competitive-analysis", "writing", "chain"]
 
 context:
@@ -44,3 +44,22 @@ steps:
       with section attribution lines, CITATIONS, and CLAIMS TO VERIFY blocks.
     output: "final_document"
     timeout: 900
+
+  - id: "save"
+    agent: "foundation:file-ops"
+    prompt: |
+      Save the following document to disk.
+
+      1. Derive a short kebab-case filename (3-5 words) from this query:
+         "{{query}}"
+         Example: if the query is about Notion vs Obsidian, use "notion-vs-obsidian"
+
+      2. Save the content to: docs/research-output/[your-derived-filename].md
+         Create the docs/research-output/ directory if it does not exist.
+
+      3. Report the full file path you saved to.
+
+      Content to save:
+      {{final_document}}
+    output: "output_path"
+    timeout: 120

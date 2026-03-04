@@ -1,6 +1,6 @@
 name: "research-chain"
-description: "Full research pipeline with format normalization — Researcher → Formatter → Data Analyzer → Writer"
-version: "1.0.0"
+description: "Full research pipeline with format normalization — Researcher → Formatter → Data Analyzer → Writer → Save"
+version: "1.1.0"
 tags: ["research", "analysis", "writing", "chain"]
 
 context:
@@ -65,3 +65,22 @@ steps:
       If audience is empty, default to a general professional audience.
     output: "final_document"
     timeout: 900
+
+  - id: "save"
+    agent: "foundation:file-ops"
+    prompt: |
+      Save the following document to disk.
+
+      1. Derive a short kebab-case filename (3-5 words) from this research question:
+         "{{research_question}}"
+         Example: if the question is about Microsoft roles in AI, use "microsoft-roles-ai-era"
+
+      2. Save the content to: docs/research-output/[your-derived-filename].md
+         Create the docs/research-output/ directory if it does not exist.
+
+      3. Report the full file path you saved to.
+
+      Content to save:
+      {{final_document}}
+    output: "output_path"
+    timeout: 120

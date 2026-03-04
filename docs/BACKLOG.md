@@ -102,6 +102,38 @@
 
 ---
 
+### Big Ideas
+
+High-potential concepts worth designing properly when the time is right. Not yet sized or scheduled.
+
+#### 💡 Ecosystem Comparison Recipe (`ecosystem-comparison-chain`)
+
+**Origin:** Emerged from a session running `research-chain` three times in parallel (Microsoft, Anthropic/Claude Code, OpenAI, AI coding tools) and synthesizing cross-ecosystem signals by hand. The cross-chain consensus signals — findings that appeared independently across all three runs — proved more trustworthy than any single chain's output, because they came from independent research with no shared sourcing. That's triangulation, and it should be built into the tool.
+
+**The idea:** A new `ecosystem-comparison-chain.yaml` recipe that accepts a research question + list of ecosystems, fans out to a Researcher per ecosystem, aggregates all outputs, and passes them to a synthesis Writer that leads with cross-ecosystem consensus, then surfaces ecosystem-specific differentiated signals.
+
+**Proposed pipeline:**
+```
+Input: research_question + ecosystems [{name, question}]
+  ↓
+[foreach ecosystem] Researcher → Formatter → Analyzer
+  ↓ (all results aggregated)
+Synthesis Writer → cross-ecosystem comparative brief
+  - Leads with signals appearing across ALL ecosystems (highest confidence)
+  - Surfaces ecosystem-specific differentiated findings
+  - Ends with unified verdict and skill/decision priority ranking
+```
+
+**Design decisions to resolve before building:**
+1. Does the recipe system support `foreach` at the step level? (parallel vs. sequential matters significantly for runtime)
+2. How does the synthesis Writer handle N aggregated inputs of variable size? Needs explicit prompt design, not just summarization
+3. Keep `research-chain.yaml` clean (Option A: separate recipe) vs. add `comparison_mode` flag to existing recipe (Option B: backwards-compatible but adds complexity)
+4. Recommendation: Option A — new dedicated recipe; the use case is distinct enough in output shape and Writer prompt to deserve its own file
+
+**Why this matters:** Single-chain research surfaces what's true for one ecosystem. Cross-chain synthesis surfaces what's *structurally* true — the signals robust enough to appear independently across multiple research contexts. That's a meaningfully higher confidence tier, and it currently requires manual orchestration.
+
+---
+
 ## Epic Completion Status
 
 | Epic | Implemented | Future | % Complete |
@@ -156,6 +188,7 @@
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v1.7 | Mar 3, 2026 | Chris | Added Big Ideas section; first entry: ecosystem-comparison-chain recipe (cross-ecosystem research synthesis) |
 | v1.6 | Mar 3, 2026 | Chris | Added researcher-formatter + research-chain to recently completed; updated Item #0 to partially shipped; Epic 01 to 95%; USING-SPECIALISTS.md and 10 competitive briefs logged |
 | v1.5 | Mar 3, 2026 | Chris | Marked Epic 08 complete; Data Analyzer added to recently completed; Storyteller promoted to Immediate Next; 4 specialists shipped |
 | v1.4 | Mar 2, 2026 | Chris | Moved researcher-first default to recently completed (implemented as 3-step recipe); removed from near-term; updated Epic 04 completion row to reflect all shipped work |
