@@ -13,11 +13,11 @@ See [docs/templates/EPIC_TEMPLATE.md](../../templates/EPIC_TEMPLATE.md) for the 
 | [01](01-research-specialist.md) | Research Specialist | ✅ Complete | `specialists:researcher` |
 | [02](02-writer-specialist.md) | Writer Specialist | ✅ Complete | `specialists:writer` |
 | [03](03-storyteller.md) | Storyteller | 🆕 Planned | — |
-| [04](04-competitive-analysis.md) | Competitive Analysis | 🔄 In Progress | `specialists:competitive-analysis` |
+| [04](04-competitive-analysis.md) | Competitive Analysis | ✅ Complete | `specialists:competitive-analysis` |
 | 05 | Design | 🆕 Planned | — |
 | 06 | Demo Generator | 🆕 Planned | — |
 | 07 | Presentation Builder | 🆕 Planned | — |
-| 08 | Data Analyzer | 🆕 Planned | — |
+| [08](08-data-analyzer.md) | Data Analyzer | ✅ Complete | `specialists:data-analyzer` |
 | 09 | Planner | 🆕 Planned | — |
 | 10 | Prioritizer | 🆕 Planned | — |
 | 11 | Platform Integrations | 🆕 Planned | — |
