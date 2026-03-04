@@ -2,7 +2,7 @@
 
 **Purpose:** Strategic planning view for canvas-specialists — a library of best-in-class, single-domain AI specialist agents for knowledge worker and consumer scenarios  
 **Owner:** Chris Park  
-**Last Updated:** March 3, 2026 (evening)  
+**Last Updated:** March 4, 2026  
 
 ---
 
@@ -75,6 +75,7 @@
 | 7 | Writer: strengthen audience calibration | 02 | Chris | S | M | `audience: myself` produced identical register to `audience: executive stakeholders` — third-person, formal, presentation-ready. Should shift to direct, first-person, actionable voice. *(from test log 2026-03-04)* |
 | 8 | Recipe display: filter internal scaffolding from summary | 01/02/04 | Chris | S | M | Raw claim IDs (S1–S45) from the Analyzer's internal pipeline appeared in the `final_output` recipe summary field. Internal scaffolding should not be user-facing. Display/recipe layer issue. *(from test log 2026-03-04)* |
 | 9 | Writer: specificity enforcement | 02 | Chris | S | M | When the research question names a specific subject, the Writer's bottom line and skills sections drifted to generic AI-era conclusions that apply to any tech company. Final layer should pull subject-specific findings through. *(from test log 2026-03-04)* |
+| 10 | Platform UX: default chain completion + narrated execution | 01/02/04/08 | Chris | M | H | Two related problems observed across all specialists: (1) conversational invocations (e.g. "run a competitive analysis") return raw intermediate output — `CompetitiveAnalysisOutput`, `ResearchOutput` — instead of a finished document. Users want the polished end product by default; raw output should be opt-in for developers/pipeline use. (2) Users have no visibility into which specialists ran or in what order. Each specialist should narrate its execution so the chain is transparent. Fix should be applied platform-wide across all specialists, not per-specialist. *(observed during session 2026-03-04)* |
 
 ### Medium-term (Next Quarter)
 
