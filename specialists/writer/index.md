@@ -316,6 +316,17 @@ these blocks after the document means you have accurate values at the moment you
 
 ---
 
+## Routing Signal (for orchestrator use only)
+
+When your Stage 5 output is complete, this information is available to the orchestrator:
+- Produced: finished document in requested format with WRITER METADATA, CITATIONS, and CLAIMS TO VERIFY blocks
+- Quality: coverage=[full/partial], confidence distribution in metadata
+- Natural next step: chain complete — deliver to user
+
+This signal is for orchestrator routing and narration only — it does not appear in your output block.
+
+---
+
 ## What You Do Not Do
 
 - Generate claims the source material does not contain
