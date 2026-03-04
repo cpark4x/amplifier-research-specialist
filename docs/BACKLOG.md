@@ -71,6 +71,10 @@
 | 2 | Presentation Builder specialist | 07 | Gurkaran Singh | L | H | Closes the research → write → present chain; slide deck output is a top knowledge worker use case |
 | 3 | Coverage audit severity levels | 02 | Chris | S | M | `gap_policy` input lets orchestrators decide what gap severity blocks vs. warns vs. passes |
 | 5 | Researcher: conservative confidence scoring for analyst estimates | 01 | Chris | S | M | Financial figures (ARR, market share) from secondary/circulated sources rated high confidence alongside audited data — needs stronger source-tier guidance for analyst estimates vs. primary financial data *(from test log 2026-03-02)* |
+| 6 | Writer: enforce word budget per format | 02 | Chris | S | H | `brief` produces ~1,500 words — same as a report. Format is a contract, not a label. brief ~600 words, report ~1,500, executive summary ~400. Observed across all 4 runs in 2026-03-04 chain test. |
+| 7 | Writer: strengthen audience calibration | 02 | Chris | S | M | `audience: myself` produced identical register to `audience: executive stakeholders` — third-person, formal, presentation-ready. Should shift to direct, first-person, actionable voice. *(from test log 2026-03-04)* |
+| 8 | Recipe display: filter internal scaffolding from summary | 01/02/04 | Chris | S | M | Raw claim IDs (S1–S45) from the Analyzer's internal pipeline appeared in the `final_output` recipe summary field. Internal scaffolding should not be user-facing. Display/recipe layer issue. *(from test log 2026-03-04)* |
+| 9 | Writer: specificity enforcement | 02 | Chris | S | M | When the research question names a specific subject, the Writer's bottom line and skills sections drifted to generic AI-era conclusions that apply to any tech company. Final layer should pull subject-specific findings through. *(from test log 2026-03-04)* |
 
 ### Medium-term (Next Quarter)
 
@@ -189,6 +193,7 @@ Synthesis Writer → cross-ecosystem comparative brief
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v1.8 | Mar 4, 2026 | Chris | Added near-term items 6–9 from test log 2026-03-04: Writer word budget, audience calibration, recipe display scaffolding, Writer specificity drift |
 | v1.7 | Mar 3, 2026 | Chris | Added Big Ideas section; first entry: ecosystem-comparison-chain recipe (cross-ecosystem research synthesis) |
 | v1.6 | Mar 3, 2026 | Chris | Added researcher-formatter + research-chain to recently completed; updated Item #0 to partially shipped; Epic 01 to 95%; USING-SPECIALISTS.md and 10 competitive briefs logged |
 | v1.5 | Mar 3, 2026 | Chris | Marked Epic 08 complete; Data Analyzer added to recently completed; Storyteller promoted to Immediate Next; 4 specialists shipped |

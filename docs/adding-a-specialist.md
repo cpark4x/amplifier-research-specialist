@@ -202,6 +202,14 @@ Run at least one input that should hit your "What You Do Not Do" section — con
 
 If your specialist is designed to feed into another (e.g., feeds Writer), run the full chain and verify output passes through without a manual translation step.
 
+### 5. Run N parallel chains on the same question (cross-chain consensus)
+
+For research-heavy specialists, run the same question against 2–3 independent topics or subject variations in parallel. Signals that appear consistently across all N runs are more trustworthy than signals from a single run — this is triangulation.
+
+**Pattern:** A finding that appears independently in 3 parallel chains with no shared sourcing is a higher-confidence tier than any single chain's output. Use this to distinguish structural conclusions (robust enough to plan around) from topic-specific findings (treat as directional only).
+
+**Practical use:** When a chain test surfaces an insight that surprises you, run 2 more variants. If the signal holds across all 3, it's worth promoting to a documented finding. If it only appears in one, it may be topic noise. *(emerged from test log 2026-03-04, ai-ecosystem-roles-workforce)*
+
 ---
 
 ## Pre-Merge Checklist
