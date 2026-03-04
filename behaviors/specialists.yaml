@@ -15,6 +15,7 @@ agents:
     - specialists:specialists/writer
     - specialists:specialists/competitive-analysis
     - specialists:specialists/data-analyzer
+    - specialists:specialists/researcher-formatter
 
 context:
   include:

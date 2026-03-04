@@ -1,0 +1,67 @@
+name: "research-chain"
+description: "Full research pipeline with format normalization — Researcher → Formatter → Data Analyzer → Writer"
+version: "1.0.0"
+tags: ["research", "analysis", "writing", "chain"]
+
+context:
+  research_question: ""      # Required: the question or topic to research
+  output_format: "brief"     # Optional: output format (e.g. brief, report, memo, deck)
+  audience: ""               # Optional: target audience for the final document
+  voice: "executive"         # Optional: writing voice/tone (e.g. executive, academic, casual)
+  quality_threshold: "medium" # Optional: quality bar for the run (low, medium, high)
+
+steps:
+  - id: "research"
+    agent: "specialists:specialists/researcher"
+    prompt: |
+      Research the following question thoroughly. Follow your full research pipeline
+      and return your complete research narrative with sourced evidence, confidence
+      scores, and source tiering.
+
+      Research question: {{research_question}}
+
+      Quality threshold: {{quality_threshold}}
+    output: "research_output"
+    timeout: 2700
+
+  - id: "format-research"
+    agent: "specialists:specialists/researcher-formatter"
+    prompt: |
+      Normalize the following research narrative into your canonical RESEARCH OUTPUT
+      block format. Apply all standard formatting rules: structured sections, source
+      tiering, per-claim confidence scores, and gap flags.
+
+      Research narrative to format:
+      {{research_output}}
+    output: "formatted_research"
+    timeout: 600
+
+  - id: "analyze"
+    agent: "specialists:specialists/data-analyzer"
+    prompt: |
+      Analyze the following formatted research output. Draw inferences, identify
+      patterns, surface key insights, and flag confidence gaps. Follow your full
+      analysis pipeline.
+
+      Formatted research:
+      {{formatted_research}}
+    output: "analysis_output"
+    timeout: 900
+
+  - id: "write"
+    agent: "specialists:specialists/writer"
+    prompt: |
+      Transform the following analysis into a polished document. Follow your full
+      writing pipeline and return WRITER METADATA, the document body with section
+      attribution lines, CITATIONS, and CLAIMS TO VERIFY blocks.
+
+      Analysis:
+      {{analysis_output}}
+
+      Output format: {{output_format}}
+      Audience: {{audience}}
+      Voice: {{voice}}
+
+      If audience is empty, default to a general professional audience.
+    output: "final_document"
+    timeout: 900
