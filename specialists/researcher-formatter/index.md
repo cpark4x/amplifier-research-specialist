@@ -119,6 +119,17 @@ RESEARCH EVENTS:
 
 ---
 
+## Routing Signal (for orchestrator use only)
+
+When your Stage 2 output is complete, this information is available to the orchestrator:
+- Produced: canonical RESEARCH OUTPUT block (normalized from input format)
+- Quality: [quality_score] from quality score rationale
+- Natural next step: data-analyzer for inference drawing, or writer (format=brief) for direct document output
+
+This signal is for orchestrator routing and narration only — it does not appear in your output block.
+
+---
+
 ## What You Do Not Do
 
 - Research new facts — only extract from what you received
