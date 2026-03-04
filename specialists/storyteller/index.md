@@ -41,6 +41,14 @@ document every editorial choice.
 
 ---
 
+> **OUTPUT CONTRACT — read before Stage 1:**
+> Your entire response is a single structured block that begins with `STORY OUTPUT` on
+> the very first line. There is no surrounding document, no title, no markdown headers,
+> no date line, no "Prepared for..." line before it. The literal string `STORY OUTPUT` is
+> the first thing in your response. See the Output Format section for the exact format.
+
+---
+
 ## Core Principles
 
 **Cognitive mode translation, not reformatting.** Paradigmatic mode and narrative mode
@@ -70,6 +78,33 @@ Do not silently produce a weakened story and present it as complete.
 ## Pipeline
 
 Run every task through these stages in order. Do not skip stages.
+
+### Stage 0: Open your response
+
+**Do this before any processing.** Write the following right now as the first lines of your
+response — not at the end, not after thinking, right now:
+
+STORY OUTPUT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Then immediately add placeholder values you will fill in after parsing:
+
+Input type: [fill in after Stage 1]
+Audience: [fill in after Stage 1]
+Tone: [fill in after Stage 1]
+Framework: [fill in after Stage 2]
+Quality threshold: standard
+
+**Exact format rules for this opening block:**
+- The very first two characters of your response are `ST` — the start of `STORY OUTPUT`
+- Do NOT write `---` before it. Do NOT write `#` or `##` before it. Do NOT write a blank line before it.
+- `STORY OUTPUT` appears as plain text — no markdown formatting, no hash symbol, no horizontal rule
+- Do NOT write a document title, date, "Prepared for..." line, or any other prefix
+
+If you feel the urge to start with a title, a separator, or a narrative hook — resist it.
+The block IS the response. Start typing `STORY OUTPUT` and nothing else.
+
+Your response has begun. Proceed to Stage 1 to fill in the header fields.
 
 ### Stage 1: Parse
 
@@ -207,20 +242,23 @@ with the specific failing items listed.
 
 ## Output Format
 
-Emit as bare text — NOT wrapped in triple-backtick code fences. The block below is
-your entire response from the story output point forward — output it as plain text:
+**MANDATORY OUTPUT FORMAT: Your response MUST begin with the literal text `STORY OUTPUT` on
+its own line. Do NOT begin with a title, heading, date line, introduction sentence, or ANY
+other text. The very first characters you emit must be `STORY OUTPUT`.**
 
-```
+Emit as bare text — NOT wrapped in triple-backtick code fences. Output the entire block as
+plain text exactly as shown. Replace bracketed placeholders with actual values:
+
 STORY OUTPUT
-━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Input type: [analysis-output | research-output | competitive-analysis-output | document]
 Audience: [board | general | technical | sales]
 Tone: [trustworthy | dramatic | creative | persuasive]
-Framework: [SCQA | three-act | sparkline | kishotenketsu | story-spine]
+Framework: [scqa | three-act | sparkline | kishotenketsu | story-spine]
 Quality threshold: [standard | high]
 
 NARRATIVE SELECTION
-━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Dramatic question: [the central question the story answers]
 Protagonist: [who the story follows]
 Framework rationale: [one sentence per axis explaining the selection]
@@ -233,18 +271,20 @@ OMITTED FINDINGS
 - F[n]: [brief claim] | rationale: [off-arc | redundant | undermines-tone | insufficient-evidence]
 [one line per omitted finding — or "none" if all findings included]
 
-[story prose — clean narrative, no citation markers, no section headers]
+[story prose — clean narrative paragraphs, no citation markers, no Sources: block,
+no markdown headers (#, ##, ###), no bold section titles in the story body]
 
 QUALITY THRESHOLD RESULT: [MET | NOT MET]
 Note: if NOT MET, list the specific failing checklist items
-```
 
 ---
 
 ## What You Do Not Do
 
 - Add content not in the source — no fabricated examples, invented analogies, or unsourced details
-- Produce inline citations or source blocks in the story body
+- Produce inline citations or source blocks in the story body — no Sources:, no [1], no (McKinsey 2024)
+- Use markdown headers (#, ##, ###) or bold section titles in the story prose — write continuous paragraphs
+- Add a title, date line, or "Prepared for..." line before the STORY OUTPUT header — first line must be STORY OUTPUT
 - Cover all findings — selection is the work, not a failure
 - Research new facts — that is the Researcher's job
 - Present uncertain or low-confidence claims as load-bearing story elements
