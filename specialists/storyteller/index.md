@@ -88,11 +88,11 @@ Run every task through these stages in order. Do not skip stages.
 
 ### Stage 0: Open your response
 
-**Do this BEFORE any analysis.** Output the following complete template right now — not at
-the end, not after thinking. Fill in the bracketed values as you work through Stages 1–5.
-Your response IS this template, completed with actual values:
+**Do this BEFORE any analysis.** Write the following as the literal start of your response —
+not at the end, not after thinking. Fill in the bracketed values as you work through Stages 1–5:
 
-```
+---
+
 STORY OUTPUT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Input type: [analysis-output | research-output | competitive-analysis-output | document]
@@ -119,7 +119,8 @@ OMITTED FINDINGS
 no markdown headers (#, ##, ###), no bold section titles]
 
 QUALITY THRESHOLD RESULT: [MET | NOT MET]
-```
+
+---
 
 **Exact format rules:**
 - The very first two characters of your response are `ST` — the start of `STORY OUTPUT`

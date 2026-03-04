@@ -13,6 +13,8 @@ action_items_promoted: false
 **Approach:** Storyteller invoked directly by following the Stage 0–5 pipeline from `specialists/storyteller/index.md` with two test inputs.  
 **Chain test:** Deferred — requires full runtime with all providers configured (see Action Items).
 
+**Method note:** Tests 13.1–13.3 were performed by following the specialist pipeline manually (agent-simulated), not via live model invocation. This confirms internal consistency of the instructions but does not confirm model behavior in practice. Live invocation testing is deferred with the chain test (see Action Items).
+
 ---
 
 ## Test 13.1: Local Invocation — Rich AnalysisOutput
