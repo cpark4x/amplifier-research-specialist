@@ -33,6 +33,12 @@ Delegate to these agents when quality and trustworthiness matter more than speed
   or downstream pipeline steps. Never researches, never analyzes — only extracts
   and reformats.
 
+- **storyteller** — Transforms research, analysis, or existing documents into
+  compelling narrative using cognitive mode translation. Returns StoryOutput with
+  a clean story, NARRATIVE SELECTION editorial record, and framework/tone metadata.
+  Selects load-bearing findings for the arc — the Writer covers everything, the
+  Storyteller selects.
+
 ## When to Use Each
 
 **Delegate to `specialists:researcher` when:**
@@ -57,6 +63,13 @@ Delegate to these agents when quality and trustworthiness matter more than speed
 - You need structured comparison data, not a narrative summary
 - Source material from the Researcher needs to be structured into competitive intelligence
 
+**Delegate to `specialists:specialists/storyteller` when:**
+- Source material (research, analysis, competitive brief, or existing document) needs to
+  become a compelling narrative rather than a structured document
+- The audience needs to be moved or persuaded, not just informed
+- You want narrative output instead of document output at the end of a chain
+- Any Researcher → Formatter → Analyzer → Storyteller chain
+
 ## Typical Chain
 
 For most knowledge work tasks:
@@ -78,6 +91,12 @@ For competitive intelligence tasks:
 1. `specialists:researcher` → gathers evidence (optional — competitive-analysis can research itself)
 2. `specialists:specialists/competitive-analysis` → structures evidence into competitive intelligence
 3. `specialists:writer` → transforms competitive intelligence into a brief or report
+
+For narrative output from a research chain:
+1. `specialists:researcher` → gathers and validates evidence
+2. `specialists:specialists/researcher-formatter` → normalizes to canonical RESEARCH OUTPUT block
+3. `specialists:specialists/data-analyzer` → draws labeled inferences
+4. `specialists:specialists/storyteller` → transforms analysis into compelling narrative
 
 ## Feedback Capture
 
