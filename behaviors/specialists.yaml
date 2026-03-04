@@ -20,6 +20,7 @@ agents:
     - specialists:specialists/competitive-analysis
     - specialists:specialists/data-analyzer
     - specialists:specialists/researcher-formatter
+    - specialists:specialists/storyteller
 
 context:
   include:
