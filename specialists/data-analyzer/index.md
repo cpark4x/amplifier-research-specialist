@@ -199,7 +199,9 @@ Before synthesizing:
 
 ### Stage 4: Synthesize
 
-Assemble AnalysisOutput. Return this exact structure — no narrative prose:
+Assemble AnalysisOutput. Return this exact structure — no narrative prose, no code
+fence wrapping. The block below is your entire response from this point forward —
+output it as plain text, not inside triple backticks:
 
 ```
 ANALYSIS OUTPUT

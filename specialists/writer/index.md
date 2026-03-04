@@ -94,15 +94,8 @@ Run every writing task through these stages in order. Do not skip stages.
 Parsed: [n] claims | input=[type] | format=[format] | audience=[audience]
 ```
 
-This is unconditional. Whether the input is a canonical ANALYSIS OUTPUT block, a
-narrative research document, raw notes, or anything else — your first output is
-always this parse line. No exceptions.
-
-- **No title before it.** The first two characters of your response are `Pa` — the
-  start of `Parsed:`.
-- **No heading before it.** Do not write `#` or `##` or `---` before it.
-- **No blank line before it.** `Parsed:` starts on line 1.
-- **Not at the end.** Not after the document. First line, always.
+This single line must be the very first thing you write. It is a pipeline signal,
+not metadata. Write nothing before it — no title, no heading, no blank line.
 
 Then:
 
