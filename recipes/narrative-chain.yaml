@@ -1,0 +1,84 @@
+name: "narrative-chain"
+description: "Full research-to-narrative pipeline — Researcher → Formatter → Data Analyzer → Storyteller → Save. Produces compelling narrative output instead of a structured document."
+version: "1.0.0"
+tags: ["research", "analysis", "narrative", "storytelling", "chain"]
+
+context:
+  research_question: ""      # Required: the question or topic to research
+  audience: ""               # Optional: target audience for the final narrative
+  tone: ""                   # Optional: tone/style for the narrative (e.g. dramatic, optimistic, neutral)
+  quality_threshold: "medium" # Optional: quality bar for the run (low, medium, high)
+
+steps:
+  - id: "research"
+    agent: "specialists:specialists/researcher"
+    prompt: |
+      Research the following question thoroughly. Follow your full research pipeline
+      and return your complete research narrative with sourced evidence, confidence
+      scores, and source tiering.
+
+      Research question: {{research_question}}
+
+      Quality threshold: {{quality_threshold}}
+    output: "research_output"
+    timeout: 2700
+
+  - id: "format-research"
+    agent: "specialists:specialists/researcher-formatter"
+    prompt: |
+      Normalize the following research narrative into your canonical RESEARCH OUTPUT
+      block format. Apply all standard formatting rules: structured sections, source
+      tiering, per-claim confidence scores, and gap flags.
+
+      Research narrative to format:
+      {{research_output}}
+    output: "formatted_research"
+    timeout: 600
+
+  - id: "analyze"
+    agent: "specialists:specialists/data-analyzer"
+    prompt: |
+      Analyze the following formatted research output. Draw inferences, identify
+      patterns, surface key insights, and flag confidence gaps. Follow your full
+      analysis pipeline.
+
+      Formatted research:
+      {{formatted_research}}
+    output: "analysis_output"
+    timeout: 900
+
+  - id: "narrate"
+    agent: "specialists:specialists/storyteller"
+    prompt: |
+      Transform the following analysis into a compelling narrative. Follow your full
+      5-stage pipeline: Parse, Find the Drama, Select and Structure, Draft, and
+      Quality Gate. Return the complete STORY OUTPUT block with NARRATIVE SELECTION
+      record, story prose, and QUALITY THRESHOLD RESULT.
+
+      Analysis: {{analysis_output}}
+
+      Audience: {{audience}}
+
+      Tone: {{tone}}
+
+      If audience is empty, infer from the content.
+      If tone is empty, infer from the content and audience.
+    output: "final_narrative"
+    timeout: 900
+
+  - id: "save"
+    agent: "foundation:file-ops"
+    prompt: |
+      Save the following narrative to disk.
+
+      1. Derive a short kebab-case filename (3-5 words) from this research question:
+         {{research_question}}
+
+      2. Save to: docs/research-output/[your-derived-filename].md
+         Create the docs/research-output/ directory if it does not exist.
+
+      3. Report the full file path saved to.
+
+      Content: {{final_narrative}}
+    output: "output_path"
+    timeout: 120
