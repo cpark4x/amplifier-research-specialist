@@ -57,10 +57,12 @@ Returns `AnalysisOutput` — defined in `shared/interface/types.md`.
 |---|-------|-------|---------|--------------|--------------|
 | 08-01 | Researcher → Data Analyzer → Writer chain | Chris Park | 2026-03-02 | - | - |
 
-### Future
+### Implemented (added post-initial)
 
-- ✏️ **focus_question parameter** — sharpen inferences toward a specific question
-- ✏️ **quality_threshold parameter** — caller controls minimum inference confidence
+| # | Story | Owner | Created | Contributors | Last Updated |
+|---|-------|-------|---------|--------------|--------------| 
+| 08-02 | focus_question parameter — sharpen inferences toward a specific question | Chris Park | 2026-03-03 | - | - |
+| 08-03 | quality_threshold parameter — caller controls minimum inference confidence | Chris Park | 2026-03-03 | - | - |
 
 ---
 
@@ -95,7 +97,7 @@ Returns `AnalysisOutput` — defined in `shared/interface/types.md`.
 - [x] **Should the Analyzer accept CompetitiveAnalysisOutput as well as ResearchOutput?** — **CLOSED 2026-03-03: deferred, no change.** CompetitiveAnalysisOutput has a different structure (comparison matrices, win conditions, positioning gaps) that doesn't map cleanly to the Analyzer's inference-from-findings model. If competitive analysis needs inference drawing, that belongs inside the Competitive Analysis specialist's own pipeline — not as a second input type for the Data Analyzer. Keeping the Analyzer's input contract to ResearchOutput preserves the "one thing, exceptionally well" principle.
 - [x] **Format compliance with non-standard input** — ~~Post-build registration test (2026-03-03) with simplified inline findings produced narrative prose.~~ **CLOSED 2026-03-03:** Follow-up test with canonical ResearchOutput format confirmed full compliance — `ANALYSIS OUTPUT / Specialist: data-analyzer / Version: 1.0` block, all sections, `type:` labels on every inference. Prose output was input-format-dependent, not a regression. See `docs/test-log/data-analyzer/2026-03-03-format-compliance.md`.
 - [x] **Behavior for non-ResearchOutput input** — **CLOSED 2026-03-03: accepted, no change.**
-- [ ] **Data Analyzer wraps ANALYSIS OUTPUT in code fence** — Stage 4 output is sometimes wrapped in triple-backtick code fence (```...```) rather than produced as bare text. When the Writer receives this, it may interpret the content as a code block rather than as analysis-output input, preventing parse-line and WRITER METADATA from triggering. Stage 4 should produce bare text output, not a fenced code block. *(from test log 2026-03-03, rust-vs-go)*
+- [x] **Data Analyzer wraps ANALYSIS OUTPUT in code fence** — **CLOSED 2026-03-03:** Stage 4 bare text output fix applied (commit c952e6f). DA now produces bare text output without triple-backtick fencing.
 - [ ] **Format B edge case: partially-canonical input** — Chain test (2026-03-03, graphql-vs-rest) found that when the Researcher produced `---\n# RESEARCH OUTPUT` (section-structured narrative rather than clean Format A or fully-narrative Format B), the Data Analyzer defaulted to narrative output instead of the canonical ANALYSIS OUTPUT block. Format B detection handles fully-narrative input with explicit Claim:/Source:/Tier: labels but not partially-canonical input (section headers + embedded statistics). Consider adding a Format C rule: "If input contains RESEARCH OUTPUT header but findings are in narrative tables rather than key-value blocks, extract using Format B logic against the structured sections." *(from test log 2026-03-03)* In real pipeline use the Researcher always produces canonical ResearchOutput; informal-input edge cases are testing artifacts, not production scenarios. README already states the contract ("only processes ResearchOutput"). No Stage 0 validation added — keeping the spec minimal.
 
 ---
@@ -105,5 +107,6 @@ Returns `AnalysisOutput` — defined in `shared/interface/types.md`.
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | v1.0 | 2026-03-02 | Chris Park | Initial epic |
-| v1.2 | 2026-03-03 | Chris Park | Status → Complete; added Tier 2 consumer use case to Problem section; closed CompetitiveAnalysisOutput open question |
 | v1.1 | 2026-03-03 | Chris Park | Add open questions from build-session feedback capture |
+| v1.2 | 2026-03-03 | Chris Park | Status → Complete; added Tier 2 consumer use case to Problem section; closed CompetitiveAnalysisOutput open question |
+| v1.3 | 2026-03-03 | Chris Park | Close code fence open question; move focus_question/quality_threshold to Implemented; fix changelog order |

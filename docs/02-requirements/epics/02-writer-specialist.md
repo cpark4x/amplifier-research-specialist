@@ -3,7 +3,7 @@
 **Status:** Complete  
 **Owner:** Chris Park  
 **Contributors:** Chris Park  
-**Last Updated:** 2026-02-28  
+**Last Updated:** 2026-03-03  
 
 <!--
 Derive ownership and history from git - don't guess or assume:
@@ -86,7 +86,9 @@ Every response begins with a machine-readable **WRITER METADATA** block (format,
 
 ## 6. Dependencies
 
-**Requires:** Epic 01 (Researcher) — Writer consumes `ResearchOutput` as its primary input type
+**Requires:**
+- Epic 01 (Researcher) — Writer consumes `ResearchOutput` as its primary input type
+- Epic 08 (Data Analyzer) — Writer also consumes `AnalysisOutput` as input type `analysis-output`; inferences are labeled as conclusions in prose rather than facts
 
 **Enables:**
 - Presentation Builder specialist — consumes Writer output as slide source

@@ -3,7 +3,7 @@
 **Status:** Complete
 **Owner:** Chris Park
 **Contributors:** Chris Park
-**Last Updated:** 2026-02-27
+**Last Updated:** 2026-03-03
 
 <!--
 Derive ownership and history from git - don't guess or assume:
@@ -55,9 +55,14 @@ Orchestrators receive structured evidence they can trust and compose — not ans
 
 ### Future
 
-- ⏭️ **Chain with Writer** — pass `ResearchOutput` directly to the Writer specialist for research-to-document pipelines
 - ⏭️ **Prior output as context** — pass prior `ResearchOutput` as context to a follow-up research task so multi-session investigations build on previous findings
 - ⏭️ **Source type filtering** — configure `source_types` to restrict which source categories are checked for domain-specific workflows
+
+### Implemented (added post-initial)
+
+| # | Story | Owner | Created | Contributors | Last Updated |
+|---|-------|-------|---------|--------------|--------------| 
+| 01-06 | Chain with Writer specialist — pass ResearchOutput directly to Writer for research-to-document pipelines | Chris Park | 2026-03-03 | - | - |
 - ⏭️ **Contradicted claims as first-class output** — receive structurally contradicted claims (source A vs. source B in direct conflict) as a dedicated output type
 
 ---
@@ -87,6 +92,7 @@ Orchestrators receive structured evidence they can trust and compose — not ans
 **Enables:**
 - Writer Specialist — consumes `ResearchOutput` and produces structured prose
 - Competitive Analysis Specialist — consumes `ResearchOutput` for structured comparisons
+- Data Analyzer Specialist — consumes `ResearchOutput` and returns labeled inferences (AnalysisOutput)
 - Any orchestrator workflow that needs verified, composable evidence before acting
 
 **Blocks:** Nothing

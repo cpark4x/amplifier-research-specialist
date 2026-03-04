@@ -25,7 +25,9 @@ bundle.md
     ├── tools: tool-web              ← web_search + web_fetch for all specialists
     ├── agents.include:              ← which specialists are loaded and callable
     │   ├── specialists/researcher
-    │   └── specialists/writer
+    │   ├── specialists/writer
+    │   ├── specialists/competitive-analysis
+    │   └── specialists/data-analyzer
     └── context.include:             ← injected into every session using this bundle
         └── context/specialists-instructions.md
 ```
@@ -188,6 +190,9 @@ Check that:
 - Every required field defined in `shared/interface/types.md` is present in the output
 - Evidence/coverage gaps are explicitly listed, not silently omitted
 - The output passes cleanly as input to any downstream specialist it's designed to feed
+- The output's header block (e.g., `ANALYSIS OUTPUT`, `RESEARCH OUTPUT`) is produced
+  as **bare text, not wrapped in a triple-backtick code fence** — fenced output breaks
+  downstream parse-line triggers in consumer specialists
 
 ### 3. Test a boundary case
 

@@ -15,9 +15,17 @@ conclusions from sourced facts.
 
 | Field | Type | Required | Default | Description |
 |---|---|---|---|---|
-| `research` | ResearchOutput | Yes | — | Output from the Researcher specialist |
+| `research` | ResearchOutput | Yes | — | Output from the Researcher specialist. See input format note below. |
 | `focus_question` | string | No | null | Aim inferences at a specific question. If omitted, analyzes all findings. |
 | `quality_threshold` | `low \| medium \| high` | No | `medium` | Minimum confidence for inferences to be included. |
+
+**Input format note:** Canonical `ResearchOutput` block (Format A — starts with bare
+`RESEARCH OUTPUT` on the first line, with `Claim:` / `Source:` / `Tier:` /
+`Confidence:` fields) is required for guaranteed `ANALYSIS OUTPUT` block compliance.
+Fully-narrative input with explicit `Claim:` / `Source:` / `Tier:` labels (Format B)
+is accepted and handled, but output format compliance is not contractually guaranteed.
+Partially-canonical input (Format C: section headers + narrative tables without
+per-finding labels) may produce narrative output instead of the canonical block.
 
 ### Returns
 
@@ -50,7 +58,9 @@ Key sections:
 - Research new facts — use Researcher
 - Write prose or produce documents — use Writer
 - Draw inferences without traceable findings — no ungrounded conclusions
-- Accept raw notes or unstructured input — only processes ResearchOutput
+- Guarantee canonical `ANALYSIS OUTPUT` block for non-canonical input — only Format A
+  (canonical `ResearchOutput` block) guarantees full compliance. Narrative input is
+  accepted but output format compliance is not guaranteed.
 - Guarantee inferences when evidence is thin — returns `QUALITY THRESHOLD RESULT: NOT MET` rather than force conclusions
 
 ---

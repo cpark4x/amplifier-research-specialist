@@ -23,7 +23,15 @@ Delegate to these agents when quality and trustworthiness matter more than speed
 - **data-analyzer** — Draws labeled inferences from ResearchOutput. Returns
   `AnalysisOutput` — findings projected from ResearchOutput plus explicit inferences
   that each trace to specific findings. Use between Researcher and Writer when you
-  need facts and conclusions explicitly separated.
+  need facts and conclusions explicitly separated. Input must be canonical
+  `ResearchOutput` from the Researcher — not raw notes or narrative summaries.
+
+- **researcher-formatter** — Format conversion specialist. Receives raw research
+  narrative in any format (canonical RESEARCH OUTPUT block or narrative markdown
+  with inline citations) and produces a canonical RESEARCH OUTPUT block. Use after
+  the researcher when guaranteed canonical format is required for machine parsing
+  or downstream pipeline steps. Never researches, never analyzes — only extracts
+  and reformats.
 
 ## When to Use Each
 
@@ -55,10 +63,16 @@ For most knowledge work tasks:
 1. `specialists:researcher` → gathers and validates evidence
 2. `specialists:writer` → transforms evidence into the requested document
 
+For reliable machine-parseable research output:
+1. `specialists:researcher` → gathers and validates evidence (any format)
+2. `specialists:specialists/researcher-formatter` → normalizes to canonical RESEARCH OUTPUT block
+3. Downstream agents receive guaranteed canonical format
+
 For analytical tasks requiring explicit fact/inference separation:
 1. `specialists:researcher` → gathers and validates evidence
-2. `specialists:specialists/data-analyzer` → draws labeled inferences from the evidence
-3. `specialists:writer` → transforms facts + labeled inferences into the requested document
+2. `specialists:specialists/researcher-formatter` → normalizes format (optional but recommended)
+3. `specialists:specialists/data-analyzer` → draws labeled inferences from the evidence
+4. `specialists:writer` → transforms facts + labeled inferences into the requested document
 
 For competitive intelligence tasks:
 1. `specialists:researcher` → gathers evidence (optional — competitive-analysis can research itself)
