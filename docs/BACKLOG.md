@@ -2,7 +2,7 @@
 
 **Purpose:** Strategic planning view for canvas-specialists — a library of best-in-class, single-domain AI specialist agents for knowledge worker and consumer scenarios  
 **Owner:** Chris Park  
-**Last Updated:** March 3, 2026  
+**Last Updated:** March 3, 2026 (evening)  
 
 ---
 
@@ -32,6 +32,10 @@
 
 | Item | Epic | Owner | Completed | Notes |
 |------|------|-------|-----------|-------|
+| researcher-formatter specialist | 01 | Chris | Mar 3, 2026 | Format conversion specialist — receives any research narrative, produces canonical RESEARCH OUTPUT block. Architectural fix for Researcher format compliance. Registered in agent registry. |
+| research-chain recipe | 01 | Chris | Mar 3, 2026 | Full four-step pipeline: Researcher → Formatter → Data Analyzer → Writer. Normalizes format at Step 2 before DA/Writer. |
+| USING-SPECIALISTS.md | 01/02/04/08 | Chris | Mar 3, 2026 | Practical guide: invoking each specialist, understanding output, chaining patterns, real examples, known limitations. |
+| 10 competitive decision briefs | 04 | Chris | Mar 3, 2026 | docs/examples/competitive-briefs/ — real examples from 10-way parallel CA + Writer chain test covering AI providers, CI/CD, IaC, project management, frontend deployment, agent infra, BaaS, dev docs, database, observability. |
 | Data Analyzer specialist | 08 | Chris | Mar 3, 2026 | 4-stage pipeline (Parse → Analyze → Quality Gate → Synthesize); AnalysisOutput schema; Writer analysis-output input type; 6 E2E tests passed |
 | Researcher-first default for product comparisons | 04 | Chris | Mar 3, 2026 | Implemented as `competitive-analysis-brief-researched` recipe — 3-step chain with Researcher pre-pass |
 | CLAIMS TO VERIFY block (Writer) | 02 | Chris | Mar 3, 2026 | Writer flags specific numerical claims from upstream without cited sources |
@@ -55,7 +59,7 @@
 
 | # | Item | Epic | Owner | Effort | Impact | Why Now |
 |---|------|------|-------|--------|--------|---------|
-| 0 | ~~**Specialist output format compliance — architectural fix**~~ | 01/02 | Chris | — | — | **Closed 2026-03-03: Option A accepted.** Writer produces world-class brief content; WRITER METADATA / CITATIONS / CLAIMS TO VERIFY are aspirational pipeline metadata not reliably producible via spec instructions. Data Analyzer is reliable. Researcher format is inconsistent but DA handles both formats. Accepted as known constraints; no architectural fix required at this time. Revisit if a concrete downstream agent requires machine-parseable Writer metadata. |
+| 0 | ~~**Specialist output format compliance — architectural fix**~~ | 01/02 | Chris | — | — | **Partially shipped 2026-03-03.** Researcher-formatter specialist built — two-step approach normalizes any Researcher output to canonical RESEARCH OUTPUT block before DA/Writer. Researcher format compliance resolved architecturally. Writer structural blocks (WRITER METADATA / CITATIONS / CLAIMS TO VERIFY) remain aspirational — revisit when Amplifier provider supports structured output (PR #38 closed upstream as premature; orchestrator layer must propagate response_format first). |
 | 1 | Storyteller specialist | 03 | Chris | L | H | Transforms research/analysis into compelling narratives; natural next specialist after Researcher → Analyzer → Writer chain is complete |
 
 ### Near-term (Next 1-2 Sprints)
@@ -102,7 +106,7 @@
 
 | Epic | Implemented | Future | % Complete |
 |------|-------------|--------|------------|
-| 01 — Researcher | Researcher V1, source tiering, quality gate, ResearchOutput v1.0 | Source confidence threshold | 90% |
+| 01 — Researcher | Researcher V1, source tiering, quality gate, ResearchOutput v1.0, researcher-formatter, research-chain recipe | Source confidence threshold | 95% |
 | 02 — Writer | Writer V1, coverage audit, citations + attribution, WRITER METADATA, citation confidence, rendering (pandoc) | Brand voice config, audit severity, source confidence threshold | 80% |
 | 03 — Storyteller | — | Full specialist implementation | 0% |
 | 04 — Competitive Analysis | 6-stage pipeline, head-to-head + landscape modes, CompetitiveAnalysisOutput schema, 2-step + 3-step recipes, researcher-first default, CLAIMS TO VERIFY block | — | 100% |
@@ -152,6 +156,7 @@
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v1.6 | Mar 3, 2026 | Chris | Added researcher-formatter + research-chain to recently completed; updated Item #0 to partially shipped; Epic 01 to 95%; USING-SPECIALISTS.md and 10 competitive briefs logged |
 | v1.5 | Mar 3, 2026 | Chris | Marked Epic 08 complete; Data Analyzer added to recently completed; Storyteller promoted to Immediate Next; 4 specialists shipped |
 | v1.4 | Mar 2, 2026 | Chris | Moved researcher-first default to recently completed (implemented as 3-step recipe); removed from near-term; updated Epic 04 completion row to reflect all shipped work |
 | v1.3 | Mar 3, 2026 | Chris | Marked Epic 04 complete; added tool-canvas-renderer, section attribution, citation confidence to recently completed; removed shipped items from future work; updated Epic 02 to 80%, Epic 04 to 100%; 3 specialists shipped |
