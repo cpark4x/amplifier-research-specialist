@@ -3,7 +3,7 @@ specialist: storyteller
 chain: direct-invocation (no chain — single specialist verification)
 topic: pre-merge-checklist-task-13
 date: 2026-03-04
-quality_signal: green
+quality_signal: pass
 action_items_promoted: false
 ---
 

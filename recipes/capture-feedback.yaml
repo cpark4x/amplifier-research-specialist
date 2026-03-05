@@ -11,7 +11,7 @@ steps:
 
       Infer the following four metadata values from this session's context:
 
-      - **specialist**: The entry-point specialist for this run. One of: researcher, writer, competitive-analysis
+      - **specialist**: The entry-point specialist for this run. One of: researcher, writer, competitive-analysis, data-analyzer, researcher-formatter, storyteller
       - **chain**: The full chain string if this was a multi-step run (e.g., "researcher → writer"), or null if it was a single specialist
       - **topic**: A short URL-safe slug describing the topic (e.g., "notion-vs-obsidian", "ai-tools-comparison")
       - **date**: Today's date in YYYY-MM-DD format
@@ -33,24 +33,24 @@ steps:
     prompt: |
       You are capturing the body of a test log entry. Walk through the following 5 sections one at a time. Ask the user for their input on each section, wait for their response, then move to the next.
 
-      1. **What worked** — What performed well in this run? What met or exceeded expectations?
-      2. **What didn't / concerns** — What fell short? Any edge cases, gaps, or concerns that surfaced?
-      3. **Confidence & accuracy** — How accurate was the output? Were there any hallucinations, factual errors, or uncertain claims?
-      4. **Coverage assessment** — Was the topic covered thoroughly? What was missing or underrepresented?
-      5. **Action items** — Specific, concrete next steps. Format each as a `- [ ]` checkbox.
+      1. **What Worked** — What performed well in this run? What met or exceeded expectations?
+      2. **What Didn't / Concerns** — What fell short? Any edge cases, gaps, or concerns that surfaced?
+      3. **Confidence Accuracy** — How accurate was the output? Were there any hallucinations, factual errors, or uncertain claims?
+      4. **Coverage Assessment** — Was the topic covered thoroughly? What was missing or underrepresented?
+      5. **Action Items** — Specific, concrete next steps. Format each as a `- [ ]` checkbox.
 
       After collecting all 5 sections, output the complete log body as clean markdown with these section headers:
 
       ```
-      ## What worked
+      ## What Worked
 
-      ## What didn't / concerns
+      ## What Didn't / Concerns
 
-      ## Confidence & accuracy
+      ## Confidence Accuracy
 
-      ## Coverage assessment
+      ## Coverage Assessment
 
-      ## Action items
+      ## Action Items
       ```
     output: "log_body"
     timeout: 1800
