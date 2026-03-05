@@ -5,6 +5,14 @@
 # CHANGELOG
 # =============================================================================
 #
+# v2.0.0 (2026-03-04):
+#   - IMPROVEMENT: Interactive date-range collection via approval gate
+#     * BREAKING CHANGE: Added "configure" stage; recipe is now 3-stage
+#     * start_date / end_date are now optional — defaults to last 7 days
+#     * Configure approval gate lets user confirm or override dates via
+#       the approval message (format: "YYYY-MM-DD YYYY-MM-DD")
+#     * Dates carried through as {{date_range.start_date}} / {{date_range.end_date}}
+#
 # v1.0.0 (2026-03-04):
 #   - NEW FEATURE: Initial staged recipe for mining test log entries
 #     * Scans docs/test-log/**/*.md (excludes README.md and reports/**)
@@ -14,27 +22,74 @@
 #     * Approval gate before commit; git-ops commits only the report
 #
 # Required agents: self, foundation:git-ops
-# Required context: start_date, end_date (YYYY-MM-DD)
+# Optional context: start_date, end_date (YYYY-MM-DD) — defaults to last 7 days
 # Optional context: specialist_filter (default: "all")
 # =============================================================================
 
 name: "mine-test-logs"
 description: "Mine test log entries for a date range, generate a summary report, and commit it after approval."
-version: "1.0.0"
+version: "2.0.0"
 tags: ["testing", "analysis", "reporting", "test-log"]
 
 context:
-  start_date: ""            # Required — inclusive start date (YYYY-MM-DD)
-  end_date: ""              # Required — inclusive end date   (YYYY-MM-DD)
-  specialist_filter: "all"  # Optional — specialist name to filter on, or "all"
+  start_date: ""            # Optional — YYYY-MM-DD; defaults to 7 days ago
+  end_date: ""              # Optional — YYYY-MM-DD; defaults to today
+  specialist_filter: "all"  # Optional — specialist name or "all"
+  _approval_message: ""     # Runtime — pre-declared so {{_approval_message}} never undefined
 
 stages:
+  # --------------------------------------------------------------------------
+  # Stage 0 — Configure: resolve date range (smart defaults + user override)
+  # --------------------------------------------------------------------------
+  - name: "configure"
+    steps:
+      - id: "resolve-defaults"
+        type: "bash"
+        command: |
+          SD="{{start_date}}"
+          ED="{{end_date}}"
+          if [ -z "$SD" ] || [ -z "$ED" ]; then
+            RANGE=$(python3 -c "from datetime import datetime,timedelta;n=datetime.now();print((n-timedelta(days=7)).strftime('%Y-%m-%d')+' '+n.strftime('%Y-%m-%d'))")
+            [ -z "$SD" ] && SD=$(echo "$RANGE" | awk '{print $1}')
+            [ -z "$ED" ] && ED=$(echo "$RANGE" | awk '{print $2}')
+          fi
+          printf '%s %s' "$SD" "$ED"
+        output: "resolved_dates"
+        timeout: 15
+
+    approval:
+      required: true
+      prompt: |
+        **Date range for mining:** {{resolved_dates}}
+        **Specialist filter:** {{specialist_filter}}
+
+        - **Approve** (no message) to use the dates shown above.
+        - **Approve with message** to override dates, e.g.: `2026-02-01 2026-02-28`
+        - **Deny** to cancel the recipe.
+      timeout: 0
+      default: "deny"
+
   # --------------------------------------------------------------------------
   # Stage 1 — Mine logs and generate the report
   # --------------------------------------------------------------------------
   - name: "mine-and-report"
     steps:
-      # Discover every test-log Markdown file, excluding README and reports.
+      - id: "finalize-dates"
+        type: "bash"
+        command: |
+          MSG="{{_approval_message}}"
+          if [ -n "$MSG" ]; then
+            DATES="$MSG"
+          else
+            DATES="{{resolved_dates}}"
+          fi
+          SD=$(echo "$DATES" | awk '{print $1}')
+          ED=$(echo "$DATES" | awk '{print $2}')
+          printf '{"start_date":"%s","end_date":"%s"}' "$SD" "$ED"
+        output: "date_range"
+        parse_json: true
+        timeout: 10
+
       - id: "find-log-files"
         type: "bash"
         command: |
@@ -45,13 +100,11 @@ stages:
         output: "file_list"
         timeout: 30
 
-      # Ensure the reports output directory exists.
       - id: "ensure-reports-dir"
         type: "bash"
         command: "mkdir -p docs/test-log/reports"
         timeout: 10
 
-      # Read every discovered file, parse, filter, analyse, and write report.
       - id: "generate-report"
         agent: "self"
         prompt: |
@@ -62,11 +115,11 @@ stages:
 
           ## Parameters
 
-          | Parameter          | Value                        |
-          |--------------------|------------------------------|
-          | Start date         | {{start_date}}               |
-          | End date           | {{end_date}}                 |
-          | Specialist filter  | {{specialist_filter}}        |
+          | Parameter          | Value                              |
+          |--------------------|------------------------------------|
+          | Start date         | {{date_range.start_date}}          |
+          | End date           | {{date_range.end_date}}            |
+          | Specialist filter  | {{specialist_filter}}              |
 
           ## File list
 
@@ -95,8 +148,8 @@ stages:
 
           ### B. Filter
 
-          Keep only entries whose `date` falls within **{{start_date}}** to
-          **{{end_date}}** inclusive (string comparison works for YYYY-MM-DD).
+          Keep only entries whose `date` falls within **{{date_range.start_date}}** to
+          **{{date_range.end_date}}** inclusive (string comparison works for YYYY-MM-DD).
 
           If `{{specialist_filter}}` is **not** `"all"`, additionally keep only
           entries whose `specialist` field contains the filter value (case-
@@ -113,8 +166,8 @@ stages:
 
           ---
           type: mining-report
-          start_date: {{start_date}}
-          end_date: {{end_date}}
+          start_date: {{date_range.start_date}}
+          end_date: {{date_range.end_date}}
           specialist_filter: {{specialist_filter}}
           generated: <today's date YYYY-MM-DD>
           entries_scanned: <total files read>
@@ -123,7 +176,7 @@ stages:
 
           # Test Log Mining Report
 
-          **Period:** {{start_date}} to {{end_date}}
+          **Period:** {{date_range.start_date}} to {{date_range.end_date}}
           **Specialist filter:** {{specialist_filter}}
           **Generated:** <today's date>
 
@@ -169,7 +222,7 @@ stages:
 
           Write the completed Markdown to:
 
-              docs/test-log/reports/{{end_date}}-mining-report.md
+              docs/test-log/reports/{{date_range.end_date}}-mining-report.md
 
           ### E. Output
 
@@ -207,5 +260,5 @@ stages:
           **Do NOT stage any other files.** Only the report above.
 
           Commit message (use exactly):
-          docs: add test log mining report for {{start_date}} to {{end_date}}
+          docs: add test log mining report for {{date_range.start_date}} to {{date_range.end_date}}
         timeout: 300
