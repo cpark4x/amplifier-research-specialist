@@ -4,7 +4,7 @@ chain: "researcher → data-analyzer → writer"
 topic: postgres-vs-mongodb
 date: 2026-03-03
 quality_signal: pass
-action_items_promoted: false
+action_items_promoted: true
 ---
 
 # Researcher → Data Analyzer → Writer — Format Compliance Chain Validation
