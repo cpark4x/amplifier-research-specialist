@@ -1,0 +1,211 @@
+# =============================================================================
+# mine-test-logs — Report-only test log mining workflow
+# =============================================================================
+#
+# CHANGELOG
+# =============================================================================
+#
+# v1.0.0 (2026-03-04):
+#   - NEW FEATURE: Initial staged recipe for mining test log entries
+#     * Scans docs/test-log/**/*.md (excludes README.md and reports/**)
+#     * Parses YAML front matter and action-item checkboxes
+#     * Filters by date range and optional specialist
+#     * Generates four-section Markdown report
+#     * Approval gate before commit; git-ops commits only the report
+#
+# Required agents: self, foundation:git-ops
+# Required context: start_date, end_date (YYYY-MM-DD)
+# Optional context: specialist_filter (default: "all")
+# =============================================================================
+
+name: "mine-test-logs"
+description: "Mine test log entries for a date range, generate a summary report, and commit it after approval."
+version: "1.0.0"
+tags: ["testing", "analysis", "reporting", "test-log"]
+
+context:
+  start_date: ""            # Required — inclusive start date (YYYY-MM-DD)
+  end_date: ""              # Required — inclusive end date   (YYYY-MM-DD)
+  specialist_filter: "all"  # Optional — specialist name to filter on, or "all"
+
+stages:
+  # --------------------------------------------------------------------------
+  # Stage 1 — Mine logs and generate the report
+  # --------------------------------------------------------------------------
+  - name: "mine-and-report"
+    steps:
+      # Discover every test-log Markdown file, excluding README and reports.
+      - id: "find-log-files"
+        type: "bash"
+        command: |
+          find docs/test-log -name '*.md' \
+            -not -name 'README.md' \
+            -not -path '*/reports/*' \
+          | sort
+        output: "file_list"
+        timeout: 30
+
+      # Ensure the reports output directory exists.
+      - id: "ensure-reports-dir"
+        type: "bash"
+        command: "mkdir -p docs/test-log/reports"
+        timeout: 10
+
+      # Read every discovered file, parse, filter, analyse, and write report.
+      - id: "generate-report"
+        agent: "self"
+        prompt: |
+          You are a test-log mining analyst for the **canvas-specialists** project.
+          Your job is to read test log files, extract structured data, and produce
+          a single Markdown mining report. This is a **report-only** workflow — you
+          must NOT edit any existing files (backlog, epics, specialist configs, etc.).
+
+          ## Parameters
+
+          | Parameter          | Value                        |
+          |--------------------|------------------------------|
+          | Start date         | {{start_date}}               |
+          | End date           | {{end_date}}                 |
+          | Specialist filter  | {{specialist_filter}}        |
+
+          ## File list
+
+          One path per line (output of `find`):
+          {{file_list}}
+
+          ## Step-by-step instructions
+
+          ### A. Read & parse every file
+
+          For **each** path in the file list above:
+
+          1. Read the file contents using your file-reading tool.
+          2. Parse the YAML front matter (the block between the opening `---` and
+             closing `---`). Extract exactly these fields:
+             - `date`  (string, YYYY-MM-DD)
+             - `specialist`  (string)
+             - `chain`  (string or absent/null)
+             - `topic`  (string)
+             - `quality_signal`  (one of: pass, mixed, fail)
+             - `action_items_promoted`  (true, false, or partial)
+          3. Locate the `## Action Items` section. Extract every markdown checkbox
+             line that starts with `- [ ]` (unchecked) or `- [x]` (checked).
+             If the section contains only prose such as "None" with no checkbox
+             lines, record zero action items for that entry.
+
+          ### B. Filter
+
+          Keep only entries whose `date` falls within **{{start_date}}** to
+          **{{end_date}}** inclusive (string comparison works for YYYY-MM-DD).
+
+          If `{{specialist_filter}}` is **not** `"all"`, additionally keep only
+          entries whose `specialist` field contains the filter value (case-
+          insensitive substring match — e.g., filter `writer` matches specialist
+          `writer` and chain `researcher → writer`).
+
+          If zero entries remain after filtering, still produce the report with
+          a note: "No entries matched the filter criteria."
+
+          ### C. Generate the report
+
+          Produce a Markdown file with **exactly** this structure (fill in the
+          data you extracted):
+
+          ---
+          type: mining-report
+          start_date: {{start_date}}
+          end_date: {{end_date}}
+          specialist_filter: {{specialist_filter}}
+          generated: <today's date YYYY-MM-DD>
+          entries_scanned: <total files read>
+          entries_matched: <files after filter>
+          ---
+
+          # Test Log Mining Report
+
+          **Period:** {{start_date}} to {{end_date}}
+          **Specialist filter:** {{specialist_filter}}
+          **Generated:** <today's date>
+
+          ---
+
+          ## 1. Corpus Summary
+
+          - **Total entries scanned:** <N>
+          - **Entries matching filter:** <N>
+          - **Quality distribution:**
+            - pass: <N>
+            - mixed: <N>
+            - fail: <N>
+          - **Specialists represented:** <comma-separated list>
+          - **Topics covered:** <comma-separated list>
+
+          ## 2. Top Themes
+
+          <For each recurring theme across entries:>
+          - **<Theme title>** — <1-2 sentence description>
+            - Evidence: `<file path 1>`, `<file path 2>`, …
+            - Frequency: appeared in <N> of <M> entries
+
+          ## 3. Unresolved / Stale
+
+          <List every entry or action item that appears unresolved:>
+          - Entries where `action_items_promoted` is NOT `true`
+          - Unchecked action-item boxes (`- [ ]`) from any matching entry
+
+          For each, cite the source file path and the specific item text.
+
+          ## 4. Recommended Backlog Additions
+
+          <Concrete suggestions based on themes and unresolved items.>
+          For each suggestion:
+          - **Title:** <clear, actionable title>
+          - **Rationale:** <1-2 sentences>
+          - **Evidence:** `<file path 1>`, `<file path 2>`, …
+
+          *These are suggestions only — no files have been modified.*
+
+          ### D. Write the report
+
+          Write the completed Markdown to:
+
+              docs/test-log/reports/{{end_date}}-mining-report.md
+
+          ### E. Output
+
+          After writing, output **only** the relative file path you wrote, e.g.:
+
+              docs/test-log/reports/2026-03-04-mining-report.md
+
+          Nothing else — no commentary, no summary, just the path.
+        output: "report_path"
+        timeout: 900
+
+    approval:
+      required: true
+      prompt: |
+        Mining report generated at: {{report_path}}
+
+        Please review the report before committing.
+        - **Approve** to commit the report to the repository.
+        - **Deny** to discard (delete the file manually if desired).
+      timeout: 0
+      default: "deny"
+
+  # --------------------------------------------------------------------------
+  # Stage 2 — Commit the report (runs only after approval)
+  # --------------------------------------------------------------------------
+  - name: "commit"
+    steps:
+      - id: "commit-report"
+        agent: "foundation:git-ops"
+        prompt: |
+          Stage and commit ONLY the single mining report file.
+
+          File to commit: {{report_path}}
+
+          **Do NOT stage any other files.** Only the report above.
+
+          Commit message (use exactly):
+          docs: add test log mining report for {{start_date}} to {{end_date}}
+        timeout: 300
