@@ -7,7 +7,7 @@ tools:
   - module: tool-web
     source: git+https://github.com/microsoft/amplifier-module-tool-web@main
   - module: tool-canvas-renderer
-    source: ./modules/tool-canvas-renderer
+    source: ../modules/tool-canvas-renderer
   - module: tool-skills
     config:
       skills:
@@ -24,7 +24,7 @@ agents:
 
 hooks:
   - module: hook-specialist-narration
-    source: ./modules/hook-specialist-narration
+    source: ../modules/hook-specialist-narration
 
 spawn:
   exclude_tools: [write_file, edit_file, apply_patch]
