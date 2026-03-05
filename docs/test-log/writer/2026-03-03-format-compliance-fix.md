@@ -3,7 +3,7 @@ specialist: writer
 topic: format-compliance-fix
 date: 2026-03-03
 quality_signal: pass
-action_items_promoted: false
+action_items_promoted: true
 ---
 
 # Writer — Format Compliance Fix Validation (analysis-output)

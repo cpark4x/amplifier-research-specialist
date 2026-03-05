@@ -2,7 +2,7 @@
 
 **Purpose:** Strategic planning view for canvas-specialists — a library of best-in-class, single-domain AI specialist agents for knowledge worker and consumer scenarios  
 **Owner:** Chris Park  
-**Last Updated:** March 4, 2026  
+**Last Updated:** March 5, 2026  
 
 ---
 
@@ -76,13 +76,21 @@ See [**2026-03-05-world-class-roadmap.md**](plans/2026-03-05-world-class-roadmap
 
 | 2 | Presentation Builder specialist | 07 | Gurkaran Singh | L | H | Closes the research → write → present chain; slide deck output is a top knowledge worker use case |
 | 3 | Coverage audit severity levels | 02 | Chris | S | M | `gap_policy` input lets orchestrators decide what gap severity blocks vs. warns vs. passes |
-| 5 | Researcher: conservative confidence scoring for analyst estimates | 01 | Chris | S | M | Financial figures (ARR, market share) from secondary/circulated sources rated high confidence alongside audited data — needs stronger source-tier guidance for analyst estimates vs. primary financial data *(from test log 2026-03-02)* |
+| 5 | Researcher: conservative confidence scoring for analyst estimates | 01 | Chris | S | M | Financial figures (ARR, market share) from secondary/circulated sources rated high confidence alongside audited data — needs stronger source-tier guidance for analyst estimates vs. primary financial data. Add numeric-claim confidence gating for market/competitive briefs *(from test log 2026-03-02; reinforced by mining report 2026-03-05)* |
 | 6 | Writer: enforce word budget per format | 02 | Chris | S | H | `brief` produces ~1,500 words — same as a report. Format is a contract, not a label. brief ~600 words, report ~1,500, executive summary ~400. Observed across all 4 runs in 2026-03-04 chain test. |
 | 7 | Writer: strengthen audience calibration | 02 | Chris | S | M | `audience: myself` produced identical register to `audience: executive stakeholders` — third-person, formal, presentation-ready. Should shift to direct, first-person, actionable voice. *(from test log 2026-03-04)* |
 | 8 | Recipe display: filter internal scaffolding from summary | 01/02/04 | Chris | S | M | Raw claim IDs (S1–S45) from the Analyzer's internal pipeline appeared in the `final_output` recipe summary field. Internal scaffolding should not be user-facing. Display/recipe layer issue. *(from test log 2026-03-04)* |
 | 9 | Writer: specificity enforcement | 02 | Chris | S | M | When the research question names a specific subject, the Writer's bottom line and skills sections drifted to generic AI-era conclusions that apply to any tech company. Final layer should pull subject-specific findings through. *(from test log 2026-03-04)* |
 | 10 | Platform UX: default chain completion + narrated execution | 01/02/04/08 | Chris | M | H | Two related problems observed across all specialists: (1) conversational invocations (e.g. "run a competitive analysis") return raw intermediate output — `CompetitiveAnalysisOutput`, `ResearchOutput` — instead of a finished document. Users want the polished end product by default; raw output should be opt-in for developers/pipeline use. (2) Users have no visibility into which specialists ran or in what order. Each specialist should narrate its execution so the chain is transparent. Fix should be applied platform-wide across all specialists, not per-specialist. *(observed during session 2026-03-04)* |
 | 11 | Recipe timeout resilience: patch research-chain and narrative-chain timeouts | 01/03 | Chris | M | M | Increase `research-chain.yaml` `format-research` step timeout and bound research output to prevent downstream timeouts. Increase `narrative-chain.yaml` `save` step timeout and/or refactor save step to remove LLM agent dependency (use foundation:file-ops directly instead). Note: parallel recipe execution amplifies queueing effects and should be avoided for heavy runs. *(identified after manual A/B/C testing 2026-03-04)* |
+| 12 | Researcher: require URL-per-claim in FINDINGS | 01 | Chris | S | M | Source *names* are not sufficient for independent verification; require URLs for each substantive claim to reduce unverifiable assertions. *(from mining report 2026-03-05)* |
+| 13 | Writer: document parse-line-first output ordering in spec | 02 | Chris | S | S | The parse-line anchor (`Parsed: ...`) is now the literal first output line, not `WRITER METADATA` directly. Update Output Structure spec (specialists/writer/index.md lines 52, 57) to document this accurately. *(from test log 2026-03-03)* |
+| 14 | Writer: enforce required structural sections for analysis-based inputs | 02 | Chris | S | M | If WRITER METADATA / CITATIONS / CLAIMS TO VERIFY are required for analysis-output inputs, enforce or explicitly relax requirements. Run Writer-only test passing AnalysisOutput to confirm behavior. *(from mining report 2026-03-05)* |
+| 15 | Writer: add deduplication pass before final output | 02 | Chris | S | M | Lightweight scan to remove duplicated content across sections before conclusion. Prevents repetition across sections observed in chain test outputs. *(from mining report 2026-03-05)* |
+| 16 | Data Analyzer: harden Format B detection for narrative markdown | 08 | Chris | S | M | Current detection struggles with fully narrative inputs; improve robustness so claims/sources extraction is consistent across all input types. *(from mining report 2026-03-05)* |
+| 17 | Data Analyzer: prevent code-fence wrapping of ANALYSIS OUTPUT | 08 | Chris | S | M | Code-fence wrapping breaks parsers that expect raw section headers/blocks; enforce "no extra fencing" around structured outputs. *(from mining report 2026-03-05)* |
+| 18 | Storyteller: surface inferences in NARRATIVE SELECTION for auditability | 03 | Chris | S | S | Clarify whether AnalysisOutput inferences should be listed in NARRATIVE SELECTION (as included/omitted) or treated as background context. Current behavior silently consumes them, reducing auditability of the inference layer. *(from test log 2026-03-04)* |
+| 19 | Storyteller: add quality_threshold as optional caller parameter | 03 | Chris | S | S | Accept `quality_threshold` parameter (like Researcher/Analyzer) to let callers request stricter quality gate behavior. Currently hardcoded to `standard`. *(from test log 2026-03-04)* |
 
 ### Medium-term (Next Quarter)
 
@@ -158,7 +166,7 @@ Synthesis Writer → cross-ecosystem comparative brief
 | 05 — Design | — | Full specialist implementation | 0% |
 | 06 — Demo Generator | — | Full specialist implementation | 0% |
 | 07 — Presentation Builder | — | Full specialist implementation | 0% |
-| 08 — Data Analyzer | 4-stage pipeline, AnalysisOutput schema, Writer analysis-output integration, 6 E2E tests | — | 100% |
+| 08 — Data Analyzer | 4-stage pipeline, AnalysisOutput schema, Writer analysis-output integration, 6 E2E tests | Format B detection hardening, code-fence prevention | 100% |
 | 09 — Planner | — | Full specialist implementation | 0% |
 | 10 — Prioritizer | — | Full specialist implementation | 0% |
 | 11 — Platform Integrations | — | LangChain wrapper, rendering integrations | 0% |
@@ -201,6 +209,7 @@ Synthesis Writer → cross-ecosystem comparative brief
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v2.0 | Mar 5, 2026 | Chris | Promoted mining report recommendations (2026-03-05) into near-term backlog; merged numeric-confidence gating into item #5; added 8 new Researcher/Writer/Data Analyzer/Storyteller near-term items (#12–#19) from mining report; updated Epic 08 future work; closed 4 unpromoted test logs by marking action_items_promoted=true |
 | v1.9 | Mar 4, 2026 | Chris | Epic 03 (Storyteller) moved to in-progress; specialist, schema, recipe, epic, user stories, principles, metrics all shipped |
 | v1.8 | Mar 4, 2026 | Chris | Added near-term items 6–9 from test log 2026-03-04: Writer word budget, audience calibration, recipe display scaffolding, Writer specificity drift |
 | v1.7 | Mar 3, 2026 | Chris | Added Big Ideas section; first entry: ecosystem-comparison-chain recipe (cross-ecosystem research synthesis) |
