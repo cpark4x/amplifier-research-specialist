@@ -270,7 +270,12 @@ Run the full checklist before delivering output. Maximum 2 revision cycles.
    RIGHT: `STORY OUTPUT`
    If the first line is not exactly `STORY OUTPUT`, fail this gate immediately and rewrite.
 
-If any checklist item fails after 2 revision cycles, emit `QUALITY THRESHOLD RESULT: NOT MET`
+**Mechanical fail triggers (emit NOT MET immediately — do not attempt revision):**
+- **Sparse input:** fewer than 3 discrete findings extracted in Stage 1.
+- **Evidence collapse:** more than half of extracted findings omitted with rationale `insufficient-evidence`.
+- **Upstream NOT MET:** source material's `QUALITY THRESHOLD RESULT` is `NOT MET` and you cannot identify at least 3 medium+ confidence findings.
+
+If any mechanical trigger fires, or if any checklist item fails after 2 revision cycles, emit `QUALITY THRESHOLD RESULT: NOT MET`
 with the specific failing items listed.
 
 ---
@@ -311,6 +316,9 @@ no markdown headers (#, ##, ###), no bold section titles in the story body]
 
 QUALITY THRESHOLD RESULT: [MET | NOT MET]
 Note: if NOT MET, list the specific failing checklist items
+
+**Vocabulary rule:** The value after `QUALITY THRESHOLD RESULT:` must be exactly `MET` or `NOT MET`.
+Do not use `PASS`, `FAIL`, `PASSED`, or `FAILED` — these are prohibited synonyms.
 
 ---
 
