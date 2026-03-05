@@ -1,7 +1,7 @@
 # Principles
 
 **Owner:** Chris Park  
-**Last Updated:** 2026-03-03  
+**Last Updated:** 2026-03-04  
 
 > Decisions made, why they were made, and what they rule out.
 > Add a principle when a decision is made. Not before.
@@ -84,9 +84,46 @@ These principles govern the Data Analyzer's job: drawing labeled inferences from
 
 ---
 
+## Storyteller-Specific Principles
+
+These principles govern the Storyteller's job: selecting findings and shaping them into a coherent narrative. They are derived from the Storyteller's specific authorization and obligations — not extended from Researcher or Data Analyzer principles.
+
+---
+
+### The Writer covers. The Storyteller selects.
+
+**Decision:** The Storyteller is authorized to choose which findings serve the narrative arc and set others aside with documented rationale. The Writer is not authorized to make this selection. All editorial choices are recorded in a NARRATIVE SELECTION record.
+
+**Why:** Compelling narrative requires selection. The Identifiable Victim Effect (Slovic 2007) and the Curse of Knowledge (Heath 2007) confirm that including too much weakens a story — excess detail dilutes emotional resonance and burdens the audience with disambiguation. The NARRATIVE SELECTION record makes editorial choices explicit and auditable without embedding them in the story itself.
+
+**What this rules out:** The Writer making selection decisions. The Storyteller silently omitting findings without documentation in the NARRATIVE SELECTION record.
+
+---
+
+### Citations break the narrative mode
+
+**Decision:** The Storyteller produces no inline citations in the story body. The NARRATIVE SELECTION record provides traceability.
+
+**Why:** Inline citations activate analytical/paradigmatic reading mode and suppress narrative transportation (Green & Brock 2000). The Identifiable Victim Effect demonstrates that adding statistical or analytical markers — including citation brackets — reduces emotional impact. Traceability is preserved through the NARRATIVE SELECTION record rather than inline attribution.
+
+**What this rules out:** Adding `> *Sources: S1, S2*` attribution blocks in the story body. Requiring downstream consumers to verify through citation markers rather than consulting the NARRATIVE SELECTION record.
+
+---
+
+### Framework and tone are independent
+
+**Decision:** Framework (SCQA / three-act / Story Spine / kishotenketsu / Sparkline) determines structure. Tone (trustworthy / dramatic / creative / persuasive) determines register. Any framework can be rendered in any tone.
+
+**Why:** Conflating framework and tone produces a false constraint that prevents selecting the right framework for the content while honouring a tone preference. A trustworthy SCQA story and a dramatic SCQA story share the same structure — they differ in word choice, evidence selection conservatism, and emotional amplification. Treating tone as a framework selector forces suboptimal structural choices.
+
+**What this rules out:** Treating tone as a framework selector. Using "dramatic" as shorthand for "three-act structure." Limiting any framework to a single tone.
+
+---
+
 ## Change History
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| v1.2 | 2026-03-04 | Chris Park | Added Storyteller-Specific Principles section: "The Writer covers, the Storyteller selects," "Citations break the narrative mode," "Framework and tone are independent" |
 | v1.1 | 2026-03-03 | Chris Park | Restructured with Universal / Researcher-Specific / Analyzer-Specific sections; generalized "quality_threshold: maximum" principle to all quality gates; added Analyzer contradiction three-path principle |
 | v1.0 | 2026-03-02 | Chris Park | Initial principles document |

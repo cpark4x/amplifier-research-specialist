@@ -1,0 +1,137 @@
+# =============================================================================
+# CHANGELOG
+# =============================================================================
+#
+# v1.1.1 (2026-03-04):
+#   - BUGFIX: Saved narrative file started with markdown heading instead of plain text
+#     * ROOT CAUSE: Storyteller model sometimes emits `## STORY OUTPUT` or
+#       `# STORY OUTPUT` despite explicit prompt instructions requiring plain-text
+#       `STORY OUTPUT` as the first line. Prompt-level enforcement alone is
+#       insufficient because models non-deterministically add heading prefixes.
+#     * FIX: Added a deterministic bash post-processing step (normalize-header)
+#       between narrate and save. Uses sed with a quoted heredoc to strip any
+#       leading `#` prefix from the first line, producing the derived variable
+#       `final_narrative_normalized` consumed by the save step.
+#     * RESULT: Saved files always begin with plain-text `STORY OUTPUT` regardless
+#       of whether the model emits a markdown heading prefix.
+#
+# v1.1.0 (2026-03-04):
+#   - BUGFIX: format-research step timed out at 600s on medium-sized research
+#     * ROOT CAUSE: The formatter receives the largest payload in the chain
+#       (raw research output before any condensation) but had the smallest
+#       timeout of any processing step (600s vs 900s for analyze/narrate).
+#     * FIX: Increased format-research timeout 600s → 1200s (2×). Added a
+#       soft output-bounding constraint to the research step (≤3 000 words /
+#       30 sourced claims) so downstream steps receive predictably-sized input.
+#     * RESULT: Pipeline reliably completes for typical medium-sized research.
+#
+# v1.0.0 (initial):
+#   - Initial release of narrative-chain recipe.
+#
+# =============================================================================
+
+name: "narrative-chain"
+description: "Full research-to-narrative pipeline — Researcher → Formatter → Data Analyzer → Storyteller → Save. Produces compelling narrative output instead of a structured document."
+version: "1.1.1"
+tags: ["research", "analysis", "narrative", "storytelling", "chain"]
+
+context:
+  research_question: ""      # Required: the question or topic to research
+  audience: ""               # Optional: target audience for the final narrative
+  tone: ""                   # Optional: tone/style for the narrative (e.g. dramatic, optimistic, neutral)
+  quality_threshold: "medium" # Optional: quality bar for the run (low, medium, high)
+
+steps:
+  - id: "research"
+    agent: "specialists:specialists/researcher"
+    prompt: |
+      Research the following question thoroughly. Follow your full research pipeline
+      and return your complete research narrative with sourced evidence, confidence
+      scores, and source tiering.
+
+      Research question: {{research_question}}
+
+      Quality threshold: {{quality_threshold}}
+
+      Scope constraints (required — enforce in Stage 1):
+      - Decompose into no more than 5 sub-questions
+      - Cap your source queue at 15 URLs total across all sub-questions
+      - Run no more than 2 Quality Gate cycles before accepting remaining gaps
+      - Target a maximum of 3,000 words and 30 sourced claims in your final output
+    output: "research_output"
+    timeout: 4500
+
+  - id: "format-research"
+    agent: "specialists:specialists/researcher-formatter"
+    prompt: |
+      Normalize the following research narrative into your canonical RESEARCH OUTPUT
+      block format. Apply all standard formatting rules: structured sections, source
+      tiering, per-claim confidence scores, and gap flags.
+
+      Research narrative to format:
+      {{research_output}}
+    output: "formatted_research"
+    timeout: 1200
+
+  - id: "analyze"
+    agent: "specialists:specialists/data-analyzer"
+    prompt: |
+      Analyze the following formatted research output. Draw inferences, identify
+      patterns, surface key insights, and flag confidence gaps. Follow your full
+      analysis pipeline.
+
+      Formatted research:
+      {{formatted_research}}
+    output: "analysis_output"
+    timeout: 900
+
+  - id: "narrate"
+    agent: "specialists:specialists/storyteller"
+    prompt: |
+      CRITICAL FORMAT REQUIREMENT: Your response MUST begin with the exact plain-text
+      line `STORY OUTPUT` — no `#` prefix, no `##` prefix, no markdown heading of any
+      kind. The very first characters you emit must be `STORY OUTPUT` (plain text only).
+      WRONG: `# STORY OUTPUT` / `## STORY OUTPUT`
+      RIGHT: `STORY OUTPUT`
+
+      Transform the following analysis into a compelling narrative. Follow your full
+      5-stage pipeline: Parse, Find the Drama, Select and Structure, Draft, and
+      Quality Gate. Return the complete STORY OUTPUT block with NARRATIVE SELECTION
+      record, story prose, and QUALITY THRESHOLD RESULT.
+
+      Analysis: {{analysis_output}}
+
+      Audience: {{audience}}
+
+      Tone: {{tone}}
+
+      If audience is empty, infer from the content.
+      If tone is empty, infer from the content and audience.
+    output: "final_narrative"
+    timeout: 900
+
+  - id: "normalize-header"
+    type: "bash"
+    command: |
+      sed '1s/^##* STORY OUTPUT/STORY OUTPUT/' <<'__RECIPE_NORM_EOF__'
+      {{final_narrative}}
+      __RECIPE_NORM_EOF__
+    output: "final_narrative_normalized"
+    timeout: 30
+
+  - id: "save"
+    agent: "foundation:file-ops"
+    prompt: |
+      Save the following narrative to disk.
+
+      1. Derive a short kebab-case filename (3-5 words) from this research question:
+         {{research_question}}
+
+      2. Save to: docs/research-output/[your-derived-filename].md
+         Create the docs/research-output/ directory if it does not exist.
+
+      3. Report the full file path saved to.
+
+      Content: {{final_narrative_normalized}}
+    output: "output_path"
+    timeout: 120

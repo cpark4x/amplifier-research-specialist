@@ -3,7 +3,7 @@
 **How we measure if Canvas Specialists is achieving its vision**
 
 **Owner:** Chris Park  
-**Last Updated:** 2026-03-03  
+**Last Updated:** 2026-03-04  
 
 ---
 
@@ -13,10 +13,11 @@
 2. [Primary Success Indicator](#primary-success-indicator)
 3. [V1 Metrics: Research Quality](#v1-metrics-research-quality)
 4. [V2 Metrics: Writing Quality](#v2-metrics-writing-quality)
-5. [V3 Metrics: Ecosystem Maturity](#v3-metrics-ecosystem-maturity)
-6. [What We Don't Measure](#what-we-dont-measure)
-7. [Success Criteria by Phase](#success-criteria-by-phase)
-8. [The Standard](#the-standard)
+5. [Storyteller Metrics](#storyteller-metrics)
+6. [V3 Metrics: Ecosystem Maturity](#v3-metrics-ecosystem-maturity)
+7. [What We Don't Measure](#what-we-dont-measure)
+8. [Success Criteria by Phase](#success-criteria-by-phase)
+9. [The Standard](#the-standard)
 
 ---
 
@@ -166,6 +167,42 @@ There must be at least one thing this specialist does that an adjacent specialis
 
 ---
 
+## Storyteller Metrics
+
+**Phase Goal:** Validate that the Storyteller performs cognitive mode translation — producing narrative that moves audiences to action in ways the Writer's structured documents cannot.
+
+### Specialist-Specific Success Criteria
+
+**ST1 — Narrative arc completeness:** Every story has dramatic question, protagonist, stakes, causal chain, peak moment, resolution; structural checklist (6 items) passes on every output.
+
+**ST2 — Selection record complete:** Every included finding traces to source; every omitted finding appears in NARRATIVE SELECTION with rationale; INCLUDED + OMITTED = total findings from Stage 1.
+
+**ST3 — Source fidelity:** Zero claims in story body that don't trace to source material in NARRATIVE SELECTION; no fabricated examples or invented analogies.
+
+**ST4 — Framework-tone independence:** Framework and tone in output header set on separate axes; selected framework appropriate to content+audience+goal (not tone alone).
+
+### Chain Success Criteria
+
+**SC1 — Analyzer → Storyteller passes without translation:** StoryOutput produced directly from AnalysisOutput without manual reformatting; narrative-chain recipe runs end-to-end.
+
+**SC2 — Narrative beats document for audience engagement:** Chain ending in Storyteller produces output that moves target audience to action more effectively than same chain ending in Writer (qualitative signal, human review).
+
+### Qualitative Signals
+
+**Signals we want to hear:**
+- "I could actually send this to the board without editing"
+- "It picked the three things that mattered and built a story around them"
+- "The selection record showed me exactly what it left out and why"
+- "The story felt like a story, not a report with a dramatic opening"
+
+**Red flags:**
+- "It just rewrote the analysis with better words"
+- "I couldn't tell what it left out"
+- "The story felt like a document in disguise"
+- "It added things that weren't in the source material"
+
+---
+
 ## V3 Metrics: Ecosystem Maturity
 
 **Phase Goal:** Validate that the specialist pattern is repeatable — new specialists (Analyst, Presenter, Communicator) can be added without breaking the framework, and the ecosystem composes cleanly.
@@ -252,6 +289,7 @@ Specialists exist to raise the quality floor. Every measurement should connect b
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| v1.3 | 2026-03-04 | Chris Park | Added Storyteller Metrics section (ST1–ST4, SC1–SC2, qualitative signals) |
 | v1.2 | 2026-03-03 | Chris Park | Updated Primary Success Indicator to chain-centric; added Universal Baseline Criteria (U1–U4); added Data Analyzer Metrics section (A1–A4, C1–C2, qualitative signals) |
 | v1.1 | 2026-03-02 | Chris Park | Added Owner, Table of Contents, Change History; aligned with SUCCESS_METRICS_TEMPLATE |
 | v1.0 | 2026-02-28 | Chris Park | Initial success metrics document |

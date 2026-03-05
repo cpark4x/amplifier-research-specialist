@@ -206,6 +206,52 @@ interface UnusedFinding {
 
 ---
 
+## StoryOutput
+
+The canonical output of the Storyteller specialist.
+
+```typescript
+interface StoryOutput {
+  // What was narrated
+  input_type: string
+  audience: string
+  tone: 'dramatic' | 'trustworthy' | 'creative' | 'persuasive'
+  framework: 'scqa' | 'three-act' | 'story-spine' | 'sparkline' | 'kishotenketsu'
+
+  // Narrative structure decisions
+  narrative_selection: NarrativeSelection
+
+  // The finished story
+  story: string
+
+  // Overall signal
+  quality_threshold_met: boolean
+}
+
+interface NarrativeSelection {
+  dramatic_question: string
+  protagonist: string
+  framework: string
+  framework_rationale: string
+  included_findings: IncludedFinding[]
+  omitted_findings: OmittedFinding[]
+}
+
+interface IncludedFinding {
+  finding_id: string
+  description: string
+  role: string
+}
+
+interface OmittedFinding {
+  finding_id: string
+  description: string
+  reason: string
+}
+```
+
+---
+
 ## Schema Version
 
-`v1.0` — established 2026-02-26. Changes require version bump and coordinated update to all callers.
+`v1.1` — updated 2026-03-04. Added StoryOutput for the Storyteller specialist. Previous: v1.0 (2026-02-26).

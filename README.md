@@ -68,8 +68,9 @@ For a detailed walkthrough of the researcher → writer chain with sample inputs
 | [writer](specialists/writer/) | Transforms structured source material into polished prose with inline citations and coverage auditing | v1 |
 | [competitive-analysis](specialists/competitive-analysis/) | Structured competitive intelligence with comparison matrices, positioning gaps, and win conditions — head-to-head and landscape modes | v1 |
 | [data-analyzer](specialists/data-analyzer/) | Draws labeled inferences from ResearchOutput — fills the fact/inference gap between Researcher and Writer | v1 |
+| [storyteller](specialists/storyteller/) | Transforms research, analysis, or existing documents into compelling narrative using cognitive mode translation — selects load-bearing findings, applies the right framework, documents editorial choices | v1 |
 
-More specialists are planned — see [docs/BACKLOG.md](docs/BACKLOG.md) for the full roadmap (Storyteller, Competitive Analysis, Presentation Builder, and more).
+More specialists are planned — see [docs/BACKLOG.md](docs/BACKLOG.md) for the full roadmap (Presentation Builder, Design, Planner, and more).
 
 ---
 

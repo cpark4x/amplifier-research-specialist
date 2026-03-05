@@ -2,17 +2,17 @@
 
 **Purpose:** Strategic planning view for canvas-specialists — a library of best-in-class, single-domain AI specialist agents for knowledge worker and consumer scenarios  
 **Owner:** Chris Park  
-**Last Updated:** March 3, 2026 (evening)  
+**Last Updated:** March 4, 2026  
 
 ---
 
 ## Current Status Summary
 
-**11 epics tracked:** ✅ 4 complete, 🔄 0 in progress, ⏸️ 0 paused, 7 planned
+**11 epics tracked:** ✅ 4 complete, 🔄 1 in progress, ⏸️ 0 paused, 6 planned
 
 - ✅ Epic 01 — Researcher
 - ✅ Epic 02 — Writer
-- 🆕 Epic 03 — Storyteller
+- 🔄 Epic 03 — Storyteller
 - ✅ Epic 04 — Competitive Analysis
 - 🆕 Epic 05 — Design
 - 🆕 Epic 06 — Demo Generator
@@ -26,7 +26,7 @@
 
 | Item | Epic | Owner | Status | Branch | Purpose |
 |------|------|-------|--------|--------|---------|
-| — | — | — | — | — | No active work |
+| Storyteller specialist | 03 | Chris | 🔄 In Progress | main | Cognitive mode translation — transforms research/analysis into compelling narrative |
 
 ### Recently Completed
 
@@ -61,13 +61,13 @@
 | # | Item | Epic | Owner | Effort | Impact | Why Now |
 |---|------|------|-------|--------|--------|---------|
 | 0 | ~~**Specialist output format compliance — architectural fix**~~ | 01/02 | Chris | — | — | **Partially shipped 2026-03-03.** Researcher-formatter specialist built — two-step approach normalizes any Researcher output to canonical RESEARCH OUTPUT block before DA/Writer. Researcher format compliance resolved architecturally. Writer structural blocks (WRITER METADATA / CITATIONS / CLAIMS TO VERIFY) remain aspirational — revisit when Amplifier provider supports structured output (PR #38 closed upstream as premature; orchestrator layer must propagate response_format first). |
-| 1 | Storyteller specialist | 03 | Chris | L | H | Transforms research/analysis into compelling narratives; natural next specialist after Researcher → Analyzer → Writer chain is complete |
+
 
 ### Near-term (Next 1-2 Sprints)
 
 | # | Item | Epic | Owner | Effort | Impact | Rationale |
 |---|------|------|-------|--------|--------|-----------|
-| 1 | Storyteller specialist | 03 | Chris | L | H | Transforms research/analysis into compelling narratives; high-demand for knowledge workers |
+
 | 2 | Presentation Builder specialist | 07 | Gurkaran Singh | L | H | Closes the research → write → present chain; slide deck output is a top knowledge worker use case |
 | 3 | Coverage audit severity levels | 02 | Chris | S | M | `gap_policy` input lets orchestrators decide what gap severity blocks vs. warns vs. passes |
 | 5 | Researcher: conservative confidence scoring for analyst estimates | 01 | Chris | S | M | Financial figures (ARR, market share) from secondary/circulated sources rated high confidence alongside audited data — needs stronger source-tier guidance for analyst estimates vs. primary financial data *(from test log 2026-03-02)* |
@@ -75,6 +75,7 @@
 | 7 | Writer: strengthen audience calibration | 02 | Chris | S | M | `audience: myself` produced identical register to `audience: executive stakeholders` — third-person, formal, presentation-ready. Should shift to direct, first-person, actionable voice. *(from test log 2026-03-04)* |
 | 8 | Recipe display: filter internal scaffolding from summary | 01/02/04 | Chris | S | M | Raw claim IDs (S1–S45) from the Analyzer's internal pipeline appeared in the `final_output` recipe summary field. Internal scaffolding should not be user-facing. Display/recipe layer issue. *(from test log 2026-03-04)* |
 | 9 | Writer: specificity enforcement | 02 | Chris | S | M | When the research question names a specific subject, the Writer's bottom line and skills sections drifted to generic AI-era conclusions that apply to any tech company. Final layer should pull subject-specific findings through. *(from test log 2026-03-04)* |
+| 10 | Platform UX: default chain completion + narrated execution | 01/02/04/08 | Chris | M | H | Two related problems observed across all specialists: (1) conversational invocations (e.g. "run a competitive analysis") return raw intermediate output — `CompetitiveAnalysisOutput`, `ResearchOutput` — instead of a finished document. Users want the polished end product by default; raw output should be opt-in for developers/pipeline use. (2) Users have no visibility into which specialists ran or in what order. Each specialist should narrate its execution so the chain is transparent. Fix should be applied platform-wide across all specialists, not per-specialist. *(observed during session 2026-03-04)* |
 
 ### Medium-term (Next Quarter)
 
@@ -145,7 +146,7 @@ Synthesis Writer → cross-ecosystem comparative brief
 |------|-------------|--------|------------|
 | 01 — Researcher | Researcher V1, source tiering, quality gate, ResearchOutput v1.0, researcher-formatter, research-chain recipe | Source confidence threshold | 95% |
 | 02 — Writer | Writer V1, coverage audit, citations + attribution, WRITER METADATA, citation confidence, rendering (pandoc) | Brand voice config, audit severity, source confidence threshold | 80% |
-| 03 — Storyteller | — | Full specialist implementation | 0% |
+| 03 — Storyteller | StoryOutput schema, 5-stage pipeline, NARRATIVE SELECTION, narrative-chain recipe | Compound tones, structured NARRATIVE SELECTION format | 90% |
 | 04 — Competitive Analysis | 6-stage pipeline, head-to-head + landscape modes, CompetitiveAnalysisOutput schema, 2-step + 3-step recipes, researcher-first default, CLAIMS TO VERIFY block | — | 100% |
 | 05 — Design | — | Full specialist implementation | 0% |
 | 06 — Demo Generator | — | Full specialist implementation | 0% |
@@ -193,6 +194,7 @@ Synthesis Writer → cross-ecosystem comparative brief
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v1.9 | Mar 4, 2026 | Chris | Epic 03 (Storyteller) moved to in-progress; specialist, schema, recipe, epic, user stories, principles, metrics all shipped |
 | v1.8 | Mar 4, 2026 | Chris | Added near-term items 6–9 from test log 2026-03-04: Writer word budget, audience calibration, recipe display scaffolding, Writer specificity drift |
 | v1.7 | Mar 3, 2026 | Chris | Added Big Ideas section; first entry: ecosystem-comparison-chain recipe (cross-ecosystem research synthesis) |
 | v1.6 | Mar 3, 2026 | Chris | Added researcher-formatter + research-chain to recently completed; updated Item #0 to partially shipped; Epic 01 to 95%; USING-SPECIALISTS.md and 10 competitive briefs logged |

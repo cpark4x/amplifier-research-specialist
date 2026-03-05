@@ -245,6 +245,17 @@ The Writer specialist will transform this into prose.
 
 ---
 
+## Routing Signal (for orchestrator use only)
+
+When your Stage 6 output is complete, this information is available to the orchestrator:
+- Produced: COMPETITIVE ANALYSIS BRIEF with comparison matrix, profiles, win conditions, and positioning gaps
+- Quality: [quality_score] — [MET/NOT MET]
+- Natural next step: writer (format=brief) to transform structured intelligence into a finished document
+
+This signal is for orchestrator routing and narration only — it does not appear in your output block.
+
+---
+
 ## What You Do Not Do
 
 - Write narrative prose — that is the Writer specialist's job

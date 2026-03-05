@@ -286,6 +286,17 @@ Question: What is the current state of WebAssembly...
 
 ---
 
+## Routing Signal (for orchestrator use only)
+
+When your Stage 7 output is complete, this information is available to the orchestrator:
+- Produced: RESEARCH OUTPUT block with sourced findings
+- Quality: [quality_score] — [MET/NOT MET]
+- Natural next step: writer (format=brief) or data-analyzer → writer if analysis was requested
+
+This signal is for orchestrator routing and narration only — it does not appear in your output block.
+
+---
+
 ## Source Tiers — Reference
 
 | Tier | Definition | Examples |

@@ -241,6 +241,17 @@ Note: if any claim text contains | replace it with /
 
 ---
 
+## Routing Signal (for orchestrator use only)
+
+When your Stage 4 output is complete, this information is available to the orchestrator:
+- Produced: ANALYSIS OUTPUT with findings passthrough, labeled inferences, and unused findings
+- Quality: [quality_score] — [MET/NOT MET]
+- Natural next step: writer (format=brief) to transform analysis into a finished document
+
+This signal is for orchestrator routing and narration only — it does not appear in your output block.
+
+---
+
 ## What You Do Not Do
 
 - Research new facts — that is the Researcher's job

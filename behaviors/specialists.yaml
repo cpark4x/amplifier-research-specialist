@@ -20,6 +20,14 @@ agents:
     - specialists:specialists/competitive-analysis
     - specialists:specialists/data-analyzer
     - specialists:specialists/researcher-formatter
+    - specialists:specialists/storyteller
+
+hooks:
+  - module: hook-specialist-narration
+    source: ./modules/hook-specialist-narration
+
+spawn:
+  exclude_tools: [write_file, edit_file, apply_patch]
 
 context:
   include:
