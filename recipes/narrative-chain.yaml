@@ -2,6 +2,31 @@
 # CHANGELOG
 # =============================================================================
 #
+# v1.2.1 (2026-03-05):
+#   - BUGFIX: normalize-quality-gate crashed with "command not found" / syntax
+#     error when the narrative contained numbered list items like "1) Build:".
+#     * ROOT CAUSE: bash's lexer scans the content of `$(...)` command
+#       substitutions for the matching `)` BEFORE honouring heredoc delimiters.
+#       Any `)` that appears in the narrative content injected via
+#       {{final_narrative_normalized}} (e.g. "1) Build:" or "2) Reframe…")
+#       was misread as the closing paren of `normalized=$(sed … <<'EOF' … EOF)`
+#       causing the heredoc to terminate early and subsequent narrative lines to
+#       be executed as shell commands ("Build: command not found").
+#     * FIX: Replaced the heredoc-inside-$() pattern with a temp-file pattern:
+#       write content into a mktemp file using a top-level heredoc (immune to
+#       the nested-paren scan), then run sed against the file inside $().
+#       The $() for sed now contains only a filename, never a heredoc.
+#     * RESULT: Numbered-list content, parentheses, and all other punctuation
+#       in the narrative are handled safely regardless of model output.
+#   - IMPROVEMENT: Increased save step timeout 120s → 300s
+#     * ROOT CAUSE: When narrative-chain runs in parallel with other LLM-heavy
+#       recipes, provider rate-limiting / request queuing can delay the
+#       foundation:file-ops agent beyond 120s despite the operation itself being
+#       lightweight (~20-40s solo).
+#     * FIX: Bumped save timeout to 300s to provide headroom under contention.
+#     * RESULT: save step survives moderate LLM back-pressure without changing
+#       any behavior.
+#
 # v1.2.0 (2026-03-04):
 #   - FEATURE: Enforce MET|NOT MET vocabulary in quality gate output
 #     * PROBLEM: Storyteller (and downstream LLM variation) occasionally emits
@@ -51,7 +76,7 @@
 
 name: "narrative-chain"
 description: "Full research-to-narrative pipeline — Researcher → Formatter → Data Analyzer → Storyteller → Save. Produces compelling narrative output instead of a structured document."
-version: "1.2.0"
+version: "1.2.1"
 tags: ["research", "analysis", "narrative", "storytelling", "chain"]
 
 context:
@@ -145,15 +170,17 @@ steps:
   - id: "normalize-quality-gate"
     type: "bash"
     command: |
+      _qg_tmp=$(mktemp)
+      cat > "$_qg_tmp" <<'__QG_NORM_EOF__'
+      {{final_narrative_normalized}}
+      __QG_NORM_EOF__
       normalized=$(sed \
         -e 's/^QUALITY THRESHOLD RESULT: PASSED$/QUALITY THRESHOLD RESULT: MET/' \
         -e 's/^QUALITY THRESHOLD RESULT: PASS$/QUALITY THRESHOLD RESULT: MET/' \
         -e 's/^QUALITY THRESHOLD RESULT: FAILED$/QUALITY THRESHOLD RESULT: NOT MET/' \
         -e 's/^QUALITY THRESHOLD RESULT: FAIL$/QUALITY THRESHOLD RESULT: NOT MET/' \
-        <<'__QG_NORM_EOF__'
-      {{final_narrative_normalized}}
-      __QG_NORM_EOF__
-      )
+        "$_qg_tmp")
+      rm -f "$_qg_tmp"
       if printf '%s' "$normalized" | grep -q '^QUALITY THRESHOLD RESULT:'; then
         printf '%s' "$normalized"
       else
@@ -177,4 +204,4 @@ steps:
 
       Content: {{final_narrative_validated}}
     output: "output_path"
-    timeout: 120
+    timeout: 300
