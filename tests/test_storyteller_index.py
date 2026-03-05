@@ -329,3 +329,118 @@ def test_what_you_do_not_do_has_seven_items(content: str) -> None:
     assert len(items) >= 7, (
         f"'What You Do Not Do' must have 7 items, found {len(items)}"
     )
+
+
+# ---------------------------------------------------------------------------
+# Quality gate: mechanical fail triggers (Step 3 additions)
+# ---------------------------------------------------------------------------
+
+
+def test_stage_5_has_mechanical_fail_triggers_section(content: str) -> None:
+    """Stage 5 must contain a 'Mechanical fail triggers' subsection."""
+    assert re.search(
+        r"Mechanical fail triggers",
+        content,
+        re.IGNORECASE,
+    ), "Stage 5 must contain a 'Mechanical fail triggers' subsection"
+
+
+def test_stage_5_mechanical_trigger_sparse_input(content: str) -> None:
+    """Mechanical fail triggers must include sparse-input trigger (fewer than 3 findings)."""
+    m = re.search(
+        r"Mechanical fail triggers(.*?)(?=\n\n(?:If any|##)|\Z)",
+        content,
+        re.DOTALL | re.IGNORECASE,
+    )
+    assert m, "Could not extract Mechanical fail triggers block"
+    block = m.group(1)
+    assert re.search(
+        r"(sparse|fewer than 3|fewer than three)",
+        block,
+        re.IGNORECASE,
+    ), "Mechanical fail triggers must include sparse-input trigger"
+
+
+def test_stage_5_mechanical_trigger_evidence_collapse(content: str) -> None:
+    """Mechanical fail triggers must include evidence-collapse trigger."""
+    assert re.search(
+        r"evidence.{0,10}collapse|insufficient.evidence",
+        content,
+        re.IGNORECASE | re.DOTALL,
+    ), (
+        "Mechanical fail triggers must mention evidence collapse or insufficient-evidence"
+    )
+
+
+def test_stage_5_mechanical_trigger_upstream_not_met(content: str) -> None:
+    """Mechanical fail triggers must include upstream NOT MET trigger."""
+    assert re.search(
+        r"upstream.{0,20}NOT MET|source material.{0,40}NOT MET",
+        content,
+        re.IGNORECASE | re.DOTALL,
+    ), "Mechanical fail triggers must include upstream NOT MET trigger"
+
+
+def test_stage_5_mechanical_triggers_fire_immediately(content: str) -> None:
+    """Mechanical fail triggers must state they fire immediately without revision."""
+    assert re.search(
+        r"immediately|do not attempt revision",
+        content,
+        re.IGNORECASE,
+    ), "Mechanical fail triggers must state they emit NOT MET immediately"
+
+
+def test_stage_5_not_met_emission_covers_mechanical_and_checklist(content: str) -> None:
+    """The NOT MET emission paragraph must cover both mechanical triggers and revision cycles."""
+    # Find the paragraph that mentions 2 revision cycles and NOT MET
+    assert re.search(
+        r"(mechanical trigger|mechanical.{0,10}fire).{0,100}(revision cycle|checklist)",
+        content,
+        re.IGNORECASE | re.DOTALL,
+    ), (
+        "NOT MET emission paragraph must cover both mechanical triggers and checklist revision cycles"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Output format: vocabulary rule (Step 3 additions)
+# ---------------------------------------------------------------------------
+
+
+def test_output_format_has_vocabulary_rule(content: str) -> None:
+    """Output Format section must contain an explicit Vocabulary rule."""
+    assert re.search(
+        r"vocabulary rule",
+        content,
+        re.IGNORECASE,
+    ), "Output Format section must have a 'Vocabulary rule'"
+
+
+def test_vocabulary_rule_prohibits_pass_fail_synonyms(content: str) -> None:
+    """Vocabulary rule must prohibit PASS, FAIL, PASSED, and FAILED."""
+    # Extract the vocabulary rule area
+    m = re.search(
+        r"vocabulary rule(.*?)(?=\n\n---|\.{0,5}\n---|\Z)",
+        content,
+        re.DOTALL | re.IGNORECASE,
+    )
+    assert m, "Could not extract vocabulary rule block"
+    block = m.group(1)
+    for synonym in ("PASS", "FAIL"):
+        assert synonym in block or synonym.lower() in block.lower(), (
+            f"Vocabulary rule must mention prohibited synonym '{synonym}'"
+        )
+
+
+def test_vocabulary_rule_requires_met_or_not_met(content: str) -> None:
+    """Vocabulary rule must specify MET and NOT MET as the only permitted values."""
+    m = re.search(
+        r"vocabulary rule(.*?)(?=\n\n---|\.{0,5}\n---|\Z)",
+        content,
+        re.DOTALL | re.IGNORECASE,
+    )
+    assert m, "Could not extract vocabulary rule block"
+    block = m.group(1)
+    assert "MET" in block and "NOT MET" in block, (
+        "Vocabulary rule must explicitly require MET and NOT MET"
+    )

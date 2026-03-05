@@ -2,6 +2,25 @@
 # CHANGELOG
 # =============================================================================
 #
+# v1.2.0 (2026-03-04):
+#   - FEATURE: Enforce MET|NOT MET vocabulary in quality gate output
+#     * PROBLEM: Storyteller (and downstream LLM variation) occasionally emits
+#       PASS/FAIL/PASSED/FAILED instead of the canonical MET/NOT MET vocabulary,
+#       causing downstream consumers to miss or misparse the quality signal.
+#     * CHANGE 1: Added 'Mechanical fail triggers' subsection to Stage 5 of the
+#       storyteller specialist (sparse input, evidence collapse, upstream NOT MET)
+#       so NOT MET is now realistically reachable via objective criteria.
+#     * CHANGE 2: Appended explicit VOCABULARY CONSTRAINT to the narrate step
+#       prompt: value must be exactly MET or NOT MET; PASS/FAIL synonyms prohibited.
+#     * CHANGE 3: Added deterministic bash post-processing step
+#       (normalize-quality-gate) between normalize-header and save. Normalizes
+#       PASS/PASSED -> MET and FAIL/FAILED -> NOT MET. Appends a NOT MET line
+#       with an explanatory note if the QUALITY THRESHOLD RESULT line is absent.
+#     * CHANGE 4: save step now consumes {{final_narrative_validated}} (output of
+#       normalize-quality-gate) instead of {{final_narrative_normalized}}.
+#     * RESULT: Quality gate vocabulary is deterministically enforced regardless
+#       of model output variation. Missing lines are caught and defaulted safely.
+#
 # v1.1.1 (2026-03-04):
 #   - BUGFIX: Saved narrative file started with markdown heading instead of plain text
 #     * ROOT CAUSE: Storyteller model sometimes emits `## STORY OUTPUT` or
@@ -32,7 +51,7 @@
 
 name: "narrative-chain"
 description: "Full research-to-narrative pipeline — Researcher → Formatter → Data Analyzer → Storyteller → Save. Produces compelling narrative output instead of a structured document."
-version: "1.1.1"
+version: "1.2.0"
 tags: ["research", "analysis", "narrative", "storytelling", "chain"]
 
 context:
@@ -107,6 +126,10 @@ steps:
 
       If audience is empty, infer from the content.
       If tone is empty, infer from the content and audience.
+
+      VOCABULARY CONSTRAINT: In your QUALITY THRESHOLD RESULT line, use exactly `MET` or
+      `NOT MET` as the value. Do NOT use PASS, FAIL, PASSED, or FAILED — these are
+      prohibited synonyms that will be rejected by downstream normalization.
     output: "final_narrative"
     timeout: 900
 
@@ -117,6 +140,26 @@ steps:
       {{final_narrative}}
       __RECIPE_NORM_EOF__
     output: "final_narrative_normalized"
+    timeout: 30
+
+  - id: "normalize-quality-gate"
+    type: "bash"
+    command: |
+      normalized=$(sed \
+        -e 's/^QUALITY THRESHOLD RESULT: PASSED$/QUALITY THRESHOLD RESULT: MET/' \
+        -e 's/^QUALITY THRESHOLD RESULT: PASS$/QUALITY THRESHOLD RESULT: MET/' \
+        -e 's/^QUALITY THRESHOLD RESULT: FAILED$/QUALITY THRESHOLD RESULT: NOT MET/' \
+        -e 's/^QUALITY THRESHOLD RESULT: FAIL$/QUALITY THRESHOLD RESULT: NOT MET/' \
+        <<'__QG_NORM_EOF__'
+      {{final_narrative_normalized}}
+      __QG_NORM_EOF__
+      )
+      if printf '%s' "$normalized" | grep -q '^QUALITY THRESHOLD RESULT:'; then
+        printf '%s' "$normalized"
+      else
+        printf '%s\nQUALITY THRESHOLD RESULT: NOT MET\nNote: quality gate line was missing from storyteller output\n' "$normalized"
+      fi
+    output: "final_narrative_validated"
     timeout: 30
 
   - id: "save"
@@ -132,6 +175,6 @@ steps:
 
       3. Report the full file path saved to.
 
-      Content: {{final_narrative_normalized}}
+      Content: {{final_narrative_validated}}
     output: "output_path"
     timeout: 120

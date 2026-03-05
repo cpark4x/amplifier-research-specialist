@@ -43,10 +43,10 @@ def test_recipe_name() -> None:
 
 
 def test_recipe_version() -> None:
-    """Recipe version must be '1.1.1'."""
+    """Recipe version must be '1.2.0'."""
     recipe = load_recipe()
-    assert recipe["version"] == "1.1.1", (
-        f"Expected version='1.1.1', got {recipe.get('version')!r}"
+    assert recipe["version"] == "1.2.0", (
+        f"Expected version='1.2.0', got {recipe.get('version')!r}"
     )
 
 
@@ -127,15 +127,15 @@ def test_context_has_quality_threshold() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_recipe_has_six_steps() -> None:
-    """Recipe must have exactly 6 steps (including normalize-header)."""
+def test_recipe_has_seven_steps() -> None:
+    """Recipe must have exactly 7 steps (including normalize-header and normalize-quality-gate)."""
     recipe = load_recipe()
     steps = recipe.get("steps", [])
-    assert len(steps) == 6, f"Expected 6 steps, got {len(steps)}"
+    assert len(steps) == 7, f"Expected 7 steps, got {len(steps)}"
 
 
 def test_step_ids_in_order() -> None:
-    """Steps must be in order: research, format-research, analyze, narrate, normalize-header, save."""
+    """Steps must be in order: research, format-research, analyze, narrate, normalize-header, normalize-quality-gate, save."""
     recipe = load_recipe()
     steps = recipe.get("steps", [])
     ids = [s["id"] for s in steps]
@@ -145,6 +145,7 @@ def test_step_ids_in_order() -> None:
         "analyze",
         "narrate",
         "normalize-header",
+        "normalize-quality-gate",
         "save",
     ]
     assert ids == expected, f"Step IDs must be {expected}, got {ids}"
@@ -333,6 +334,20 @@ def test_step4_prompt_mentions_story_output_block() -> None:
     )
 
 
+def test_step4_prompt_has_vocabulary_constraint() -> None:
+    """Step 4 (narrate) prompt must include explicit MET/NOT MET vocabulary constraint."""
+    recipe = load_recipe()
+    step = recipe["steps"][3]
+    prompt = step["prompt"]
+    assert "MET" in prompt and "NOT MET" in prompt, (
+        "Narrate prompt must reference MET and NOT MET vocabulary"
+    )
+    # Must prohibit synonym vocabulary
+    assert "PASS" in prompt or "FAIL" in prompt, (
+        "Narrate prompt must reference PASS/FAIL synonyms to prohibit them"
+    )
+
+
 # ---------------------------------------------------------------------------
 # Step 5 — normalize-header (bash post-processing)
 # ---------------------------------------------------------------------------
@@ -391,51 +406,129 @@ def test_step5_timeout() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Step 6 — save
+# Step 6 — normalize-quality-gate (bash post-processing)
+# ---------------------------------------------------------------------------
+
+
+def test_step6_normalize_quality_gate_exists() -> None:
+    """Step 6 must exist with id 'normalize-quality-gate'."""
+    recipe = load_recipe()
+    step = recipe["steps"][5]
+    assert step["id"] == "normalize-quality-gate", (
+        f"Step 6 id must be 'normalize-quality-gate', got {step.get('id')!r}"
+    )
+
+
+def test_step6_normalize_quality_gate_is_bash_type() -> None:
+    """Step 6 must be a bash step."""
+    recipe = load_recipe()
+    step = recipe["steps"][5]
+    assert step.get("type") == "bash", (
+        f"Step 6 must be type='bash', got {step.get('type')!r}"
+    )
+
+
+def test_step6_normalize_quality_gate_output() -> None:
+    """Step 6 output must be 'final_narrative_validated'."""
+    recipe = load_recipe()
+    step = recipe["steps"][5]
+    assert step["output"] == "final_narrative_validated", (
+        f"Step 6 output must be 'final_narrative_validated', got {step.get('output')!r}"
+    )
+
+
+def test_step6_normalize_quality_gate_references_input_variable() -> None:
+    """Step 6 command must reference {{final_narrative_normalized}} as input."""
+    recipe = load_recipe()
+    step = recipe["steps"][5]
+    assert "{{final_narrative_normalized}}" in step["command"], (
+        "normalize-quality-gate command must reference {{final_narrative_normalized}}"
+    )
+
+
+def test_step6_normalize_quality_gate_has_pass_to_met_normalization() -> None:
+    """Step 6 command must normalize PASS/PASSED to MET."""
+    recipe = load_recipe()
+    step = recipe["steps"][5]
+    cmd = step["command"]
+    assert "PASS" in cmd and "MET" in cmd, (
+        "normalize-quality-gate must contain PASS->MET normalization"
+    )
+
+
+def test_step6_normalize_quality_gate_has_fail_to_not_met_normalization() -> None:
+    """Step 6 command must normalize FAIL/FAILED to NOT MET."""
+    recipe = load_recipe()
+    step = recipe["steps"][5]
+    cmd = step["command"]
+    assert "FAIL" in cmd and "NOT MET" in cmd, (
+        "normalize-quality-gate must contain FAIL->NOT MET normalization"
+    )
+
+
+def test_step6_normalize_quality_gate_appends_missing_line() -> None:
+    """Step 6 command must append NOT MET and note when QUALITY THRESHOLD RESULT line is absent."""
+    recipe = load_recipe()
+    step = recipe["steps"][5]
+    cmd = step["command"]
+    assert "quality gate line was missing" in cmd, (
+        "normalize-quality-gate must handle missing QUALITY THRESHOLD RESULT line"
+    )
+
+
+def test_step6_normalize_quality_gate_timeout() -> None:
+    """Step 6 timeout must be 30 (trivial bash operation)."""
+    recipe = load_recipe()
+    step = recipe["steps"][5]
+    assert step["timeout"] == 30
+
+
+# ---------------------------------------------------------------------------
+# Step 7 — save
 # ---------------------------------------------------------------------------
 
 
 def test_step6_agent_is_file_ops() -> None:
-    """Step 6 must use agent 'foundation:file-ops'."""
+    """Step 6 (now step 7) must use agent 'foundation:file-ops'."""
     recipe = load_recipe()
-    step = recipe["steps"][5]
+    step = recipe["steps"][6]
     assert step["agent"] == "foundation:file-ops"
 
 
 def test_step6_output() -> None:
-    """Step 6 output must be 'output_path'."""
+    """Step 7 output must be 'output_path'."""
     recipe = load_recipe()
-    step = recipe["steps"][5]
+    step = recipe["steps"][6]
     assert step["output"] == "output_path"
 
 
 def test_step6_timeout() -> None:
-    """Step 6 timeout must be 120."""
+    """Step 7 timeout must be 120."""
     recipe = load_recipe()
-    step = recipe["steps"][5]
+    step = recipe["steps"][6]
     assert step["timeout"] == 120
 
 
 def test_step6_saves_to_docs_research_output() -> None:
-    """Step 6 must save to docs/research-output/ directory."""
+    """Step 7 must save to docs/research-output/ directory."""
     recipe = load_recipe()
-    step = recipe["steps"][5]
+    step = recipe["steps"][6]
     assert "docs/research-output/" in step["prompt"], (
         "Step 6 must save to docs/research-output/"
     )
 
 
-def test_step6_prompt_contains_final_narrative_normalized() -> None:
-    """Step 6 prompt must reference {{final_narrative_normalized}} (not raw {{final_narrative}})."""
+def test_step6_prompt_contains_final_narrative_validated() -> None:
+    """Step 7 prompt must reference {{final_narrative_validated}} (output of normalize-quality-gate)."""
     recipe = load_recipe()
-    step = recipe["steps"][5]
-    assert "{{final_narrative_normalized}}" in step["prompt"], (
-        "Save step must use the normalized variable {{final_narrative_normalized}}"
+    step = recipe["steps"][6]
+    assert "{{final_narrative_validated}}" in step["prompt"], (
+        "Save step must use the validated variable {{final_narrative_validated}}"
     )
 
 
 def test_step6_prompt_contains_research_question() -> None:
-    """Step 6 prompt must reference {{research_question}} to derive filename."""
+    """Step 7 prompt must reference {{research_question}} to derive filename."""
     recipe = load_recipe()
-    step = recipe["steps"][5]
+    step = recipe["steps"][6]
     assert "{{research_question}}" in step["prompt"]
