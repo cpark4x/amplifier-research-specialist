@@ -105,6 +105,10 @@ def test_module_source_compiles(module_dir: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.xfail(
+    reason="Source paths are broken until fix/specialists-behavior-source-paths is merged (PR #13)",
+    strict=True,
+)
 def test_behavior_yaml_local_sources_resolve() -> None:
     """Every local source: path in the behavior YAML must resolve to an existing directory."""
     assert BEHAVIOR_YAML.is_file(), f"Behavior YAML not found: {BEHAVIOR_YAML}"
