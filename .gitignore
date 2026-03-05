@@ -2,3 +2,12 @@
 .amplifier/cache/
 *.local.yaml
 *.html
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Temporary
+tmp/
