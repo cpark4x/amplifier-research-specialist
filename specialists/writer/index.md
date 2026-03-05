@@ -172,6 +172,7 @@ Choose the document structure for the requested format:
 **Report:** Executive Summary → Background → Findings (by sub-question) → Conclusions → Recommendations → Appendix (sources)
 
 **Brief:** Summary (3-5 sentences) → Key Points (bullets) → Implications → Next Steps
+**Brief word budget:** 250–400 words total
 
 **Proposal:** Problem → Proposed Solution → Evidence → Expected Outcome → Ask
 
@@ -213,15 +214,20 @@ Before returning output:
 5. Attribution completeness: every section with factual content has a
    `> *Sources: ...*` line. If any factual section is missing one, add it
    before returning.
-6. **Write the CITATIONS block now.** Start a new line with `CITATIONS` — plain text,
+6. **Deduplication check:** Before writing the CITATIONS block, scan the document for repeated claims or phrasing:
+   - Identify any claim stated multiple times in different sections or language variations
+   - Consolidate repeated material into a single clear statement
+   - Remove or substantially rewrite duplicates to avoid redundancy
+   - Verify the deduped document still covers all required points
+7. **Write the CITATIONS block now.** Start a new line with `CITATIONS` — plain text,
    no markdown header. For each source claim S1, S2, S3 ... from Stage 1, write one
    entry stating which section used it (or mark it unused). Use the fixed confidence
    mapping: high → 0.9 | medium → 0.6 | low → 0.3 | unrated → unrated (no numeric).
    For `analysis-output` input: inference entries carry `type: inference`:
      Sx: "[inference claim]" → used in: [section] | type: inference | confidence: high (0.9)
-   Write this block in full before Step 7.
+   Write this block in full before Step 8.
 
-7. **Note for Step 9:** Once the document is written, you will produce WRITER METADATA
+8. **Note for Step 9:** Once the document is written, you will produce WRITER METADATA
    with the following fields filled in:
    - `Word count:` — count the words in the document you just drafted
    - `Coverage:` (full | partial) and `Coverage gaps:` — from your Stage 2 audit
@@ -231,7 +237,7 @@ Before returning output:
      For `analysis-output`, add an `inference` bucket:
      `Confidence distribution: [n] high · [n] medium · [n] low · [n] unrated · [n] inference`
 
-8. **Write the CLAIMS TO VERIFY block now** — only when `input type` is `analyst-output`,
+9. **Write the CLAIMS TO VERIFY block now** — only when `input type` is `analyst-output`,
    `raw-notes`, or `analysis-output`. When input type is `researcher-output`, skip this
    step entirely. Start a new line with `CLAIMS TO VERIFY` — plain text, no markdown header.
    For `analysis-output`: flag both unrated findings AND any inferences containing
@@ -246,7 +252,7 @@ Before returning output:
      named statistic)
    - If no claims match: produce `CLAIMS TO VERIFY: none`
 
-9. **Produce WRITER METADATA, CITATIONS, and CLAIMS TO VERIFY now — after the document.**
+10. **Produce WRITER METADATA, CITATIONS, and CLAIMS TO VERIFY now — after the document.**
 
    Your document is written. You now have everything you need. Produce these three
    blocks immediately after the document, separated by `---`:
