@@ -6,6 +6,12 @@
 
 ---
 
+## Strategic Roadmap
+
+See [**2026-03-05-world-class-roadmap.md**](plans/2026-03-05-world-class-roadmap.md) for the 4-phase strategic direction: Phase 1 NOW (solidify foundations), Phase 2 NEXT (expand specialists), Phase 3 LATER (ecosystem synthesis), Phase 4 CI/Polish (production readiness).
+
+---
+
 ## Current Status Summary
 
 **11 epics tracked:** ✅ 4 complete, 🔄 1 in progress, ⏸️ 0 paused, 6 planned
@@ -76,6 +82,7 @@
 | 8 | Recipe display: filter internal scaffolding from summary | 01/02/04 | Chris | S | M | Raw claim IDs (S1–S45) from the Analyzer's internal pipeline appeared in the `final_output` recipe summary field. Internal scaffolding should not be user-facing. Display/recipe layer issue. *(from test log 2026-03-04)* |
 | 9 | Writer: specificity enforcement | 02 | Chris | S | M | When the research question names a specific subject, the Writer's bottom line and skills sections drifted to generic AI-era conclusions that apply to any tech company. Final layer should pull subject-specific findings through. *(from test log 2026-03-04)* |
 | 10 | Platform UX: default chain completion + narrated execution | 01/02/04/08 | Chris | M | H | Two related problems observed across all specialists: (1) conversational invocations (e.g. "run a competitive analysis") return raw intermediate output — `CompetitiveAnalysisOutput`, `ResearchOutput` — instead of a finished document. Users want the polished end product by default; raw output should be opt-in for developers/pipeline use. (2) Users have no visibility into which specialists ran or in what order. Each specialist should narrate its execution so the chain is transparent. Fix should be applied platform-wide across all specialists, not per-specialist. *(observed during session 2026-03-04)* |
+| 11 | Recipe timeout resilience: patch research-chain and narrative-chain timeouts | 01/03 | Chris | M | M | Increase `research-chain.yaml` `format-research` step timeout and bound research output to prevent downstream timeouts. Increase `narrative-chain.yaml` `save` step timeout and/or refactor save step to remove LLM agent dependency (use foundation:file-ops directly instead). Note: parallel recipe execution amplifies queueing effects and should be avoided for heavy runs. *(identified after manual A/B/C testing 2026-03-04)* |
 
 ### Medium-term (Next Quarter)
 
