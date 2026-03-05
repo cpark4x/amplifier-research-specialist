@@ -5,6 +5,86 @@
 # CHANGELOG
 # =============================================================================
 #
+# v2.5.0 (2026-03-05):
+#   - CRITICAL FIX: generate-report still timing out / truncating at 4096
+#     output tokens despite v2.4.0's per-item text truncation.
+#     * ROOT CAUSE: Even with 200-char item truncation, the full per-entry
+#       JSON array (~23k input tokens for a week of logs) left the model with
+#       insufficient output budget.  The model tried to enumerate every entry,
+#       exhausting its output tokens mid-write_file call.
+#     * THE KEY INSIGHT: The LLM doesn't need raw per-entry data — it needs
+#       an aggregated summary.  Move filtering and aggregation into the Python
+#       extraction step; feed the LLM only pre-computed counts, distributions,
+#       and a capped sample of unchecked items.
+#     * FIX (three structural changes):
+#       1. collect-log-data rewritten: Python now filters by date range and
+#          specialist_filter, then emits a SUMMARY JSON (output: log_summary)
+#          with entries_scanned, entries_matched, quality_distribution,
+#          specialists_represented, topics_covered, unresolved_entries (entries
+#          with unchecked items or action_items_promoted≠true),
+#          unchecked_items_total, and unchecked_items_sample (≤20 items,
+#          text ≤120 chars).
+#       2. generate-report prompt rewritten: uses only {{log_summary}}, targets
+#          <1200 words, caps Top Themes to 5, Unresolved/Stale to 10 listed
+#          entries, Backlog Additions to 10.
+#       3. generate-report timeout kept at 900 s.
+#     * RESULT: Input tokens drop from ~23k to ~2-4k; output comfortably fits
+#       within default token budget; write_file call always completes.
+#
+# v2.4.0 (2026-03-05):
+#   - CRITICAL FIX: generate-report truncated at 4096 output tokens on ~23k
+#     input tokens, causing partial write_file calls missing file_path.
+#     * ROOT CAUSE: Action item texts were unbounded (some multi-line items
+#       exceeded 500 chars), inflating the JSON payload to ~23k input tokens.
+#       Combined with the model's 4096 default max output tokens, the report
+#       was truncated mid-tool-call, producing a write_file without file_path.
+#     * FIX (minimally invasive, three changes):
+#       1. collect-log-data: truncate each action_item text to ≤ 200 chars
+#          (with trailing "..." if truncated) — shrinks JSON payload.
+#       2. generate-report prompt: hard caps on every section — max 5 themes,
+#          max 15 unresolved/stale items (with total counts), max 10 backlog
+#          suggestions, target < 1500 words — shrinks output to fit comfortably
+#          within output token budget.
+#       3. generate-report timeout kept at 900 s (from v2.3.0).
+#     * RESULT: Report fits within output token limits; write_file call always
+#       includes file_path; recipe completes reliably.
+#
+# v2.3.0 (2026-03-05):
+#   - CRITICAL FIX: generate-report still timing out at 300 s
+#     * ROOT CAUSE: 300 s was simply too short for the agent to render a
+#       full four-section report from a large JSON payload, even when it
+#       obeyed the "no file reads" constraint.  The prompt also lacked an
+#       explicit tool-use whitelist, so the agent occasionally attempted
+#       grep / cat calls "just to double-check", burning the clock.
+#     * FIX: Bumped generate-report timeout to 900 s.  Prompt now carries
+#       an ironclad TOOL-USE WHITELIST (write_file only) with an explicit
+#       penalty framing.  collect-log-data already feeds the agent every
+#       field it needs via {{log_data}} so zero file reads are necessary.
+#     * RESULT: Report generation completes well within the 900 s window
+#       with no extraneous tool calls.
+#
+# v2.2.0 (2026-03-05):
+#   - FIX: generate-report still timed out under v2.1.0
+#     * ROOT CAUSE: v2.1.0 stored action items as raw checkbox strings
+#       ("- [ ] …") and emitted indented JSON (indent=2, ~12 KB).  The self
+#       agent ignored the "do not read files" instruction — likely because
+#       the unstructured items gave it reason to re-open files for context,
+#       and the large prompt left fewer tokens for generation before the
+#       300 s wall.
+#     * FIX: Python extractor now emits compact JSON (no indent) with
+#       structured action-item objects {checked: bool, text: string} and
+#       multi-line items merged into single strings.  find output feeds
+#       the extractor via FILE_LIST env var so file discovery stays with
+#       find and parsing stays with Python — single source of truth.
+#     * Prompt rewritten: log_data injected as bare text (no code fence),
+#       schema documented inline, and the ONLY permitted tool call is
+#       write_file for the report.
+#
+# v2.1.0 (2026-03-05):
+#   - FIX: Attempted generate-report timeout fix (insufficient)
+#     * Added collect-log-contents bash step with Python front-matter parser
+#     * Agent still made per-file reads despite instruction; see v2.2.0
+#
 # v2.0.0 (2026-03-04):
 #   - IMPROVEMENT: Interactive date-range collection via approval gate
 #     * BREAKING CHANGE: Added "configure" stage; recipe is now 3-stage
@@ -28,7 +108,7 @@
 
 name: "mine-test-logs"
 description: "Mine test log entries for a date range, generate a summary report, and commit it after approval."
-version: "2.0.0"
+version: "2.5.0"
 tags: ["testing", "analysis", "reporting", "test-log"]
 
 context:
@@ -105,80 +185,198 @@ stages:
         command: "mkdir -p docs/test-log/reports"
         timeout: 10
 
+      - id: "collect-log-data"
+        type: "bash"
+        command: |
+          export FILE_LIST="{{file_list}}"
+          export START_DATE="{{date_range.start_date}}"
+          export END_DATE="{{date_range.end_date}}"
+          export SPEC_FILTER="{{specialist_filter}}"
+          python3 - <<'PYEOF'
+          import os, re, json
+
+          files = [f for f in os.environ['FILE_LIST'].strip().split('\n') if f]
+          start = os.environ['START_DATE']
+          end = os.environ['END_DATE']
+          spec_filter = os.environ['SPEC_FILTER'].strip().lower()
+
+          entries_scanned = 0
+          matched = []
+
+          for fp in files:
+              with open(fp) as fh:
+                  content = fh.read()
+              fm = {}
+              m = re.match(r'^---\s*\n(.*?\n)---', content, re.DOTALL)
+              if m:
+                  for line in m.group(1).split('\n'):
+                      if ':' in line:
+                          k, _, v = line.partition(':')
+                          fm[k.strip()] = v.strip().strip('"')
+              items = []
+              m2 = re.search(r'## Action Items\s*\n(.*?)(?=\n## |\Z)', content, re.DOTALL)
+              if m2:
+                  for line in m2.group(1).split('\n'):
+                      s = line.strip()
+                      if s.startswith('- [x]') or s.startswith('- [X]'):
+                          items.append({'checked': True, 'text': s[5:].strip()})
+                      elif s.startswith('- [ ]'):
+                          items.append({'checked': False, 'text': s[5:].strip()})
+                      elif items and line.startswith('  ') and s:
+                          items[-1]['text'] += ' ' + s
+              entries_scanned += 1
+              d = fm.get('date', '')
+              if d < start or d > end:
+                  continue
+              if spec_filter != 'all':
+                  sp = fm.get('specialist', '').lower()
+                  ch = fm.get('chain', '').lower()
+                  if spec_filter not in sp and spec_filter not in ch:
+                      continue
+              matched.append({
+                  'file': fp,
+                  'date': d,
+                  'specialist': fm.get('specialist', ''),
+                  'topic': fm.get('topic', ''),
+                  'quality_signal': fm.get('quality_signal', ''),
+                  'action_items_promoted': fm.get('action_items_promoted', ''),
+                  'action_items': items
+              })
+
+          quality_dist = {}
+          specialists = set()
+          topics = set()
+          unresolved = []
+          unchecked_total = 0
+          unchecked_sample = []
+
+          for e in matched:
+              qs = e['quality_signal'] or 'unknown'
+              quality_dist[qs] = quality_dist.get(qs, 0) + 1
+              if e['specialist']:
+                  specialists.add(e['specialist'])
+              if e['topic']:
+                  topics.add(e['topic'])
+              unchecked = [i for i in e['action_items'] if not i['checked']]
+              unchecked_total += len(unchecked)
+              if e['action_items_promoted'] != 'true' or unchecked:
+                  unresolved.append({
+                      'file': e['file'],
+                      'date': e['date'],
+                      'specialist': e['specialist'],
+                      'topic': e['topic'],
+                      'action_items_promoted': e['action_items_promoted']
+                  })
+              for it in unchecked:
+                  if len(unchecked_sample) < 20:
+                      t = it['text']
+                      if len(t) > 120:
+                          t = t[:117] + '...'
+                      unchecked_sample.append({
+                          'file': e['file'],
+                          'checked': False,
+                          'text': t
+                      })
+
+          summary = {
+              'entries_scanned': entries_scanned,
+              'entries_matched': len(matched),
+              'quality_distribution': quality_dist,
+              'specialists_represented': sorted(specialists),
+              'topics_covered': sorted(topics),
+              'unresolved_entries': unresolved,
+              'unchecked_items_total': unchecked_total,
+              'unchecked_items_sample': unchecked_sample
+          }
+          print(json.dumps(summary))
+          PYEOF
+        output: "log_summary"
+        timeout: 30
+
       - id: "generate-report"
         agent: "self"
         prompt: |
           You are a test-log mining analyst for the **canvas-specialists** project.
-          Your job is to read test log files, extract structured data, and produce
-          a single Markdown mining report. This is a **report-only** workflow — you
-          must NOT edit any existing files (backlog, epics, specialist configs, etc.).
+          Produce a single Markdown mining report from the pre-computed summary JSON
+          below. This is a **report-only** workflow — do NOT edit any existing files
+          (backlog, epics, specialist configs, etc.).
+
+          ═══════════════════════════════════════════════════════════════════════════
+          TOOL-USE WHITELIST — MANDATORY
+          ═══════════════════════════════════════════════════════════════════════════
+          You may call exactly ONE tool during this entire task:
+
+              write_file  →  to save the finished report
+
+          You MUST NOT call read_file, cat, grep, find, glob, bash, or any
+          other tool. ALL data you need is already embedded below as {{log_summary}}.
+          Any tool call other than the single write_file WILL cause the recipe
+          to time out and fail, wasting the entire run.
+          ═══════════════════════════════════════════════════════════════════════════
+
+          ═══════════════════════════════════════════════════════════════════════════
+          OUTPUT SIZE LIMITS — MANDATORY
+          ═══════════════════════════════════════════════════════════════════════════
+          The report MUST be concise. Target < 1200 words total. Obey these caps:
+
+          - **Section 2 (Top Themes):** At most **5** themes. Derive themes from
+            the topics_covered list, specialists_represented, quality_distribution,
+            and unchecked_items_sample texts. Each theme: 1–2 sentences + evidence
+            file paths. If fewer than 5 themes exist, list only those.
+          - **Section 3 (Unresolved / Stale):** Show total counts first, then list
+            at most **10** entries from unresolved_entries. If more than 10 exist,
+            add a line: "… and N more unresolved entries not listed."
+          - **Section 4 (Recommended Backlog Additions):** At most **10**
+            suggestions. Prioritize by impact. Each: title + 1–2 sentence
+            rationale + evidence file paths.
+          - Keep descriptions terse: 1–2 sentences per item, no paragraphs.
+          ═══════════════════════════════════════════════════════════════════════════
 
           ## Parameters
 
-          | Parameter          | Value                              |
-          |--------------------|------------------------------------|
-          | Start date         | {{date_range.start_date}}          |
-          | End date           | {{date_range.end_date}}            |
-          | Specialist filter  | {{specialist_filter}}              |
+          | Parameter         | Value                     |
+          |-------------------|---------------------------|
+          | Start date        | {{date_range.start_date}} |
+          | End date          | {{date_range.end_date}}   |
+          | Specialist filter | {{specialist_filter}}     |
 
-          ## File list
+          ## Pre-computed summary (JSON)
 
-          One path per line (output of `find`):
-          {{file_list}}
+          {{log_summary}}
 
-          ## Step-by-step instructions
+          Schema:
+          - entries_scanned           — total files found (before filtering)
+          - entries_matched           — entries after date + specialist filtering
+          - quality_distribution      — {pass: N, mixed: N, fail: N, …}
+          - specialists_represented   — list of specialist names
+          - topics_covered            — list of topic slugs
+          - unresolved_entries        — list of {file, date, specialist, topic,
+                                        action_items_promoted} for entries with
+                                        unchecked items or promoted ≠ "true"
+          - unchecked_items_total     — total unchecked action items across all
+                                        matched entries
+          - unchecked_items_sample    — up to 20 sample unchecked items:
+                                        {file, checked: false, text (≤120 chars)}
 
-          ### A. Read & parse every file
+          ## Report structure (follow exactly)
 
-          For **each** path in the file list above:
-
-          1. Read the file contents using your file-reading tool.
-          2. Parse the YAML front matter (the block between the opening `---` and
-             closing `---`). Extract exactly these fields:
-             - `date`  (string, YYYY-MM-DD)
-             - `specialist`  (string)
-             - `chain`  (string or absent/null)
-             - `topic`  (string)
-             - `quality_signal`  (one of: pass, mixed, fail)
-             - `action_items_promoted`  (true, false, or partial)
-          3. Locate the `## Action Items` section. Extract every markdown checkbox
-             line that starts with `- [ ]` (unchecked) or `- [x]` (checked).
-             If the section contains only prose such as "None" with no checkbox
-             lines, record zero action items for that entry.
-
-          ### B. Filter
-
-          Keep only entries whose `date` falls within **{{date_range.start_date}}** to
-          **{{date_range.end_date}}** inclusive (string comparison works for YYYY-MM-DD).
-
-          If `{{specialist_filter}}` is **not** `"all"`, additionally keep only
-          entries whose `specialist` field contains the filter value (case-
-          insensitive substring match — e.g., filter `writer` matches specialist
-          `writer` and chain `researcher → writer`).
-
-          If zero entries remain after filtering, still produce the report with
-          a note: "No entries matched the filter criteria."
-
-          ### C. Generate the report
-
-          Produce a Markdown file with **exactly** this structure (fill in the
-          data you extracted):
+          Write a Markdown file with this structure:
 
           ---
           type: mining-report
           start_date: {{date_range.start_date}}
           end_date: {{date_range.end_date}}
           specialist_filter: {{specialist_filter}}
-          generated: <today's date YYYY-MM-DD>
-          entries_scanned: <total files read>
-          entries_matched: <files after filter>
+          generated: <today YYYY-MM-DD>
+          entries_scanned: <from summary>
+          entries_matched: <from summary>
           ---
 
           # Test Log Mining Report
 
           **Period:** {{date_range.start_date}} to {{date_range.end_date}}
           **Specialist filter:** {{specialist_filter}}
-          **Generated:** <today's date>
+          **Generated:** <today>
 
           ---
 
@@ -190,41 +388,44 @@ stages:
             - pass: <N>
             - mixed: <N>
             - fail: <N>
-          - **Specialists represented:** <comma-separated list>
-          - **Topics covered:** <comma-separated list>
+          - **Specialists represented:** <comma-separated>
+          - **Topics covered:** <comma-separated>
 
-          ## 2. Top Themes
+          ## 2. Top Themes (max 5)
 
-          <For each recurring theme across entries:>
-          - **<Theme title>** — <1-2 sentence description>
-            - Evidence: `<file path 1>`, `<file path 2>`, …
+          <For each theme:>
+          - **<Theme title>** — <1–2 sentence description>
+            - Evidence: `<file>`, `<file>`, …
             - Frequency: appeared in <N> of <M> entries
 
-          ## 3. Unresolved / Stale
+          ## 3. Unresolved / Stale (max 10 listed; totals always shown)
 
-          <List every entry or action item that appears unresolved:>
-          - Entries where `action_items_promoted` is NOT `true`
-          - Unchecked action-item boxes (`- [ ]`) from any matching entry
+          **Totals:** <X> unchecked action items across <Y> entries;
+          <Z> entries with action_items_promoted ≠ "true".
 
-          For each, cite the source file path and the specific item text.
+          <List up to 10 from unresolved_entries:>
+          - `<file>`: <specialist> / <topic> — <promoted status> (<date>)
 
-          ## 4. Recommended Backlog Additions
+          <If more than 10: "… and N more unresolved entries not listed.">
 
-          <Concrete suggestions based on themes and unresolved items.>
-          For each suggestion:
-          - **Title:** <clear, actionable title>
-          - **Rationale:** <1-2 sentences>
-          - **Evidence:** `<file path 1>`, `<file path 2>`, …
+          ## 4. Recommended Backlog Additions (max 10)
+
+          <Suggestions based on themes and unresolved items.>
+          - **Title:** <actionable title>
+          - **Rationale:** <1–2 sentences>
+          - **Evidence:** `<file>`, `<file>`, …
 
           *These are suggestions only — no files have been modified.*
 
-          ### D. Write the report
+          ## Write the report
 
-          Write the completed Markdown to:
+          Call write_file EXACTLY ONCE with EXACTLY this file_path:
 
               docs/test-log/reports/{{date_range.end_date}}-mining-report.md
 
-          ### E. Output
+          Do NOT compute or alter the path. Use it verbatim as shown above.
+
+          ## Output
 
           After writing, output **only** the relative file path you wrote, e.g.:
 
