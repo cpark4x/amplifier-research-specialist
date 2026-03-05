@@ -7,7 +7,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-SPEC_FILE = Path(__file__).parent.parent / "specialists" / "competitive-analysis" / "index.md"
+SPEC_FILE = (
+    Path(__file__).parent.parent / "specialists" / "competitive-analysis" / "index.md"
+)
 
 
 def _content() -> str:
@@ -51,5 +53,7 @@ def test_output_format_starts_with_competitive_analysis_brief() -> None:
 
 
 def test_separator_structure_around_routing_signal() -> None:
-    signal_block = _content().split("## Routing Signal")[1].split("## What You Do Not Do")[0]
+    signal_block = (
+        _content().split("## Routing Signal")[1].split("## What You Do Not Do")[0]
+    )
     assert signal_block.strip().endswith("---")

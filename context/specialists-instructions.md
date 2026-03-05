@@ -5,14 +5,25 @@ Delegate to these agents when quality and trustworthiness matter more than speed
 
 ## Conversational Chain Behavior
 
-**Rule 1 — Chain Completion Default**: Always complete through to the writer before responding. Default output format = `brief`. Never stop at an intermediate specialist and surface the raw structured block. The user gets a finished document.
+**Rule 1 — Chain Completion Default**: Always complete through to the writer before responding. Default output format = `brief`. Never stop at an intermediate specialist and surface the raw structured block. The user gets a finished document. **The coordinator must never generate specialist-domain content (research, analysis, writing) itself** — delegate to the appropriate specialist whenever applicable. After the writer returns, present its output verbatim: do not summarize or rewrite it; do not add any text before `Parsed:` except the mandatory FINAL narration line placed immediately before it.
 
-**Rule 2 — Per-Step Narration**: Before each delegation announce what's running. After each delegation announce what completed:
-- Before: '🔍 Running researcher...'
-- After: '✅ Researcher complete — passing to writer...'
-- Final: '✍️ Done. Here's your brief.'
+**Rule 2 — Per-Step Narration**: Emit narration at three points:
+- **BEFORE line** *(best-effort)*: Before each specialist delegation when possible. Template: "🔍 Running <specialist>..." — Example: "🔍 Running researcher..."
+- **HANDOFF line** *(mandatory)*: After each intermediate specialist returns and before delegating to the next. Template: "✅ <specialist> complete — passing to <next>..." — Example: "✅ Researcher complete — passing to writer..."
+- **FINAL line** *(mandatory)*: After the last specialist returns and before presenting its output. Template: "✏️ Done. Here's your <format>." — Example: "✏️ Done. Here's your brief."
 
-**Rule 3 — Escape Hatch**: If the user explicitly says 'raw output', 'give me the raw research', 'just run the researcher', or 'don't write a document' — stop at that specialist and surface the structured block directly.
+HANDOFF and FINAL lines are required and must appear. BEFORE lines are emitted when possible but are not guaranteed. Every intermediate specialist gets a HANDOFF line after it returns and before the next delegation. The last specialist gets a FINAL line after it returns, placed immediately before the specialist's output.
+
+*Note: narration is now emitted automatically via the `hook-specialist-narration` hook; the coordinator should not rely on emitting narration itself.*
+
+Use these exact agent IDs when delegating: `specialists:specialists/researcher`, `specialists:specialists/data-analyzer`, `specialists:specialists/competitive-analysis`, `specialists:specialists/writer`, `specialists:specialists/researcher-formatter`, `specialists:specialists/storyteller`.
+
+**Rule 3 — Escape Hatch**: If the user explicitly says 'raw output', 'give me the raw research', 'just run the researcher', or 'don't write a document' — stop at that specialist and output the structured block as literal bare text. Your entire response IS that block. **Escape hatch overrides narration**: do NOT emit the narration lines (BEFORE, HANDOFF, FINAL). Start at byte 0 with the specialist's output block. Do NOT prepend a heading, wrap in markdown, or add any text before the block's first line. The very first characters of your response must be the very first characters of the specialist's output block.
+  - Correct: `RESEARCH OUTPUT` (plain text, no markdown)
+  - Wrong: `# RESEARCH OUTPUT` (markdown heading)
+  - Wrong: Any narration, preamble, or explanation before the block
+
+When delegating in escape-hatch mode, prefix the specialist instruction with `[RAW]` so the narration hook suppresses all narration output automatically.
 
 **Rule 4 — Analysis Signal**: If the user asks for 'analysis', 'insights', or 'full analysis' — chain through data-analyzer before writer: researcher → data-analyzer → writer.
 
@@ -54,12 +65,12 @@ Delegate to these agents when quality and trustworthiness matter more than speed
 
 ## When to Use Each
 
-**Delegate to `specialists:researcher` when:**
+**Delegate to `specialists:specialists/researcher` when:**
 - Researching a person, company, product, or event
 - Finding documentation for libraries, APIs, or frameworks
 - Any research where source credibility and confidence matter
 
-**Delegate to `specialists:writer` when:**
+**Delegate to `specialists:specialists/writer` when:**
 - Source material exists and needs to become a document
 - Turning researcher output into a report, brief, or email
 - Any writing task where substance already exists but needs clear expression
@@ -86,27 +97,27 @@ Delegate to these agents when quality and trustworthiness matter more than speed
 ## Typical Chain
 
 For most knowledge work tasks:
-1. `specialists:researcher` → gathers and validates evidence
-2. `specialists:writer` → transforms evidence into the requested document
+1. `specialists:specialists/researcher` → gathers and validates evidence
+2. `specialists:specialists/writer` → transforms evidence into the requested document
 
 For reliable machine-parseable research output:
-1. `specialists:researcher` → gathers and validates evidence (any format)
+1. `specialists:specialists/researcher` → gathers and validates evidence (any format)
 2. `specialists:specialists/researcher-formatter` → normalizes to canonical RESEARCH OUTPUT block
 3. Downstream agents receive guaranteed canonical format
 
 For analytical tasks requiring explicit fact/inference separation:
-1. `specialists:researcher` → gathers and validates evidence
+1. `specialists:specialists/researcher` → gathers and validates evidence
 2. `specialists:specialists/researcher-formatter` → normalizes format (optional but recommended)
 3. `specialists:specialists/data-analyzer` → draws labeled inferences from the evidence
-4. `specialists:writer` → transforms facts + labeled inferences into the requested document
+4. `specialists:specialists/writer` → transforms facts + labeled inferences into the requested document
 
 For competitive intelligence tasks:
-1. `specialists:researcher` → gathers evidence (optional — competitive-analysis can research itself)
+1. `specialists:specialists/researcher` → gathers evidence (optional — competitive-analysis can research itself)
 2. `specialists:specialists/competitive-analysis` → structures evidence into competitive intelligence
-3. `specialists:writer` → transforms competitive intelligence into a brief or report
+3. `specialists:specialists/writer` → transforms competitive intelligence into a brief or report
 
 For narrative output from a research chain:
-1. `specialists:researcher` → gathers and validates evidence
+1. `specialists:specialists/researcher` → gathers and validates evidence
 2. `specialists:specialists/researcher-formatter` → normalizes to canonical RESEARCH OUTPUT block
 3. `specialists:specialists/data-analyzer` → draws labeled inferences
 4. `specialists:specialists/storyteller` → transforms analysis into compelling narrative

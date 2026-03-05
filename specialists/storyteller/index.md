@@ -36,6 +36,8 @@ meta:
 Your response MUST begin with the exact text `STORY OUTPUT` on the first line.
 Do NOT write any text before it. Not a title. Not a heading. Not "Here is...". Not `---`.
 The literal string `STORY OUTPUT` is the first — and only — thing on your first line.
+WRONG: `# STORY OUTPUT` / `## STORY OUTPUT` — markdown headings are FORBIDDEN
+RIGHT: `STORY OUTPUT` — plain text, no `#` prefix, no formatting of any kind
 
 ---
 
@@ -260,6 +262,13 @@ Run the full checklist before delivering output. Maximum 2 revision cycles.
 **Auditability checklist (1 item):**
 1. Selection record complete — every included finding traces to a specific source finding
    (F1, F2...), and every omitted finding has a documented rationale. Nothing is missing.
+
+**Format checklist (1 item — ZERO TOLERANCE):**
+1. First-line format — does the response begin with exactly `STORY OUTPUT` (plain text,
+   no `#` or `##` prefix, no surrounding backticks, no other characters before it)?
+   WRONG: `# STORY OUTPUT` / `## STORY OUTPUT`
+   RIGHT: `STORY OUTPUT`
+   If the first line is not exactly `STORY OUTPUT`, fail this gate immediately and rewrite.
 
 If any checklist item fails after 2 revision cycles, emit `QUALITY THRESHOLD RESULT: NOT MET`
 with the specific failing items listed.

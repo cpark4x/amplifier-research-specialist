@@ -1,6 +1,38 @@
+# =============================================================================
+# CHANGELOG
+# =============================================================================
+#
+# v1.1.1 (2026-03-04):
+#   - BUGFIX: Saved narrative file started with markdown heading instead of plain text
+#     * ROOT CAUSE: Storyteller model sometimes emits `## STORY OUTPUT` or
+#       `# STORY OUTPUT` despite explicit prompt instructions requiring plain-text
+#       `STORY OUTPUT` as the first line. Prompt-level enforcement alone is
+#       insufficient because models non-deterministically add heading prefixes.
+#     * FIX: Added a deterministic bash post-processing step (normalize-header)
+#       between narrate and save. Uses sed with a quoted heredoc to strip any
+#       leading `#` prefix from the first line, producing the derived variable
+#       `final_narrative_normalized` consumed by the save step.
+#     * RESULT: Saved files always begin with plain-text `STORY OUTPUT` regardless
+#       of whether the model emits a markdown heading prefix.
+#
+# v1.1.0 (2026-03-04):
+#   - BUGFIX: format-research step timed out at 600s on medium-sized research
+#     * ROOT CAUSE: The formatter receives the largest payload in the chain
+#       (raw research output before any condensation) but had the smallest
+#       timeout of any processing step (600s vs 900s for analyze/narrate).
+#     * FIX: Increased format-research timeout 600s → 1200s (2×). Added a
+#       soft output-bounding constraint to the research step (≤3 000 words /
+#       30 sourced claims) so downstream steps receive predictably-sized input.
+#     * RESULT: Pipeline reliably completes for typical medium-sized research.
+#
+# v1.0.0 (initial):
+#   - Initial release of narrative-chain recipe.
+#
+# =============================================================================
+
 name: "narrative-chain"
 description: "Full research-to-narrative pipeline — Researcher → Formatter → Data Analyzer → Storyteller → Save. Produces compelling narrative output instead of a structured document."
-version: "1.0.0"
+version: "1.1.1"
 tags: ["research", "analysis", "narrative", "storytelling", "chain"]
 
 context:
@@ -20,8 +52,14 @@ steps:
       Research question: {{research_question}}
 
       Quality threshold: {{quality_threshold}}
+
+      Scope constraints (required — enforce in Stage 1):
+      - Decompose into no more than 5 sub-questions
+      - Cap your source queue at 15 URLs total across all sub-questions
+      - Run no more than 2 Quality Gate cycles before accepting remaining gaps
+      - Target a maximum of 3,000 words and 30 sourced claims in your final output
     output: "research_output"
-    timeout: 2700
+    timeout: 4500
 
   - id: "format-research"
     agent: "specialists:specialists/researcher-formatter"
@@ -33,7 +71,7 @@ steps:
       Research narrative to format:
       {{research_output}}
     output: "formatted_research"
-    timeout: 600
+    timeout: 1200
 
   - id: "analyze"
     agent: "specialists:specialists/data-analyzer"
@@ -50,6 +88,12 @@ steps:
   - id: "narrate"
     agent: "specialists:specialists/storyteller"
     prompt: |
+      CRITICAL FORMAT REQUIREMENT: Your response MUST begin with the exact plain-text
+      line `STORY OUTPUT` — no `#` prefix, no `##` prefix, no markdown heading of any
+      kind. The very first characters you emit must be `STORY OUTPUT` (plain text only).
+      WRONG: `# STORY OUTPUT` / `## STORY OUTPUT`
+      RIGHT: `STORY OUTPUT`
+
       Transform the following analysis into a compelling narrative. Follow your full
       5-stage pipeline: Parse, Find the Drama, Select and Structure, Draft, and
       Quality Gate. Return the complete STORY OUTPUT block with NARRATIVE SELECTION
@@ -66,6 +110,15 @@ steps:
     output: "final_narrative"
     timeout: 900
 
+  - id: "normalize-header"
+    type: "bash"
+    command: |
+      sed '1s/^##* STORY OUTPUT/STORY OUTPUT/' <<'__RECIPE_NORM_EOF__'
+      {{final_narrative}}
+      __RECIPE_NORM_EOF__
+    output: "final_narrative_normalized"
+    timeout: 30
+
   - id: "save"
     agent: "foundation:file-ops"
     prompt: |
@@ -79,6 +132,6 @@ steps:
 
       3. Report the full file path saved to.
 
-      Content: {{final_narrative}}
+      Content: {{final_narrative_normalized}}
     output: "output_path"
     timeout: 120

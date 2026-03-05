@@ -43,10 +43,10 @@ def test_recipe_name() -> None:
 
 
 def test_recipe_version() -> None:
-    """Recipe version must be '1.0.0'."""
+    """Recipe version must be '1.1.1'."""
     recipe = load_recipe()
-    assert recipe["version"] == "1.0.0", (
-        f"Expected version='1.0.0', got {recipe.get('version')!r}"
+    assert recipe["version"] == "1.1.1", (
+        f"Expected version='1.1.1', got {recipe.get('version')!r}"
     )
 
 
@@ -127,21 +127,27 @@ def test_context_has_quality_threshold() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_recipe_has_five_steps() -> None:
-    """Recipe must have exactly 5 steps."""
+def test_recipe_has_six_steps() -> None:
+    """Recipe must have exactly 6 steps (including normalize-header)."""
     recipe = load_recipe()
     steps = recipe.get("steps", [])
-    assert len(steps) == 5, f"Expected 5 steps, got {len(steps)}"
+    assert len(steps) == 6, f"Expected 6 steps, got {len(steps)}"
 
 
 def test_step_ids_in_order() -> None:
-    """Steps must be in order: research, format-research, analyze, narrate, save."""
+    """Steps must be in order: research, format-research, analyze, narrate, normalize-header, save."""
     recipe = load_recipe()
     steps = recipe.get("steps", [])
     ids = [s["id"] for s in steps]
-    assert ids == ["research", "format-research", "analyze", "narrate", "save"], (
-        f"Step IDs must be ['research', 'format-research', 'analyze', 'narrate', 'save'], got {ids}"
-    )
+    expected = [
+        "research",
+        "format-research",
+        "analyze",
+        "narrate",
+        "normalize-header",
+        "save",
+    ]
+    assert ids == expected, f"Step IDs must be {expected}, got {ids}"
 
 
 # ---------------------------------------------------------------------------
@@ -164,10 +170,10 @@ def test_step1_output() -> None:
 
 
 def test_step1_timeout() -> None:
-    """Step 1 timeout must be 2700."""
+    """Step 1 timeout must be 4500 (increased to accommodate scope-constrained research runs)."""
     recipe = load_recipe()
     step = recipe["steps"][0]
-    assert step["timeout"] == 2700
+    assert step["timeout"] == 4500
 
 
 def test_step1_prompt_contains_research_question() -> None:
@@ -204,10 +210,10 @@ def test_step2_output() -> None:
 
 
 def test_step2_timeout() -> None:
-    """Step 2 timeout must be 600."""
+    """Step 2 timeout must be 1200 (raised from 600 — formatter processes largest payload)."""
     recipe = load_recipe()
     step = recipe["steps"][1]
-    assert step["timeout"] == 600
+    assert step["timeout"] == 1200
 
 
 def test_step2_prompt_contains_research_output() -> None:
@@ -328,49 +334,108 @@ def test_step4_prompt_mentions_story_output_block() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Step 5 — save
+# Step 5 — normalize-header (bash post-processing)
 # ---------------------------------------------------------------------------
 
 
-def test_step5_agent_is_file_ops() -> None:
-    """Step 5 must use agent 'foundation:file-ops'."""
+def test_step5_is_bash_type() -> None:
+    """Step 5 must be a bash step."""
     recipe = load_recipe()
     step = recipe["steps"][4]
-    assert step["agent"] == "foundation:file-ops"
-
-
-def test_step5_output() -> None:
-    """Step 5 output must be 'output_path'."""
-    recipe = load_recipe()
-    step = recipe["steps"][4]
-    assert step["output"] == "output_path"
-
-
-def test_step5_timeout() -> None:
-    """Step 5 timeout must be 120."""
-    recipe = load_recipe()
-    step = recipe["steps"][4]
-    assert step["timeout"] == 120
-
-
-def test_step5_saves_to_docs_research_output() -> None:
-    """Step 5 must save to docs/research-output/ directory."""
-    recipe = load_recipe()
-    step = recipe["steps"][4]
-    assert "docs/research-output/" in step["prompt"], (
-        "Step 5 must save to docs/research-output/"
+    assert step.get("type") == "bash", (
+        f"Step 5 must be type='bash', got {step.get('type')!r}"
     )
 
 
-def test_step5_prompt_contains_final_narrative() -> None:
-    """Step 5 prompt must reference {{final_narrative}}."""
+def test_step5_id_is_normalize_header() -> None:
+    """Step 5 id must be 'normalize-header'."""
     recipe = load_recipe()
     step = recipe["steps"][4]
-    assert "{{final_narrative}}" in step["prompt"]
+    assert step["id"] == "normalize-header"
 
 
-def test_step5_prompt_contains_research_question() -> None:
-    """Step 5 prompt must reference {{research_question}} to derive filename."""
+def test_step5_output_is_final_narrative_normalized() -> None:
+    """Step 5 output must be 'final_narrative_normalized'."""
     recipe = load_recipe()
     step = recipe["steps"][4]
+    assert step["output"] == "final_narrative_normalized", (
+        f"Expected output='final_narrative_normalized', got {step.get('output')!r}"
+    )
+
+
+def test_step5_command_references_final_narrative() -> None:
+    """Step 5 command must reference {{final_narrative}} for normalization."""
+    recipe = load_recipe()
+    step = recipe["steps"][4]
+    assert "{{final_narrative}}" in step["command"], (
+        "normalize-header command must reference {{final_narrative}}"
+    )
+
+
+def test_step5_command_strips_heading_prefix() -> None:
+    """Step 5 command must strip markdown heading prefix from first line."""
+    recipe = load_recipe()
+    step = recipe["steps"][4]
+    cmd = step["command"]
+    assert "sed" in cmd, "normalize-header must use sed"
+    assert "STORY OUTPUT" in cmd, "sed pattern must reference STORY OUTPUT"
+    # Must target only line 1 (1s/ pattern)
+    assert "1s/" in cmd, "sed must target only the first line (1s/...)"
+
+
+def test_step5_timeout() -> None:
+    """Step 5 timeout must be 30 (trivial bash operation)."""
+    recipe = load_recipe()
+    step = recipe["steps"][4]
+    assert step["timeout"] == 30
+
+
+# ---------------------------------------------------------------------------
+# Step 6 — save
+# ---------------------------------------------------------------------------
+
+
+def test_step6_agent_is_file_ops() -> None:
+    """Step 6 must use agent 'foundation:file-ops'."""
+    recipe = load_recipe()
+    step = recipe["steps"][5]
+    assert step["agent"] == "foundation:file-ops"
+
+
+def test_step6_output() -> None:
+    """Step 6 output must be 'output_path'."""
+    recipe = load_recipe()
+    step = recipe["steps"][5]
+    assert step["output"] == "output_path"
+
+
+def test_step6_timeout() -> None:
+    """Step 6 timeout must be 120."""
+    recipe = load_recipe()
+    step = recipe["steps"][5]
+    assert step["timeout"] == 120
+
+
+def test_step6_saves_to_docs_research_output() -> None:
+    """Step 6 must save to docs/research-output/ directory."""
+    recipe = load_recipe()
+    step = recipe["steps"][5]
+    assert "docs/research-output/" in step["prompt"], (
+        "Step 6 must save to docs/research-output/"
+    )
+
+
+def test_step6_prompt_contains_final_narrative_normalized() -> None:
+    """Step 6 prompt must reference {{final_narrative_normalized}} (not raw {{final_narrative}})."""
+    recipe = load_recipe()
+    step = recipe["steps"][5]
+    assert "{{final_narrative_normalized}}" in step["prompt"], (
+        "Save step must use the normalized variable {{final_narrative_normalized}}"
+    )
+
+
+def test_step6_prompt_contains_research_question() -> None:
+    """Step 6 prompt must reference {{research_question}} to derive filename."""
+    recipe = load_recipe()
+    step = recipe["steps"][5]
     assert "{{research_question}}" in step["prompt"]
