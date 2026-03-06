@@ -118,28 +118,19 @@ Emit a `source_attempted` event for every URL regardless of outcome.
 
 From each successfully fetched source, extract discrete claims. One claim per finding.
 
-For each claim, write it directly in FINDINGS block format as you extract it — not as prose first, formatted later. Each extracted claim becomes one entry in your final FINDINGS section:
+For each claim, capture:
+- The specific, falsifiable claim (not a vague summary)
+- The source URL (full `https://` — a publication name is not a URL)
+- The source tier (primary / secondary / tertiary)
+- Your confidence assessment (high / medium / low)
+- Whether it's a direct quote
+- Publication date if known
 
-```
-- Claim: [specific, falsifiable statement — not a vague summary]
-  Source: [URL]
-  Tier: [primary | secondary | tertiary]
-  Confidence: [high | medium | low]
-  Corroborated by: [count] independent sources
-  Direct quote: [yes | no]
-  Published: [date if known]
-```
+**Data quality rules:**
+- If you cannot recover the source URL, that source is inaccessible — log it in evidence gaps, do not extract claims from it.
+- Numeric and financial claims (dollar amounts, percentages, revenue figures) get `low` confidence unless backed by a primary source or 2+ independent secondary sources.
 
-Do not synthesize at this stage. Only extract and format.
-
-**Format enforcement rules — apply to every finding before writing it:**
-
-- **`Source` must be a full `https://` URL** — never a publication name, never a headline. If you have the source name but not the URL, that source is inaccessible — log it in EVIDENCE GAPS, do not create a finding for it.
-- **`Confidence` must be `high`, `medium`, or `low`** — never `unrated`. If you are uncertain, assign `low`. Uncertain = Low confidence. Unclassified is not an option.
-- **Numeric and financial claims** (dollar amounts, percentages, user counts, revenue figures, valuations) require special handling: assign `low` confidence unless backed by a primary source or 2+ independent secondary sources, and add a `Note:` line to the finding:
-  ```
-  Note: financial figure — single source, independent corroboration required
-  ```
+Do not synthesize at this stage. Only extract.
 
 ### Stage 5: Corroborator
 
