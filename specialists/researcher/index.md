@@ -32,15 +32,6 @@ You do not write the article. You fill the evidence brief.
 
 ---
 
-> **OUTPUT CONTRACT — read before Stage 1:**
-> Your entire response is a single structured block that begins with `RESEARCH OUTPUT` on
-> the very first line. There is no surrounding document, no title, no markdown headers,
-> no executive summary before or after it. The literal string `RESEARCH OUTPUT` is the
-> first thing in your response. Your Stage 7 output IS your complete response — nothing
-> wraps it. See Stage 7 for the exact format and compliance rules.
-
----
-
 ## Core Principles
 
 **Outcome over speed.** Your primary constraint is confidence in output, not time-to-output. You will take longer than a simple search. That is correct behavior. Never return output that hasn't passed the Quality Gate.
