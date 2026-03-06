@@ -25,7 +25,11 @@ Use these exact agent IDs when delegating: `specialists:specialists/researcher`,
 
 When delegating in escape-hatch mode, prefix the specialist instruction with `[RAW]` so the narration hook suppresses all narration output automatically.
 
-**Rule 4 — Analysis Signal**: If the user asks for 'analysis', 'insights', or 'full analysis' — chain through data-analyzer before writer: researcher → data-analyzer → writer.
+**Rule 4 — Analysis Signal**: If the user asks for 'analysis', 'insights', or 'full analysis' — chain through data-analyzer before writer: researcher → formatter → data-analyzer → writer.
+
+**Rule 5 — Formatter Is Always In The Path**: When the researcher's output feeds ANY downstream specialist (writer, data-analyzer, storyteller, competitive-analysis), **always** route through `specialists:specialists/researcher-formatter` first. The researcher produces excellent content but its format is inconsistent (~1 in 3 topics produces canonical output). The formatter normalizes it in seconds. This is not optional — skip it only if the user explicitly says 'skip formatter' or 'raw research'.
+
+The formatter is invisible to the user — do not mention it in narration unless the user asks about the pipeline. HANDOFF narration should say "✅ Research complete — normalizing format..." (not "passing to formatter").
 
 ## Available Specialists
 
@@ -98,23 +102,20 @@ When delegating in escape-hatch mode, prefix the specialist instruction with `[R
 
 For most knowledge work tasks:
 1. `specialists:specialists/researcher` → gathers and validates evidence
-2. `specialists:specialists/writer` → transforms evidence into the requested document
-
-For reliable machine-parseable research output:
-1. `specialists:specialists/researcher` → gathers and validates evidence (any format)
-2. `specialists:specialists/researcher-formatter` → normalizes to canonical RESEARCH OUTPUT block
-3. Downstream agents receive guaranteed canonical format
+2. `specialists:specialists/researcher-formatter` → normalizes to canonical format (Rule 5 — always)
+3. `specialists:specialists/writer` → transforms evidence into the requested document
 
 For analytical tasks requiring explicit fact/inference separation:
 1. `specialists:specialists/researcher` → gathers and validates evidence
-2. `specialists:specialists/researcher-formatter` → normalizes format (optional but recommended)
+2. `specialists:specialists/researcher-formatter` → normalizes to canonical format (Rule 5 — always)
 3. `specialists:specialists/data-analyzer` → draws labeled inferences from the evidence
 4. `specialists:specialists/writer` → transforms facts + labeled inferences into the requested document
 
 For competitive intelligence tasks:
 1. `specialists:specialists/researcher` → gathers evidence (optional — competitive-analysis can research itself)
-2. `specialists:specialists/competitive-analysis` → structures evidence into competitive intelligence
-3. `specialists:specialists/writer` → transforms competitive intelligence into a brief or report
+2. `specialists:specialists/researcher-formatter` → normalizes to canonical format (Rule 5 — when researcher is used)
+3. `specialists:specialists/competitive-analysis` → structures evidence into competitive intelligence
+4. `specialists:specialists/writer` → transforms competitive intelligence into a brief or report
 
 For narrative output from a research chain:
 1. `specialists:specialists/researcher` → gathers and validates evidence
