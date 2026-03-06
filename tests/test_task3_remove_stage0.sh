@@ -9,7 +9,7 @@ PASS=0
 FAIL=0
 
 # Test 1: No "Stage 0" references
-count=$(grep -c 'Stage 0' "$FILE")
+count=$(grep -c 'Stage 0' "$FILE" || true)
 if [ "$count" -eq 0 ]; then
     echo "PASS: No 'Stage 0' references found"
     ((PASS++))
@@ -30,7 +30,7 @@ fi
 # Test 3: Research Pipeline intro flows directly to Stage 1
 # The line "Do not skip stages." should be followed (after a blank line) by "### Stage 1: Planner"
 # with NO Stage 0 heading in between
-between=$(sed -n '/Do not skip stages\./,/### Stage 1: Planner/p' "$FILE" | grep -c '### Stage 0')
+between=$(sed -n '/Do not skip stages\./,/### Stage 1: Planner/p' "$FILE" | grep -c '### Stage 0' || true)
 if [ "$between" -eq 0 ]; then
     echo "PASS: No Stage 0 between pipeline intro and Stage 1"
     ((PASS++))
