@@ -12,3 +12,6 @@ dependencies = [
 
 [project.entry-points."amplifier.modules"]
 hook-specialist-narration = "amplifier_module_hook_specialist_narration:mount"
+
+[tool.hatch.build.targets.wheel]
+packages = ["amplifier_module_hook_specialist_narration"]
