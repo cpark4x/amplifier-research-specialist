@@ -75,7 +75,7 @@ Items ordered by impact. Ship these first — they fix the most-flagged quality 
 | # | Item | Epic | Owner | Effort | Impact | Why Now |
 |---|------|------|-------|--------|--------|---------|
 | 0 | ~~**Specialist output format compliance — architectural fix**~~ | 01/02 | Chris | — | — | **Partially shipped 2026-03-03.** Researcher-formatter specialist built — two-step approach normalizes any Researcher output to canonical RESEARCH OUTPUT block before DA/Writer. Researcher format compliance resolved architecturally. Writer structural blocks (WRITER METADATA / CITATIONS / CLAIMS TO VERIFY) remain aspirational — revisit when Amplifier provider supports structured output (PR #38 closed upstream as premature; orchestrator layer must propagate response_format first). |
-
+| 22 | **Researcher format compliance — canonical output enforcement** | 01 | Chris | M | H | **Promoted from near-term after Session 1 validation test.** 3/3 researcher runs produced narrative documents instead of canonical RESEARCH OUTPUT blocks. Specific failures: (a) markdown headers instead of plain `RESEARCH OUTPUT` anchor, (b) narrative sections instead of structured FINDINGS blocks, (c) numeric confidence (0.97) instead of categorical (high/medium/low), (d) abbreviated tier labels (T1/T2/T3) instead of primary/secondary/tertiary. Fix: added 5-point FINAL SELF-CHECK, explicit wrong/right examples for FINDINGS format, numeric confidence, and tier labels. Deeper than a single-field fix — the model consistently ignores the structured output format after 10-20+ tool calls of research. *(validated by test log 2026-03-06-validation-session1-fixes)* |
 
 
 ### Near-term (Next 1-2 Sprints)
@@ -89,7 +89,7 @@ Ordered by priority tier then impact. Items marked *(consolidated)* absorbed dup
 | 28 | Writer: surface CLAIMS TO VERIFY in user-facing output | 02 | Chris | S | M | Writer already identifies claims needing verification (17 in 2026-03-06 run) but buries them in metadata. Readers get no signal about which figures are soft. Consider inline confidence markers or a "Note on Sources" section. Small lift — the analysis is already done. *(from test log 2026-03-06)* |
 | 7 | Writer: strengthen audience calibration | 02 | Chris | S | M | `audience: myself` produced identical register to `audience: executive stakeholders` — third-person, formal, presentation-ready. Should shift to direct, first-person, actionable voice. *(from test log 2026-03-04)* |
 | 9 | Writer: specificity enforcement | 02 | Chris | S | M | When the research question names a specific subject, the Writer's bottom line and skills sections drifted to generic AI-era conclusions that apply to any tech company. Final layer should pull subject-specific findings through. *(from test log 2026-03-04)* |
-| 22 | Stabilize Researcher canonical output header/anchor (Stage 0 / "RESEARCH OUTPUT") | 01 | Chris | S | M | The "opening block" normalization is not reliably triggering across topics, breaking downstream parsing assumptions. *(from mining report 2026-03-05)* |
+| ~~22~~ | ~~Stabilize Researcher canonical output header/anchor (Stage 0 / "RESEARCH OUTPUT")~~ | 01 | Chris | — | — | **Promoted to Immediate Next and shipped 2026-03-06.** See Immediate Next #22 entry. |
 
 **Priority 3 — Important but not urgent:**
 
@@ -249,6 +249,7 @@ Synthesis Writer → cross-ecosystem comparative brief
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v2.8 | Mar 6, 2026 | Chris | Promoted #22 from near-term to Immediate Next after validation test (3/3 researcher runs produced non-canonical output). Shipped format enforcement fix: 5-point FINAL SELF-CHECK, explicit wrong/right examples for FINDINGS blocks, numeric confidence ban, tier label ban. Struck through #22 in near-term. |
 | v2.7 | Mar 6, 2026 | Chris | Marked #27 as shipped — moved to Recently Completed. Sprint complete: Immediate Next is now empty. |
 | v2.6 | Mar 6, 2026 | Chris | Marked #5 and #6 as shipped — moved to Recently Completed. #27 is now the sole Immediate Next item. |
 | v2.5 | Mar 6, 2026 | Chris | **Prioritization pass.** Consolidated 5 duplicates: #12/#20/#21 merged into #5 (researcher trustworthiness overhaul, bumped to M effort / H impact); #23 merged into #16; #24 merged into #17. Restructured near-term into 4 priority tiers. Moved #5, #6, #27 to Immediate Next. Filled TBD effort/impact ratings. Added Consolidation Log. Separated shipped items (#10, #26) into Shipped/Closed table. Net: 28 items → 20 unique items (5 absorbed, 2 shipped, 1 partially shipped). |

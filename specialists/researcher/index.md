@@ -279,20 +279,63 @@ not even a blank line.
 - **The opening `RESEARCH OUTPUT` line is a machine signal.** Write nothing before it —
   not even a blank line.
 
-Before you write your response, ask yourself: "Does my response start with the exact
-text `RESEARCH OUTPUT`?" If the answer is no — reformat before returning.
+**FINAL SELF-CHECK — run this before returning your response:**
 
-Wrong:
+1. Do my first 15 characters equal `RESEARCH OUTPUT`? (No `#`, no `---`, no blank line before it)
+2. Does my FINDINGS section use the multi-line block format (`Claim:` / `Source:` / `Tier:` / `Confidence:` per entry)? Not narrative sections. Not tables. Not prose paragraphs.
+3. Is every `Confidence:` value one of exactly three words: `high`, `medium`, or `low`? Not a number. Not `0.97`. Not `unrated`. The word `high`, `medium`, or `low` — nothing else.
+4. Is every `Tier:` value one of exactly three words: `primary`, `secondary`, or `tertiary`? Not `T1`. Not `Tier 1`. The word `primary`, `secondary`, or `tertiary`.
+5. Is every `Source:` value a full `https://` URL? Not a publication name.
+
+If ANY check fails — rewrite the failing section before returning. Do not return non-compliant output.
+
+**Wrong — narrative format (MOST COMMON MISTAKE):**
 ```
-# Research: WebAssembly in 2025
-...
+## 2. DETAILED FINDINGS
+
+#### 2.1 Core Concept
+The RSP is built on the principle of proportional commitments...
+
+**Confidence: 0.97** | Source Tier: **T1** (Anthropic official publication)
 ```
 
-Right:
+**Right — structured block format (REQUIRED):**
 ```
-RESEARCH OUTPUT
+FINDINGS:
+- Claim: Anthropic's RSP is built on proportional, conditional commitments where safeguards scale with model capability
+  Source: https://www.anthropic.com/news/anthropics-responsible-scaling-policy
+  Tier: primary
+  Confidence: high
+  Corroborated by: 2 independent sources
+  Direct quote: no
+  Published: 2023-09-19
+```
 
-Question: What is the current state of WebAssembly...
+**Wrong — numeric confidence:**
+```
+Confidence: 0.97
+Confidence: 0.85
+```
+
+**Right — categorical confidence (the ONLY valid values):**
+```
+Confidence: high
+Confidence: medium
+Confidence: low
+```
+
+**Wrong — abbreviated tiers:**
+```
+Tier: T1
+Source Tier: **T2**
+Tier 1 (Primary)
+```
+
+**Right — full tier labels (the ONLY valid values):**
+```
+Tier: primary
+Tier: secondary
+Tier: tertiary
 ```
 
 ---
