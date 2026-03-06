@@ -36,15 +36,15 @@ Anchored to `SUCCESS-METRICS.md` and `VISION.md`:
 
 ## Current State
 
-*As of 2026-03-06 — after session 1*
+*As of 2026-03-06 — end of session 1*
 
 | Dimension | Score | Status | Key Gaps |
 |---|---|---|---|
 | **Research Trustworthiness** | 5/10 | *(spec)* | Confidence tiers + URL enforcement added (#5). Not yet validated by test run. |
 | **Chain Reliability** | 4/10 | — | Formatter step skipped in Mar 6 log (#27 open). Timeout fragility (#11 open). |
-| **Format Fidelity** | 3/10 | — | Brief = ~1500w (should be ~400–600w). Audience undifferentiated. CLAIMS TO VERIFY buried. |
+| **Format Fidelity** | 5/10 | *(spec)* | Word budgets added for all 6 formats + Stage 5 enforcement (#6). Audience calibration still undifferentiated (#7 open). CLAIMS TO VERIFY still buried (#28 open). |
 | **Specialist Coverage** | 4/10 | — | 5/11 epics complete. Most Phase 1 roadmap gates open. |
-| **Overall** | **4.0/10** | | |
+| **Overall** | **4.5/10** | | |
 
 ---
 
@@ -52,7 +52,7 @@ Anchored to `SUCCESS-METRICS.md` and `VISION.md`:
 
 | Date | Session | Changes | Dimension Deltas | Overall |
 |---|---|---|---|---|
-| 2026-03-06 | Session 1 | Added session startup procedure (`context/session-startup.md`). Researcher trustworthiness overhaul — backlog #5: explicit `unrated` ban, URL capture enforcement, numeric/financial claim handling (Stage 3 + Stage 4 + Core Principles). | Research Trust: 2→5 *(spec)* | 3.0 → 4.0 *(spec)* |
+| 2026-03-06 | Session 1 | Session startup procedure (`context/session-startup.md`) + SCORECARD.md. Researcher trustworthiness overhaul (#5): explicit `unrated` ban, URL capture enforcement, numeric/financial claim handling (Stage 3 + Stage 4 + Core Principles). Writer word budget enforcement (#6): budgets for all 6 formats in Stage 3 + budget check + trim instruction in Stage 5. | Research Trust: 2→5 *(spec)*, Format Fidelity: 3→5 *(spec)* | 3.0 → 4.5 *(spec)* |
 
 ---
 
@@ -104,4 +104,5 @@ Anchored to `SUCCESS-METRICS.md` and `VISION.md`:
 
 | Version | Date | Changes |
 |---|---|---|
+| v1.1 | 2026-03-06 | Session 1 complete — Format Fidelity 3→5 (spec) after #6. Overall 4.0→4.5 (spec). Session log updated to include both #5 and #6. |
 | v1.0 | 2026-03-06 | Initial scorecard — first session baseline |
