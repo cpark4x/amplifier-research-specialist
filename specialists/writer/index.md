@@ -190,17 +190,22 @@ Before writing a single word:
 Choose the document structure for the requested format:
 
 **Report:** Executive Summary → Background → Findings (by sub-question) → Conclusions → Recommendations → Appendix (sources)
+**Report word budget:** 1,200–1,800 words total
 
 **Brief:** Summary (3-5 sentences) → Key Points (bullets) → Implications → Next Steps
 **Brief word budget:** 250–400 words total
 
 **Proposal:** Problem → Proposed Solution → Evidence → Expected Outcome → Ask
+**Proposal word budget:** 500–700 words total
 
 **Executive Summary:** One paragraph — situation, key findings, recommended action
+**Executive Summary word budget:** 150–250 words total
 
 **Email:** Subject → Context (1 sentence) → Key Points (3 bullets max) → Ask or FYI close
+**Email word budget:** 100–200 words total
 
 **Memo:** To/From/Date/Re header → Summary → Detail → Action items
+**Memo word budget:** 300–500 words total
 
 ### Stage 4: Draft
 
@@ -238,7 +243,7 @@ After drafting each section, immediately append a source attribution line:
 Before returning output:
 1. Every factual claim in the document — can you point to it in the source material?
 2. Is the coverage gap list complete and accurate?
-3. Does the format match what was requested?
+3. Does the format match what was requested? Does the word count fall within the format's budget (Stage 3)? If over budget: trim starting with the least important details, compress verbose sentences, never cut coverage gap disclosures. Record the final trimmed count in WRITER METADATA.
 4. Is the voice consistent throughout?
 5. Attribution completeness: every section with factual content has a
    `> *Sources: ...*` line. If any factual section is missing one, add it
