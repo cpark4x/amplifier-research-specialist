@@ -22,9 +22,11 @@ agents:
     - specialists:specialists/researcher-formatter
     - specialists:specialists/storyteller
 
-hooks:
-  - module: hook-specialist-narration
-    source: ../modules/hook-specialist-narration
+# hooks:
+#   - module: hook-specialist-narration
+#     source: ../modules/hook-specialist-narration
+#   Deferred 2026-03-06: prompt-level narration sufficient at >90% reliability.
+#   Module stub retained on disk for future use. Re-enable if code-level narration needed.
 
 spawn:
   exclude_tools: [write_file, edit_file, apply_patch]

@@ -42,16 +42,18 @@ Stabilize 4 shipped specialists + 1 in-progress specialist. Lock contracts, esta
   - Data Analyzer: quality threshold defaults (`confidence_minimum: 0.75`)
   - Storyteller: tone defaults (neutral, adaptive per input)
   
-- [ ] **Test-log feedback system** (Phase 0 infrastructure → Phase 1 enforcement)
+- [x] **Test-log feedback system** (Phase 0 infrastructure → Phase 1 enforcement)
   - Test logs automatically mined for signals (word-budget gaps, audience drift, claim specificity issues)
   - Signals routed to epic definitions + specialist instructions for next phase
   - At least 2 sprints of test logs captured and analyzed
+  - *Shipped: promote-mining-items recipe (PR #15) automates mining report → backlog promotion. 7 test logs captured, 6 items promoted. (Mar 5, 2026)*
   
 - [ ] **Async chain reliability**
   - Increase `research-chain` step timeouts + bound output sizes
   - Increase `narrative-chain` step timeouts + move save to foundation:file-ops
   - Benchmark parallel execution costs (N researchers in parallel → queue lag)
   - Document throttling guidance for orchestrators
+  - *Partial: Behavioral chain reliability shipped in PR #16 (routing heuristic, chain completion default, narration rules, >90% smoke test). Timeout/infrastructure hardening remains open. (Mar 5, 2026)*
   
 - [ ] **Documentation: USING-SPECIALISTS.md v1.1**
   - Add Storyteller to the invocation guide

@@ -36,7 +36,7 @@ Use these exact agent IDs when delegating: `specialists:specialists/researcher`,
   - Wrong: `# RESEARCH OUTPUT` (markdown heading)
   - Wrong: Any narration, preamble, or explanation before the block
 
-When delegating in escape-hatch mode, prefix the specialist instruction with `[RAW]` so the narration hook suppresses all narration output automatically.
+When delegating in escape-hatch mode, prefix the specialist instruction with `[RAW]` to signal escape-hatch mode. The coordinator suppresses all narration output for `[RAW]` delegations.
 
 **Rule 4 — Analysis Signal**: If the user asks for 'analysis', 'insights', or 'full analysis' — chain through data-analyzer before writer: researcher → formatter → data-analyzer → writer.
 
