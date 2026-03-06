@@ -6,6 +6,7 @@ specialist_filter: all
 generated: 2026-03-05
 entries_scanned: 12
 entries_matched: 12
+items_promoted: partial
 ---
 
 # Test Log Mining Report
