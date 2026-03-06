@@ -34,13 +34,13 @@ def test_single_separator_between_intro_and_core_principles():
     There must NOT be two --- separators with content between them in that region.
     """
     content = RESEARCHER_INDEX.read_text()
-    # The text before the separator
-    assert "You do not write the article. You fill the evidence brief." in content
+    # The text before the separator (updated by task-6 identity paragraph edit)
+    assert "your job is evidence quality." in content
     # The text after the separator
     assert "## Core Principles" in content
 
-    # Extract the region between "evidence brief" and "Core Principles"
-    brief_idx = content.index("You fill the evidence brief.")
+    # Extract the region between the identity closing and "Core Principles"
+    brief_idx = content.index("your job is evidence quality.")
     core_idx = content.index("## Core Principles")
     between = content[brief_idx:core_idx]
 
