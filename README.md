@@ -1,21 +1,62 @@
-# Specialists
+# canvas-specialists
 
-A library of best-in-class, single-domain AI specialist agents for knowledge worker and consumer scenarios — each built with a focused pipeline, rigorous quality gates, and a clean interface contract.
+**When you ask a generalist AI to research something, you get confident-sounding prose with no way to audit the claims.** canvas-specialists produces structured research and writing outputs where every finding traces to a source, every inference is labeled as an inference, and every gap is named explicitly — output you can hand to a decision-maker without re-verifying everything first.
 
-> A specialist is like a consultant with a toolbox. A skill is a textbook. A specialist *does the work.*
+Battle-tested across 2,500+ agent runs. Used for competitive briefs on AI providers, market analysis, and product research.
 
 ---
 
-## Quick Start
+## What makes it different
 
-### Prerequisites
+Here's what a typical AI research output looks like:
 
-- [Amplifier](https://github.com/microsoft/amplifier) installed and configured
-- An API key for a supported LLM provider (Anthropic, OpenAI, Azure, etc.)
+> *"OpenAI holds a dominant position in the enterprise AI market, with strong adoption among Fortune 500 companies. Anthropic is gaining ground, particularly among safety-conscious organizations."*
 
-### 1. Add this bundle to your project
+No sources. No confidence levels. No acknowledgment of what it doesn't know. You can't audit it.
 
-In your project's `.amplifier/settings.yaml`:
+Here's what canvas-specialists produces:
+
+```
+FINDING [HIGH CONFIDENCE]
+OpenAI holds ~60% share of enterprise API spend among F500 companies.
+Sources: [S1] Menlo Ventures Enterprise AI Report 2024 (primary)
+          [S2] Bloomberg Technology Survey Q3 2024 (secondary)
+
+FINDING [MEDIUM CONFIDENCE]
+Anthropic is the preferred alternative in regulated industries (finance, healthcare).
+Source: [S3] Axios Pro Rata, Dec 2024 — based on 3 vendor interviews (secondary)
+Note: No published survey data found. Treat as directional, not quantified.
+
+EVIDENCE GAP
+No independent data on Anthropic's enterprise contract count or ARR.
+Vendor claims only. Treat Anthropic market share figures as unverified until confirmed.
+```
+
+Every claim is traceable. Every inference is labeled. Every gap is named.
+
+---
+
+## The five specialists
+
+| Specialist | What it produces |
+|---|---|
+| **researcher** | Structured findings with source tiering (primary / secondary / tertiary), per-claim confidence ratings (high / medium / low), and explicit evidence gap reporting |
+| **writer** | Polished documents with inline citations `[S1]`, a `CLAIMS TO VERIFY` block, and audience-calibrated prose |
+| **competitive-analysis** | Comparison matrices, positioning gaps, and win conditions — head-to-head or landscape modes |
+| **data-analyzer** | Labeled inferences that bridge fact and conclusion — explicitly separated from source findings so the reasoning is always visible |
+| **storyteller** | Narrative transformation of research and analysis — selects load-bearing findings, applies the right framework, documents every editorial choice |
+
+All five are shipped and production-ready (v1). See [docs/BACKLOG.md](docs/BACKLOG.md) for what's coming next.
+
+---
+
+## Quick start
+
+canvas-specialists runs on [Amplifier](https://github.com/microsoft/amplifier) — a lightweight agent framework that handles routing, context passing, and multi-step orchestration. If you're already using Amplifier, specialists drop in as a bundle. If you're not, start there first.
+
+### 1. Add the bundle
+
+In your `.amplifier/settings.yaml`:
 
 ```yaml
 bundles:
@@ -23,90 +64,53 @@ bundles:
     name: specialists
 ```
 
-### 2. Use a specialist
-
-In any Amplifier session, specialists are available for delegation:
-
-```
-"Research the competitive landscape for async Python frameworks and return structured findings"
-```
-
-The orchestrator routes to the right specialist automatically. To invoke directly:
+### 2. Invoke a specialist
 
 ```python
-delegate(agent="specialists:specialists/researcher", instruction="Research X...")
-delegate(agent="specialists:specialists/writer", instruction="Write a brief from this research...")
+research = delegate(
+    agent="specialists:specialists/researcher",
+    instruction="Research the enterprise AI infrastructure market. Return structured findings."
+)
 ```
 
-### 3. Chain researcher → writer
+### 3. Chain them together
+
+Specialists are composable by design. Each one's output schema is the next one's input contract.
 
 ```python
-# Step 1: gather evidence
+# Stage 1: gather evidence
 research = delegate(
     agent="specialists:specialists/researcher",
     instruction="Research X. Return structured findings."
 )
 
-# Step 2: turn evidence into a document
+# Stage 2: draw inferences
+analysis = delegate(
+    agent="specialists:specialists/data-analyzer",
+    instruction=f"Analyze these findings and draw labeled inferences: {research.response}"
+)
+
+# Stage 3: produce the document
 document = delegate(
     agent="specialists:specialists/writer",
-    instruction=f"Write an executive brief for a product team. Source material: {research.response}"
+    instruction=f"Write an executive brief for a product team. Source material: {analysis.response}"
 )
 ```
 
-See [docs/USING-SPECIALISTS.md](docs/USING-SPECIALISTS.md) for the full practical guide — invoking each specialist, understanding output, and chaining them together.
-
-For a detailed walkthrough of the researcher → writer chain with sample inputs and outputs, see [docs/examples/researcher-to-writer.md](docs/examples/researcher-to-writer.md).
+See [docs/USING-SPECIALISTS.md](docs/USING-SPECIALISTS.md) for the full practical guide, and [docs/examples/researcher-to-writer.md](docs/examples/researcher-to-writer.md) for a walkthrough with sample inputs and outputs.
 
 ---
 
-## Available Specialists
+## How it works
 
-| Specialist | Domain | Status |
-|---|---|---|
-| [researcher](specialists/researcher/) | Structured web research with source tiering, quality gates, and confidence-rated findings | v1 |
-| [writer](specialists/writer/) | Transforms structured source material into polished prose with inline citations and coverage auditing | v1 |
-| [competitive-analysis](specialists/competitive-analysis/) | Structured competitive intelligence with comparison matrices, positioning gaps, and win conditions — head-to-head and landscape modes | v1 |
-| [data-analyzer](specialists/data-analyzer/) | Draws labeled inferences from ResearchOutput — fills the fact/inference gap between Researcher and Writer | v1 |
-| [storyteller](specialists/storyteller/) | Transforms research, analysis, or existing documents into compelling narrative using cognitive mode translation — selects load-bearing findings, applies the right framework, documents editorial choices | v1 |
+Each specialist runs as a sequence of discrete, auditable stages — not a single prompt. The researcher runs source retrieval, tiering, claim extraction, and confidence rating as separate steps, each with a clean output. Individual stages are improvable, debuggable, and replaceable independently.
 
-More specialists are planned — see [docs/BACKLOG.md](docs/BACKLOG.md) for the full roadmap (Presentation Builder, Design, Planner, and more).
+**The output schema is the stable contract.** Implementations can evolve freely. The schema does not change without a version bump and coordinated update to callers. Downstream specialists — and your orchestrator — depend on the schema, not the implementation details.
+
+**Gaps are first-class outputs.** Missing evidence is never silently dropped. If the researcher can't find primary source data for a claim, it says so. The writer surfaces that as `CLAIMS TO VERIFY`. You know exactly what needs verification before anything gets published or presented.
 
 ---
 
-## How Specialists Work
+## Built by
 
-Specialists are **stateless domain experts**. Each one:
-
-- Has a single job and a focused multi-stage pipeline for that job
-- Exposes a defined interface contract — what it accepts, what it returns, what it won't do
-- Is UI-independent — callable identically from Canvas, CLI, another agent, or any orchestrator
-- Never manages its own memory — loads context in, produces structured output out
-- Is honest about gaps — missing evidence and coverage failures are first-class outputs, never silently dropped
-
-**The specialist never knows where it's being called from.** The interface contract is the only boundary it knows.
-
----
-
-## Shared Interface
-
-`shared/interface/types.md` defines the stable output contracts all specialists follow. Orchestrators and downstream specialists depend on these — they do not change when implementations evolve.
-
----
-
-## Design Principles
-
-**Outcome over speed.** The primary design constraint is quality of output, not time-to-output. Speed is what you opt into. Quality is the default.
-
-**The output schema is the center.** Each specialist's output schema is its stable contract. Implementations evolve freely. The schema does not change without a version bump and coordinated update to callers.
-
-**Mechanism, not policy.** Specialists expose their behavior as configurable parameters. Defaults are tuned for quality. Callers opt into speed or alternative behavior.
-
-**Composable stages.** Specialists run as sequences of discrete stages — each with one job and a clean output. Individual stages are improvable, debuggable, and swappable independently.
-
----
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
-To add a new specialist, follow [docs/adding-a-specialist.md](docs/adding-a-specialist.md).
+[Chris Park](https://www.linkedin.com/in/chrispark) — Senior PM at Microsoft's Office of the CTO, AI Incubation group, with 17 years of PM experience and an engineering degree from Waterloo. Building the tools he actually uses.
