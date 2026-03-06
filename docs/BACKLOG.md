@@ -2,7 +2,7 @@
 
 **Purpose:** Strategic planning view for canvas-specialists — a library of best-in-class, single-domain AI specialist agents for knowledge worker and consumer scenarios  
 **Owner:** Chris Park  
-**Last Updated:** March 5, 2026  
+**Last Updated:** March 6, 2026  
 
 ---
 
@@ -67,42 +67,69 @@ See [**2026-03-05-world-class-roadmap.md**](plans/2026-03-05-world-class-roadmap
 
 ### Immediate Next (This Sprint)
 
+Items ordered by impact. Ship these first — they fix the most-flagged quality gaps.
+
 | # | Item | Epic | Owner | Effort | Impact | Why Now |
 |---|------|------|-------|--------|--------|---------|
 | 0 | ~~**Specialist output format compliance — architectural fix**~~ | 01/02 | Chris | — | — | **Partially shipped 2026-03-03.** Researcher-formatter specialist built — two-step approach normalizes any Researcher output to canonical RESEARCH OUTPUT block before DA/Writer. Researcher format compliance resolved architecturally. Writer structural blocks (WRITER METADATA / CITATIONS / CLAIMS TO VERIFY) remain aspirational — revisit when Amplifier provider supports structured output (PR #38 closed upstream as premature; orchestrator layer must propagate response_format first). |
+| 5 | **Researcher trustworthiness overhaul** (confidence tiers + URL-per-claim + numeric gating) | 01 | Chris | M | H | **Consolidated from #5, #12, #20, #21.** The single most-flagged quality gap across all test logs. Three facets of the same problem: (a) confidence tiers — 142/142 claims returned as `unrated` in 2026-03-06 chain, zero source-tier classification; flagged in test logs 03-02, 03-06, mining report 03-05. (b) URL-per-claim — source *names* are not sufficient for verification; require URLs for each substantive claim. (c) numeric-claim gating — dollar figures, staff counts, market-share numbers repeatedly flagged as weakest link; add explicit confidence + "cannot verify" handling. Fix it once at the source so every downstream specialist benefits. |
+| 6 | Writer: enforce word budget per format | 02 | Chris | S | H | `brief` produces ~1,500 words — same as a report. Format is a contract, not a label. brief ~600 words, report ~1,500, executive summary ~400. Observed across all 4 runs in 2026-03-04 chain test. |
+| 27 | Coordinator: enforce formatter step (Rule 5) in researcher → writer chains | 01/02 | Chris | S | M | Coordinator skipped `researcher-formatter` in researcher → writer chain despite Rule 5 requiring it. Output happened to be well-structured, but ~1 in 3 topics produce non-canonical output. Investigate whether coordinator instructions need stronger enforcement language or whether this is a model-level compliance issue. *(from test log 2026-03-06)* |
 
 
 ### Near-term (Next 1-2 Sprints)
 
+Ordered by priority tier then impact. Items marked *(consolidated)* absorbed duplicates — see Consolidation Log below.
+
+**Priority 2 — Quality polish, moderate impact:**
+
 | # | Item | Epic | Owner | Effort | Impact | Rationale |
 |---|------|------|-------|--------|--------|-----------|
-
-| 2 | Presentation Builder specialist | 07 | Gurkaran Singh | L | H | Closes the research → write → present chain; slide deck output is a top knowledge worker use case |
-| 3 | Coverage audit severity levels | 02 | Chris | S | M | `gap_policy` input lets orchestrators decide what gap severity blocks vs. warns vs. passes |
-| 5 | Researcher: conservative confidence scoring for analyst estimates | 01 | Chris | S | M | Financial figures (ARR, market share) from secondary/circulated sources rated high confidence alongside audited data — needs stronger source-tier guidance for analyst estimates vs. primary financial data. Add numeric-claim confidence gating for market/competitive briefs *(from test log 2026-03-02; reinforced by mining report 2026-03-05; reinforced by test log 2026-03-06: 142/142 claims returned as `unrated` in sports-betting-specialists chain — zero confidence tiers assigned)* |
-| 6 | Writer: enforce word budget per format | 02 | Chris | S | H | `brief` produces ~1,500 words — same as a report. Format is a contract, not a label. brief ~600 words, report ~1,500, executive summary ~400. Observed across all 4 runs in 2026-03-04 chain test. |
+| 28 | Writer: surface CLAIMS TO VERIFY in user-facing output | 02 | Chris | S | M | Writer already identifies claims needing verification (17 in 2026-03-06 run) but buries them in metadata. Readers get no signal about which figures are soft. Consider inline confidence markers or a "Note on Sources" section. Small lift — the analysis is already done. *(from test log 2026-03-06)* |
 | 7 | Writer: strengthen audience calibration | 02 | Chris | S | M | `audience: myself` produced identical register to `audience: executive stakeholders` — third-person, formal, presentation-ready. Should shift to direct, first-person, actionable voice. *(from test log 2026-03-04)* |
-| 8 | Recipe display: filter internal scaffolding from summary | 01/02/04 | Chris | S | M | Raw claim IDs (S1–S45) from the Analyzer's internal pipeline appeared in the `final_output` recipe summary field. Internal scaffolding should not be user-facing. Display/recipe layer issue. *(from test log 2026-03-04)* |
 | 9 | Writer: specificity enforcement | 02 | Chris | S | M | When the research question names a specific subject, the Writer's bottom line and skills sections drifted to generic AI-era conclusions that apply to any tech company. Final layer should pull subject-specific findings through. *(from test log 2026-03-04)* |
-| ~~10~~ | ~~Platform UX: default chain completion + narrated execution~~ | 01/02/04/08 | Chris | M | H | **Shipped in PR #16 (Mar 5, 2026).** Instructions-level fix: Rules 1-5 in `specialists-instructions.md`, routing heuristic table, "when in doubt, chain" default, per-step narration templates. Smoke test: 5/5 scenarios pass, >90% reliability. Code-level `hook-specialist-narration` deferred — prompt-level enforcement is sufficient for current needs. *(observed 2026-03-04; shipped 2026-03-05)* |
-| 11 | Recipe timeout resilience: patch research-chain and narrative-chain timeouts | 01/03 | Chris | M | M | Increase `research-chain.yaml` `format-research` step timeout and bound research output to prevent downstream timeouts. Increase `narrative-chain.yaml` `save` step timeout and/or refactor save step to remove LLM agent dependency (use foundation:file-ops directly instead). Note: parallel recipe execution amplifies queueing effects and should be avoided for heavy runs. *(identified after manual A/B/C testing 2026-03-04)* |
-| 12 | Researcher: require URL-per-claim in FINDINGS | 01 | Chris | S | M | Source *names* are not sufficient for independent verification; require URLs for each substantive claim to reduce unverifiable assertions. *(from mining report 2026-03-05)* |
-| 13 | Writer: document parse-line-first output ordering in spec | 02 | Chris | S | S | The parse-line anchor (`Parsed: ...`) is now the literal first output line, not `WRITER METADATA` directly. Update Output Structure spec (specialists/writer/index.md lines 52, 57) to document this accurately. *(from test log 2026-03-03)* **Update 2026-03-05:** Smoke test confirmed `Parsed:` line appears inconsistently — present in competitive→writer chain (Test 3) but absent in researcher→writer chain (Test 1). May be input-type-dependent. |
+| 22 | Stabilize Researcher canonical output header/anchor (Stage 0 / "RESEARCH OUTPUT") | 01 | Chris | S | M | The "opening block" normalization is not reliably triggering across topics, breaking downstream parsing assumptions. *(from mining report 2026-03-05)* |
+
+**Priority 3 — Important but not urgent:**
+
+| # | Item | Epic | Owner | Effort | Impact | Rationale |
+|---|------|------|-------|--------|--------|-----------|
+| 3 | Coverage audit severity levels | 02 | Chris | S | M | `gap_policy` input lets orchestrators decide what gap severity blocks vs. warns vs. passes |
+| 16 | Data Analyzer: harden Format B detection for narrative markdown *(consolidated)* | 08 | Chris | S | M | **Consolidated from #16, #23.** Current detection struggles with fully narrative inputs; improve robustness so claims/sources extraction is consistent across all input types. *(from mining report 2026-03-05)* |
+| 17 | Data Analyzer: prevent code-fence wrapping of ANALYSIS OUTPUT *(consolidated)* | 08 | Chris | S | M | **Consolidated from #17, #24.** Code-fence wrapping breaks parsers that expect raw section headers/blocks; enforce "no extra fencing" around structured outputs. *(from mining report 2026-03-05)* |
 | 14 | Writer: enforce required structural sections for analysis-based inputs | 02 | Chris | S | M | If WRITER METADATA / CITATIONS / CLAIMS TO VERIFY are required for analysis-output inputs, enforce or explicitly relax requirements. Run Writer-only test passing AnalysisOutput to confirm behavior. *(from mining report 2026-03-05)* |
 | 15 | Writer: add deduplication pass before final output | 02 | Chris | S | M | Lightweight scan to remove duplicated content across sections before conclusion. Prevents repetition across sections observed in chain test outputs. *(from mining report 2026-03-05)* |
-| 16 | Data Analyzer: harden Format B detection for narrative markdown | 08 | Chris | S | M | Current detection struggles with fully narrative inputs; improve robustness so claims/sources extraction is consistent across all input types. *(from mining report 2026-03-05)* |
-| 17 | Data Analyzer: prevent code-fence wrapping of ANALYSIS OUTPUT | 08 | Chris | S | M | Code-fence wrapping breaks parsers that expect raw section headers/blocks; enforce "no extra fencing" around structured outputs. *(from mining report 2026-03-05)* |
+| 13 | Writer: document parse-line-first output ordering in spec | 02 | Chris | S | S | The parse-line anchor (`Parsed: ...`) is now the literal first output line, not `WRITER METADATA` directly. Update Output Structure spec (specialists/writer/index.md lines 52, 57) to document this accurately. *(from test log 2026-03-03)* **Update 2026-03-05:** Smoke test confirmed `Parsed:` line appears inconsistently — present in competitive→writer chain (Test 3) but absent in researcher→writer chain (Test 1). May be input-type-dependent. |
 | 18 | Storyteller: surface inferences in NARRATIVE SELECTION for auditability | 03 | Chris | S | S | Clarify whether AnalysisOutput inferences should be listed in NARRATIVE SELECTION (as included/omitted) or treated as background context. Current behavior silently consumes them, reducing auditability of the inference layer. *(from test log 2026-03-04)* |
 | 19 | Storyteller: add quality_threshold as optional caller parameter | 03 | Chris | S | S | Accept `quality_threshold` parameter (like Researcher/Analyzer) to let callers request stricter quality gate behavior. Currently hardcoded to `standard`. *(from test log 2026-03-04)* |
-| 20 | Require URL-per-claim capture in Researcher outputs | TBD | Chris | TBD | TBD | Source *names* are not sufficient for independent verification; require URLs for each substantive claim to reduce unverifiable assertions. *(from mining report 2026-03-05; id: mine-2026-03-05-require-url-per-claim-capture-in-researcher-outputs)* |
-| 21 | Add numeric-claim confidence gating for market/competitive briefs | TBD | Chris | TBD | TBD | ARR/market-share style numbers are repeatedly flagged as the weakest link; add explicit confidence + “cannot verify” handling and push Writer to surface gaps. *(from mining report 2026-03-05; id: mine-2026-03-05-add-numeric-claim-confidence-gating-for-market-competitive-briefs)* |
-| 22 | Stabilize Researcher canonical output header/anchor (Stage 0 / “RESEARCH OUTPUT”) | TBD | Chris | TBD | TBD | The “opening block” normalization is not reliably triggering across topics, breaking downstream parsing assumptions. *(from mining report 2026-03-05; id: mine-2026-03-05-stabilize-researcher-canonical-output-header-anchor-stage-0-research-output)* |
-| 23 | Harden Data Analyzer Format B detection for narrative markdown | TBD | Chris | TBD | TBD | Current detection struggles with fully narrative inputs; improve robustness so claims/sources extraction is consistent. *(from mining report 2026-03-05; id: mine-2026-03-05-harden-data-analyzer-format-b-detection-for-narrative-markdown)* |
-| 24 | Prevent Data Analyzer from wrapping ANALYSIS OUTPUT in code fences | TBD | Chris | TBD | TBD | Code-fence wrapping can break parsers that expect raw section headers/blocks; enforce “no extra fencing” around structured outputs. *(from mining report 2026-03-05; id: mine-2026-03-05-prevent-data-analyzer-from-wrapping-analysis-output-in-code-fences)* |
-| 25 | Package common comparison flows as recipes (e.g., competitive-analysis → writer; optionally researcher-first) | TBD | Chris | TBD | TBD | Product comparisons repeatedly benefit from a consistent multi-step pipeline; encode as a single invokable recipe to reduce manual chaining and variance. *(from mining report 2026-03-05; id: mine-2026-03-05-package-common-comparison-flows-as-recipes-e-g-competitive-analysis-writer)* |
-| ~~26~~ | ~~Clarify ambiguity boundary for casual prompts in chain instructions~~ | 01/02/04/08 | Chris | S | M | **Shipped in PR #16 (Mar 5, 2026).** Option (c) implemented: routing heuristic table + "when in doubt, chain" rule added to `specialists-instructions.md`. Casual phrasing ("tell me about X") now explicitly listed as a chain trigger. Re-test confirmed: 5/5 pass. *(from smoke test 2026-03-05; shipped same day)* |
-| 27 | Coordinator: enforce formatter step (Rule 5) in researcher → writer chains | 01/02 | Chris | S | M | Coordinator skipped `researcher-formatter` in researcher → writer chain despite Rule 5 requiring it. Output happened to be well-structured, but ~1 in 3 topics produce non-canonical output. Investigate whether coordinator instructions need stronger enforcement language or whether this is a model-level compliance issue. *(from test log 2026-03-06)* |
-| 28 | Writer: surface CLAIMS TO VERIFY in user-facing output | 02 | Chris | S | M | Writer correctly identified 17 claims needing verification but buried them in metadata after the CITATIONS block. Readers of the brief have no signal about which figures are soft. Consider inline confidence markers or a "Note on Sources" section in the brief itself. *(from test log 2026-03-06)* |
+| 11 | Recipe timeout resilience: patch research-chain and narrative-chain timeouts | 01/03 | Chris | M | M | Increase `research-chain.yaml` `format-research` step timeout and bound research output to prevent downstream timeouts. Increase `narrative-chain.yaml` `save` step timeout and/or refactor save step to remove LLM agent dependency (use foundation:file-ops directly instead). Note: parallel recipe execution amplifies queueing effects and should be avoided for heavy runs. *(identified after manual A/B/C testing 2026-03-04)* |
+
+**Priority 4 — Separate track (new capabilities / UX):**
+
+| # | Item | Epic | Owner | Effort | Impact | Rationale |
+|---|------|------|-------|--------|--------|-----------|
+| 2 | Presentation Builder specialist | 07 | Gurkaran Singh | L | H | Closes the research → write → present chain; slide deck output is a top knowledge worker use case |
+| 25 | Package common comparison flows as recipes | 04 | Chris | S | M | Product comparisons repeatedly benefit from a consistent multi-step pipeline; encode as a single invokable recipe to reduce manual chaining and variance. *(from mining report 2026-03-05)* |
+| 8 | Recipe display: filter internal scaffolding from summary | 01/02/04 | Chris | S | M | Raw claim IDs (S1–S45) from the Analyzer's internal pipeline appeared in the `final_output` recipe summary field. Internal scaffolding should not be user-facing. Display/recipe layer issue. *(from test log 2026-03-04)* |
+
+**Shipped / Closed:**
+
+| # | Item | Status |
+|---|------|--------|
+| ~~10~~ | ~~Platform UX: default chain completion + narrated execution~~ | **Shipped in PR #16 (Mar 5, 2026).** |
+| ~~26~~ | ~~Clarify ambiguity boundary for casual prompts in chain instructions~~ | **Shipped in PR #16 (Mar 5, 2026).** |
+
+### Consolidation Log
+
+Items merged during prioritization pass (2026-03-06):
+
+| Absorbed | Into | Rationale |
+|----------|------|-----------|
+| #12 (Researcher URL-per-claim) | **#5** | Same root cause: researcher trustworthiness. URL-per-claim is one facet of the overhaul. |
+| #20 (Require URL-per-claim — mining report duplicate) | **#5** | Duplicate of #12, both now in #5. |
+| #21 (Numeric-claim confidence gating) | **#5** | Confidence gating is inseparable from confidence tiers — same implementation scope. |
+| #23 (Harden DA Format B — mining report duplicate) | **#16** | Exact duplicate of #16. |
+| #24 (Prevent DA code fences — mining report duplicate) | **#17** | Exact duplicate of #17. |
 
 ### Medium-term (Next Quarter)
 
@@ -221,6 +248,7 @@ Synthesis Writer → cross-ecosystem comparative brief
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v2.5 | Mar 6, 2026 | Chris | **Prioritization pass.** Consolidated 5 duplicates: #12/#20/#21 merged into #5 (researcher trustworthiness overhaul, bumped to M effort / H impact); #23 merged into #16; #24 merged into #17. Restructured near-term into 4 priority tiers. Moved #5, #6, #27 to Immediate Next. Filled TBD effort/impact ratings. Added Consolidation Log. Separated shipped items (#10, #26) into Shipped/Closed table. Net: 28 items → 20 unique items (5 absorbed, 2 shipped, 1 partially shipped). |
 | v2.4 | Mar 6, 2026 | Chris | Routed 3 action items from sports-betting-specialists chain test log (2026-03-06): reinforced #5 with 142/142 unrated confidence evidence; added #27 (coordinator Rule 5 formatter enforcement); added #28 (writer CLAIMS TO VERIFY surfacing in user-facing output). Narration BEFORE-line tracking noted in test log but not promoted (best-effort, low priority). |
 | v2.3 | Mar 6, 2026 | Chris | Session-close doc sweep: closed #10 (shipped instructions-level in PR #16, hook deferred), closed #26 (shipped routing heuristic + "when in doubt, chain" in PR #16), added PRs #14/#15/#16 to Recently Completed, annotated #13 with smoke test finding |
 | v2.2 | Mar 5, 2026 | Chris | Routed 3 action items from chain-reliability smoke test: updated #10 with hook stub finding + smoke test results; updated #13 with Parsed: line inconsistency; added #26 (ambiguity boundary for casual prompts) |
