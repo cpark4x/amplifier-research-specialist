@@ -14,20 +14,19 @@ Additional structural checks from spec:
 - New Stage 7 content is ~15 lines (compact)
 """
 
-import os
 import re
+from pathlib import Path
 
 import pytest
 
-RESEARCHER_PATH = os.path.join(
-    os.path.dirname(__file__), "..", "specialists", "researcher", "index.md"
+RESEARCHER_PATH = (
+    Path(__file__).parent.parent / "specialists" / "researcher" / "index.md"
 )
 
 
 @pytest.fixture
 def content():
-    with open(RESEARCHER_PATH, "r") as f:
-        return f.read()
+    return RESEARCHER_PATH.read_text()
 
 
 # --- Acceptance criteria: things that must NOT be present ---
@@ -89,6 +88,10 @@ def test_no_research_output_template_block(content):
     """The old RESEARCH OUTPUT template block (the rigid format spec) should be gone."""
     # The phrase "RESEARCH OUTPUT" may appear in the Routing Signal as a reference.
     # What must NOT exist is the old rigid template: "RESEARCH BRIEF:", "RESEARCH EVENTS:", etc.
+    # These three fields are chosen because they only appeared inside the old Stage 7
+    # template block — they are unambiguous markers of the rigid format that was removed.
+    # "RESEARCH BRIEF:" is intentionally excluded since the new Stage 7 references
+    # "research brief" conceptually (lowercase, in prose) and it could appear elsewhere.
     assert "RESEARCH EVENTS:" not in content, (
         "Found 'RESEARCH EVENTS:' — old template block should have been removed"
     )
