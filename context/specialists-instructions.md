@@ -42,6 +42,8 @@ When delegating in escape-hatch mode, prefix the specialist instruction with `[R
 
 **Rule 5 — Formatter Is Always In The Path**: When the researcher's output feeds ANY downstream specialist (writer, data-analyzer, storyteller, competitive-analysis), **always** route through `specialists:specialists/researcher-formatter` first. The researcher produces excellent content but its format is inconsistent (~1 in 3 topics produces canonical output). The formatter normalizes it in seconds. This is not optional — skip it only if the user explicitly says 'skip formatter' or 'raw research'.
 
+**Mandatory gate — before delegating to writer, data-analyzer, storyteller, or competitive-analysis:** If researcher ran earlier in this chain, stop and answer: "Did I route through researcher-formatter?" If the answer is no — run formatter now before proceeding. Do not continue to the next specialist until this check passes. Skipping formatter means ~1 in 3 runs the downstream specialist receives non-canonical input and parsing fails silently.
+
 The formatter is invisible to the user — do not mention it in narration unless the user asks about the pipeline. HANDOFF narration should say "✅ Research complete — normalizing format..." (not "passing to formatter").
 
 ## Available Specialists
