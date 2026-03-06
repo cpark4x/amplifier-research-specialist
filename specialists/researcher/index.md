@@ -160,143 +160,20 @@ Maximum 3 Quality Gate cycles before accepting remaining gaps as genuinely inacc
 
 Do not skip the Quality Gate. Do not return output before passing it.
 
-### Stage 7: Synthesizer
+### Stage 7: Synthesize and Return
 
-Assemble the RESEARCH OUTPUT block. You are not writing a new document —
-you are assembling the pre-formatted findings from Stage 4 into the remaining sections.
+Assemble your findings into a complete research output. Include all of the following:
 
-Fill in each section now — no narrative prose, no markdown headers, nothing outside the block:
+1. The original research question and query type
+2. A research brief — your highest-confidence findings as compact bullets with source URLs
+3. Which sub-questions you addressed and to what coverage level
+4. All findings with their source URLs, tiers, confidence levels, and corroboration counts
+5. All evidence gaps with what you attempted
+6. Your quality score rationale
+7. Quality threshold result (MET / NOT MET)
+8. Follow-up questions that would most improve confidence
 
-```
-RESEARCH OUTPUT
-
-Question: [original question]
-Query Type: [type]
-Quality Score: [low | medium | high]
-
-RESEARCH BRIEF:
-[5-10 bullets — one discrete claim per bullet, URL in parentheses. Compressed for fast machine consumption. High-confidence claims only.]
-- [claim] ([source URL])
-- [claim] ([source URL])
-
-SUB-QUESTIONS ADDRESSED:
-1. [sub-question] — [high/medium/low coverage]
-2. ...
-
-FINDINGS:
-[For each finding:]
-- Claim: [specific, discrete statement]
-  Source: [URL]
-  Tier: [primary | secondary | tertiary]
-  Confidence: [high | medium | low]
-  Corroborated by: [count] independent sources
-  Contradicted by: [source — URL] (only when another source conflicts with this claim)
-  Direct quote: [yes | no]
-  Published: [date if known]
-
-EVIDENCE GAPS:
-[For each gap:]
-- What: [what couldn't be found]
-  Attempted: [list of fallbacks tried]
-  Reason: [why it's inaccessible]
-
-QUALITY SCORE RATIONALE:
-[Brief explanation of overall confidence level]
-
-QUALITY THRESHOLD RESULT: [MET | NOT MET | N/A]
-Requested: [low | medium | high | maximum]
-Achieved: [low | medium | high]
-Unresolved: [N claims remain single-source or Low confidence after 3 cycles] (only when NOT MET)
-
-FOLLOW-UP QUESTIONS:
-1. [question that would most improve confidence]
-2. ...
-
-RESEARCH EVENTS:
-[Condensed log of what was attempted — sources hit, paywalls encountered, corroboration found]
-```
-
-**COMPLIANCE NOTE — machine-parseable output required:**
-
-The block format above is the only acceptable Stage 7 output format. This is a pipeline
-contract, not a style preference — downstream specialists parse this structure automatically.
-
-**The very first character of your response is `R`, not `#`.** Do not begin with a
-markdown header, a title, an emoji, an executive summary, or any other content. The
-literal string `RESEARCH OUTPUT` is the first thing in your response — nothing before it,
-not even a blank line.
-
-- **Your response MUST begin with `RESEARCH OUTPUT`** — no preamble, no markdown headers,
-  no executive summary before it. The first four characters of your output are `RESE`.
-- **FINDINGS must use the exact multi-line key-value format:** `Claim:` / `Source:` /
-  `Tier:` / `Confidence:` — one finding per block, blank line between findings. Do not
-  convert FINDINGS into a table, a prose paragraph, or a single-line format.
-- **Narrative prose output is a spec violation.** Thematic section headers, embedded
-  markdown tables, and flowing paragraph summaries are not acceptable — they break
-  automated parsing by the Data Analyzer.
-- **RESEARCH BRIEF bullets are single-line claims with an inline URL in parentheses.**
-  One bullet per claim. Not multi-paragraph descriptions. Not grouped by theme.
-- **The opening `RESEARCH OUTPUT` line is a machine signal.** Write nothing before it —
-  not even a blank line.
-
-**FINAL SELF-CHECK — run this before returning your response:**
-
-1. Do my first 15 characters equal `RESEARCH OUTPUT`? (No `#`, no `---`, no blank line before it)
-2. Does my FINDINGS section use the multi-line block format (`Claim:` / `Source:` / `Tier:` / `Confidence:` per entry)? Not narrative sections. Not tables. Not prose paragraphs.
-3. Is every `Confidence:` value one of exactly three words: `high`, `medium`, or `low`? Not a number. Not `0.97`. Not `unrated`. The word `high`, `medium`, or `low` — nothing else.
-4. Is every `Tier:` value one of exactly three words: `primary`, `secondary`, or `tertiary`? Not `T1`. Not `Tier 1`. The word `primary`, `secondary`, or `tertiary`.
-5. Is every `Source:` value a full `https://` URL? Not a publication name.
-
-If ANY check fails — rewrite the failing section before returning. Do not return non-compliant output.
-
-**Wrong — narrative format (MOST COMMON MISTAKE):**
-```
-## 2. DETAILED FINDINGS
-
-#### 2.1 Core Concept
-The RSP is built on the principle of proportional commitments...
-
-**Confidence: 0.97** | Source Tier: **T1** (Anthropic official publication)
-```
-
-**Right — structured block format (REQUIRED):**
-```
-FINDINGS:
-- Claim: Anthropic's RSP is built on proportional, conditional commitments where safeguards scale with model capability
-  Source: https://www.anthropic.com/news/anthropics-responsible-scaling-policy
-  Tier: primary
-  Confidence: high
-  Corroborated by: 2 independent sources
-  Direct quote: no
-  Published: 2023-09-19
-```
-
-**Wrong — numeric confidence:**
-```
-Confidence: 0.97
-Confidence: 0.85
-```
-
-**Right — categorical confidence (the ONLY valid values):**
-```
-Confidence: high
-Confidence: medium
-Confidence: low
-```
-
-**Wrong — abbreviated tiers:**
-```
-Tier: T1
-Source Tier: **T2**
-Tier 1 (Primary)
-```
-
-**Right — full tier labels (the ONLY valid values):**
-```
-Tier: primary
-Tier: secondary
-Tier: tertiary
-```
+**Do not worry about exact output formatting.** The downstream formatter specialist will canonicalize your output into the machine-parseable format the pipeline requires. Focus on completeness and accuracy of the evidence, not on matching a rigid template.
 
 ---
 
