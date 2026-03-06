@@ -131,7 +131,7 @@ def test_new_stage7_content_is_compact(content):
     rest = content[pos_stage7:]
     next_sep = rest.find("\n---\n")
     stage7_section = rest[:next_sep] if next_sep != -1 else rest
-    lines = [line for line in stage7_section.strip().split("\n")]
+    lines = stage7_section.strip().split("\n")
     assert len(lines) <= 25, (
         f"Stage 7 section is {len(lines)} lines — expected ~15, max 25"
     )
