@@ -41,10 +41,10 @@ Anchored to `SUCCESS-METRICS.md` and `VISION.md`:
 | Dimension | Score | Status | Key Gaps |
 |---|---|---|---|
 | **Research Trustworthiness** | 5/10 | *(spec)* | Confidence tiers + URL enforcement added (#5). Not yet validated by test run. |
-| **Chain Reliability** | 4/10 | — | Formatter step skipped in Mar 6 log (#27 open). Timeout fragility (#11 open). |
+| **Chain Reliability** | 5/10 | *(spec)* | Formatter mandatory gate added (#27). Timeout fragility still open (#11). |
 | **Format Fidelity** | 5/10 | *(spec)* | Word budgets added for all 6 formats + Stage 5 enforcement (#6). Audience calibration still undifferentiated (#7 open). CLAIMS TO VERIFY still buried (#28 open). |
 | **Specialist Coverage** | 4/10 | — | 5/11 epics complete. Most Phase 1 roadmap gates open. |
-| **Overall** | **4.5/10** | | |
+| **Overall** | **4.8/10** | | |
 
 ---
 

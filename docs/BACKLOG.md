@@ -38,6 +38,7 @@ See [**2026-03-05-world-class-roadmap.md**](plans/2026-03-05-world-class-roadmap
 
 | Item | Epic | Owner | Completed | Notes |
 |------|------|-------|-----------|-------|
+| Coordinator: enforce formatter step (Rule 5) | 01/02 | Chris | Mar 6, 2026 | Backlog #27. Strengthened Rule 5 in `context/specialists-instructions.md` from a rule statement into an explicit mandatory gate. Added self-check paragraph: coordinator must stop and verify "Did I route through researcher-formatter?" before delegating to writer, data-analyzer, storyteller, or competitive-analysis. Root cause: rule existed but lacked a checkpoint forcing explicit verification. |
 | Researcher trustworthiness overhaul — confidence tiers + URL-per-claim + numeric gating | 01 | Chris | Mar 6, 2026 | Backlog #5. Three surgical edits to `specialists/researcher/index.md`: explicit `unrated` ban (Core Principles), full https:// URL required before extracting claims (Stage 3), format enforcement block covering URL rule + `unrated` ban + numeric/financial claim Note field (Stage 4). Fixes 142/142 unrated confidence observed in Mar 6 test log. |
 | Writer word budget enforcement | 02 | Chris | Mar 6, 2026 | Backlog #6. Added word budgets for all 6 formats in Stage 3 (Report: 1,200–1,800w · Brief: 250–400w · Proposal: 500–700w · Exec Summary: 150–250w · Email: 100–200w · Memo: 300–500w). Added budget check + trim-from-least-important instruction to Stage 5 step 3. |
 | Chain reliability hardening (routing heuristic + narration rules) | 01/02/04/08 | Chris | Mar 5, 2026 | PR #16. Routing heuristic table, "when in doubt, chain" default, tightened narration rules, Writer story-output support. Smoke test: 5/5 scenarios pass, >90% reliability. Closes backlog #10 and #26. |
@@ -74,7 +75,7 @@ Items ordered by impact. Ship these first — they fix the most-flagged quality 
 | # | Item | Epic | Owner | Effort | Impact | Why Now |
 |---|------|------|-------|--------|--------|---------|
 | 0 | ~~**Specialist output format compliance — architectural fix**~~ | 01/02 | Chris | — | — | **Partially shipped 2026-03-03.** Researcher-formatter specialist built — two-step approach normalizes any Researcher output to canonical RESEARCH OUTPUT block before DA/Writer. Researcher format compliance resolved architecturally. Writer structural blocks (WRITER METADATA / CITATIONS / CLAIMS TO VERIFY) remain aspirational — revisit when Amplifier provider supports structured output (PR #38 closed upstream as premature; orchestrator layer must propagate response_format first). |
-| 27 | Coordinator: enforce formatter step (Rule 5) in researcher → writer chains | 01/02 | Chris | S | M | Coordinator skipped `researcher-formatter` in researcher → writer chain despite Rule 5 requiring it. Output happened to be well-structured, but ~1 in 3 topics produce non-canonical output. Investigate whether coordinator instructions need stronger enforcement language or whether this is a model-level compliance issue. *(from test log 2026-03-06)* |
+
 
 
 ### Near-term (Next 1-2 Sprints)
@@ -248,6 +249,7 @@ Synthesis Writer → cross-ecosystem comparative brief
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v2.7 | Mar 6, 2026 | Chris | Marked #27 as shipped — moved to Recently Completed. Sprint complete: Immediate Next is now empty. |
 | v2.6 | Mar 6, 2026 | Chris | Marked #5 and #6 as shipped — moved to Recently Completed. #27 is now the sole Immediate Next item. |
 | v2.5 | Mar 6, 2026 | Chris | **Prioritization pass.** Consolidated 5 duplicates: #12/#20/#21 merged into #5 (researcher trustworthiness overhaul, bumped to M effort / H impact); #23 merged into #16; #24 merged into #17. Restructured near-term into 4 priority tiers. Moved #5, #6, #27 to Immediate Next. Filled TBD effort/impact ratings. Added Consolidation Log. Separated shipped items (#10, #26) into Shipped/Closed table. Net: 28 items → 20 unique items (5 absorbed, 2 shipped, 1 partially shipped). |
 | v2.4 | Mar 6, 2026 | Chris | Routed 3 action items from sports-betting-specialists chain test log (2026-03-06): reinforced #5 with 142/142 unrated confidence evidence; added #27 (coordinator Rule 5 formatter enforcement); added #28 (writer CLAIMS TO VERIFY surfacing in user-facing output). Narration BEFORE-line tracking noted in test log but not promoted (best-effort, low priority). |
