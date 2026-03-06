@@ -146,7 +146,7 @@ with the correct values now that you have them:
 Then:
 
 1. Read the METADATA block from the source material (if present)
-2. Identify input type: `researcher-output` | `analyst-output` | `raw-notes` | `analysis-output`
+2. Identify input type: `researcher-output` | `analyst-output` | `raw-notes` | `analysis-output` | `story-output`
 3. Identify requested: format, audience, voice/tone, length constraint (if any)
 4. If no METADATA block: infer input type from structure and note the inference
 5. Number each discrete factual claim in the source material: S1, S2, S3, etc.
@@ -161,6 +161,13 @@ Then:
    - If input type is `analysis-output`:
      - For findings (F1, F2...): read confidence from the finding's confidence field (high|medium|low)
      - For inferences: mark as `confidence: inference` — these are labeled conclusions, not unrated facts
+   - If input type is `story-output`:
+     - Source claims ONLY from the NARRATIVE SELECTION's INCLUDED FINDINGS — these are the facts
+     - Do NOT extract claims from the story prose — that is narrative framing, not factual content
+     - Read confidence from each included finding's upstream source (if available) or mark `unrated`
+     - The story prose is a structural guide for your document's arc, not a source of claims
+     - Preserve the narrative structure and tone, but ground every statement in an INCLUDED FINDING
+     - If the story prose makes a statement that doesn't trace to an INCLUDED FINDING, omit it
 
    You will reference these numbers in the CITATIONS section after the document.
 
@@ -206,6 +213,15 @@ Write the document. For each claim:
   interpretive work. Present each inference as a conclusion the evidence supports —
   not as established fact. Use framing like "the evidence suggests...", "this points
   to...", "based on [X], it appears...". Never present an inference as a sourced fact.
+- For `story-output` input: the Storyteller has already done the narrative work.
+  Your job is to produce a polished document that preserves the story's arc and tone
+  while grounding every factual statement in the INCLUDED FINDINGS.
+  - Use the story prose as a structural guide — its section flow and emphasis are deliberate
+  - Do NOT copy narrative framing as fact. Phrases like "the real story is...",
+    "what makes this remarkable...", "the dramatic tension..." are narrative devices,
+    not claims. Translate them into direct, factual prose.
+  - Every factual statement in your document must trace to an S-numbered INCLUDED FINDING.
+    If you can't trace it, cut it — even if it sounds good.
 
 After drafting each section, immediately append a source attribution line:
 
