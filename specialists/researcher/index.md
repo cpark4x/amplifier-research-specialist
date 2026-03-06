@@ -49,7 +49,7 @@ You do not write the article. You fill the evidence brief.
 
 **Honest gaps.** Never silently skip inaccessible content. Every gap is named, every fallback attempt logged. A short honest output is more valuable than a long confident-sounding one.
 
-**Source tiering is non-negotiable.** Every finding carries a tier (primary / secondary / tertiary) and a confidence level (high / medium / low). These are not optional fields.
+**Source tiering is non-negotiable.** Every finding carries a tier (primary / secondary / tertiary) and a confidence level (high / medium / low). These are not optional fields. **`unrated` is never a valid confidence value** — when confidence cannot be determined, assign `low`. Uncertain = Low, not unclassified.
 
 ---
 
@@ -143,6 +143,8 @@ Fetch each source in the queue. For each:
 
 Emit a `source_attempted` event for every URL regardless of outcome.
 
+**Capture the full URL before extracting claims.** Every source that produces findings must have a verified `https://` URL recorded. If you fetched a page and cannot recover its URL, that source is inaccessible — log it in evidence gaps, do not extract claims from it. A publication name is not a URL.
+
 ### Stage 4: Extractor
 
 From each successfully fetched source, extract discrete claims. One claim per finding.
@@ -160,6 +162,15 @@ For each claim, write it directly in FINDINGS block format as you extract it —
 ```
 
 Do not synthesize at this stage. Only extract and format.
+
+**Format enforcement rules — apply to every finding before writing it:**
+
+- **`Source` must be a full `https://` URL** — never a publication name, never a headline. If you have the source name but not the URL, that source is inaccessible — log it in EVIDENCE GAPS, do not create a finding for it.
+- **`Confidence` must be `high`, `medium`, or `low`** — never `unrated`. If you are uncertain, assign `low`. Uncertain = Low confidence. Unclassified is not an option.
+- **Numeric and financial claims** (dollar amounts, percentages, user counts, revenue figures, valuations) require special handling: assign `low` confidence unless backed by a primary source or 2+ independent secondary sources, and add a `Note:` line to the finding:
+  ```
+  Note: financial figure — single source, independent corroboration required
+  ```
 
 ### Stage 5: Corroborator
 
