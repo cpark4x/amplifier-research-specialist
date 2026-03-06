@@ -27,10 +27,9 @@ def content() -> str:
 
 
 @pytest.fixture(scope="module")
-def line_count() -> int:
-    """Count lines in researcher/index.md."""
-    assert RESEARCHER_PATH.exists(), f"File not found: {RESEARCHER_PATH}"
-    return len(RESEARCHER_PATH.read_text(encoding="utf-8").splitlines())
+def line_count(content: str) -> int:
+    """Count lines in researcher/index.md, derived from the content fixture."""
+    return len(content.splitlines())
 
 
 # ─── Step 1: Removed content must be absent ─────────────────────────────
@@ -71,30 +70,39 @@ class TestKeptContent:
     """Core pipeline stages and reference sections must still be present."""
 
     def test_stage_1_planner(self, content: str) -> None:
+        """Pipeline stage 1 heading must be present."""
         assert "Stage 1: Planner" in content
 
     def test_stage_2_source_discoverer(self, content: str) -> None:
+        """Pipeline stage 2 heading must be present."""
         assert "Stage 2: Source Discoverer" in content
 
     def test_stage_3_fetcher(self, content: str) -> None:
+        """Pipeline stage 3 heading must be present."""
         assert "Stage 3: Fetcher" in content
 
     def test_stage_4_extractor(self, content: str) -> None:
+        """Pipeline stage 4 heading must be present."""
         assert "Stage 4: Extractor" in content
 
     def test_stage_5_corroborator(self, content: str) -> None:
+        """Pipeline stage 5 heading must be present."""
         assert "Stage 5: Corroborator" in content
 
     def test_stage_6_quality_gate(self, content: str) -> None:
+        """Pipeline stage 6 heading must be present."""
         assert "Stage 6: Quality Gate" in content
 
     def test_stage_7_synthesize_and_return(self, content: str) -> None:
+        """Pipeline stage 7 heading must be present."""
         assert "Stage 7: Synthesize and Return" in content
 
     def test_source_tiers(self, content: str) -> None:
+        """Source Tiers reference section must be present."""
         assert "Source Tiers" in content
 
     def test_confidence_levels(self, content: str) -> None:
+        """Confidence Levels reference section must be present."""
         assert "Confidence Levels" in content
 
     def test_do_not_worry_about_formatting(self, content: str) -> None:
@@ -147,9 +155,10 @@ def check_researcher_output(output: str) -> dict[str, bool]:
     Called by the agent after delegation, not by pytest.
     """
     return {
-        "has_sources": "http" in output.lower(),
+        "has_sources": "https://" in output.lower() or "http://" in output.lower(),
         "has_confidence": "confidence" in output.lower(),
-        "has_evidence_gaps": "gap" in output.lower(),
+        "has_evidence_gaps": "evidence gap" in output.lower()
+        or "gaps" in output.lower(),
         "no_final_self_check": "FINAL SELF-CHECK" not in output,
         "no_compliance_note": "COMPLIANCE NOTE" not in output,
     }
