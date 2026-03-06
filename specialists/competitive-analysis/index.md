@@ -98,7 +98,10 @@ For each subject:
    - Stage 2a: Identify who the competitors are (search "competitors of [subject]",
      "[subject] alternatives", "[market] competitive landscape")
    - Stage 2b: Profile each identified competitor across dimensions
-4. For each data point: record source URL, tier, and confidence
+4. For each data point: record source URL, tier, and confidence.
+   **Every rating in the COMPARISON MATRIX must carry a source URL.** If no URL was found
+   for a data point after exhausting the paywall fallback chain, record `source: "none"` —
+   but this counts as an evidence gap that must appear in the EVIDENCE GAPS section.
 5. Paywall fallback: direct → Google cache → Archive.org → author summary → mark inaccessible
 
 Do not proceed to Stage 3 until you have attempted at least one source per subject per dimension.
@@ -215,7 +218,7 @@ Quality score: [low | medium | high]
 **Section 2 — Structured data** (facts first, inferences second):
 ```
 COMPARISON MATRIX
-subject: [name] | dimension: [name] | rating: [strong|moderate|weak|unknown] | confidence: [high|medium|low]
+subject: [name] | dimension: [name] | rating: [strong|moderate|weak|unknown] | evidence: [one-sentence factual basis] | source: [URL or "none"] | tier: [primary|secondary|tertiary] | confidence: [high|medium|low]
 [one line per subject+dimension combination]
 
 PROFILES
