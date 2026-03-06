@@ -25,7 +25,8 @@ class CanvasRendererTool:
             "Use after the writer specialist to produce a deliverable document."
         )
 
-    def get_schema(self) -> dict:
+    @property
+    def input_schema(self) -> dict:
         return {
             "type": "object",
             "properties": {

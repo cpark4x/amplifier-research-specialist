@@ -11,4 +11,7 @@ dependencies = [
 ]
 
 [project.entry-points."amplifier.modules"]
-tool-canvas-renderer = "tool_canvas_renderer:mount"
+tool-canvas-renderer = "amplifier_module_tool_canvas_renderer:mount"
+
+[tool.hatch.build.targets.wheel]
+packages = ["amplifier_module_tool_canvas_renderer"]
