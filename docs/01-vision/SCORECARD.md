@@ -36,15 +36,15 @@ Anchored to `SUCCESS-METRICS.md` and `VISION.md`:
 
 ## Current State
 
-*As of 2026-03-06 — end of session 1*
+*As of 2026-03-06 — end of session 1 (post-validation)*
 
 | Dimension | Score | Status | Key Gaps |
 |---|---|---|---|
-| **Research Trustworthiness** | 5/10 | *(spec)* | Confidence tiers + URL enforcement added (#5). Not yet validated by test run. |
-| **Chain Reliability** | 5/10 | *(spec)* | Formatter mandatory gate added (#27). Timeout fragility still open (#11). |
-| **Format Fidelity** | 5/10 | *(spec)* | Word budgets added for all 6 formats + Stage 5 enforcement (#6). Audience calibration still undifferentiated (#7 open). CLAIMS TO VERIFY still buried (#28 open). |
+| **Research Trustworthiness** | 3/10 | *(validated)* | `unrated` gone, URLs improved, but researcher format compliance is systemically broken — narrative output instead of canonical FINDINGS blocks, numeric confidence instead of categorical. #22 promoted to sprint priority. |
+| **Chain Reliability** | 4/10 | *(partial)* | Formatter gate added (#27) but untested in live coordinator session. Recipe timeout confirmed at writer step (#11). |
+| **Format Fidelity** | 5/10 | *(validated for writer)* | Writer brief budget PASS — 316w within 250–400 budget. Audience calibration still undifferentiated (#7). CLAIMS TO VERIFY still buried (#28). |
 | **Specialist Coverage** | 4/10 | — | 5/11 epics complete. Most Phase 1 roadmap gates open. |
-| **Overall** | **4.8/10** | | |
+| **Overall** | **4.0/10** | | |
 
 ---
 
@@ -52,7 +52,7 @@ Anchored to `SUCCESS-METRICS.md` and `VISION.md`:
 
 | Date | Session | Changes | Dimension Deltas | Overall |
 |---|---|---|---|---|
-| 2026-03-06 | Session 1 | Session startup procedure (`context/session-startup.md`) + SCORECARD.md. Researcher trustworthiness overhaul (#5): explicit `unrated` ban, URL capture enforcement, numeric/financial claim handling (Stage 3 + Stage 4 + Core Principles). Writer word budget enforcement (#6): budgets for all 6 formats in Stage 3 + budget check + trim instruction in Stage 5. | Research Trust: 2→5 *(spec)*, Format Fidelity: 3→5 *(spec)* | 3.0 → 4.5 *(spec)* |
+| 2026-03-06 | Session 1 | **Shipped:** session startup procedure, SCORECARD.md, #5 (researcher `unrated` ban + URL enforcement), #6 (writer word budgets all formats + Stage 5 enforcement), #27 (formatter mandatory gate). **Validated:** Writer brief = 316w (PASS). Researcher `unrated` gone + URLs present (PARTIAL — format compliance still broken: narrative output, numeric confidence, wrong tier labels). Recipe timeout confirmed at writer step. **Net:** #6 validated, #5 partially validated, #27 untested in live session. #22 promoted to sprint priority. | Research Trust: 2→5→3, Format Fidelity: 3→5 *(validated for writer)*, Chain: 4→5→4 | 3.0 → 4.8 → 4.0 |
 
 ---
 
