@@ -77,7 +77,8 @@ There must be at least one thing this specialist does that an adjacent specialis
 - Quality score accurately predicts downstream usefulness
 
 **Composability:**
-- ResearchOutput passes to Writer without preprocessing
+- Researcher → Formatter → Writer chain produces canonical output without manual intervention
+- Formatter successfully normalizes researcher output on every run
 - Schema version has not needed a breaking change
 
 ### Qualitative Signals
@@ -91,6 +92,29 @@ There must be at least one thing this specialist does that an adjacent specialis
 - "I had to verify everything anyway"
 - "The confidence ratings felt arbitrary"
 - "It returned findings but I couldn't tell where they came from"
+
+---
+
+## Formatter Metrics
+
+**Phase Goal:** Validate that the Formatter reliably converts any researcher output into canonical ResearchOutput format — the essential bridge between research and all downstream specialists.
+
+### Leading Indicators
+
+**Format compliance:**
+- Every finding in formatter output uses categorical confidence (high/medium/low — never numeric)
+- Every finding uses full tier labels (primary/secondary/tertiary — never abbreviated)
+- Every source field is a full `https://` URL or explicitly marked `unknown`
+
+**Normalization reliability:**
+- Formatter produces canonical RESEARCH OUTPUT block on every run regardless of researcher output format
+- Zero claims lost during format conversion (input claim count = output claim count)
+
+### Lagging Indicators
+
+**Pipeline trust:**
+- Downstream specialists (Writer, Data Analyzer) never receive non-canonical input
+- Zero parsing failures in Writer or Data Analyzer traced to format issues
 
 ---
 
@@ -243,12 +267,13 @@ There must be at least one thing this specialist does that an adjacent specialis
 
 ## Success Criteria by Phase
 
-### V1 Success = Researcher Is Trustworthy
+### V1 Success = Research Pipeline Is Trustworthy
 
 **Must achieve:**
-- Every finding is sourced, tiered, and confidence-rated
+- Every finding is sourced, tiered, and confidence-rated (validated via formatter output)
 - Evidence gaps are always disclosed, never omitted
 - ResearchOutput schema is stable (no breaking changes needed after v1.0)
+- Formatter normalizes researcher output to canonical format on every run
 
 **Qualitative validation:**
 - A caller can audit any output and verify every claim traces to a source

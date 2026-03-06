@@ -6,7 +6,10 @@ These types are the stable contracts that all specialists follow. They do not ch
 
 ## ResearchOutput
 
-The canonical output of the Researcher specialist.
+The canonical output of the research pipeline (Researcher → Formatter). The Researcher
+produces evidence in whatever format is natural for the research task; the Formatter
+normalizes it into this schema. Downstream consumers depend on formatter output, not
+raw researcher output.
 
 ```typescript
 interface ResearchOutput {

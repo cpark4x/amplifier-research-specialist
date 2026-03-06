@@ -14,9 +14,9 @@ steps:
   - id: "research"
     agent: "specialists:specialists/researcher"
     prompt: |
-      Research the following question thoroughly. Follow your full research pipeline
-      and return your complete research narrative with sourced evidence, confidence
-      scores, and source tiering.
+      Research the following question thoroughly. Follow your full research pipeline.
+      Focus on finding trustworthy evidence with source tiering and confidence
+      assessments. Do not worry about output format — the formatter handles that.
 
       Research question: {{research_question}}
 
