@@ -1,0 +1,672 @@
+# =============================================================================
+# promote-mining-items — Promote mining report recommendations to BACKLOG.md
+# =============================================================================
+#
+# CHANGELOG
+# =============================================================================
+#
+# v1.3.0 (2026-03-05):
+#   - BUGFIX: Guarantee Change History row even when ## Change History
+#     section or table header is missing in BACKLOG.md
+#     * ROOT CAUSE: Stage 1 only wrote the history row if the heading
+#       already existed; missing heading caused silent skip
+#     * FIX: Create ## Change History section (with standard markdown
+#       table header) at end of file if absent; create table header
+#       within existing section if header/separator missing
+#     * Added idempotency guard: skip duplicate history rows on re-run
+#       (matched by end_date fingerprint in row text)
+#   - BUGFIX: Guarantee report frontmatter marking even when report
+#     has no YAML frontmatter
+#     * ROOT CAUSE: Frontmatter regex only matched existing ---/---
+#       blocks; reports without frontmatter were written back unchanged
+#     * FIX: Prepend minimal frontmatter (items_promoted: status)
+#       when no existing frontmatter detected
+#
+# v1.2.0 (2026-03-05):
+#   - CRITICAL FIX: Stage 0 no longer writes .promote-plan.json before the
+#     approval gate — all file I/O deferred to Stage 1 (post-approval)
+#     * ROOT CAUSE: build-promotion-plan wrote .promote-plan.json during
+#       Stage 0, before the first approval gate, violating the contract
+#       that no files are modified until the user approves
+#     * FIX: Stage 0 outputs plan data as JSON to stdout only
+#       (parse_json: true captures it as plan_summary); Stage 1
+#       re-extracts the plan deterministically from report + BACKLOG
+#       instead of reading a pre-written file
+#     * WHY THIS WORKS: Extraction is deterministic — items are parsed in
+#       document order, dedup preserves insertion order, select_numbers
+#       are assigned sequentially — so re-running the same logic in
+#       Stage 1 reproduces exactly the numbering shown in the Stage 0
+#       approval prompt
+#   - IMPROVEMENT: Auto-select newest report by parsing YYYY-MM-DD date
+#     from filenames rather than relying on pure lexicographic sort
+#     (for ISO dates the result is identical, but this is more robust
+#     if non-date prefixes ever appear in filenames)
+#
+# v1.1.0 (2026-03-05):
+#   - BUGFIX: Fixed f-string syntax in build-promotion-plan display builder
+#     * ROOT CAUSE: Single-quoted f-string with embedded parens/braces was
+#       ambiguous and could break depending on tooling interpretation
+#     * FIX: Switched to double-quoted f-string for unambiguous parsing
+#   - BUGFIX: Verified all template refs use promotion_result (not
+#     production_result) in commit stage — no typos remain
+#   - IMPROVEMENT: Clarified _approval_message in context dict — it is a
+#     validator placeholder only; runtime overwrites it after each approval
+#     gate per schema spec. Comment updated to document this.
+#   - IMPROVEMENT: Added conservative title-based dedup (case-insensitive
+#     exact match) against existing BACKLOG entries without id: markers
+#     * Extracts titles from all table rows in BACKLOG.md
+#     * Strips markdown formatting (bold, strikethrough) before comparison
+#     * Reports skip reason (id match vs title match) in approval prompt
+#   - BUGFIX: Change History scanning now searches until next section
+#     boundary or EOF instead of only checking 10 lines after header
+#     * ROOT CAUSE: Hardcoded limit of 10 lines could miss the table if
+#       blank lines or comments separated header from table
+#     * FIX: Scan to next heading or EOF; also added fallback insertion
+#       after table separator when no existing data rows found
+#
+# v1.0.0 (2026-03-05):
+#   - NEW FEATURE: Initial recipe for automated mining report promotion
+#     * 3-stage workflow: extract-and-plan → apply → commit
+#     * Deterministic extraction of Section 4 items via Python (no LLM)
+#     * Stable IDs: mine-{end_date}-{title_slug} for idempotent dedup
+#     * Approval gate with "all" or comma-separated item selection
+#     * Inserts rows into Near-term table with traceability markers
+#     * Updates Change History and marks report frontmatter
+#     * Git commit via foundation:git-ops (BACKLOG.md + report only)
+#
+# Required agents: foundation:git-ops
+# Context: report_path (optional — auto-selects newest if omitted),
+#          owner (default "Chris"), epic (default "" → TBD),
+#          target_section (default "Near-term")
+#
+# Usage:
+#   amplifier run "execute recipes/promote-mining-items.yaml"
+#   amplifier run "execute recipes/promote-mining-items.yaml with report_path=docs/test-log/reports/2026-03-05-mining-report.md"
+# =============================================================================
+
+name: "promote-mining-items"
+description: "Extract recommended backlog additions from a mining report, deduplicate against existing items, and promote selected items into docs/BACKLOG.md with traceability."
+version: "1.3.0"
+tags: ["backlog", "mining", "promotion", "documentation", "test-log"]
+
+context:
+  report_path: ""             # Optional — path to mining report; auto-selects newest if empty
+  owner: "Chris"              # Owner assigned to promoted items
+  epic: ""                    # Epic number for items (empty → "TBD" in table)
+  target_section: "Near-term" # Target section in BACKLOG.md (Near-term, Immediate, Medium-term)
+  _approval_message: ""       # Validator placeholder — runtime overwrites this with the
+                              # approval gate message (e.g. "all" or "1,3,5")
+
+stages:
+  # --------------------------------------------------------------------------
+  # Stage 0 — Extract Section 4 items, deduplicate, build promotion plan
+  # NOTE: This stage performs NO file writes. All plan data is output to
+  # stdout and captured via parse_json into plan_summary context variable.
+  # --------------------------------------------------------------------------
+  - name: "extract-and-plan"
+    steps:
+      - id: "build-promotion-plan"
+        type: "bash"
+        command: |
+          export REPORT_PATH="{{report_path}}"
+          python3 - <<'PYEOF'
+          import os, re, json, sys, glob
+
+          def main():
+              report_path = os.environ.get('REPORT_PATH', '').strip()
+
+              # -- 1. Resolve report path ----------------------------------
+              if not report_path:
+                  candidates = glob.glob('docs/test-log/reports/*-mining-report.md')
+                  if not candidates:
+                      print(json.dumps({"error": "No mining reports found in docs/test-log/reports/"}))
+                      sys.exit(1)
+                  # Sort by date extracted from filename (YYYY-MM-DD) for
+                  # robustness; for ISO dates this matches lexicographic order
+                  # but handles non-date prefixes gracefully.
+                  def _date_key(p):
+                      m = re.search(r'(\d{4}-\d{2}-\d{2})', os.path.basename(p))
+                      return m.group(1) if m else ''
+                  candidates.sort(key=_date_key)
+                  report_path = candidates[-1]
+
+              if not os.path.isfile(report_path):
+                  print(json.dumps({"error": f"Report not found: {report_path}"}))
+                  sys.exit(1)
+
+              with open(report_path, encoding='utf-8') as f:
+                  content = f.read()
+
+              # -- 2. Extract end_date from frontmatter or filename --------
+              end_date = None
+              fm = re.match(r'^---\s*\n(.*?)\n---', content, re.DOTALL)
+              if fm:
+                  for line in fm.group(1).split('\n'):
+                      if line.strip().startswith('end_date:'):
+                          end_date = line.split(':', 1)[1].strip().strip('"').strip("'")
+                          break
+              if not end_date:
+                  m = re.search(r'(\d{4}-\d{2}-\d{2})', os.path.basename(report_path))
+                  if m:
+                      end_date = m.group(1)
+              if not end_date:
+                  print(json.dumps({"error": "Could not determine end_date from report"}))
+                  sys.exit(1)
+
+              # -- 3. Extract Section 4 items ------------------------------
+              sec4 = re.search(
+                  r'## 4\.?\s*Recommended Backlog Additions[^\n]*\n(.*?)(?=\n## |\Z)',
+                  content, re.DOTALL
+              )
+              if not sec4:
+                  print(json.dumps({"error": "Section '## 4. Recommended Backlog Additions' not found"}))
+                  sys.exit(1)
+
+              items = []
+              current = None
+              for line in sec4.group(1).split('\n'):
+                  s = line.strip()
+                  if s.startswith('- **Title:**'):
+                      if current and current.get('title'):
+                          items.append(current)
+                      title = s[len('- **Title:**'):].strip()
+                      slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+                      if len(slug) > 80:
+                          slug = slug[:80].rsplit('-', 1)[0]
+                      current = {
+                          'title': title,
+                          'rationale': '',
+                          'evidence': '',
+                          'stable_id': f'mine-{end_date}-{slug}'
+                      }
+                  elif s.startswith('- **Rationale:**') and current:
+                      current['rationale'] = s[len('- **Rationale:**'):].strip()
+                  elif s.startswith('- **Evidence:**') and current:
+                      current['evidence'] = s[len('- **Evidence:**'):].strip()
+              if current and current.get('title'):
+                  items.append(current)
+
+              if not items:
+                  print(json.dumps({"error": "No items found in Section 4"}))
+                  sys.exit(1)
+
+              # -- 4. Deduplicate against BACKLOG.md -----------------------
+              backlog = ''
+              if os.path.isfile('docs/BACKLOG.md'):
+                  with open('docs/BACKLOG.md', encoding='utf-8') as f:
+                      backlog = f.read()
+
+              # 4a. Extract existing titles from BACKLOG table rows
+              #     for conservative title-based dedup (case-insensitive exact)
+              existing_titles = set()
+              for bline in backlog.split('\n'):
+                  bline_s = bline.strip()
+                  tm = re.match(r'\|\s*\d+\s*\|([^|]+)\|', bline_s)
+                  if tm:
+                      raw_title = tm.group(1).strip()
+                      # Strip markdown bold/strikethrough formatting
+                      clean_title = re.sub(r'[~*]+', '', raw_title).strip()
+                      if clean_title:
+                          existing_titles.add(clean_title.lower())
+
+              # 4b. Deduplicate: id-based first, then title-based
+              new_items = []
+              skipped = []
+              for item in items:
+                  if f"id: {item['stable_id']}" in backlog:
+                      skipped.append({**item, 'skip_reason': 'id'})
+                  elif item['title'].strip().lower() in existing_titles:
+                      skipped.append({**item, 'skip_reason': 'title'})
+                  else:
+                      new_items.append(item)
+
+              for i, item in enumerate(new_items):
+                  item['select_number'] = i + 1
+
+              # -- 5. Build display text for approval prompt ---------------
+              dl = []
+              if new_items:
+                  dl.append(f"**NEW** ({len(new_items)} item(s) to promote):")
+                  for item in new_items:
+                      dl.append(f"  {item['select_number']}. {item['title']}")
+                      r = item.get('rationale', '')
+                      if r:
+                          if len(r) > 120:
+                              r = r[:117] + '...'
+                          dl.append(f"     {r}")
+              else:
+                  dl.append('**No new items to promote** - all are already in the backlog.')
+
+              if skipped:
+                  dl.append('')
+                  dl.append(f"**SKIPPED** ({len(skipped)} already in backlog):")
+                  for item in skipped:
+                      reason = 'id match' if item.get('skip_reason') == 'id' else 'title match'
+                      dl.append(f"  - {item['title']} ({reason})")
+
+              display = '\n'.join(dl)
+
+              # -- 6. Output summary JSON (NO file writes) -----------------
+              print(json.dumps({
+                  'end_date': end_date,
+                  'report_path': report_path,
+                  'total_extracted': len(items),
+                  'new_count': len(new_items),
+                  'skipped_count': len(skipped),
+                  'display': display
+              }, ensure_ascii=False))
+
+          main()
+          PYEOF
+        output: "plan_summary"
+        parse_json: true
+        timeout: 30
+
+    approval:
+      required: true
+      prompt: |
+        ## Promotion Plan - Mining Report {{plan_summary.end_date}}
+
+        **Source:** `{{plan_summary.report_path}}`
+        **Target:** {{target_section}} section in `docs/BACKLOG.md`
+        **Owner:** {{owner}} | **Epic:** {{epic}} (empty = TBD)
+
+        ---
+
+        {{plan_summary.display}}
+
+        ---
+
+        - **Approve with `all`** to promote all {{plan_summary.new_count}} new item(s).
+        - **Approve with item numbers** (e.g. `1,3,5`) to select specific items.
+        - **Deny** to cancel.
+      timeout: 0
+      default: "deny"
+
+  # --------------------------------------------------------------------------
+  # Stage 1 — Apply promotion to BACKLOG.md and mark mining report
+  # Re-extracts the plan deterministically from the same report + BACKLOG
+  # (same logic as Stage 0) so that no pre-written temp files are needed.
+  # Selection numbers are stable because extraction order is deterministic:
+  # items parsed in document order, dedup preserves insertion order,
+  # select_numbers assigned sequentially.
+  # --------------------------------------------------------------------------
+  - name: "apply"
+    steps:
+      - id: "apply-promotion"
+        type: "bash"
+        command: |
+          export APPROVAL_MSG="{{_approval_message}}"
+          export OWNER="{{owner}}"
+          export EPIC="{{epic}}"
+          export TARGET_SECTION="{{target_section}}"
+          export REPORT_PATH="{{plan_summary.report_path}}"
+          python3 - <<'PYEOF'
+          import os, re, json, sys
+          from datetime import datetime
+
+          def main():
+              approval_msg = os.environ.get('APPROVAL_MSG', '').strip()
+              owner = os.environ.get('OWNER', 'Chris')
+              epic = os.environ.get('EPIC', '')
+              target_section = os.environ.get('TARGET_SECTION', 'Near-term')
+              report_path = os.environ.get('REPORT_PATH', '').strip()
+
+              # -- 1. Validate resolved report path (from Stage 0) ---------
+              if not report_path or not os.path.isfile(report_path):
+                  print(json.dumps({"error": f"Report not found: {report_path}"}))
+                  sys.exit(1)
+
+              # -- 2. Re-extract plan (deterministic, same as Stage 0) -----
+              # This duplicates the Stage 0 extraction logic so that no
+              # temp files need to be written before the approval gate.
+              # Ordering is stable: items parsed in document order, dedup
+              # preserves insertion order, select_numbers are sequential.
+              with open(report_path, encoding='utf-8') as f:
+                  content = f.read()
+
+              # Extract end_date from frontmatter or filename
+              end_date = None
+              fm = re.match(r'^---\s*\n(.*?)\n---', content, re.DOTALL)
+              if fm:
+                  for line in fm.group(1).split('\n'):
+                      if line.strip().startswith('end_date:'):
+                          end_date = line.split(':', 1)[1].strip().strip('"').strip("'")
+                          break
+              if not end_date:
+                  m = re.search(r'(\d{4}-\d{2}-\d{2})', os.path.basename(report_path))
+                  if m:
+                      end_date = m.group(1)
+              if not end_date:
+                  print(json.dumps({"error": "Could not determine end_date from report"}))
+                  sys.exit(1)
+
+              # Extract Section 4 items
+              sec4 = re.search(
+                  r'## 4\.?\s*Recommended Backlog Additions[^\n]*\n(.*?)(?=\n## |\Z)',
+                  content, re.DOTALL
+              )
+              if not sec4:
+                  print(json.dumps({"error": "Section '## 4. Recommended Backlog Additions' not found"}))
+                  sys.exit(1)
+
+              items = []
+              current = None
+              for line in sec4.group(1).split('\n'):
+                  s = line.strip()
+                  if s.startswith('- **Title:**'):
+                      if current and current.get('title'):
+                          items.append(current)
+                      title = s[len('- **Title:**'):].strip()
+                      slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+                      if len(slug) > 80:
+                          slug = slug[:80].rsplit('-', 1)[0]
+                      current = {
+                          'title': title,
+                          'rationale': '',
+                          'evidence': '',
+                          'stable_id': f'mine-{end_date}-{slug}'
+                      }
+                  elif s.startswith('- **Rationale:**') and current:
+                      current['rationale'] = s[len('- **Rationale:**'):].strip()
+                  elif s.startswith('- **Evidence:**') and current:
+                      current['evidence'] = s[len('- **Evidence:**'):].strip()
+              if current and current.get('title'):
+                  items.append(current)
+
+              if not items:
+                  print(json.dumps({"error": "No items found in Section 4"}))
+                  sys.exit(1)
+
+              # Deduplicate against BACKLOG.md
+              backlog = ''
+              if os.path.isfile('docs/BACKLOG.md'):
+                  with open('docs/BACKLOG.md', encoding='utf-8') as f:
+                      backlog = f.read()
+
+              existing_titles = set()
+              for bline in backlog.split('\n'):
+                  bline_s = bline.strip()
+                  tm = re.match(r'\|\s*\d+\s*\|([^|]+)\|', bline_s)
+                  if tm:
+                      raw_title = tm.group(1).strip()
+                      clean_title = re.sub(r'[~*]+', '', raw_title).strip()
+                      if clean_title:
+                          existing_titles.add(clean_title.lower())
+
+              new_items = []
+              skipped = []
+              for item in items:
+                  if f"id: {item['stable_id']}" in backlog:
+                      skipped.append({**item, 'skip_reason': 'id'})
+                  elif item['title'].strip().lower() in existing_titles:
+                      skipped.append({**item, 'skip_reason': 'title'})
+                  else:
+                      new_items.append(item)
+
+              for i, item in enumerate(new_items):
+                  item['select_number'] = i + 1
+
+              # -- 3. Filter items by approval message ---------------------
+              if not approval_msg or approval_msg.lower() == 'all':
+                  approved = list(new_items)
+              else:
+                  try:
+                      nums = [int(n.strip()) for n in approval_msg.split(',') if n.strip()]
+                  except ValueError:
+                      print(json.dumps({"error": f"Invalid selection: '{approval_msg}'. Use 'all' or comma-separated numbers."}))
+                      sys.exit(1)
+                  approved = [it for it in new_items if it.get('select_number') in nums]
+
+              if not approved:
+                  print(json.dumps({
+                      "items_promoted": 0,
+                      "promoted_status": "false",
+                      "new_version": "",
+                      "summary": "No items selected for promotion. No files modified."
+                  }))
+                  return
+
+              # -- 4. Insert rows into BACKLOG.md --------------------------
+              with open('docs/BACKLOG.md', encoding='utf-8') as f:
+                  lines = f.readlines()
+
+              # Find target section header
+              target_idx = None
+              for i, line in enumerate(lines):
+                  if line.strip().startswith('###') and target_section.lower() in line.lower():
+                      target_idx = i
+                      break
+
+              if target_idx is None:
+                  print(json.dumps({"error": f"Section matching '{target_section}' not found in BACKLOG.md"}))
+                  sys.exit(1)
+
+              # Find next section boundary
+              next_sec = len(lines)
+              for i in range(target_idx + 1, len(lines)):
+                  if re.match(r'^#{2,3}\s', lines[i]):
+                      next_sec = i
+                      break
+
+              # Find last table data row and max item number
+              last_row = None
+              max_num = 0
+              for i in range(target_idx, next_sec):
+                  m = re.match(r'\|\s*(\d+)\s*\|', lines[i])
+                  if m:
+                      last_row = i
+                      max_num = max(max_num, int(m.group(1)))
+
+              # Fallback: insert after table separator if no data rows
+              if last_row is None:
+                  for i in range(target_idx, next_sec):
+                      if re.match(r'\|[-\s|]+\|', lines[i]):
+                          last_row = i
+                          break
+
+              if last_row is None:
+                  print(json.dumps({"error": "Could not locate table in target section"}))
+                  sys.exit(1)
+
+              # Build new table rows
+              new_rows = []
+              for item in approved:
+                  max_num += 1
+                  title = item['title'].replace('|', '/')
+                  rationale = item.get('rationale', '').replace('|', '/')
+                  sid = item['stable_id']
+                  trace = f'*(from mining report {end_date}; id: {sid})*'
+                  full_rat = f'{rationale} {trace}' if rationale else trace
+                  ep = (epic if epic else 'TBD').replace('|', '/')
+                  own = owner.replace('|', '/')
+                  row = f'| {max_num} | {title} | {ep} | {own} | TBD | TBD | {full_rat} |\n'
+                  new_rows.append(row)
+
+              insert_at = last_row + 1
+              for j, row in enumerate(new_rows):
+                  lines.insert(insert_at + j, row)
+
+              # -- 5. Append Change History row ----------------------------
+              ch_idx = None
+              for i, line in enumerate(lines):
+                  if '## Change History' in line:
+                      ch_idx = i
+                      break
+
+              # Create section at end of file if missing
+              if ch_idx is None:
+                  if lines and not lines[-1].endswith('\n'):
+                      lines[-1] += '\n'
+                  lines.append('\n')
+                  lines.append('## Change History\n')
+                  ch_idx = len(lines) - 1
+                  lines.append('\n')
+                  lines.append('| Version | Date | Author | Change Description |\n')
+                  lines.append('|---------|------|--------|--------------------|\n')
+
+              # Find the next section boundary after Change History
+              ch_end = len(lines)
+              for i in range(ch_idx + 1, len(lines)):
+                  if re.match(r'^#{1,3}\s', lines[i]) and '## Change History' not in lines[i]:
+                      ch_end = i
+                      break
+
+              # Scan for table components (robust: to section end)
+              first_data = None
+              separator_row = None
+              header_row = None
+              for i in range(ch_idx + 1, ch_end):
+                  s = lines[i].strip()
+                  if not s.startswith('|'):
+                      continue
+                  # Separator row: only |, -, and whitespace
+                  cleaned = s.replace('|', '').replace('-', '').strip()
+                  if not cleaned:
+                      separator_row = i
+                      continue
+                  # Header row
+                  if s.lower().startswith('| version'):
+                      header_row = i
+                      continue
+                  # Data row found
+                  if first_data is None:
+                      first_data = i
+
+              # If heading exists but table header/separator missing, create it
+              if separator_row is None:
+                  ins = ch_idx + 1
+                  while ins < ch_end and not lines[ins].strip():
+                      ins += 1
+                  lines.insert(ins, '| Version | Date | Author | Change Description |\n')
+                  lines.insert(ins + 1, '|---------|------|--------|--------------------|\n')
+                  separator_row = ins + 1
+                  ch_end += 2
+                  if first_data is not None and first_data >= ins:
+                      first_data += 2
+
+              # Compute version
+              new_version = ''
+              cur_ver = 'v0.0'
+              if first_data is not None:
+                  vm = re.match(r'\|\s*(v[\d.]+)', lines[first_data])
+                  if vm:
+                      cur_ver = vm.group(1)
+
+              parts = cur_ver.replace('v', '').split('.')
+              if len(parts) >= 2:
+                  new_version = f'v{parts[0]}.{int(parts[1]) + 1}'
+              else:
+                  new_version = f'v{parts[0]}.1'
+
+              # Idempotency: skip if a row for this end_date already exists
+              duplicate = False
+              for i in range(ch_idx + 1, ch_end):
+                  s = lines[i].strip()
+                  if s.startswith('|') and f'mining report items ({end_date})' in s:
+                      duplicate = True
+                      dvm = re.match(r'\|\s*(v[\d.]+)', s)
+                      if dvm:
+                          new_version = dvm.group(1)
+                      break
+
+              if not duplicate:
+                  today = datetime.now().strftime('%b %-d, %Y')
+                  titles_brief = '; '.join([it['title'][:50] for it in approved[:5]])
+                  if len(approved) > 5:
+                      titles_brief += f'; +{len(approved)-5} more'
+                  ch_text = (
+                      f'Promoted {len(approved)} mining report items ({end_date}) '
+                      f'to {target_section} backlog: {titles_brief}'
+                  )
+                  ch_row = f'| {new_version} | {today} | {owner} | {ch_text} |\n'
+
+                  if first_data is not None:
+                      lines.insert(first_data, ch_row)
+                  elif separator_row is not None:
+                      lines.insert(separator_row + 1, ch_row)
+
+              with open('docs/BACKLOG.md', 'w', encoding='utf-8') as f:
+                  f.writelines(lines)
+
+              # -- 6. Mark mining report frontmatter -----------------------
+              with open(report_path, encoding='utf-8') as f:
+                  rpt = f.read()
+
+              total_accounted = len(skipped) + len(approved)
+              status = 'true' if total_accounted >= len(items) else 'partial'
+
+              fm = re.match(r'^(---\s*\n)(.*?)(\n---)', rpt, re.DOTALL)
+              if fm:
+                  body = fm.group(2)
+                  if 'items_promoted:' in body:
+                      body = re.sub(r'items_promoted:\s*\S+', f'items_promoted: {status}', body)
+                  else:
+                      body += f'\nitems_promoted: {status}'
+                  rpt = fm.group(1) + body + fm.group(3) + rpt[fm.end():]
+              else:
+                  # No frontmatter exists — prepend minimal YAML frontmatter
+                  rpt = f'---\nitems_promoted: {status}\n---\n\n' + rpt
+
+              with open(report_path, 'w', encoding='utf-8') as f:
+                  f.write(rpt)
+
+              # -- 7. Output result ----------------------------------------
+              pl = '\n'.join([
+                  f"  - #{it.get('select_number','?')}: {it['title']}"
+                  for it in approved
+              ])
+              summary = (
+                  f"Promoted {len(approved)} item(s) to {target_section} backlog:\n"
+                  f"{pl}\n\n"
+                  f"Backlog version: {new_version}"
+              )
+
+              print(json.dumps({
+                  "items_promoted": len(approved),
+                  "promoted_status": status,
+                  "new_version": new_version,
+                  "summary": summary
+              }, ensure_ascii=False))
+
+          main()
+          PYEOF
+        output: "promotion_result"
+        parse_json: true
+        timeout: 30
+
+    approval:
+      required: true
+      prompt: |
+        ## Promotion Applied
+
+        {{promotion_result.summary}}
+
+        **Files modified:**
+        - `docs/BACKLOG.md` → {{promotion_result.new_version}}
+        - `{{plan_summary.report_path}}` → items_promoted: {{promotion_result.promoted_status}}
+
+        ---
+
+        - **Approve** to commit these changes.
+        - **Deny** to discard (revert with `git checkout -- docs/BACKLOG.md {{plan_summary.report_path}}`).
+      timeout: 0
+      default: "deny"
+
+  # --------------------------------------------------------------------------
+  # Stage 2 — Commit promoted changes (only intended files)
+  # --------------------------------------------------------------------------
+  - name: "commit"
+    steps:
+      - id: "commit-changes"
+        agent: "foundation:git-ops"
+        prompt: |
+          Stage and commit ONLY these two files:
+          1. docs/BACKLOG.md
+          2. {{plan_summary.report_path}}
+
+          Do NOT stage any other files.
+
+          Commit message (use exactly):
+          docs: promote {{promotion_result.items_promoted}} mining report items ({{plan_summary.end_date}}) to backlog
+        timeout: 300
