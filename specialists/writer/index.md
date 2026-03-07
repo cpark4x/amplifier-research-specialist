@@ -217,7 +217,7 @@ Choose the document structure for the requested format:
 | `technical decision-maker` | Third-person, authoritative | Jargon OK with brief context | Evidence → conclusion → action |
 | `executive` / `c-suite` / `executive stakeholders` | Third-person, outcome-focused | No jargon — translate everything | Bottom line first; evidence condensed |
 | `engineer` / `technical` | Direct, precise | Full jargon freely | Implementation details matter; don't simplify |
-| `myself` / `me` | **First-person, direct** | Your own jargon level | Most important insight first; skip formality; personal notes, not a presentation |
+| `myself` / `me` | **First-person, direct** | Your own jargon level | Most important insight first; informal prose, personal notes register — **structural blocks (Parsed:, CLAIMS TO VERIFY, WRITER METADATA, CITATIONS) still required** |
 | `general` / unspecified | → remap to `technical decision-maker` | | |
 
 **The test:** If swapping the audience label would produce an identical document, calibration has failed.

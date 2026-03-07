@@ -36,15 +36,15 @@ Anchored to `SUCCESS-METRICS.md` and `VISION.md`:
 
 ## Current State
 
-*As of 2026-03-06 — end of session 2 (post-validation)*
+*As of 2026-03-06 — end of session 2 (post-validation, writer quality fixes)*
 
 | Dimension | Score | Status | Key Gaps |
 |---|---|---|---|
 | **Research Trustworthiness** | 5/10 | *(validated)* | Architecture fix validated. Researcher produces natural narrative; formatter canonicalizes to categorical confidence + full tier labels on every run. Remaining gaps: quality gate NOT MET path untested across 5+ topics; coverage depth varies by topic. |
 | **Chain Reliability** | 5/10 | *(validated)* | Researcher→Formatter→Writer chain completed end-to-end without manual intervention. Formatter fired on all 43 claims. Rule 5 confirmed operational. Recipe timeout (#11) still open but not hit in this run. |
-| **Format Fidelity** | 5/10 | *(validated for writer)* | Writer brief budget PASS — 316w within 250–400 budget. Audience calibration still undifferentiated (#7). CLAIMS TO VERIFY surfaced in Session 2 run. |
+| **Format Fidelity** | 6/10 | *(validated)* | #7, #9, #28 shipped. Audience calibration confirmed working (first-person register for `myself`). Specificity gate confirmed. CLAIMS TO VERIFY inline surfacing confirmed. OUTPUT CONTRACT compliance for informal registers still fragile (#29). |
 | **Specialist Coverage** | 4/10 | — | 5/11 epics complete. Most Phase 1 roadmap gates open. |
-| **Overall** | **4.8/10** | | |
+| **Overall** | **5.1/10** | | |
 
 ---
 
@@ -53,6 +53,7 @@ Anchored to `SUCCESS-METRICS.md` and `VISION.md`:
 | Date | Session | Changes | Dimension Deltas | Overall |
 |---|---|---|---|---|
 | 2026-03-06 | Session 1 | **Shipped:** session startup procedure, SCORECARD.md, #5 (researcher `unrated` ban + URL enforcement), #6 (writer word budgets all formats + Stage 5 enforcement), #27 (formatter mandatory gate). **Validated:** Writer brief = 316w (PASS). Researcher `unrated` gone + URLs present (PARTIAL — format compliance still broken: narrative output, numeric confidence, wrong tier labels). Recipe timeout confirmed at writer step. **Net:** #6 validated, #5 partially validated, #27 untested in live session. #22 promoted to sprint priority. | Research Trust: 2→5→3, Format Fidelity: 3→5 *(validated for writer)*, Chain: 4→5→4 | 3.0 → 4.8 → 4.0 |
+| 2026-03-06 | Session 2 cont. | **Shipped:** #28 (CLAIMS TO VERIFY surfacing + scope extended to researcher-output), #7 (audience calibration — `myself` register, Stage 4 register table), #9 (specificity gate in Stage 5), #18 (Storyteller inference auditability in NARRATIVE SELECTION), #19 (Storyteller quality_threshold param). **Validated:** #7 and #9 PASS on Mistral AI test run. #28 PARTIAL — inline caveat surfacing works, formal block absent for `myself` audience; OUTPUT CONTRACT slip logged as #29. Format Fidelity 5→6. | Format Fidelity: 5→6 *(validated)* | 4.8 → 5.1 |
 | 2026-03-06 | Session 2 | **Shipped:** #22 architectural reframe — stripped ~150 lines of format enforcement from researcher (OUTPUT CONTRACT, Stage 0, Stage 7 template, COMPLIANCE NOTE, SELF-CHECK, wrong/right examples), added compact output expectations. Promoted formatter to essential pipeline stage with validation rules (numeric→categorical confidence mapping, T1→primary tier normalization, URL validation, removed pass-through mode). Updated coordinator Rule 5, recipe prompt, types.md, SUCCESS-METRICS.md. Fixed canvas-renderer module rename. **Validated:** Full researcher→formatter→writer chain on "What is Jina AI?" — 43 claims, all confidence categorical, all tiers full labels, zero numeric values, EVIDENCE GAPS present, writer brief with 10 citations + 5 CLAIMS TO VERIFY. Architecture thesis confirmed: researcher focuses on evidence, formatter handles format. | Research Trust: 3→5 *(validated)*, Chain Reliability: 4→5 *(validated)* | 4.0 → 4.8 |
 
 ---
@@ -105,6 +106,7 @@ Anchored to `SUCCESS-METRICS.md` and `VISION.md`:
 
 | Version | Date | Changes |
 |---|---|---|
+| v1.3 | 2026-03-06 | Session 2 continued — Writer quality fixes #28/#7/#9 shipped and partially validated. Storyteller #18/#19 shipped. Format Fidelity 5→6 (validated). Overall 4.8→5.1. |
 | v1.2 | 2026-03-06 | Session 2 complete — Shipped #22 as architectural reframe. Research Trustworthiness 3→5 (validated). Chain Reliability 4→5 (validated). Overall 4.0→4.8 (validated). |
 | v1.1 | 2026-03-06 | Session 1 complete — Format Fidelity 3→5 (spec) after #6. Overall 4.0→4.5 (spec). Session log updated to include both #5 and #6. |
 | v1.0 | 2026-03-06 | Initial scorecard — first session baseline |
