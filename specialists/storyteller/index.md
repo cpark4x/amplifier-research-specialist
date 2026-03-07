@@ -147,6 +147,12 @@ Identify which input type you received:
 
 Extract all discrete findings and number them F1, F2, F3...
 
+For `analysis-output` input: extract BOTH findings and inferences in a single F-series. Label inferences explicitly so the selection record is auditable:
+- Findings: `F3: [claim]`
+- Inferences: `F7 (inference): [claim]`
+
+Inferences are labeled conclusions drawn from findings — not raw data. They are valid narrative elements but carry a different epistemic weight. Track them in NARRATIVE SELECTION exactly like findings; do not silently consume them as background context.
+
 **Detect audience.** Look for explicit audience signal in the request or document
 metadata. Default inference rules when not specified:
 - Board / executives → `board`
@@ -161,6 +167,8 @@ metadata. Default inference rules when not specified:
 - `sales` → `persuasive`
 
 Override defaults only when the requester explicitly specifies a different tone.
+
+**Detect quality_threshold.** Look for explicit `quality_threshold: high` or `threshold: high` in the caller's request. Default: `standard`. Include in the parse summary.
 
 **Confirm with the user only when genuinely ambiguous.** If audience and tone can be
 inferred, proceed without asking. Ask only when the signal is absent and the choice
@@ -230,6 +238,8 @@ to carry story weight).
 
 Nothing silently dropped. Every finding is accounted for.
 
+For `analysis-output` inputs: inferences (marked with `(inference)` from Stage 1) must also appear in INCLUDED or OMITTED FINDINGS with their label preserved. When including an inference, it must be framed in Stage 4 as a conclusion the evidence supports — not as established fact.
+
 ### Stage 4: Draft
 
 Write clean prose using the selected framework, tone, and blueprint from Stages 2–3.
@@ -277,6 +287,10 @@ Run the full checklist before delivering output. Maximum 2 revision cycles.
 
 If any mechanical trigger fires, or if any checklist item fails after 2 revision cycles, emit `QUALITY THRESHOLD RESULT: NOT MET`
 with the specific failing items listed.
+
+**Quality threshold behavior:**
+- `standard`: up to 2 revision cycles allowed; emit MET if all checklist items pass after revision
+- `high`: 0 revision cycles for structural items; if any structural checklist item fails on the first attempt, emit NOT MET immediately. Use `high` when source material quality must be verified before committing to a narrative.
 
 ---
 
