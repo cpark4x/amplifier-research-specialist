@@ -89,6 +89,7 @@ Ordered by priority tier then impact. Items marked *(consolidated)* absorbed dup
 | # | Item | Epic | Owner | Effort | Impact | Rationale |
 |---|------|------|-------|--------|--------|-----------|
 | 29 | Writer: OUTPUT CONTRACT compliance for informal registers | 02 | Chris | S | M | `audience: myself` run produced no `Parsed:` line and no structural blocks — OUTPUT CONTRACT violation. Register table's "skip formality" language was interpreted as permission to skip structural requirements. Consider adding WRONG/RIGHT example to OUTPUT CONTRACT block showing structural blocks required even for informal registers. *(from test log 2026-03-06-writer-quality-fixes-validation)* |
+| 30 | Storyteller: OUTPUT CONTRACT compliance (STORY OUTPUT header + NARRATIVE SELECTION block) | 03 | Chris | S | H | Test run on Mistral AI board narrative produced no STORY OUTPUT header, no NARRATIVE SELECTION block, and no QUALITY THRESHOLD RESULT line. Story prose started with "Here is the board narrative." — a direct OUTPUT CONTRACT violation. Same class of format compliance failure as Writer #29. Blocks #18 and #19 from being verified. *(from test log 2026-03-06-storyteller-fixes-validation)* |
 | ~~22~~ | ~~Stabilize Researcher canonical output header/anchor (Stage 0 / "RESEARCH OUTPUT")~~ | 01 | Chris | — | — | **Promoted to Immediate Next and shipped 2026-03-06.** See Immediate Next #22 entry. |
 
 **Priority 3 — Important but not urgent:**
@@ -249,6 +250,7 @@ Synthesis Writer → cross-ecosystem comparative brief
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v3.1 | Mar 6, 2026 | Chris | Added #30 (Storyteller OUTPUT CONTRACT compliance) to near-term after failed format validation run. #18 and #19 unverified pending this fix. |
 | v3.0 | Mar 6, 2026 | Chris | Shipped #28, #7, #9 as single Writer quality commit. Moved to Recently Completed. Added #29 (OUTPUT CONTRACT compliance for informal registers) to near-term. Storyteller: shipped #18 (inference auditability in NARRATIVE SELECTION) and #19 (quality_threshold param). |
 | v2.9 | Mar 6, 2026 | Chris | Shipped #22 as architectural reframe — researcher stripped to evidence-only, formatter promoted to essential pipeline stage with validation rules. Moved to Recently Completed. |
 | v2.8 | Mar 6, 2026 | Chris | Promoted #22 from near-term to Immediate Next after validation test (3/3 researcher runs produced non-canonical output). Shipped format enforcement fix: 5-point FINAL SELF-CHECK, explicit wrong/right examples for FINDINGS blocks, numeric confidence ban, tier label ban. Struck through #22 in near-term. |
