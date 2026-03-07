@@ -3,7 +3,7 @@
 > **For AI agents:** This document is the authoritative source for WHY this project exists, WHERE it is going, and HOW to make decisions. Read this before touching any code.
 
 **Owner:** Chris Park  
-**Last Updated:** 2026-03-03  
+**Last Updated:** 2026-03-06  
 
 ---
 
@@ -118,13 +118,14 @@ Breaking it is a breaking change.
 - Paywall fallback ladder
 - Wired as Amplifier agent at `specialists:specialists/researcher`
 
-### V2 — Writer + Researcher Upgrade
+### V2 — Writer + Researcher-Formatter Architecture
 - **Writer specialist** — takes research output and produces structured content
   (articles, briefs, reports)
-- **Researcher v2** — adopt Canvas researcher's machine-parseable output schema
-  (Research Brief section for fast machine consumption) while keeping the quality
-  gate methodology
-- These two together validate the hand-off contract: researcher output → writer input
+- **Researcher-Formatter** — dedicated format normalization stage that always runs
+  after the Researcher. Research and formatting are two different cognitive tasks;
+  the Formatter canonicalizes any Researcher output into the machine-parseable
+  ResearchOutput schema. This is the designed architecture, not a workaround.
+- These together validate the hand-off contract: researcher output → formatter → writer input
 
 ### V3 — Specialist Framework + More Specialists
 - Extract the common framework from researcher + writer patterns
@@ -142,7 +143,7 @@ Breaking it is a breaking change.
   claim themselves
 - Every finding traces to a source. Every inference traces to a finding. Every gap is
   named. The output shows its work.
-- The full chain (Researcher → Data Analyzer → Writer) produces a usable document without
+- The full chain (Researcher → Formatter → Writer, or Researcher → Formatter → Data Analyzer → Writer) produces a usable document without
   human editing between steps
 - Adding a new specialist takes hours, not days, because the framework handles the boilerplate
 - Output from specialists is measurably more trustworthy than generalist alternatives:
@@ -171,6 +172,7 @@ Breaking it is a breaking change.
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| v1.4 | 2026-03-06 | Chris Park | Updated V2 roadmap to reflect Researcher-Formatter as designed architecture (not workaround). Updated "What Success Looks Like" chain to include Formatter. |
 | v1.3 | 2026-03-03 | Chris Park | Updated Summary with defensible/auditable goal framing; revised Primary Success Indicator to chain-centric; updated What Success Looks Like to chain-centric outcomes |
 | v1.2 | 2026-03-02 | Chris Park | Added metadata, Summary, ToC, Related Documentation, Change History; aligned with VISION_TEMPLATE |
 | v1.1 | 2026-03-02 | Chris Park | Added Philosophy section; updated Target Audience to knowledge workers + consumers first |

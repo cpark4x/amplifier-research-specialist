@@ -11,3 +11,9 @@ __pycache__/
 
 # Temporary
 tmp/
+
+# Recipe output (auto-generated, not versioned)
+docs/research-output/
+
+# OS
+.DS_Store
