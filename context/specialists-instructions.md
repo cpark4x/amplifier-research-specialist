@@ -30,7 +30,7 @@ HANDOFF and FINAL lines are required and must appear. BEFORE lines are emitted w
 
 **No extra text between narration lines.** Do not insert commentary, explanations, or filler between narration lines and specialist delegations. The narration IS the commentary. Go directly from narration line to delegation or output.
 
-Use these exact agent IDs when delegating: `specialists:specialists/researcher`, `specialists:specialists/data-analyzer`, `specialists:specialists/competitive-analysis`, `specialists:specialists/writer`, `specialists:specialists/researcher-formatter`, `specialists:specialists/storyteller`, `specialists:specialists/prioritizer`.
+Use these exact agent IDs when delegating: `specialists:specialists/researcher`, `specialists:specialists/data-analyzer`, `specialists:specialists/competitive-analysis`, `specialists:specialists/writer`, `specialists:specialists/researcher-formatter`, `specialists:specialists/storyteller`, `specialists:specialists/story-formatter`, `specialists:specialists/prioritizer`.
 
 **Rule 3 — Escape Hatch**: If the user explicitly says 'raw output', 'give me the raw research', 'just run the researcher', or 'don't write a document' — stop at that specialist and output the structured block as literal bare text. Your entire response IS that block. **Escape hatch overrides narration**: do NOT emit the narration lines (BEFORE, HANDOFF, FINAL). Start at byte 0 with the specialist's output block. Do NOT prepend a heading, wrap in markdown, or add any text before the block's first line. The very first characters of your response must be the very first characters of the specialist's output block.
   - Correct: `RESEARCH OUTPUT` (plain text, no markdown)
@@ -82,6 +82,12 @@ The formatter is invisible to the user — do not mention it in narration unless
   Selects load-bearing findings for the arc — the Writer covers everything, the
   Storyteller selects.
 
+- **story-formatter** — Essential pipeline stage. Receives storyteller output
+  in any format and produces a canonical STORY OUTPUT block. Classifies which
+  findings from the original input appear in the narrative prose and assigns
+  each a narrative role. Never generates new story content — only extracts,
+  classifies, and reformats. Always runs after the storyteller.
+
 - **prioritizer** — Ranking specialist that takes a list of items and produces
   a `PrioritizerOutput` with every item ranked using an explicit framework
   (MoSCoW, impact-effort, RICE, or weighted scoring), with 2–3 sentence rationale
@@ -119,6 +125,12 @@ The formatter is invisible to the user — do not mention it in narration unless
 - You want narrative output instead of document output at the end of a chain
 - Any Researcher → Formatter → Analyzer → Storyteller chain
 
+**Delegate to `specialists:specialists/story-formatter` when:**
+- Storyteller output needs to be wrapped in canonical STORY OUTPUT structure
+- Storyteller produced narrative prose or a markdown document instead of a structured block
+- NARRATIVE SELECTION record is missing from storyteller output
+- Any pipeline step where storyteller output feeds a downstream agent or parser
+
 **Delegate to `specialists:specialists/prioritizer` when:**
 - The user has a list of items and needs a ranked, justified order
 - Backlog grooming, roadmap planning, feature triage, vendor selection
@@ -150,6 +162,7 @@ For narrative output from a research chain:
 2. `specialists:specialists/researcher-formatter` → normalizes to canonical RESEARCH OUTPUT block
 3. `specialists:specialists/data-analyzer` → draws labeled inferences
 4. `specialists:specialists/storyteller` → transforms analysis into compelling narrative
+5. `specialists:specialists/story-formatter` → normalizes to canonical STORY OUTPUT block
 
 ## Feedback Capture
 

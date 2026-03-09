@@ -21,6 +21,7 @@ agents:
     - specialists:specialists/data-analyzer
     - specialists:specialists/researcher-formatter
     - specialists:specialists/storyteller
+    - specialists:specialists/story-formatter
     - specialists:specialists/prioritizer
 
 # hooks:

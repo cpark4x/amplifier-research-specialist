@@ -2,6 +2,19 @@
 # CHANGELOG
 # =============================================================================
 #
+# v1.2.2 (2026-03-09):
+#   - FEATURE: Added story-formatter step between narrate and normalize-header
+#     * ROOT CAUSE: Storyteller consistently produces narrative prose/markdown
+#       documents instead of canonical STORY OUTPUT blocks. Format instructions
+#       in system context do not reliably override generation priors — same
+#       root cause as the Researcher's format compliance failure.
+#     * FIX: Added story-format step using story-formatter specialist, which
+#       mirrors the researcher-formatter pattern. Receives raw storyteller
+#       output + original analysis, classifies findings against the narrative,
+#       and produces a canonical STORY OUTPUT block.
+#     * normalize-header input updated: {{final_narrative}} → {{formatted_narrative}}
+#     * RESULT: Structural compliance handled architecturally, not via prompts.
+#
 # v1.2.1 (2026-03-05):
 #   - BUGFIX: normalize-quality-gate crashed with "command not found" / syntax
 #     error when the narrative contained numbered list items like "1) Build:".
@@ -75,8 +88,8 @@
 # =============================================================================
 
 name: "narrative-chain"
-description: "Full research-to-narrative pipeline — Researcher → Formatter → Data Analyzer → Storyteller → Save. Produces compelling narrative output instead of a structured document."
-version: "1.2.1"
+description: "Full research-to-narrative pipeline — Researcher → Formatter → Data Analyzer → Storyteller → Story Formatter → Save. Produces compelling narrative output instead of a structured document."
+version: "1.2.2"
 tags: ["research", "analysis", "narrative", "storytelling", "chain"]
 
 context:
@@ -158,11 +171,24 @@ steps:
     output: "final_narrative"
     timeout: 900
 
+  - id: "story-format"
+    agent: "specialists:specialists/story-formatter"
+    prompt: |
+      Produce the canonical STORY OUTPUT block from the following storyteller output.
+
+      Original analysis (source of findings F1, F2, etc.):
+      {{analysis_output}}
+
+      Storyteller output to format:
+      {{final_narrative}}
+    output: "formatted_narrative"
+    timeout: 600
+
   - id: "normalize-header"
     type: "bash"
     command: |
       sed '1s/^##* STORY OUTPUT/STORY OUTPUT/' <<'__RECIPE_NORM_EOF__'
-      {{final_narrative}}
+      {{formatted_narrative}}
       __RECIPE_NORM_EOF__
     output: "final_narrative_normalized"
     timeout: 30

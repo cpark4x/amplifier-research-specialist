@@ -45,6 +45,7 @@ Every claim is traceable. Every inference is labeled. Every gap is named.
 | **competitive-analysis** | Comparison matrices, positioning gaps, and win conditions — head-to-head or landscape modes | v1 |
 | **data-analyzer** | Labeled inferences that bridge fact and conclusion — explicitly separated from source findings so the reasoning is always visible | v1 |
 | [storyteller](specialists/storyteller/) | cognitive mode translation — converts structured findings (AnalysisOutput, ResearchOutput) into narrative-mode artifacts with a documented NARRATIVE SELECTION record | v1 |
+| [story-formatter](specialists/story-formatter/) | format normalization for storyteller output — takes narrative prose in any format and produces canonical STORY OUTPUT blocks with NARRATIVE SELECTION classification | v1 |
 
 All shipped and production-ready. More specialists are planned, including Presentation Builder — see [docs/BACKLOG.md](docs/BACKLOG.md) for what's coming next.
 
