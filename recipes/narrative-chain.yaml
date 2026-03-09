@@ -76,7 +76,7 @@
 
 name: "narrative-chain"
 description: "Full research-to-narrative pipeline — Researcher → Formatter → Data Analyzer → Storyteller → Save. Produces compelling narrative output instead of a structured document."
-version: "1.2.0"
+version: "1.2.1"
 tags: ["research", "analysis", "narrative", "storytelling", "chain"]
 
 context:
@@ -204,4 +204,4 @@ steps:
 
       Content: {{final_narrative_validated}}
     output: "output_path"
-    timeout: 120
+    timeout: 300

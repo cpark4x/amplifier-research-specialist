@@ -1,6 +1,32 @@
+# =============================================================================
+# CHANGELOG
+# =============================================================================
+#
+# v1.2.0 (2026-03-09):
+#   - FIX: writer step timed out at 900s ceiling on broad research topics
+#     * ROOT CAUSE: (1) No output scope constraints on the research step meant
+#       the researcher could produce 5,000+ word narratives, creating oversized
+#       input for downstream steps. (2) format-research timeout (600s) was the
+#       smallest of any processing step despite receiving the largest payload.
+#       (3) write timeout (900s) insufficient for broad topics even with
+#       bounded input.
+#     * FIX 1: Added scope constraints to research step prompt matching
+#       narrative-chain.yaml v1.1.0 — max 5 sub-questions, 15 URLs, 2 QG
+#       cycles, 3,000 words / 30 sourced claims.
+#     * FIX 2: Increased format-research timeout 600s → 1200s (matches
+#       narrative-chain.yaml).
+#     * FIX 3: Increased write timeout 900s → 1800s to provide headroom for
+#       broad topics even with bounded input.
+#     * RESULT: Pipeline reliably completes for broad research questions.
+#
+# v1.1.0 (2026-03-03):
+#   - Added save step — writes final document to docs/research-output/
+#
+# =============================================================================
+
 name: "research-chain"
 description: "Full research pipeline with format normalization — Researcher → Formatter → Data Analyzer → Writer → Save"
-version: "1.1.0"
+version: "1.2.0"
 tags: ["research", "analysis", "writing", "chain"]
 
 context:
@@ -21,6 +47,12 @@ steps:
       Research question: {{research_question}}
 
       Quality threshold: {{quality_threshold}}
+
+      Scope constraints (required — enforce in Stage 1):
+      - Decompose into no more than 5 sub-questions
+      - Cap your source queue at 15 URLs total across all sub-questions
+      - Run no more than 2 Quality Gate cycles before accepting remaining gaps
+      - Target a maximum of 3,000 words and 30 sourced claims in your final output
     output: "research_output"
     timeout: 2700
 
@@ -34,7 +66,7 @@ steps:
       Research narrative to format:
       {{research_output}}
     output: "formatted_research"
-    timeout: 600
+    timeout: 1200
 
   - id: "analyze"
     agent: "specialists:specialists/data-analyzer"
@@ -64,7 +96,7 @@ steps:
 
       If audience is empty, default to a general professional audience.
     output: "final_document"
-    timeout: 900
+    timeout: 1800
 
   - id: "save"
     agent: "foundation:file-ops"
