@@ -14,7 +14,7 @@ See [**2026-03-05-world-class-roadmap.md**](plans/2026-03-05-world-class-roadmap
 
 ## Current Status Summary
 
-**11 epics tracked:** ✅ 4 complete, 🔄 1 in progress, ⏸️ 0 paused, 6 planned
+**11 epics tracked:** ✅ 5 complete, 🔄 1 in progress, ⏸️ 0 paused, 5 planned
 
 - ✅ Epic 01 — Researcher
 - ✅ Epic 02 — Writer
@@ -25,7 +25,7 @@ See [**2026-03-05-world-class-roadmap.md**](plans/2026-03-05-world-class-roadmap
 - 🆕 Epic 07 — Presentation Builder
 - ✅ Epic 08 — Data Analyzer
 - 🆕 Epic 09 — Planner
-- 🆕 Epic 10 — Prioritizer
+- ✅ Epic 10 — Prioritizer
 - 🆕 Epic 11 — Platform Integrations
 
 ### Active Work
@@ -38,6 +38,7 @@ See [**2026-03-05-world-class-roadmap.md**](plans/2026-03-05-world-class-roadmap
 
 | Item | Epic | Owner | Completed | Notes |
 |------|------|-------|-----------|-------|
+| Prioritizer specialist | 10 | Chris | Mar 9, 2026 | 4-stage pipeline (Parse → Analyze → Quality Gate → Synthesize); PrioritizerOutput schema with per-item ranked output using explicit frameworks (MoSCoW, impact-effort, RICE, weighted scoring); 2–3 sentence rationale per item; unrankable items listed explicitly. Wired as Amplifier agent at `specialists:specialists/prioritizer`. |
 | Writer quality fixes: CLAIMS TO VERIFY surfacing, audience calibration, specificity enforcement | 02 | Chris | Mar 6, 2026 | Backlog #28, #7, #9. Three surgical edits to `specialists/writer/index.md`: (1) CLAIMS TO VERIFY moved before WRITER METADATA/CITATIONS and extended to all input types including researcher-output (medium/low confidence claims now flagged); (2) `myself`/`me` audience no longer remapped to `technical decision-maker` — first-person direct register; audience register table added to Stage 4; Stage 5 voice check expanded with audience differentiation test; (3) Specificity gate added to Stage 5 — bottom line must not survive [SUBJECT] substitution. Validated: #7 and #9 confirmed working in Mistral AI test run. #28 partial — inline caveat surfacing worked, formal block absent due to `myself` register slip; patched register table immediately. |
 | Researcher-Formatter architecture refactor | 01 | Chris | Mar 6, 2026 | Backlog #22. Architectural reframe: stripped ~150 lines of format enforcement from researcher (OUTPUT CONTRACT, Stage 0, Stage 7 template, COMPLIANCE NOTE, SELF-CHECK, wrong/right examples). Added compact output expectations ("do not worry about exact output formatting — the formatter handles that"). Promoted formatter from optional cleanup to essential pipeline stage with validation rules (numeric→categorical confidence mapping ≥0.8→high/0.5–0.79→medium/<0.5→low, T1→primary tier normalization, URL validation, removed pass-through mode). Updated coordinator Rule 5 from apologetic (~1 in 3 framing) to intentional (matched pair by design). Updated recipe prompt, types.md, SUCCESS-METRICS.md. Root cause: format enforcement doesn't work after 10-20+ tool calls of narrative research context. Solution: accept researcher produces evidence naturally, formatter produces format — two different cognitive tasks. Validated: 43 claims, all confidence categorical, all tiers full labels on "What is Jina AI?" run. |
 | Coordinator: enforce formatter step (Rule 5) | 01/02 | Chris | Mar 6, 2026 | Backlog #27. Strengthened Rule 5 in `context/specialists-instructions.md` from a rule statement into an explicit mandatory gate. Added self-check paragraph: coordinator must stop and verify "Did I route through researcher-formatter?" before delegating to writer, data-analyzer, storyteller, or competitive-analysis. Root cause: rule existed but lacked a checkpoint forcing explicit verification. |
@@ -90,6 +91,8 @@ Ordered by priority tier then impact. Items marked *(consolidated)* absorbed dup
 |---|------|------|-------|--------|--------|-----------|
 | 29 | Writer: OUTPUT CONTRACT compliance for informal registers | 02 | Chris | S | M | `audience: myself` run produced no `Parsed:` line and no structural blocks — OUTPUT CONTRACT violation. Register table's "skip formality" language was interpreted as permission to skip structural requirements. Consider adding WRONG/RIGHT example to OUTPUT CONTRACT block showing structural blocks required even for informal registers. *(from test log 2026-03-06-writer-quality-fixes-validation)* |
 | 30 | Storyteller: OUTPUT CONTRACT compliance (STORY OUTPUT header + NARRATIVE SELECTION block) | 03 | Chris | S | H | Test run on Mistral AI board narrative produced no STORY OUTPUT header, no NARRATIVE SELECTION block, and no QUALITY THRESHOLD RESULT line. Story prose started with "Here is the board narrative." — a direct OUTPUT CONTRACT violation. Same class of format compliance failure as Writer #29. Blocks #18 and #19 from being verified. *(from test log 2026-03-06-storyteller-fixes-validation)* |
+| 31 | Prioritizer: add structured output block (`PRIORITIZER OUTPUT` header) | 10 | Chris | S | M | Every other specialist produces a machine-parseable header block (STORY OUTPUT, RESEARCH OUTPUT, ANALYSIS OUTPUT). Prioritizer returns markdown prose — breaks pipeline parsability and violates the output contract pattern. Required before Prioritizer can be used as a pipeline stage rather than standalone tool. *(from test log 2026-03-09-prioritizer-spot-test)* |
+| 32 | Coordinator routing: add Prioritizer trigger for priority list requests | 10 | Chris | XS | M | Coordinator failed to route to Prioritizer when user presented a priority list at session startup — required two explicit prompts to correct. Routing heuristic table in `context/specialists-instructions.md` had no row for "user arrives with a list to prioritize." Fixed in this commit; backlog item tracks validation. *(from test log 2026-03-09-prioritizer-spot-test)* |
 | ~~22~~ | ~~Stabilize Researcher canonical output header/anchor (Stage 0 / "RESEARCH OUTPUT")~~ | 01 | Chris | — | — | **Promoted to Immediate Next and shipped 2026-03-06.** See Immediate Next #22 entry. |
 
 **Priority 3 — Important but not urgent:**
@@ -209,7 +212,7 @@ Synthesis Writer → cross-ecosystem comparative brief
 | 07 — Presentation Builder | — | Full specialist implementation | 0% |
 | 08 — Data Analyzer | 4-stage pipeline, AnalysisOutput schema, Writer analysis-output integration, 6 E2E tests | Format B detection hardening, code-fence prevention | 100% |
 | 09 — Planner | — | Full specialist implementation | 0% |
-| 10 — Prioritizer | — | Full specialist implementation | 0% |
+| 10 — Prioritizer | Prioritizer V1 — 4-stage pipeline, PrioritizerOutput schema, impact-effort + MoSCoW + RICE + weighted scoring | Structured output block (`PRIORITIZER OUTPUT` header) | 70% |
 | 11 — Platform Integrations | — | LangChain wrapper, rendering integrations | 0% |
 
 **Overall: 4 specialists shipped, 6 planned, 1 integrations epic**
@@ -250,6 +253,7 @@ Synthesis Writer → cross-ecosystem comparative brief
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v3.2 | Mar 9, 2026 | Chris | Marked Epic 10 (Prioritizer) complete — added to recently completed. Added #31 (Prioritizer structured output block) and #32 (coordinator routing hook for priority lists) to near-term Priority 2 from test log 2026-03-09-prioritizer-spot-test. Routing heuristic in specialists-instructions.md updated with Prioritizer trigger row. |
 | v3.1 | Mar 6, 2026 | Chris | Added #30 (Storyteller OUTPUT CONTRACT compliance) to near-term after failed format validation run. #18 and #19 unverified pending this fix. |
 | v3.0 | Mar 6, 2026 | Chris | Shipped #28, #7, #9 as single Writer quality commit. Moved to Recently Completed. Added #29 (OUTPUT CONTRACT compliance for informal registers) to near-term. Storyteller: shipped #18 (inference auditability in NARRATIVE SELECTION) and #19 (quality_threshold param). |
 | v2.9 | Mar 6, 2026 | Chris | Shipped #22 as architectural reframe — researcher stripped to evidence-only, formatter promoted to essential pipeline stage with validation rules. Moved to Recently Completed. |

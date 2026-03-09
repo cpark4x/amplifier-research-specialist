@@ -13,6 +13,7 @@ Delegate to these agents when quality and trustworthiness matter more than speed
 |---|---|
 | A factual topic, person, company, product, technology, or concept | **Chain.** Even casual phrasing ("tell me about X", "what is Y") gets the specialist pipeline. |
 | A comparison of two or more things | **Chain** via competitive-analysis → writer. |
+| A list of items to rank or prioritize — even framed as orientation ("here's what I want to work on this week") | **Route to prioritizer.** Do not rank inline. Even casual priority lists get the Prioritizer. |
 | A request for analysis, insights, or investigation | **Chain** via researcher → analyzer → writer (Rule 4). |
 | The specialists themselves, the system, or how things work here | Answer directly. |
 | A simple follow-up or clarification on a previous response | Answer directly. |
