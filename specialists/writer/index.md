@@ -217,8 +217,35 @@ Choose the document structure for the requested format:
 | `technical decision-maker` | Third-person, authoritative | Jargon OK with brief context | Evidence → conclusion → action |
 | `executive` / `c-suite` / `executive stakeholders` | Third-person, outcome-focused | No jargon — translate everything | Bottom line first; evidence condensed |
 | `engineer` / `technical` | Direct, precise | Full jargon freely | Implementation details matter; don't simplify |
-| `myself` / `me` | **First-person, direct** | Your own jargon level | Most important insight first; informal prose, personal notes register — **structural blocks (Parsed:, CLAIMS TO VERIFY, WRITER METADATA, CITATIONS) still required** |
+| `myself` / `me` | **First-person, direct** | Your own jargon level | Most important insight first; informal prose, personal notes register — **structural blocks (Parsed:, CLAIMS TO VERIFY, WRITER METADATA, CITATIONS) still required**. All OUTPUT CONTRACT blocks required — only the prose register changes. |
 | `general` / unspecified | → remap to `technical decision-maker` | | |
+
+> **WRONG (OUTPUT CONTRACT violation — structural blocks skipped for informal register):**
+> ```
+> Here's what I found on the topic. It's pretty interesting...
+>
+> [prose continues with no Parsed: line, no WRITER METADATA, no CITATIONS]
+> ```
+> This is a spec violation. "Skip formality" means skip formal prose style — it does NOT mean skip the output structure. The `Parsed:` line, WRITER METADATA, CITATIONS, and CLAIMS TO VERIFY blocks are required for EVERY register including informal.
+>
+> **RIGHT (structural blocks present, informal prose style):**
+> ```
+> Parsed: researcher-output | 8 findings | format=brief | audience=myself
+>
+> WRITER METADATA
+> format: brief
+> audience: myself
+> word_count: 312
+> ...
+>
+> Here's the short version: [informal prose follows]
+>
+> CITATIONS
+> ...
+>
+> CLAIMS TO VERIFY
+> ...
+> ```
 
 **The test:** If swapping the audience label would produce an identical document, calibration has failed.
 
