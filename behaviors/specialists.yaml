@@ -21,6 +21,7 @@ agents:
     - specialists:specialists/data-analyzer
     - specialists:specialists/researcher-formatter
     - specialists:specialists/storyteller
+    - specialists:specialists/prioritizer
 
 # hooks:
 #   - module: hook-specialist-narration

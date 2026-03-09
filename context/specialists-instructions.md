@@ -29,7 +29,7 @@ HANDOFF and FINAL lines are required and must appear. BEFORE lines are emitted w
 
 **No extra text between narration lines.** Do not insert commentary, explanations, or filler between narration lines and specialist delegations. The narration IS the commentary. Go directly from narration line to delegation or output.
 
-Use these exact agent IDs when delegating: `specialists:specialists/researcher`, `specialists:specialists/data-analyzer`, `specialists:specialists/competitive-analysis`, `specialists:specialists/writer`, `specialists:specialists/researcher-formatter`, `specialists:specialists/storyteller`.
+Use these exact agent IDs when delegating: `specialists:specialists/researcher`, `specialists:specialists/data-analyzer`, `specialists:specialists/competitive-analysis`, `specialists:specialists/writer`, `specialists:specialists/researcher-formatter`, `specialists:specialists/storyteller`, `specialists:specialists/prioritizer`.
 
 **Rule 3 — Escape Hatch**: If the user explicitly says 'raw output', 'give me the raw research', 'just run the researcher', or 'don't write a document' — stop at that specialist and output the structured block as literal bare text. Your entire response IS that block. **Escape hatch overrides narration**: do NOT emit the narration lines (BEFORE, HANDOFF, FINAL). Start at byte 0 with the specialist's output block. Do NOT prepend a heading, wrap in markdown, or add any text before the block's first line. The very first characters of your response must be the very first characters of the specialist's output block.
   - Correct: `RESEARCH OUTPUT` (plain text, no markdown)
@@ -81,6 +81,12 @@ The formatter is invisible to the user — do not mention it in narration unless
   Selects load-bearing findings for the arc — the Writer covers everything, the
   Storyteller selects.
 
+- **prioritizer** — Ranking specialist that takes a list of items and produces
+  a `PrioritizerOutput` with every item ranked using an explicit framework
+  (MoSCoW, impact-effort, RICE, or weighted scoring), with 2–3 sentence rationale
+  per item traceable to the context provided. Unrankable items listed explicitly.
+  Use when the caller needs to defend a prioritization, not just receive a list.
+
 ## When to Use Each
 
 **Delegate to `specialists:specialists/researcher` when:**
@@ -111,6 +117,13 @@ The formatter is invisible to the user — do not mention it in narration unless
 - The audience needs to be moved or persuaded, not just informed
 - You want narrative output instead of document output at the end of a chain
 - Any Researcher → Formatter → Analyzer → Storyteller chain
+
+**Delegate to `specialists:specialists/prioritizer` when:**
+- The user has a list of items and needs a ranked, justified order
+- Backlog grooming, roadmap planning, feature triage, vendor selection
+- Any situation where "what should we do first?" needs visible reasoning
+- The user needs to present or defend a prioritization to a stakeholder
+- The user specifies a framework (MoSCoW, RICE, impact-effort, etc.)
 
 ## Typical Chain
 

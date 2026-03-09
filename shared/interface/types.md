@@ -255,6 +255,49 @@ interface OmittedFinding {
 
 ---
 
+## PrioritizerOutput
+
+The canonical output of the Prioritizer specialist.
+
+```typescript
+interface PrioritizerOutput {
+  // What was prioritized
+  goal: string                        // The situation or goal driving prioritization
+  framework: 'moscow' | 'impact-effort' | 'rice' | 'weighted-scoring'
+  framework_rationale: string         // Why this framework was selected
+  items_received: number
+  items_ranked: number
+  items_unrankable: number
+
+  // The ranked output — one entry per item, in priority order
+  rankings: RankedItem[]
+
+  // Items that couldn't be meaningfully ranked
+  unrankable_items: UnrankableItem[]
+
+  // Overall signal
+  quality_threshold_met: boolean
+}
+
+interface RankedItem {
+  rank: number
+  item: string                        // The item exactly as received — not reworded
+  priority: 'must' | 'should' | 'could' | 'wont'   // MoSCoW mapping for all frameworks
+  score: number | string | null       // Framework score (null for MoSCoW which is categorical)
+  framework_scores: Record<string, number | string>  // Dimension breakdown (e.g. {impact: 4, effort: 2, score: 2.0})
+  rationale: string                   // 2–3 sentences citing specific context
+  dependencies: string[]              // Items this must follow or that follow it
+}
+
+interface UnrankableItem {
+  item: string
+  reason: 'insufficient_context' | 'out_of_scope' | 'duplicate' | 'not_actionable'
+  detail: string                      // One sentence explaining why
+}
+```
+
+---
+
 ## Schema Version
 
-`v1.1` — updated 2026-03-04. Added StoryOutput for the Storyteller specialist. Previous: v1.0 (2026-02-26).
+`v1.2` — updated 2026-03-09. Added PrioritizerOutput for the Prioritizer specialist. Previous: v1.1 (2026-03-04).
