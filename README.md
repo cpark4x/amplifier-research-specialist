@@ -36,17 +36,17 @@ Every claim is traceable. Every inference is labeled. Every gap is named.
 
 ---
 
-## The five specialists
+## The specialists
 
-| Specialist | What it produces |
-|---|---|
-| **researcher** | Structured findings with source tiering (primary / secondary / tertiary), per-claim confidence ratings (high / medium / low), and explicit evidence gap reporting |
-| **writer** | Polished documents with inline citations `[S1]`, a `CLAIMS TO VERIFY` block, and audience-calibrated prose |
-| **competitive-analysis** | Comparison matrices, positioning gaps, and win conditions — head-to-head or landscape modes |
-| **data-analyzer** | Labeled inferences that bridge fact and conclusion — explicitly separated from source findings so the reasoning is always visible |
-| **storyteller** | Narrative transformation of research and analysis — selects load-bearing findings, applies the right framework, documents every editorial choice |
+| Specialist | What it produces | Status |
+|---|---|---|
+| **researcher** | Structured findings with source tiering (primary / secondary / tertiary), per-claim confidence ratings (high / medium / low), and explicit evidence gap reporting | v1 |
+| **writer** | Polished documents with inline citations `[S1]`, a `CLAIMS TO VERIFY` block, and audience-calibrated prose | v1 |
+| **competitive-analysis** | Comparison matrices, positioning gaps, and win conditions — head-to-head or landscape modes | v1 |
+| **data-analyzer** | Labeled inferences that bridge fact and conclusion — explicitly separated from source findings so the reasoning is always visible | v1 |
+| [storyteller](specialists/storyteller/) | cognitive mode translation — converts structured findings (AnalysisOutput, ResearchOutput) into narrative-mode artifacts with a documented NARRATIVE SELECTION record | v1 |
 
-All five are shipped and production-ready (v1). See [docs/BACKLOG.md](docs/BACKLOG.md) for what's coming next.
+All shipped and production-ready. More specialists are planned, including Presentation Builder — see [docs/BACKLOG.md](docs/BACKLOG.md) for what's coming next.
 
 ---
 

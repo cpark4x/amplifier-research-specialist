@@ -33,8 +33,8 @@ def test_agents_include_contains_storyteller() -> None:
 def test_storyteller_is_last_entry_in_agents_include() -> None:
     data = load_yaml()
     include_list = data["agents"]["include"]
-    assert include_list[-1] == "specialists:specialists/storyteller", (
-        f"Last entry in agents.include must be 'specialists:specialists/storyteller', "
+    assert include_list[-1] == "specialists:specialists/prioritizer", (
+        f"Last entry in agents.include must be 'specialists:specialists/prioritizer', "
         f"got '{include_list[-1]}'"
     )
 
@@ -50,6 +50,7 @@ def test_agents_include_full_ordered_list() -> None:
         "specialists:specialists/data-analyzer",
         "specialists:specialists/researcher-formatter",
         "specialists:specialists/storyteller",
+        "specialists:specialists/prioritizer",
     ]
     assert include_list == expected, (
         f"agents.include list does not match spec.\n"

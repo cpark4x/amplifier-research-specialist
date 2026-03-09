@@ -83,8 +83,8 @@ def test_storyteller_heading_present(content: str) -> None:
 
 
 def test_persona_paragraph_present(content: str) -> None:
-    assert "senior narrative strategist" in content, (
-        "Persona must identify the agent as 'senior narrative strategist'"
+    assert "story block production stage" in content, (
+        "Persona must identify the agent as 'story block production stage'"
     )
     assert "cognitive mode translation" in content.lower(), (
         "Persona must mention 'cognitive mode translation'"
@@ -267,12 +267,12 @@ def test_output_format_says_bare_text_not_code_fences(content: str) -> None:
         content,
         re.IGNORECASE,
     ), "Output format section must say 'bare text'"
-    assert re.search(
-        r"NOT wrapped in triple.backtick code fences",
-        content,
-        re.IGNORECASE,
+    assert (
+        "emit story output as bare text" in content
+        or "Wrap output in code fences" in content
     ), (
-        "Output format section must explicitly say 'NOT wrapped in triple-backtick code fences'"
+        "Output format section must say 'emit story output as bare text' or "
+        "'Wrap output in code fences'"
     )
 
 
