@@ -30,7 +30,7 @@ HANDOFF and FINAL lines are required and must appear. BEFORE lines are emitted w
 
 **No extra text between narration lines.** Do not insert commentary, explanations, or filler between narration lines and specialist delegations. The narration IS the commentary. Go directly from narration line to delegation or output.
 
-Use these exact agent IDs when delegating: `specialists:specialists/researcher`, `specialists:specialists/data-analyzer`, `specialists:specialists/competitive-analysis`, `specialists:specialists/writer`, `specialists:specialists/researcher-formatter`, `specialists:specialists/storyteller`, `specialists:specialists/story-formatter`, `specialists:specialists/writer-formatter`, `specialists:specialists/prioritizer`.
+Use these exact agent IDs when delegating: `specialists:specialists/researcher`, `specialists:specialists/data-analyzer`, `specialists:specialists/competitive-analysis`, `specialists:specialists/writer`, `specialists:specialists/researcher-formatter`, `specialists:specialists/storyteller`, `specialists:specialists/story-formatter`, `specialists:specialists/writer-formatter`, `specialists:specialists/prioritizer`, `specialists:specialists/prioritizer-formatter`.
 
 **Rule 3 — Escape Hatch**: If the user explicitly says 'raw output', 'give me the raw research', 'just run the researcher', or 'don't write a document' — stop at that specialist and output the structured block as literal bare text. Your entire response IS that block. **Escape hatch overrides narration**: do NOT emit the narration lines (BEFORE, HANDOFF, FINAL). Start at byte 0 with the specialist's output block. Do NOT prepend a heading, wrap in markdown, or add any text before the block's first line. The very first characters of your response must be the very first characters of the specialist's output block.
   - Correct: `RESEARCH OUTPUT` (plain text, no markdown)
@@ -48,6 +48,10 @@ When delegating in escape-hatch mode, prefix the specialist instruction with `[R
 **Rule 6 — Writer-Formatter Is Always In The Path**: The writer and writer-formatter are a matched pair by design — the writer produces audience-calibrated prose, the writer-formatter canonicalizes it into the structured output block downstream agents depend on. When the writer's output feeds ANY downstream step or the user, **always** route through `specialists:specialists/writer-formatter` first. This is the designed architecture, not optional.
 
 **Mandatory gate — before delivering writer output to the user or any downstream agent:** Stop and answer: "Did I route through writer-formatter?" If the answer is no — run writer-formatter now before proceeding.
+
+**Rule 7 — Prioritizer-Formatter Is Always In The Path**: The prioritizer and prioritizer-formatter are a matched pair by design — the prioritizer produces ranked output with defensible rationale, the prioritizer-formatter canonicalizes it into the structured PRIORITY OUTPUT block downstream agents and parsers depend on. When the prioritizer's output feeds ANY downstream step or the user, **always** route through `specialists:specialists/prioritizer-formatter` first. This is the designed architecture, not optional.
+
+**Mandatory gate — before delivering prioritizer output to the user or any downstream agent:** Stop and answer: "Did I route through prioritizer-formatter?" If the answer is no — run prioritizer-formatter now before proceeding.
 
 The formatter is invisible to the user — do not mention it in narration unless the user asks about the pipeline. HANDOFF narration should say "✅ Research complete — normalizing format..." (not "passing to formatter").
 
@@ -105,6 +109,12 @@ The formatter is invisible to the user — do not mention it in narration unless
   per item traceable to the context provided. Unrankable items listed explicitly.
   Use when the caller needs to defend a prioritization, not just receive a list.
 
+- **prioritizer-formatter** — Essential pipeline stage. Receives prioritizer output
+  in any format (structured PRIORITY OUTPUT block, markdown prose, numbered list,
+  ranked table) plus the original items list and produces a canonical PRIORITY OUTPUT
+  block. Never re-ranks or re-scores — only extracts, normalizes, and reformats.
+  Always runs after the prioritizer — this is the designed architecture, not optional.
+
 ## When to Use Each
 
 **Delegate to `specialists:specialists/researcher` when:**
@@ -155,6 +165,12 @@ The formatter is invisible to the user — do not mention it in narration unless
 - The user needs to present or defend a prioritization to a stakeholder
 - The user specifies a framework (MoSCoW, RICE, impact-effort, etc.)
 
+**Delegate to `specialists:specialists/prioritizer-formatter` when:**
+- Prioritizer output is missing the `PRIORITY OUTPUT` structured block
+- Prioritizer produced markdown prose or a numbered list instead of a canonical block
+- Any pipeline step where prioritizer output feeds a downstream agent or parser
+- Always runs after the prioritizer — this is the designed architecture, not a workaround
+
 ## Typical Chain
 
 For most knowledge work tasks:
@@ -181,6 +197,11 @@ For narrative output from a research chain:
 3. `specialists:specialists/data-analyzer` → draws labeled inferences
 4. `specialists:specialists/storyteller` → transforms analysis into compelling narrative
 5. `specialists:specialists/story-formatter` → normalizes to canonical STORY OUTPUT block
+
+For prioritization tasks:
+1. `specialists:specialists/prioritizer` → ranks items using explicit framework with per-item rationale
+2. `specialists:specialists/prioritizer-formatter` → normalizes to canonical PRIORITY OUTPUT block (Rule 7 — always)
+3. `specialists:specialists/writer` → (optional) transforms ranked output into a recommendation brief
 
 ## Feedback Capture
 
