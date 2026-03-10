@@ -19,6 +19,7 @@ agents:
     - specialists:specialists/writer
     - specialists:specialists/competitive-analysis
     - specialists:specialists/data-analyzer
+    - specialists:specialists/data-analyzer-formatter
     - specialists:specialists/researcher-formatter
     - specialists:specialists/storyteller
     - specialists:specialists/story-formatter
