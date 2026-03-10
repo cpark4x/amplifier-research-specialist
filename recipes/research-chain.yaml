@@ -2,6 +2,20 @@
 # CHANGELOG
 # =============================================================================
 #
+# v1.4.0 (2026-03-09):
+#   - FEATURE: Added writer-formatter step between write and derive-filename
+#     * ROOT CAUSE: Writer with informal register (audience=myself) produces
+#       good prose but skips all structural blocks (Parsed:, WRITER METADATA,
+#       CITATIONS, CLAIMS TO VERIFY). Instruction-based fixes failed twice.
+#       Same root cause as Researcher/Storyteller — generation priors override
+#       format instructions.
+#     * FIX: Added format-writer step using writer-formatter specialist, which
+#       mirrors the researcher-formatter/story-formatter pattern. Receives
+#       writer prose + analysis_output, extracts S-numbered claims, wraps
+#       prose in all required structural blocks.
+#     * save step updated: {{final_document}} → {{formatted_document}}
+#     * RESULT: Structural compliance handled architecturally.
+#
 # v1.3.0 (2026-03-09):
 #   - FIX: save step timed out at 120s ceiling on all runs
 #     * ROOT CAUSE: save step was doing two things — (1) LLM reasoning to
@@ -41,8 +55,8 @@
 # =============================================================================
 
 name: "research-chain"
-description: "Full research pipeline with format normalization — Researcher → Formatter → Data Analyzer → Writer → Save"
-version: "1.3.0"
+description: "Full research pipeline with format normalization — Researcher → Formatter → Data Analyzer → Writer → Writer Formatter → Save"
+version: "1.4.0"
 tags: ["research", "analysis", "writing", "chain"]
 
 context:
@@ -114,6 +128,19 @@ steps:
     output: "final_document"
     timeout: 1800
 
+  - id: "format-writer"
+    agent: "specialists:specialists/writer-formatter"
+    prompt: |
+      Produce the canonical Writer output block from the following writer output.
+
+      Original source material (source of S-numbered claims):
+      {{analysis_output}}
+
+      Writer output to format:
+      {{final_document}}
+    output: "formatted_document"
+    timeout: 600
+
   - id: "derive-filename"
     agent: "foundation:file-ops"
     prompt: |
@@ -137,6 +164,6 @@ steps:
       Report the full file path you saved to.
 
       Content to save:
-      {{final_document}}
+      {{formatted_document}}
     output: "output_path"
     timeout: 300

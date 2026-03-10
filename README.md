@@ -46,6 +46,7 @@ Every claim is traceable. Every inference is labeled. Every gap is named.
 | **data-analyzer** | Labeled inferences that bridge fact and conclusion — explicitly separated from source findings so the reasoning is always visible | v1 |
 | [storyteller](specialists/storyteller/) | cognitive mode translation — converts structured findings (AnalysisOutput, ResearchOutput) into narrative-mode artifacts with a documented NARRATIVE SELECTION record | v1 |
 | [story-formatter](specialists/story-formatter/) | format normalization for storyteller output — takes narrative prose in any format and produces canonical STORY OUTPUT blocks with NARRATIVE SELECTION classification | v1 |
+| [writer-formatter](specialists/writer-formatter/) | format normalization for writer output — takes prose in any format plus source material and produces canonical Writer output with Parsed:, WRITER METADATA, CITATIONS, and CLAIMS TO VERIFY blocks | v1 |
 
 All shipped and production-ready. More specialists are planned, including Presentation Builder — see [docs/BACKLOG.md](docs/BACKLOG.md) for what's coming next.
 
