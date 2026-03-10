@@ -1,0 +1,183 @@
+# =============================================================================
+# Presentation Builder Test Harness — Deck Evaluation
+# =============================================================================
+#
+# Evaluates a single generated presentation deck against the evaluation rubric.
+# Reads the original scenario (for source material and expected parameters),
+# the rubric (10-dimension scoring criteria), and the generated deck, then
+# produces a structured evaluation with per-dimension scores and a verdict.
+#
+# Requirements:
+#   - foundation bundle (provides zen-architect agent)
+#
+# Usage:
+#   amplifier tool invoke recipes operation=execute \
+#     recipe_path=tests/presentation-builder/evaluate-deck.yaml \
+#     context='{
+#       "scenario_path": "tests/presentation-builder/scenarios/01-qbr-status-update.md",
+#       "deck_path": "tests/presentation-builder/outputs/01-qbr-status-update-output.html"
+#     }'
+#
+# Context variables:
+#   - scenario_path (required): Path to the original scenario .md file
+#   - deck_path (required): Path to the generated deck output file
+#   - rubric_path (optional): Path to evaluation rubric
+#                              (default: tests/presentation-builder/rubric.md)
+#   - output_dir (optional): Directory for evaluation results
+#                              (default: tests/presentation-builder/outputs)
+#
+# Typical runtime: 3-8 minutes per evaluation
+#
+# =============================================================================
+# CHANGELOG
+# =============================================================================
+#
+# v1.0.0 (2025-07-24):
+#   - Initial recipe: single-deck evaluation pipeline
+#     * Step 1: Read and validate all input files (scenario, rubric, deck)
+#     * Step 2: Judge the deck using zen-architect in REVIEW mode with
+#       reasoning-class model for rigorous critique
+#     * Step 3: Save structured evaluation result alongside the deck
+#
+# =============================================================================
+
+name: "evaluate-deck"
+description: "Evaluate a generated presentation deck against the rubric using structured 10-dimension scoring"
+version: "1.0.0"
+tags: ["presentation-builder", "testing", "evaluation", "judge"]
+
+context:
+  scenario_path: ""                                   # Required: path to original scenario .md file
+  deck_path: ""                                       # Required: path to generated deck output file
+  rubric_path: "tests/presentation-builder/rubric.md" # Path to evaluation rubric
+  output_dir: "tests/presentation-builder/outputs"    # Directory for evaluation results
+
+steps:
+  # ── Step 1: Read and validate all input files ──────────────────────────────
+  #
+  # Reads the rubric, original scenario, and generated deck into a single
+  # clearly-labeled context variable. Validates all files exist before
+  # proceeding to the expensive LLM evaluation step.
+  - id: "read-inputs"
+    type: "bash"
+    command: |
+      set -euo pipefail
+
+      # Validate all input files exist
+      errors=0
+      for f in "{{scenario_path}}" "{{deck_path}}" "{{rubric_path}}"; do
+        if [ ! -f "$f" ]; then
+          echo "ERROR: File not found: $f" >&2
+          errors=$((errors + 1))
+        fi
+      done
+      if [ "$errors" -gt 0 ]; then
+        exit 1
+      fi
+
+      # Emit all inputs with clear section labels for the judge
+      echo "=== EVALUATION RUBRIC ==="
+      cat "{{rubric_path}}"
+      echo ""
+      echo "=== ORIGINAL SCENARIO (parameters and source material) ==="
+      cat "{{scenario_path}}"
+      echo ""
+      echo "=== GENERATED DECK OUTPUT ==="
+      cat "{{deck_path}}"
+      echo ""
+      echo "=== END OF INPUTS ==="
+    output: "evaluation_inputs"
+    timeout: 60
+
+  # ── Step 2: Judge the deck against the rubric ──────────────────────────────
+  #
+  # Uses zen-architect in REVIEW mode as the judge. The reasoning model class
+  # is selected for rigorous critique — evaluation demands careful comparison
+  # of claims against source material, framework adherence checks, and
+  # nuanced scoring across 10 dimensions.
+  #
+  # model_role: critique — this step evaluates existing work, not creating new.
+  - id: "judge-deck"
+    agent: "foundation:zen-architect"
+    mode: "REVIEW"
+    # Critique/evaluation role: benefits from strongest available reasoning model.
+    # Uncomment provider_preferences below to pin to a specific provider, or
+    # leave unset to use the session's default model.
+    # provider_preferences:
+    #   - provider: anthropic
+    #     model: claude-opus-*
+    #   - provider: openai
+    #     model: o3-*
+    prompt: |
+      You are an expert presentation evaluator acting as the judge in a
+      presentation builder evaluation harness.
+
+      Below you will find three clearly labeled sections:
+      1. **EVALUATION RUBRIC** — the complete grading criteria, the 1–5 scoring
+         scale, dimension weights, verdict thresholds, and the exact output format
+         you must produce.
+      2. **ORIGINAL SCENARIO** — the source material and parameters that were
+         given to the presentation builder. This is your ground truth.
+      3. **GENERATED DECK OUTPUT** — the presentation the builder produced.
+         This is what you are evaluating.
+
+      ## Your Task
+
+      Follow the rubric EXACTLY. For each of the 10 dimensions (D1–D10):
+      - Score on the 1–5 scale using the rubric's definitions
+      - Provide a one-line rationale grounded in specific evidence
+
+      Apply the verdict thresholds as specified:
+      - PASS: overall >= 4.0 AND no dimension below 3
+      - MARGINAL: overall >= 3.0 AND no dimension below 2
+      - FAIL: overall < 3.0 OR any dimension at 1
+
+      ## Critical Evaluation Rules
+
+      1. **Content fidelity is paramount.** Any number, statistic, percentage,
+         or claim in the deck that cannot be traced to the source material is a
+         FABRICATION — score D3 accordingly regardless of plausibility.
+      2. **Apply the Newspaper Test literally.** Read ONLY the slide titles in
+         sequence. Either they tell a coherent story or they don't. A title like
+         "Key Findings" fails. A title like "MTTR dropped 51% through automated
+         runbooks" passes.
+      3. **Be specific in evidence.** Quote actual slide titles and content
+         passages. "Generally good" is not acceptable.
+      4. **Speaker notes matter.** Generic notes like "Discuss this slide" are
+         a failure for D8.
+
+      Produce your evaluation in the EXACT output format specified in the rubric's
+      "Output Format" section. Do not add extra sections or change the format.
+
+      {{evaluation_inputs}}
+    output: "evaluation_result"
+    timeout: 900
+
+  # ── Step 3: Save the evaluation result ─────────────────────────────────────
+  - id: "save-evaluation"
+    type: "bash"
+    command: |
+      set -euo pipefail
+      mkdir -p "{{output_dir}}"
+
+      # Derive evaluation filename from deck path
+      deck_basename=$(basename "{{deck_path}}" .html)
+      # Handle case where deck_path doesn't end in .html
+      if [ "$deck_basename" = "$(basename "{{deck_path}}")" ]; then
+        deck_basename=$(basename "{{deck_path}}" .md)
+      fi
+      eval_path="{{output_dir}}/${deck_basename}-evaluation.md"
+
+      # Write evaluation result
+      printf '%s' '{{evaluation_result}}' > "${eval_path}"
+
+      # Verify write succeeded
+      if [ -s "${eval_path}" ]; then
+        byte_count=$(wc -c < "${eval_path}")
+        echo "Evaluation saved: ${eval_path} (${byte_count} bytes)"
+      else
+        echo "ERROR: Evaluation write failed or produced empty output" >&2
+        exit 1
+      fi
+    output: "save_result"
+    timeout: 30
