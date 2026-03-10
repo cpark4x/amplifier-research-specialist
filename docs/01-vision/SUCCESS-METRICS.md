@@ -302,6 +302,59 @@ There must be at least one thing this specialist does that an adjacent specialis
 
 ---
 
+## Scoring Rubric
+
+The scorecard (`docs/SCORECARD.md`) tracks current scores against these definitions. **This file owns the rubric.** The scorecard references it — the scorecard does not redefine what scores mean. Changing a rubric definition here is a deliberate, auditable act. Changing it in the scorecard is definition drift.
+
+Scores are 0–10 per dimension. Scores move only on **validated test evidence**, not spec changes alone.
+
+### Research Trustworthiness
+
+*Criteria: V1 Leading + Lagging Indicators above; Formatter Metrics; Data Analyzer A1–A4*
+
+| Score | Meaning |
+|---|---|
+| 0–2 | Core mechanisms broken — confidence tiers absent, no URLs, quality gate decorative |
+| 3–5 | Architecture correct, some validation. Most claims rated, URLs present, gaps disclosed. Not validated across diverse topics. |
+| 6–8 | Validated across 5+ diverse topics. Quality gate demonstrably returns NOT MET. Caller can audit any claim end-to-end. Inference traces preserved through full chain. |
+| 9–10 | Full V1 success criteria met and validated. "I trusted it because I could see every source." Zero `unrated` confidence, 100% verifiable URLs, evidence gaps always disclosed — across all test evidence. |
+
+### Chain Reliability
+
+*Criteria: V2 Composability indicators; chain success criteria (C1, SC1); recipe completion*
+
+| Score | Meaning |
+|---|---|
+| 0–2 | Chain breaks frequently — formatters skipped, timeouts, parsing failures |
+| 3–5 | Individual links work. Known fragility points exist. Some chains validated, not all. |
+| 6–8 | All individual chain variants validated. Formatter fires on every run as designed pipeline stage. No timeouts in standard runs. Recipe completion reliable. |
+| 9–10 | Full chain (R→RF→DA→DAF→W) validated end-to-end. Zero preprocessing between specialists. Every chain variant proven in test evidence. "It just works." |
+
+### Format Fidelity
+
+*Criteria: V2 Format Fidelity indicators; Universal Baseline U1 (output schema is a contract)*
+
+| Score | Meaning |
+|---|---|
+| 0–2 | Format is a label only — brief and report indistinguishable in practice |
+| 3–5 | Formats partially distinct. Structural blocks present inconsistently. Word budgets not enforced. |
+| 6–8 | All specialist-formatter pairs produce canonical output. Structural blocks reliable. Word budgets enforced. Audience calibration produces distinct output for different registers. |
+| 9–10 | 100% format fidelity validated across all formats and input types. CLAIMS TO VERIFY surfaced consistently. "The brief was exactly right — not a report in brief clothing." |
+
+### Specialist Coverage
+
+*Criteria: Roadmap phases in VISION.md; epic status in BACKLOG.md*
+
+| Score | Meaning |
+|---|---|
+| 0–2 | Fewer than 3 specialist domains shipped |
+| 3–5 | Core specialists built (Researcher, Writer, DA, CA). Phase 1 mostly done. |
+| 6 | Phase 2 in progress — most Phase 2 specialists shipped (e.g., Storyteller, Prioritizer), at least one pending (e.g., Planner). Formatter pattern established across all shipped specialists. |
+| 7–8 | All Phase 2 specialists shipped. Pattern proven repeatable — new specialist from guide alone. |
+| 9–10 | All 11 epics complete. Full roadmap Phases 1–3 delivered. Ecosystem composition validated. |
+
+---
+
 ## The Standard
 
 **If a metric doesn't help us answer "does the specialist produce more trustworthy output than inline work?", we don't track it.**
@@ -314,6 +367,7 @@ Specialists exist to raise the quality floor. Every measurement should connect b
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
+| v1.4 | 2026-03-10 | Chris Park | Added Scoring Rubric section — single source of truth for dimension definitions (0–10 scales for Research Trustworthiness, Chain Reliability, Format Fidelity, Specialist Coverage). Scorecard references this file; cannot redefine. Updated Chain Reliability rubric to reflect formatters as architectural design (not rescue). |
 | v1.3 | 2026-03-04 | Chris Park | Added Storyteller Metrics section (ST1–ST4, SC1–SC2, qualitative signals) |
 | v1.2 | 2026-03-03 | Chris Park | Updated Primary Success Indicator to chain-centric; added Universal Baseline Criteria (U1–U4); added Data Analyzer Metrics section (A1–A4, C1–C2, qualitative signals) |
 | v1.1 | 2026-03-02 | Chris Park | Added Owner, Table of Contents, Change History; aligned with SUCCESS_METRICS_TEMPLATE |
