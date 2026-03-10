@@ -277,6 +277,14 @@ QUALITY THRESHOLD RESULT: [MET | NOT MET]
 Note: if any claim text contains | replace it with /
 ```
 
+**Stage 4 self-check before emitting (zero tolerance):**
+
+Before returning your output, verify:
+1. Does your response start with ` ``` ` or ` ```analysis `? If yes — **remove the fences immediately.** Strip any opening ` ``` ` or ` ```analysis ` line before `ANALYSIS OUTPUT`, and any closing ` ``` ` line at the end. Your output is bare text, not a code block.
+2. Does your response start with the literal characters `A-N-A-L-Y-S-I-S O-U-T-P-U-T`? If not — rewrite the opening so it does.
+
+This check is mandatory. A response wrapped in code fences is not a valid ANALYSIS OUTPUT — it is a parsing failure for every downstream specialist.
+
 ---
 
 ## Routing Signal (for orchestrator use only)
