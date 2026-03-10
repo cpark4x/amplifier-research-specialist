@@ -2,6 +2,17 @@
 # CHANGELOG
 # =============================================================================
 #
+# v1.5.0 (2026-03-09):
+#   - FEATURE: Added required-field validation guard to research step
+#     * ROOT CAUSE: If orchestrator passes wrong variable name, research_question
+#       is empty and the pipeline silently runs a null-result research pass
+#       with no useful output and no error signal.
+#     * FIX: Added prompt-level fast-fail guard — if {{research_question}} is
+#       blank, researcher returns a structured ERROR immediately rather than
+#       proceeding with an empty query.
+#     * RESULT: Misconfigured calls surface a clear, actionable error message
+#       instead of silently producing garbage output.
+#
 # v1.4.0 (2026-03-09):
 #   - FEATURE: Added writer-formatter step between write and derive-filename
 #     * ROOT CAUSE: Writer with informal register (audience=myself) produces
@@ -56,7 +67,7 @@
 
 name: "research-chain"
 description: "Full research pipeline with format normalization — Researcher → Formatter → Data Analyzer → Writer → Writer Formatter → Save"
-version: "1.4.0"
+version: "1.5.0"
 tags: ["research", "analysis", "writing", "chain"]
 
 context:
@@ -70,6 +81,10 @@ steps:
   - id: "research"
     agent: "specialists:specialists/researcher"
     prompt: |
+      REQUIRED: research_question must not be blank. If {{research_question}} is empty
+      or blank, stop immediately and return: "ERROR: research_question is required but
+      was not provided. Please provide a research question."
+
       Research the following question thoroughly. Follow your full research pipeline.
       Focus on finding trustworthy evidence with source tiering and confidence
       assessments. Do not worry about output format — the formatter handles that.

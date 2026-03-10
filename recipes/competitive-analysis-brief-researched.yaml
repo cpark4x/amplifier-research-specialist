@@ -1,6 +1,24 @@
+# =============================================================================
+# CHANGELOG
+# =============================================================================
+#
+# v1.2.0 (2026-03-09):
+#   - FEATURE: Added writer-formatter step between write and save
+#     * Mirrors the pattern established in research-chain.yaml v1.4.0 and
+#       narrative-chain.yaml. Writer with non-default register skips structural
+#       blocks (WRITER METADATA, CITATIONS, CLAIMS TO VERIFY); formatter
+#       enforces compliance architecturally.
+#     * Source material passed to format-writer: {{competitive_analysis_output}}
+#     * save step updated: {{final_document}} → {{formatted_document}}
+#
+# v1.1.0 (2026-03-03):
+#   - Added save step — writes final document to docs/research-output/
+#
+# =============================================================================
+
 name: "competitive-analysis-brief-researched"
 description: "High-fidelity competitive brief with Researcher pre-pass. Researcher gathers sourced evidence first, competitive-analysis builds the matrix from that evidence, writer produces the document."
-version: "1.1.0"
+version: "1.2.0"
 tags: ["competitive-analysis", "research", "writing", "chain"]
 
 context:
@@ -60,6 +78,19 @@ steps:
     output: "final_document"
     timeout: 900
 
+  - id: "format-writer"
+    agent: "specialists:specialists/writer-formatter"
+    prompt: |
+      Produce the canonical Writer output block from the following writer output.
+
+      Original source material (source of S-numbered claims):
+      {{competitive_analysis_output}}
+
+      Writer output to format:
+      {{final_document}}
+    output: "formatted_document"
+    timeout: 600
+
   - id: "save"
     agent: "foundation:file-ops"
     prompt: |
@@ -75,6 +106,6 @@ steps:
       3. Report the full file path you saved to.
 
       Content to save:
-      {{final_document}}
+      {{formatted_document}}
     output: "output_path"
     timeout: 120
