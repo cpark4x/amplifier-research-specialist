@@ -2,6 +2,17 @@
 # CHANGELOG
 # =============================================================================
 #
+# v1.6.0 (2026-03-10):
+#   - FEATURE: Added format-analysis step (data-analyzer-formatter) between analyze and write
+#     * ROOT CAUSE: DA can produce unstructured narrative prose when input framing is
+#       ambiguous — no ANALYSIS OUTPUT block, no traces_to fields. Same root cause as
+#       writer/storyteller/prioritizer format failures.
+#     * FIX: Inserted data-analyzer-formatter step after analyze. Receives DA output +
+#       original formatted_research. Produces canonical ANALYSIS OUTPUT block regardless
+#       of DA output format. write and format-writer steps now consume formatted_analysis.
+#     * RESULT: Analysis chain has architectural formatter catch — matches researcher,
+#       writer, storyteller, and prioritizer formatter pattern.
+#
 # v1.5.0 (2026-03-09):
 #   - FEATURE: Added required-field validation guard to research step
 #     * ROOT CAUSE: If orchestrator passes wrong variable name, research_question
@@ -67,7 +78,7 @@
 
 name: "research-chain"
 description: "Full research pipeline with format normalization — Researcher → Formatter → Data Analyzer → Writer → Writer Formatter → Save"
-version: "1.5.0"
+version: "1.6.0"
 tags: ["research", "analysis", "writing", "chain"]
 
 context:
@@ -125,6 +136,19 @@ steps:
     output: "analysis_output"
     timeout: 900
 
+  - id: "format-analysis"
+    agent: "specialists:specialists/data-analyzer-formatter"
+    prompt: |
+      Normalize the following data-analyzer output into a canonical ANALYSIS OUTPUT block.
+
+      Data-analyzer output to format:
+      {{analysis_output}}
+
+      Original research (authoritative source for F1-Fn findings):
+      {{formatted_research}}
+    output: "formatted_analysis"
+    timeout: 600
+
   - id: "write"
     agent: "specialists:specialists/writer"
     prompt: |
@@ -133,7 +157,7 @@ steps:
       attribution lines, CITATIONS, and CLAIMS TO VERIFY blocks.
 
       Analysis:
-      {{analysis_output}}
+      {{formatted_analysis}}
 
       Output format: {{output_format}}
       Audience: {{audience}}
@@ -149,7 +173,7 @@ steps:
       Produce the canonical Writer output block from the following writer output.
 
       Original source material (source of S-numbered claims):
-      {{analysis_output}}
+      {{formatted_analysis}}
 
       Writer output to format:
       {{final_document}}
