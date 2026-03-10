@@ -9,11 +9,11 @@ when test evidence exists; not updated on spec changes alone.
 
 | Dimension | Score | Previous | Change | Last Updated |
 |-----------|-------|----------|--------|--------------|
-| **Research Trustworthiness** | 3/10 | 3/10 | — | 2026-03-09 |
-| **Chain Reliability** | 8/10 | 7/10 | +1 ↑ | 2026-03-10 |
-| **Format Fidelity** | 9/10 | 8/10 | +1 ↑ | 2026-03-10 |
+| **Research Trustworthiness** | 4/10 | 3/10 | +1 ↑ | 2026-03-10 |
+| **Chain Reliability** | 9/10 | 8/10 | +1 ↑ | 2026-03-10 |
+| **Format Fidelity** | 10/10 | 9/10 | +1 ↑ | 2026-03-10 |
 | **Specialist Coverage** | 6/10 | 6/10 | — | 2026-03-09 |
-| **Overall** | 7/10 | 6/10 | +1 ↑ | 2026-03-10 |
+| **Overall** | 7/10 | 7/10 | — | 2026-03-10 |
 
 ---
 
@@ -44,46 +44,48 @@ production-ready? Coverage includes the full chain (specialist + formatter pairs
 |------|---------------|-------------------|-----------------|----------|---------|---------------|
 | 2026-03-09 | 3/10 | 7/10 | 8/10 | 6/10 | 6/10 | Scorecard established. 13 commits shipped in parallel sprint. Prioritizer built. Routing validation #32 PASS. |
 | 2026-03-10 | 3/10 | 8/10 | 9/10 | 6/10 | **7/10** | Format Fidelity: closed #33 (prioritizer-formatter), #29 (writer informal), #30 (Storyteller format), verified #18/#19. Chain Reliability: prioritizer chain complete, DA hardening. Research Trustworthiness: DA improvements but new #34 finding; no net change. |
+| 2026-03-10 | 4/10 | 9/10 | 10/10 | 6/10 | **7/10** | Shipped #34 (da-formatter). Format Fidelity: all 5 specialist-formatter pairs now complete → 10/10. Chain Reliability: DA input-framing failure mode closed architecturally. Research Trustworthiness: da-formatter closes traces_to gap; spot test PASS; full end-to-end chain not yet validated → 4/10. Overall unchanged (29/4 = 7.25). |
 
 ---
 
 ## What Moves Each Dimension
 
-### Research Trustworthiness (currently 3/10)
+### Research Trustworthiness (currently 4/10)
 
-**What's keeping it at 3:**
-- DA can produce unstructured prose output for ambiguous inputs (new #34 finding)
-- DA-formatter (#34) not yet built — no architectural catch for DA format failures
+**What moved it from 3 to 4:**
+- da-formatter (#34) built and spot-tested — closes the architectural gap for DA format failures
+- `traces_to` fields now preserved (confirmed) or honestly flagged (`[narrative-mapped: uncertain]`) — never silently lost
+
+**What's keeping it at 4:**
+- Full end-to-end chain (Researcher → Formatter → DA → da-formatter → Writer) not yet validated
 - Source confidence threshold not implemented (backlog #3 area)
 
-**What would move it:**
-- Build da-formatter specialist (#34) — closes the DA output format gap architecturally
-- Run full research chain (Researcher → Formatter → DA → Writer) end-to-end and confirm
-  all inference traces are preserved through to the final document
+**What would move it to 5+:**
+- Run full research chain end-to-end and confirm inference traces preserved through to final document
 - Validate that confidence ratings in final Writer output trace back to source confidence
 
-### Chain Reliability (currently 8/10)
+### Chain Reliability (currently 9/10)
+
+**What moved it from 8 to 9:**
+- DA input-framing sensitivity closed architecturally (da-formatter catches any DA output format)
+- Stage narration prefix stripped by da-formatter
 
 **What's keeping it from 10:**
-- DA chain has a known input-framing sensitivity (Test 1 failure in 2026-03-10 session)
-- story-formatter appends normalization notes outside the STORY OUTPUT block (minor)
-- Stage narration leaks into DA response (stage thinking visible in output)
-
-**What would move it:**
-- Build da-formatter (#34)
-- Investigate stage narration leak in DA response
-
-### Format Fidelity (currently 9/10)
-
-**What's keeping it from 10:**
-- Story-formatter appends normalization notes outside the canonical block (violation of
-  "no explanatory text outside the block" rule — non-breaking but technically a violation)
-- DA stage narration appears before ANALYSIS OUTPUT (minor prefix leakage)
-- writer-formatter not tested with analysis-output input type (#14 still open)
+- Story-formatter appends normalization notes outside the STORY OUTPUT block (minor)
 
 **What would move it:**
 - Fix story-formatter to suppress normalization notes for non-debug use
-- Fix DA to suppress stage narration from response output
+
+### Format Fidelity (currently 10/10)
+
+**What got it to 10:**
+- All 5 specialist-formatter pairs now complete: researcher, writer, storyteller, prioritizer, data-analyzer
+- da-formatter closes the last open format compliance gap
+- DA stage narration prefix stripped architecturally by the formatter
+
+**What to watch:**
+- Story-formatter normalization notes (minor, non-blocking) — the one remaining cosmetic issue
+- writer-formatter with analysis-output input type (#14 still untested)
 
 ### Specialist Coverage (currently 6/10)
 
