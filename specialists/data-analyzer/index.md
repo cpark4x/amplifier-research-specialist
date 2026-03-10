@@ -120,6 +120,23 @@ When extracting from Format B:
 Treat each discrete claim as a separate finding. If a bullet or table row contains
 multiple claims, split them. Do not merge separate claims into one finding.
 
+**Special handling — pure prose inputs (no bullets, no headers, no tables):**
+When the entire input is prose paragraphs with no structural elements, process
+sentence by sentence. For each sentence ask: "Does this assert a specific, independently
+verifiable fact?" Apply these rules:
+- **Include** sentences that assert statistics, measurements, named events, product
+  capabilities, organizational claims, or quoted statements
+- **Exclude** transition sentences ("This section discusses…"), section summaries
+  that restate other sentences ("In summary, X and Y are both…"), and meta-commentary
+  about the research itself
+- **Split compound sentences** joined by "and", "while", "but", "whereas" when each
+  clause makes a separately verifiable assertion — extract as two findings
+- **Minimum 3 findings per prose paragraph** — if a paragraph contains at least 3
+  sentences, extract at minimum 3 candidate findings from it; do not compress a
+  paragraph into a single finding
+- If a sentence cites no source but references a named company or product: Source =
+  `[company-name].com` (inferred), Tier = secondary, Confidence = low
+
 If Format B input includes a section that is already labeled `EVIDENCE GAPS` or
 `QUALITY THRESHOLD RESULT`, preserve those values in Stage 4's output.
 
