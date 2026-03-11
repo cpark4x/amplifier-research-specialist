@@ -2,6 +2,44 @@
 # CHANGELOG
 # =============================================================================
 #
+# v1.8.1 (2026-03-11):
+#   - FIX: Hardened both bash strip steps against edge cases
+#     * strip-parsed-prefix: Added fallback — if no "RESEARCH OUTPUT" line found,
+#       passes through entire input instead of producing empty output. Prevents
+#       catastrophic data loss when formatter output format varies.
+#     * strip-formatter-notes: Replaced keyword-matching with generic pattern
+#       `^**...:**$` that catches ALL formatter artifact headers — any bold line
+#       ending with `:**` (matches **Formatter notes**, **Audit findings**,
+#       **Formatter corrections**, **Normalizations applied**, and any future
+#       variants). Also strips prefix artifacts (before Parsed: line).
+#       With fallback: if no "Parsed:" line, just strips suffix artifacts.
+#     * ROOT CAUSE: v1.8.0 strip-formatter-notes only matched "**Formatter notes"
+#       but writer-formatter produces at least 4 distinct artifact headers.
+#       strip-parsed-prefix had no fallback — if RESEARCH OUTPUT line was missing,
+#       it produced empty output, likely causing the Financial Crisis 4-byte failure.
+#     * RESULT: Robust stripping that degrades gracefully instead of catastrophically.
+#
+# v1.8.0 (2026-03-11):
+#   - FIX: Added strip-parsed-prefix bash step between format-research and analyze
+#     * ROOT CAUSE: Researcher-formatter outputs "Parsed: N claims..." as line 1,
+#       but DA expects "RESEARCH OUTPUT" as line 1 for Format A detection. With
+#       the Parsed prefix, DA falls to Format C→B path, producing narrative output
+#       that causes DA-formatter to mark all traces_to as [narrative-mapped: uncertain].
+#       Inference traces never survive to the final document.
+#     * FIX: Inserted lightweight bash step that strips the Parsed: prefix line,
+#       ensuring DA receives RESEARCH OUTPUT on line 1 → Format A → canonical
+#       ANALYSIS OUTPUT with real F# traces.
+#     * RESULT: Inference traces_to fields carry real F-number references
+#       instead of [narrative-mapped: uncertain].
+#   - FIX: Added strip-formatter-notes bash step between format-writer and derive-filename
+#     * ROOT CAUSE: Writer-formatter occasionally appends internal processing notes
+#       ("Formatter notes (not part of output):") after the CITATIONS block. The save
+#       step does a mechanical write with no stripping, so notes survive into
+#       the saved file.
+#     * FIX: Inserted bash step that strips everything from "**Formatter notes" onward.
+#       No-op when notes are absent.
+#     * RESULT: Clean saved files with no internal processing artifacts.
+#
 # v1.7.0 (2026-03-10):
 #   - FEATURE: Added resolve-urls step between research and format-research
 #     * ROOT CAUSE: Researcher visits URLs via web_fetch but its output contains
@@ -96,7 +134,7 @@
 
 name: "research-chain"
 description: "Full research pipeline with format normalization — Researcher → URL Resolution → Formatter → Data Analyzer → Writer → Writer Formatter → Save"
-version: "1.7.0"
+version: "1.8.2"
 tags: ["research", "analysis", "writing", "chain"]
 
 context:
@@ -202,6 +240,22 @@ steps:
     output: "formatted_research"
     timeout: 1200
 
+  - id: "strip-parsed-prefix"
+    type: "bash"
+    command: |
+      _sp_tmp=$(mktemp)
+      cat > "$_sp_tmp" <<'__STRIP_PARSED_EOF__'
+      {{formatted_research}}
+      __STRIP_PARSED_EOF__
+      if grep -q '^RESEARCH OUTPUT' "$_sp_tmp"; then
+        awk '/^RESEARCH OUTPUT/{found=1} found{print}' "$_sp_tmp"
+      else
+        cat "$_sp_tmp"
+      fi
+      rm -f "$_sp_tmp"
+    output: "formatted_research_clean"
+    timeout: 30
+
   - id: "analyze"
     agent: "specialists:specialists/data-analyzer"
     prompt: |
@@ -210,7 +264,7 @@ steps:
       analysis pipeline.
 
       Formatted research:
-      {{formatted_research}}
+      {{formatted_research_clean}}
     output: "analysis_output"
     timeout: 900
 
@@ -237,11 +291,17 @@ steps:
       Analysis:
       {{formatted_analysis}}
 
+      SOURCE URL MAP (verified URLs for sources — use these in CITATIONS):
+      {{source_url_map}}
+
       Output format: {{output_format}}
       Audience: {{audience}}
       Voice: {{voice}}
 
       If audience is empty, default to a general professional audience.
+      When building your CITATIONS block, match source names to the URL map above
+      and use the verified https:// URLs. This ensures source provenance survives
+      the analysis step.
     output: "final_document"
     timeout: 1800
 
@@ -257,6 +317,26 @@ steps:
       {{final_document}}
     output: "formatted_document"
     timeout: 1200
+
+  - id: "strip-formatter-notes"
+    type: "bash"
+    command: |
+      _fn_tmp=$(mktemp)
+      cat > "$_fn_tmp" <<'__STRIP_NOTES_EOF__'
+      {{formatted_document}}
+      __STRIP_NOTES_EOF__
+      _start=$(grep -n '^Parsed:' "$_fn_tmp" | head -1 | cut -d: -f1)
+      _end=$(grep -n '^S[0-9]\{1,\}:' "$_fn_tmp" | tail -1 | cut -d: -f1)
+      if [ -n "$_start" ] && [ -n "$_end" ]; then
+        sed -n "${_start},${_end}p" "$_fn_tmp"
+      elif [ -n "$_start" ]; then
+        awk '/^Parsed:/ && !s{s=1} s && /^[*][*].*:[*][*]$/{exit} s{print}' "$_fn_tmp"
+      else
+        cat "$_fn_tmp"
+      fi
+      rm -f "$_fn_tmp"
+    output: "formatted_document_clean"
+    timeout: 30
 
   - id: "derive-filename"
     agent: "foundation:file-ops"
@@ -281,6 +361,6 @@ steps:
       Report the full file path you saved to.
 
       Content to save:
-      {{formatted_document}}
+      {{formatted_document_clean}}
     output: "output_path"
     timeout: 300

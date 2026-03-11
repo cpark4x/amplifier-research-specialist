@@ -17,15 +17,15 @@ when test evidence exists; not updated on spec changes alone.
 
 ---
 
-## Current Scores (as of 2026-03-10)
+## Current Scores (as of 2026-03-11)
 
 | Dimension | Score | Previous | Change | Last Updated |
 |-----------|-------|----------|--------|--------------|
-| **Research Trustworthiness** | 5/10 | 4/10 | +1 ↑ | 2026-03-10 |
+| **Research Trustworthiness** | 7/10 | 5/10 | +2 ↑ | 2026-03-11 |
 | **Chain Reliability** | 8/10 | 8/10 | — | 2026-03-10 |
 | **Format Fidelity** | 7/10 | 7/10 | — | 2026-03-10 |
 | **Specialist Coverage** | 6/10 | 6/10 | — | 2026-03-09 |
-| **Overall** | 7/10 | 6/10 | +1 ↑ | 2026-03-10 |
+| **Overall** | 7/10 | 7/10 | — | 2026-03-11 |
 
 ---
 
@@ -39,26 +39,32 @@ when test evidence exists; not updated on spec changes alone.
 | 2026-03-10 | 4/10 | 7/10 | 7/10 | 6/10 | **6/10** | **Reconciliation.** Consolidated two diverged scorecards. Anchored dimension definitions to SUCCESS-METRICS.md § Scoring Rubric. Re-scored against reconciled rubric. Chain Reliability 9→7: full R→RF→DA→DAF→W chain not validated end-to-end; individual links proven but longest chain unproven. Format Fidelity 10→7: all 5 formatter pairs complete, but Writer word budgets not validated across all 6 formats, audience calibration not systematic, writer-formatter with analysis-output input (#14) untested, CLAIMS TO VERIFY surfacing inconsistent. Research Trustworthiness stays 4. Coverage stays 6. |
 | 2026-03-10 | 4/10 | 8/10 | 7/10 | 6/10 | **6/10** | **Full chain validation.** Ran research-chain v1.6.0 end-to-end on "Poolside AI" topic (R→RF→DA→DAF→W→WF→save). All 8 steps completed, no manual intervention, file saved at 13,764 bytes. Chain Reliability 7→8: longest chain variant proven. Research Trustworthiness stays 4: inference traces_to degraded to `[narrative-mapped: uncertain]` (15/15), URLs absent from CITATIONS block, confidence upgrades in prose. Two new gaps identified: Writer needs source URLs in CITATIONS, Writer needs inference hedging. *(test log 2026-03-10-poolside-ai-full-chain-audit)* |
 | 2026-03-10 | 5/10 | 8/10 | 7/10 | 6/10 | **7/10** | **URL recovery + hedging validated.** Shipped three architectural fixes: (1) writer-formatter Stage 3.5 confidence-hedge audit — 14/14 medium/inference claims hedged, PASS. (2) researcher-formatter Stage 1.5 URL recovery — pattern-based reconstruction from source names. (3) resolve-urls pipeline step — verified URL lookup via web_search before formatting. Research-chain v1.7.0 (9 steps). Validation: 15/15 sourceable claims have real https:// URLs (100%), zero "unattributed". Research Trustworthiness 4→5. Overall 6→7. *(test log 2026-03-10-url-recovery-validation)* |
+| 2026-03-11 | **7/10** | 8/10 | 7/10 | 6/10 | **7/10** | **Diverse topic validation + traces_to fix.** Shipped research-chain v1.8.2 (11 steps): (1) strip-parsed-prefix bash step — strips `Parsed:` prefix so DA hits Format A → real F# traces. (2) strip-formatter-notes bash step v3 — citation-boundary approach strips all artifact variants. 6 diverse topics validated across 6 domains (history, humanities, arts, medicine, tech, physics). URL recovery 181/182 = 99.5%. F-number traces 52/53 = 98.1%. Hedging consistent across all topics. Research Trustworthiness 5→7. Overall stays 7 (now exactly 7.0 vs 6.5). *(test log 2026-03-11-research-trustworthiness-diverse-validation)* |
 
 ---
 
 ## What Moves Each Dimension
 
-### Research Trustworthiness (currently 5/10)
+### Research Trustworthiness (currently 7/10)
 
-**What moved it from 4 to 5:**
-- Source URLs now present in CITATIONS: 15/15 sourceable claims have real https:// URLs (100%), zero "unattributed" — via two-layer architectural fix: resolve-urls pipeline step (verified URL lookup) + researcher-formatter Stage 1.5 (pattern-based reconstruction) *(2026-03-10-url-recovery-validation)*
-- Confidence hedging validated: 14/14 medium/inference claims hedged in prose via writer-formatter Stage 3.5. `reportedly` for medium, `According to unconfirmed reports` for low, `Evidence suggests` for inference *(2026-03-10-research-trustworthiness-fixes)*
+**What moved it from 5 to 7:**
+- Inference `traces_to` fix: strip-parsed-prefix bash step (v1.8.0) strips `Parsed:` prefix so DA receives `RESEARCH OUTPUT` on line 1 → Format A → canonical ANALYSIS OUTPUT with real F# finding references. 52/53 inference claims now carry real F-numbers (98.1%), zero `narrative-mapped: uncertain`. *(2026-03-11-research-trustworthiness-diverse-validation)*
+- Diverse topic validation: 6 topics across 6 domains (history, humanities, arts, medicine, tech, physics). URL recovery 181/182 = 99.5%. Hedging consistent across all topics. Formatter artifacts addressed architecturally via citation-boundary stripping (v1.8.2).
+- Recipe evolved v1.8.0 → v1.8.1 → v1.8.2 during validation, each iteration hardening the bash strip steps against edge cases found in real runs.
 
-**What's keeping it at 5:**
-- Inference `traces_to` fields are `[narrative-mapped: uncertain]` (12/12) — honest placeholder from DA-formatter when DA produces narrative prose, but no specific F# references survive to final document
-- Validated on only 1 topic (Poolside AI) — rubric requires 5+ diverse topics for 6+
+**What moved it from 4 to 5 (previous session):**
+- Source URLs: 15/15 sourceable claims have real https:// URLs (100%), zero "unattributed" — via resolve-urls pipeline step + researcher-formatter Stage 1.5 *(2026-03-10-url-recovery-validation)*
+- Confidence hedging: 14/14 medium/inference claims hedged in prose via writer-formatter Stage 3.5 *(2026-03-10-research-trustworthiness-fixes)*
+
+**What's keeping it at 7:**
 - Quality gate NOT MET path untested
+- Researcher output truncation is stochastic (~50% of runs produce pipeline failure briefs instead of research) — reliability concern at the step level
+- Minor formatting inconsistencies: bracket notation (`[F1, F2]` vs `F1, F2`) and meta-observation convention (`[meta]` vs `uncertain`) not standardized
 
-**What would move it to 6:**
-- Run across 4+ more diverse topics with consistent URL recovery and hedging results
-- Investigate DA structured output to get specific F# traces (or accept `[narrative-mapped: uncertain]` as honest ceiling for narrative DA output)
-- Test quality gate NOT MET path
+**What would move it to 8:**
+- Test quality gate NOT MET path (high threshold on thin-output topic)
+- Reduce researcher truncation failure rate (content-presence gate after research step)
+- Standardize traces_to bracket notation and meta-observation convention
 
 ### Chain Reliability (currently 8/10)
 
@@ -70,13 +76,14 @@ when test evidence exists; not updated on spec changes alone.
 
 **What's keeping it from 9+:**
 - Story-formatter appends normalization notes outside the STORY OUTPUT block (minor)
-- Only one full-chain end-to-end run validated (rubric 9–10 requires "every chain variant proven")
+- Narrative-chain and competitive-analysis-brief chains not validated end-to-end
+- Researcher output truncation (~50% of runs) is a step-level reliability concern
 
 **What would move it to 9:**
 - Fix story-formatter normalization notes
 - Validate narrative-chain (Storyteller variant) end-to-end
 - Validate competitive-analysis-brief chains end-to-end
-- Run full research-chain on 2+ more diverse topics to confirm consistency
+- Reduce researcher truncation failure rate (content-presence gate)
 
 ### Format Fidelity (currently 7/10)
 
@@ -118,7 +125,7 @@ when test evidence exists; not updated on spec changes alone.
 
 ---
 
-## Validated Evidence Summary (2026-03-10)
+## Validated Evidence Summary (2026-03-11)
 
 | Item | Evidence | Dimension |
 |------|----------|-----------|
@@ -137,6 +144,10 @@ when test evidence exists; not updated on spec changes alone.
 | **URL recovery (resolve-urls + Stage 1.5)** | 15/15 sourceable claims have real https:// URLs, zero "unattributed". PASS *(2026-03-10-url-recovery-validation)* | **Research Trustworthiness** |
 | **Confidence hedging (Stage 3.5)** | 14/14 medium/inference claims hedged in prose, zero misses. PASS *(2026-03-10-research-trustworthiness-fixes)* | **Research Trustworthiness** |
 | Full 9-step chain (v1.7.0) | R→resolve-urls→RF→DA→DAF→W→WF→save completed, 17,892 bytes saved. PASS | Chain Reliability |
+| **Diverse topic validation (6 topics)** | 6 domains (history, humanities, arts, medicine, tech, physics). URL recovery 181/182 = 99.5%. F-number traces 52/53 = 98.1%. Hedging consistent. PASS *(2026-03-11-research-trustworthiness-diverse-validation)* | **Research Trustworthiness** |
+| **Inference traces_to fix (strip-parsed-prefix)** | DA now receives RESEARCH OUTPUT on line 1 → Format A → real F# references. 52/53 inferences carry F-numbers, zero `narrative-mapped: uncertain`. PASS *(2026-03-11-research-trustworthiness-diverse-validation)* | **Research Trustworthiness** |
+| **Formatter artifact stripping (v1.8.2)** | Citation-boundary approach: extract Parsed: through last S-entry. Eliminates all artifact variants without pattern enumeration. v1.8.2 runs (Printing Press, Higgs Boson) clean. PASS | **Format Fidelity** |
+| Full 11-step chain (v1.8.2) | R→resolve-urls→RF→strip-prefix→DA→DAF→W→WF→strip-notes→slug→save. 6 successful end-to-end runs. PASS | Chain Reliability |
 
 ---
 
@@ -144,6 +155,7 @@ when test evidence exists; not updated on spec changes alone.
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v2.3 | 2026-03-11 | **Diverse topic validation + traces_to fix.** Shipped research-chain v1.8.2 (11 steps) with three new fixes: strip-parsed-prefix (DA Format A → real F# traces), strip-formatter-notes v3 (citation-boundary approach strips all artifact variants), fallback guards (prevent empty output on format variation). 6 diverse topics validated across 6 domains. URL recovery 181/182 = 99.5%. F-number traces 52/53 = 98.1%. Hedging consistent. Formatter artifacts eliminated architecturally. Research Trustworthiness 5→7, Overall stays 7 (now exactly 7.0). *(test log 2026-03-11-research-trustworthiness-diverse-validation)* |
 | v2.2 | 2026-03-10 | **URL recovery + hedging validated.** Shipped three architectural fixes: researcher-formatter Stage 1.5 (URL reconstruction), resolve-urls pipeline step (verified URL lookup), writer-formatter Stage 3.5 (confidence hedging). Research-chain v1.7.0 (9 steps). Validation: 15/15 sourceable claims with URLs (100%), 14/14 claims hedged, zero "unattributed". Research Trustworthiness 4→5, Overall 6→7. *(test log 2026-03-10-url-recovery-validation)* |
 | v2.1 | 2026-03-10 | **Full chain validation.** Ran research-chain v1.6.0 end-to-end (Poolside AI topic). Chain Reliability 7→8: longest chain variant proven. Research Trustworthiness stays 4: inference traces, source URLs, and confidence hedging all fail to survive to final document. Four new action items logged. *(test log 2026-03-10-poolside-ai-full-chain-audit)* |
 | v2.0 | 2026-03-10 | **Reconciliation.** Consolidated two diverged scorecards into one. Retired `docs/01-vision/SCORECARD.md`. Anchored all dimension definitions to `SUCCESS-METRICS.md` § Scoring Rubric (new section added there). Added Scoring Rules to prevent future drift. Re-scored against reconciled rubric: Chain Reliability 9→7 (full chain unproven), Format Fidelity 10→7 (word budgets, audience calibration, #14 untested). Overall 7→6. |
