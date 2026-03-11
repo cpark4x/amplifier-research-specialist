@@ -215,7 +215,11 @@ Assemble your findings into a complete research output. Include all of the follo
 
 **Do not worry about exact output formatting.** The downstream formatter specialist will canonicalize your output into the machine-parseable format the pipeline requires. Focus on completeness and accuracy of the evidence, not on matching a rigid template.
 
-**Self-check before returning:** Does my response begin with the literal text `RESEARCH OUTPUT` on the first line? If not, stop and rewrite from the beginning.
+**URLs are evidence, not formatting.** The formatter can fix labels, tiers, and structure — but it cannot recover URLs you did not include. Every finding MUST include the full `https://` URL of the page you extracted it from. A finding without a URL is an unsourced claim. If you visited a page and extracted a claim, you have the URL — include it.
+
+**Self-check before returning:**
+1. Does my response begin with the literal text `RESEARCH OUTPUT` on the first line? If not, stop and rewrite from the beginning.
+2. Does every finding include a full `https://` URL (not just a publication name)? If any finding says only "TechCrunch" or "Bloomberg" without a URL, stop and add the URL you visited.
 
 ---
 

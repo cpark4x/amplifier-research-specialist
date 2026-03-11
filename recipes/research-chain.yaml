@@ -178,7 +178,7 @@ steps:
       Writer output to format:
       {{final_document}}
     output: "formatted_document"
-    timeout: 600
+    timeout: 1200
 
   - id: "derive-filename"
     agent: "foundation:file-ops"
