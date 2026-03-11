@@ -22,10 +22,10 @@ when test evidence exists; not updated on spec changes alone.
 | Dimension | Score | Previous | Change | Last Updated |
 |-----------|-------|----------|--------|--------------|
 | **Research Trustworthiness** | 4/10 | 4/10 | — | 2026-03-10 |
-| **Chain Reliability** | 7/10 | 9/10 | -2 ↓ | 2026-03-10 |
-| **Format Fidelity** | 7/10 | 10/10 | -3 ↓ | 2026-03-10 |
+| **Chain Reliability** | 8/10 | 7/10 | +1 ↑ | 2026-03-10 |
+| **Format Fidelity** | 7/10 | 7/10 | — | 2026-03-10 |
 | **Specialist Coverage** | 6/10 | 6/10 | — | 2026-03-09 |
-| **Overall** | 6/10 | 7/10 | -1 ↓ | 2026-03-10 |
+| **Overall** | 6/10 | 6/10 | — | 2026-03-10 |
 
 ---
 
@@ -37,6 +37,7 @@ when test evidence exists; not updated on spec changes alone.
 | 2026-03-10 | 3/10 | 8/10 | 9/10 | 6/10 | 7/10 | Format Fidelity: closed #33 (prioritizer-formatter), #29 (writer informal), #30 (Storyteller format), verified #18/#19. Chain Reliability: prioritizer chain complete, DA hardening. Research Trustworthiness: DA improvements but new #34 finding; no net change. |
 | 2026-03-10 | 4/10 | 9/10 | 10/10 | 6/10 | 7/10 | Shipped #34 (da-formatter). *(Scores below were overclaimed — see reconciliation row.)* |
 | 2026-03-10 | 4/10 | 7/10 | 7/10 | 6/10 | **6/10** | **Reconciliation.** Consolidated two diverged scorecards. Anchored dimension definitions to SUCCESS-METRICS.md § Scoring Rubric. Re-scored against reconciled rubric. Chain Reliability 9→7: full R→RF→DA→DAF→W chain not validated end-to-end; individual links proven but longest chain unproven. Format Fidelity 10→7: all 5 formatter pairs complete, but Writer word budgets not validated across all 6 formats, audience calibration not systematic, writer-formatter with analysis-output input (#14) untested, CLAIMS TO VERIFY surfacing inconsistent. Research Trustworthiness stays 4. Coverage stays 6. |
+| 2026-03-10 | 4/10 | 8/10 | 7/10 | 6/10 | **6/10** | **Full chain validation.** Ran research-chain v1.6.0 end-to-end on "Poolside AI" topic (R→RF→DA→DAF→W→WF→save). All 8 steps completed, no manual intervention, file saved at 13,764 bytes. Chain Reliability 7→8: longest chain variant proven. Research Trustworthiness stays 4: inference traces_to degraded to `[narrative-mapped: uncertain]` (15/15), URLs absent from CITATIONS block, confidence upgrades in prose. Two new gaps identified: Writer needs source URLs in CITATIONS, Writer needs inference hedging. *(test log 2026-03-10-poolside-ai-full-chain-audit)* |
 
 ---
 
@@ -48,32 +49,36 @@ when test evidence exists; not updated on spec changes alone.
 - da-formatter (#34) built and spot-tested — closes the architectural gap for DA format failures
 - `traces_to` fields now preserved (confirmed) or honestly flagged (`[narrative-mapped: uncertain]`) — never silently lost
 
-**What's keeping it at 4:**
-- Full end-to-end chain (Researcher → Formatter → DA → da-formatter → Writer) not yet validated
+**What's keeping it at 4 (validated 2026-03-10 full chain run):**
+- Inference `traces_to` fields degrade to `[narrative-mapped: uncertain]` (15/15 in Poolside AI run) — no specific F# references survive to final document
+- CITATIONS block has zero source URLs — claims trace to S-numbers but not to external sources
+- Confidence levels preserved in CITATIONS metadata but upgraded in prose — medium/inference claims stated as definitive facts without hedging
 - Not validated across 5+ diverse topics (rubric requires this for 6+)
 - Quality gate NOT MET path untested
-- Source confidence threshold not implemented (backlog #3 area)
 
 **What would move it to 5–6:**
-- Run full research chain end-to-end and confirm inference traces preserved through to final document
-- Validate confidence ratings in final Writer output trace back to source confidence
+- Fix Writer to carry source URLs into CITATIONS block (URL exists in `formatted_research`, lost in DA→Writer handoff)
+- Fix Writer to hedge inference-backed and medium-confidence claims in prose
+- Investigate DA-formatter: can it map inferences to specific F# findings when DA produces narrative output, or is `[narrative-mapped: uncertain]` the expected ceiling for that format?
 - Run across 3+ diverse topics with consistent results
 
-### Chain Reliability (currently 7/10)
+### Chain Reliability (currently 8/10)
 
-**What supports 7:**
-- Individual chain variants validated: R→RF→W (Jina AI, Mar 6), Storyteller chain (Acme Corp, Mar 10), Prioritizer chain (routing validation, Mar 9), DA chain (da-formatter spot test, Mar 10)
-- Formatter fires on every chain run (Rules 5/6/7/8 operational)
+**What moved it from 7 to 8:**
+- Full 8-step chain (R→RF→DA→DAF→W→WF→save) validated end-to-end on "Poolside AI" topic — all steps completed, no manual intervention, file saved at 13,764 bytes *(2026-03-10-poolside-ai-full-chain-audit)*
+- All formatters fired as designed pipeline stages at every link
+- Individual chain variants previously validated: R→RF→W (Jina AI, Mar 6), Storyteller (Acme Corp, Mar 10), Prioritizer (routing validation, Mar 9)
 - Recipe timeouts fixed (#11, Mar 9)
 
-**What's keeping it from 8+:**
-- Full 5-link chain (R→RF→DA→DAF→W) not validated as a single end-to-end run
-- Story-formatter appends normalization notes outside the STORY OUTPUT block
+**What's keeping it from 9+:**
+- Story-formatter appends normalization notes outside the STORY OUTPUT block (minor)
+- Only one full-chain end-to-end run validated (rubric 9–10 requires "every chain variant proven")
 
-**What would move it to 8–9:**
-- Run full R→RF→DA→DAF→W chain end-to-end, confirm clean handoff at every link
+**What would move it to 9:**
 - Fix story-formatter normalization notes
-- Validate all chain variants in a single test session
+- Validate narrative-chain (Storyteller variant) end-to-end
+- Validate competitive-analysis-brief chains end-to-end
+- Run full research-chain on 2+ more diverse topics to confirm consistency
 
 ### Format Fidelity (currently 7/10)
 
@@ -119,6 +124,11 @@ when test evidence exists; not updated on spec changes alone.
 
 | Item | Evidence | Dimension |
 |------|----------|-----------|
+| **Full chain end-to-end (Poolside AI)** | 8-step R→RF→DA→DAF→W→WF→save completed, no manual intervention, 13,764 bytes saved. PASS for chain completion. *(2026-03-10-poolside-ai-full-chain-audit)* | **Chain Reliability** |
+| Full chain: inference traces | 15/15 inferences degraded to `[narrative-mapped: uncertain]`, zero F# refs in final doc. FAIL. | Research Trustworthiness |
+| Full chain: source URLs | Zero URLs in CITATIONS block. Claims trace to S-numbers but not external sources. FAIL. | Research Trustworthiness |
+| Full chain: confidence preservation | Labels preserved in CITATIONS metadata, but prose upgrades medium/inference to definitive statements. PARTIAL. | Research Trustworthiness |
+| Full chain: structural completeness | Parsed line, S-numbered claims (45), CLAIMS TO VERIFY, WRITER METADATA, CITATIONS — all present. PASS. | Format Fidelity |
 | Prioritizer-formatter (#33) | prose→PRIORITY OUTPUT: PASS *(2026-03-10-prioritizer-formatter-spot-test)* | Format Fidelity |
 | Story-formatter handles Storyteller failure mode (#30) | document→STORY OUTPUT: PASS *(2026-03-10-storyteller-format-compliance-verification)* | Format Fidelity |
 | Inferences in NARRATIVE SELECTION (#18) | I1–I3 with `(inference)` labels in INCLUDED FINDINGS: PASS | Format Fidelity |
@@ -133,6 +143,7 @@ when test evidence exists; not updated on spec changes alone.
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v2.1 | 2026-03-10 | **Full chain validation.** Ran research-chain v1.6.0 end-to-end (Poolside AI topic). Chain Reliability 7→8: longest chain variant proven. Research Trustworthiness stays 4: inference traces, source URLs, and confidence hedging all fail to survive to final document. Four new action items logged. *(test log 2026-03-10-poolside-ai-full-chain-audit)* |
 | v2.0 | 2026-03-10 | **Reconciliation.** Consolidated two diverged scorecards into one. Retired `docs/01-vision/SCORECARD.md`. Anchored all dimension definitions to `SUCCESS-METRICS.md` § Scoring Rubric (new section added there). Added Scoring Rules to prevent future drift. Re-scored against reconciled rubric: Chain Reliability 9→7 (full chain unproven), Format Fidelity 10→7 (word budgets, audience calibration, #14 untested). Overall 7→6. |
 | v1.2 | 2026-03-10 | Shipped #34 (da-formatter). Format Fidelity 9→10, Chain Reliability 8→9, Research Trustworthiness 3→4. |
 | v1.1 | 2026-03-10 | Closed #33, #29, #30, verified #18/#19. Format Fidelity 8→9, Chain Reliability 7→8. |
