@@ -44,7 +44,7 @@ Every input — regardless of how well-formatted it appears — gets the full no
 - **Tier must be a full label:** `primary`, `secondary`, or `tertiary` — nothing else.
   - If the input uses abbreviations (T1, T2, T3, Tier 1, etc.): normalize — T1/Tier 1 → `primary`, T2/Tier 2 → `secondary`, T3/Tier 3 → `tertiary`
   - If no tier label is present: infer — academic paper / official publication → primary, credible third-party reporting → secondary, blog posts / forums / indirect → tertiary
-- **Source must be a full `https://` URL or explicitly `unknown`.** A publication name is not a URL.
+- **Source must be a full `https://` URL, a reconstructed URL marked `[reconstructed]`, or explicitly `unknown`.** A publication name alone is not a URL — but it may be recoverable (see Stage 1.5).
 - If a field cannot be determined, mark it explicitly rather than omitting it
 
 ---
@@ -70,6 +70,43 @@ Parsed: [n] claims | format=[A if canonical / B if narrative] | question=[short 
 
 ---
 
+### Stage 1.5: URL Recovery
+
+After parsing, scan your extracted claims for sources that have a **publication name but no `https://` URL**. For each, attempt recovery in this order:
+
+**Recovery patterns (in order of reliability):**
+
+1. **Bare domain fragments in the text.** If the narrative contains what looks like a domain or path — `poolside.ai/platform`, `arxiv.org/abs/2401.12345`, `github.com/jina-ai/reader` — prepend `https://` and use it directly. These are URLs missing their protocol, not reconstructions.
+
+2. **Well-known publication + article context.** Major publications have predictable URL structures. If you can identify the publication name AND enough context (topic, company name, date) to form a plausible article URL, reconstruct it:
+   - TechCrunch → `https://techcrunch.com/[year]/[month]/[day]/[slug]`
+   - Bloomberg → `https://www.bloomberg.com/news/articles/[date]/[slug]`
+   - Reuters → `https://www.reuters.com/technology/[slug]`
+   - ArXiv → `https://arxiv.org/abs/[id]`
+   - Company blogs → `https://[company-domain]/blog/[slug]`
+   - Crunchbase → `https://www.crunchbase.com/organization/[slug]`
+   
+   Use the research question topic and any dates/names in the claim to form the slug. The slug does not need to be exact — it needs to be plausible and point to the right domain and section.
+
+3. **Company official domains.** If a claim is attributed to a company's own announcement, press release, or documentation, reconstruct as `https://[company-domain]/` or `https://[company-domain]/blog` or `https://[company-domain]/newsroom` as appropriate.
+
+**Mark every reconstructed URL:** Append the literal text ` [reconstructed]` after the URL:
+```
+Source: https://techcrunch.com/2024/10/poolside-ai-series-b [reconstructed]
+```
+
+**Do NOT reconstruct when:**
+- The attribution is vague ("industry sources", "reports suggest", "analysts say")
+- The source is a social media post (URL patterns are unpredictable)
+- You cannot identify the publication domain with confidence
+- The narrative gives no topic/date context to form even a plausible slug
+
+**Fall back to `unknown`** only when none of the recovery patterns apply.
+
+The goal is best-effort recovery, not precision. A reconstructed URL that points to the right publication and topic section is far more useful downstream than `unknown`, even if the exact article path is approximate. The `[reconstructed]` marker tells downstream consumers the URL was not directly verified.
+
+---
+
 ### Stage 2: Produce RESEARCH OUTPUT
 
 Your entire response after the parse summary is this block — nothing else before
@@ -84,8 +121,8 @@ Quality Score: [low | medium | high]
 
 RESEARCH BRIEF:
 [5–10 highest-confidence claims as compact bullets with source URL]
-- [claim] ([URL or "unknown"])
-- [claim] ([URL or "unknown"])
+- [claim] ([URL, or "URL [reconstructed]", or "unknown"])
+- [claim] ([URL, or "URL [reconstructed]", or "unknown"])
 
 SUB-QUESTIONS ADDRESSED:
 1. [sub-question] — [high | medium | low] coverage
@@ -94,7 +131,7 @@ FINDINGS:
 [One block per discrete claim extracted:]
 
 - Claim: [specific, falsifiable statement — not a vague summary]
-  Source: [URL — or "unknown" if not in input]
+  Source: [URL — or "URL [reconstructed]" via Stage 1.5 — or "unknown" if not recoverable]
   Tier: [primary | secondary | tertiary]
   Confidence: [high | medium | low]
   Corroborated by: [count] independent sources

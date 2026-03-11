@@ -2,6 +2,24 @@
 # CHANGELOG
 # =============================================================================
 #
+# v1.7.0 (2026-03-10):
+#   - FEATURE: Added resolve-urls step between research and format-research
+#     * ROOT CAUSE: Researcher visits URLs via web_fetch but its output contains
+#       source NAMES without https:// URLs. This is the 6th instance of
+#       "instruction fixes don't hold" — the researcher's generation priors
+#       override format instructions. Every downstream step faithfully passes
+#       through nothing. Final citations show source: unattributed for all entries.
+#     * FIX: Inserted a lightweight URL resolution step after research. Receives
+#       research_output, extracts source names, uses web_search to find verified
+#       URLs for each. Produces source_url_map passed to format-research.
+#       Researcher-formatter receives both narrative and URL map, uses verified
+#       URLs in preference to "unknown".
+#     * RESULT: URLs recovered architecturally via verification, not instruction.
+#       Complements researcher-formatter's own URL recovery (Stage 1.5) as
+#       defense in depth.
+#   - FIX: writer-formatter timeout 600s → 1200s (Stage 3.5 confidence-hedge
+#     audit adds processing time)
+#
 # v1.6.0 (2026-03-10):
 #   - FEATURE: Added format-analysis step (data-analyzer-formatter) between analyze and write
 #     * ROOT CAUSE: DA can produce unstructured narrative prose when input framing is
@@ -77,8 +95,8 @@
 # =============================================================================
 
 name: "research-chain"
-description: "Full research pipeline with format normalization — Researcher → Formatter → Data Analyzer → Writer → Writer Formatter → Save"
-version: "1.6.0"
+description: "Full research pipeline with format normalization — Researcher → URL Resolution → Formatter → Data Analyzer → Writer → Writer Formatter → Save"
+version: "1.7.0"
 tags: ["research", "analysis", "writing", "chain"]
 
 context:
@@ -112,6 +130,56 @@ steps:
     output: "research_output"
     timeout: 2700
 
+  - id: "resolve-urls"
+    agent: "foundation:web-research"
+    prompt: |
+      You are a URL verification utility. Your ONLY job is to find verified URLs for
+      source names mentioned in a research output. You do NOT research, analyze, or
+      summarize — you look up URLs.
+
+      Below is a research output that mentions sources by name (e.g., "TechCrunch",
+      "Bloomberg", "Contrary Research", "poolside.ai") but may be missing full
+      https:// URLs for some or all of them.
+
+      Research topic for search context: {{research_question}}
+
+      Research output:
+      {{research_output}}
+
+      TASK:
+      1. Extract every distinct source name mentioned in the research output
+         (publication names, company sites, report titles, blog names).
+         Cap at 15 sources maximum — prioritize primary and secondary tier sources.
+
+      2. For each source name, run ONE web_search to find the actual article URL.
+         Search query pattern: "[source name] [key topic words from research question] [year if mentioned]"
+         Example: "TechCrunch Poolside AI Series B 2024"
+
+      3. From the search results, pick the best-matching URL — same publication,
+         same topic, plausible date. If no good match, mark as "not found".
+
+      4. Return ONLY a source URL map in this exact format — nothing else:
+
+      SOURCE_URL_MAP
+      - name: "TechCrunch — Poolside AI raises $500M"
+        url: "https://techcrunch.com/2024/10/15/poolside-ai-raises-500m-series-b/"
+        match: verified
+      - name: "Contrary Research — Poolside Business Breakdown"
+        url: "https://research.contrary.com/company/poolside-ai"
+        match: verified
+      - name: "Some Obscure Blog"
+        url: not found
+        match: none
+      END_SOURCE_URL_MAP
+
+      Rules:
+      - One web_search per source, no more. This step must stay fast.
+      - Never fabricate a URL. If search results don't have a clear match, say "not found".
+      - The map format must be exactly as shown — downstream parsing depends on it.
+      - Do not include any text before SOURCE_URL_MAP or after END_SOURCE_URL_MAP.
+    output: "source_url_map"
+    timeout: 600
+
   - id: "format-research"
     agent: "specialists:specialists/researcher-formatter"
     prompt: |
@@ -121,6 +189,16 @@ steps:
 
       Research narrative to format:
       {{research_output}}
+
+      SOURCE URL MAP (verified URLs for sources named in the narrative):
+      {{source_url_map}}
+
+      URL resolution instructions: A prior pipeline step searched for verified URLs
+      matching source names in the research narrative. When you encounter a source
+      name that matches an entry in the URL map with match: verified, use that URL
+      as the Source value for that finding. This is extracted data, not invention —
+      the URLs were verified via web search. Only fall back to your own URL recovery
+      (Stage 1.5) or "unknown" for sources not in the map or marked "not found".
     output: "formatted_research"
     timeout: 1200
 
