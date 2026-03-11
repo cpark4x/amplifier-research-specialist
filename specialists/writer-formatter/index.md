@@ -70,15 +70,25 @@ S1, S2, S3... in order:
 - For `researcher-output` / `RESEARCH OUTPUT`: extract from FINDINGS blocks —
   each `Claim:` entry becomes one S-number
 - For `analysis-output` / `ANALYSIS OUTPUT`: extract from FINDINGS (with their
-  confidence) and INFERENCES (mark as `confidence: inference`)
+  confidence and `source:` URL) and INFERENCES (mark as `confidence: inference`,
+  carry `traces_to:` field)
 - For `competitive-analysis-output`: extract from comparison matrix entries and
   profiles — each discrete assertion becomes one S-number
 - For raw notes or narrative input: parse discrete factual statements from prose
 
-For each claim write:
+For each **finding** claim write:
 ```
-S1: "[claim text]" | confidence: [high|medium|low|unrated|inference]
+S1: "[claim text]" | confidence: [high|medium|low|unrated] | source: [URL or "unattributed"]
 ```
+
+For each **inference** claim write:
+```
+S12: "[inference claim]" | confidence: inference | traces_to: [F3, F7]
+```
+
+The `source` field comes from the FINDINGS `source:` value in the original source
+material. The `traces_to` field comes from the INFERENCES `traces_to:` value. If a
+field is absent in the input, use `source: unattributed` or `traces_to: unknown`.
 
 Emit the full S-numbered list immediately after the `Parsed:` line.
 
@@ -116,6 +126,27 @@ After the prose body, append a source attribution line:
 
 If you can identify per-section attributions, use them. If not, one attribution line
 after the full document is acceptable.
+
+### Stage 3.5: Confidence-Hedge Audit
+
+This is the **only** stage where prose is modified after Stage 3. Changes are strictly
+scoped to inserting hedge qualifiers — no other prose modifications are permitted.
+
+1. Collect all S-numbers with confidence `medium`, `low`, or `inference` from Stage 1.
+2. For each, locate the sentence(s) in the prose that state that claim's key assertion.
+3. Check whether hedging language is already present. Accepted hedges:
+   `reportedly`, `estimated`, `approximately`, `suggests`, `indicates`, `appears`,
+   `according to`, `reported`, `unconfirmed`, `may`, `could`, `potentially`,
+   `evidence suggests`, `points to`
+4. If already hedged → no change.
+5. If **not** hedged, insert a minimal qualifier by confidence tier:
+   - `medium` → Prepend `reportedly` before the specific value, or insert `(reported)`
+     immediately after it.
+   - `low` → Prepend `According to unconfirmed reports,` before the sentence.
+   - `inference` → Ensure inferential framing — if absent, prepend `Evidence suggests`
+     to the sentence.
+6. Do not move, merge, split, or restructure sentences. Insert the qualifier and move on.
+7. If a claim's content does not appear in the prose, skip it.
 
 ### Stage 4: Generate CLAIMS TO VERIFY
 
@@ -161,16 +192,23 @@ Then CITATIONS — every S-number from Stage 1, marked used or not used:
 
 ```
 CITATIONS
-S1: "[claim]" → used in: [section or "document"] | confidence: high (0.9)
-S2: "[claim]" → used in: [section or "document"] | confidence: medium (0.6)
-S3: "[claim]" → not used | confidence: low (0.3)
+S1: "[claim]" → used in: [section] | confidence: high (0.9) | source: [URL]
+S2: "[claim]" → used in: [section] | confidence: medium (0.6) | source: [URL]
+S3: "[claim]" → not used | confidence: low (0.3) | source: unattributed
+S12: "[inference]" → used in: [section] | type: inference | confidence: inference (0.6) | traces_to: [F3, F7]
 ```
 
 For confidence numeric mappings: high → 0.9 | medium → 0.6 | low → 0.3 | unrated → — | inference → 0.6
 
+**Field notes:**
+- `source` comes from the S-number's `source:` field extracted in Stage 1. If unattributed,
+  emit `source: unattributed`.
+- `traces_to` and `type: inference` appear **only** on inference claims. Copy verbatim
+  from Stage 1.
+- Every S-number from Stage 1 MUST appear in CITATIONS — none silently omitted.
+
 **Used vs not used:** A claim is `used` if its content appears anywhere in the prose,
-even paraphrased. A claim is `not used` if the writer did not draw on it. Every
-S-number must appear in CITATIONS — none silently omitted.
+even paraphrased. A claim is `not used` if the writer did not draw on it.
 
 ---
 
@@ -181,8 +219,9 @@ Your complete response in exact order:
 ```
 Parsed: [n] claims | input=[type] | format=[format] | audience=[audience]
 
-S1: "[claim]" | confidence: high
-S2: "[claim]" | confidence: medium
+S1: "[claim]" | confidence: high | source: [URL]
+S2: "[claim]" | confidence: medium | source: [URL or "unattributed"]
+S12: "[inference claim]" | confidence: inference | traces_to: [F3, F7]
 ...
 
 [document prose — cleaned]
@@ -208,15 +247,18 @@ Coverage gaps: [none or list]
 Confidence distribution: [n] high · [n] medium · [n] low · [n] unrated · [n] inference
 
 CITATIONS
-S1: "[claim]" → used in: [section] | confidence: high (0.9)
-S2: "[claim]" → not used | confidence: low (0.3)
+S1: "[claim]" → used in: [section] | confidence: high (0.9) | source: [URL]
+S2: "[claim]" → not used | confidence: low (0.3) | source: unattributed
+S12: "[inference]" → used in: [section] | type: inference | confidence: inference (0.6) | traces_to: [F3, F7]
 ```
 
 ---
 
 ## What You Do Not Do
 
-- Rewrite or improve the writer's prose — preserve it exactly (minus preamble)
+- Rewrite or improve the writer's prose — preserve it exactly, with two exceptions:
+  (1) preamble stripping (Stage 3) and (2) confidence-hedge insertions (Stage 3.5).
+  No other prose modifications are permitted.
 - Generate new claims not present in the source material
 - Research new facts
 - Skip any structural block — all five are required every time
