@@ -21,11 +21,11 @@ when test evidence exists; not updated on spec changes alone.
 
 | Dimension | Score | Previous | Change | Last Updated |
 |-----------|-------|----------|--------|--------------|
-| **Research Trustworthiness** | 4/10 | 4/10 | — | 2026-03-10 |
-| **Chain Reliability** | 8/10 | 7/10 | +1 ↑ | 2026-03-10 |
+| **Research Trustworthiness** | 5/10 | 4/10 | +1 ↑ | 2026-03-10 |
+| **Chain Reliability** | 8/10 | 8/10 | — | 2026-03-10 |
 | **Format Fidelity** | 7/10 | 7/10 | — | 2026-03-10 |
 | **Specialist Coverage** | 6/10 | 6/10 | — | 2026-03-09 |
-| **Overall** | 6/10 | 6/10 | — | 2026-03-10 |
+| **Overall** | 7/10 | 6/10 | +1 ↑ | 2026-03-10 |
 
 ---
 
@@ -38,29 +38,27 @@ when test evidence exists; not updated on spec changes alone.
 | 2026-03-10 | 4/10 | 9/10 | 10/10 | 6/10 | 7/10 | Shipped #34 (da-formatter). *(Scores below were overclaimed — see reconciliation row.)* |
 | 2026-03-10 | 4/10 | 7/10 | 7/10 | 6/10 | **6/10** | **Reconciliation.** Consolidated two diverged scorecards. Anchored dimension definitions to SUCCESS-METRICS.md § Scoring Rubric. Re-scored against reconciled rubric. Chain Reliability 9→7: full R→RF→DA→DAF→W chain not validated end-to-end; individual links proven but longest chain unproven. Format Fidelity 10→7: all 5 formatter pairs complete, but Writer word budgets not validated across all 6 formats, audience calibration not systematic, writer-formatter with analysis-output input (#14) untested, CLAIMS TO VERIFY surfacing inconsistent. Research Trustworthiness stays 4. Coverage stays 6. |
 | 2026-03-10 | 4/10 | 8/10 | 7/10 | 6/10 | **6/10** | **Full chain validation.** Ran research-chain v1.6.0 end-to-end on "Poolside AI" topic (R→RF→DA→DAF→W→WF→save). All 8 steps completed, no manual intervention, file saved at 13,764 bytes. Chain Reliability 7→8: longest chain variant proven. Research Trustworthiness stays 4: inference traces_to degraded to `[narrative-mapped: uncertain]` (15/15), URLs absent from CITATIONS block, confidence upgrades in prose. Two new gaps identified: Writer needs source URLs in CITATIONS, Writer needs inference hedging. *(test log 2026-03-10-poolside-ai-full-chain-audit)* |
+| 2026-03-10 | 5/10 | 8/10 | 7/10 | 6/10 | **7/10** | **URL recovery + hedging validated.** Shipped three architectural fixes: (1) writer-formatter Stage 3.5 confidence-hedge audit — 14/14 medium/inference claims hedged, PASS. (2) researcher-formatter Stage 1.5 URL recovery — pattern-based reconstruction from source names. (3) resolve-urls pipeline step — verified URL lookup via web_search before formatting. Research-chain v1.7.0 (9 steps). Validation: 15/15 sourceable claims have real https:// URLs (100%), zero "unattributed". Research Trustworthiness 4→5. Overall 6→7. *(test log 2026-03-10-url-recovery-validation)* |
 
 ---
 
 ## What Moves Each Dimension
 
-### Research Trustworthiness (currently 4/10)
+### Research Trustworthiness (currently 5/10)
 
-**What moved it from 3 to 4:**
-- da-formatter (#34) built and spot-tested — closes the architectural gap for DA format failures
-- `traces_to` fields now preserved (confirmed) or honestly flagged (`[narrative-mapped: uncertain]`) — never silently lost
+**What moved it from 4 to 5:**
+- Source URLs now present in CITATIONS: 15/15 sourceable claims have real https:// URLs (100%), zero "unattributed" — via two-layer architectural fix: resolve-urls pipeline step (verified URL lookup) + researcher-formatter Stage 1.5 (pattern-based reconstruction) *(2026-03-10-url-recovery-validation)*
+- Confidence hedging validated: 14/14 medium/inference claims hedged in prose via writer-formatter Stage 3.5. `reportedly` for medium, `According to unconfirmed reports` for low, `Evidence suggests` for inference *(2026-03-10-research-trustworthiness-fixes)*
 
-**What's keeping it at 4 (validated 2026-03-10 full chain run):**
-- Inference `traces_to` fields degrade to `[narrative-mapped: uncertain]` (15/15 in Poolside AI run) — no specific F# references survive to final document
-- CITATIONS block has zero source URLs — claims trace to S-numbers but not to external sources
-- Confidence levels preserved in CITATIONS metadata but upgraded in prose — medium/inference claims stated as definitive facts without hedging
-- Not validated across 5+ diverse topics (rubric requires this for 6+)
+**What's keeping it at 5:**
+- Inference `traces_to` fields are `[narrative-mapped: uncertain]` (12/12) — honest placeholder from DA-formatter when DA produces narrative prose, but no specific F# references survive to final document
+- Validated on only 1 topic (Poolside AI) — rubric requires 5+ diverse topics for 6+
 - Quality gate NOT MET path untested
 
-**What would move it to 5–6:**
-- Fix Writer to carry source URLs into CITATIONS block (URL exists in `formatted_research`, lost in DA→Writer handoff)
-- Fix Writer to hedge inference-backed and medium-confidence claims in prose
-- Investigate DA-formatter: can it map inferences to specific F# findings when DA produces narrative output, or is `[narrative-mapped: uncertain]` the expected ceiling for that format?
-- Run across 3+ diverse topics with consistent results
+**What would move it to 6:**
+- Run across 4+ more diverse topics with consistent URL recovery and hedging results
+- Investigate DA structured output to get specific F# traces (or accept `[narrative-mapped: uncertain]` as honest ceiling for narrative DA output)
+- Test quality gate NOT MET path
 
 ### Chain Reliability (currently 8/10)
 
@@ -136,6 +134,9 @@ when test evidence exists; not updated on spec changes alone.
 | DA Format B labeled extraction (#16 partial) | 9 findings from labeled narrative: PASS | Chain Reliability |
 | DA code-fence prevention (#17) | ANALYSIS OUTPUT as bare text: PASS | Chain Reliability |
 | da-formatter (#34) | narrative DA→canonical ANALYSIS OUTPUT: PASS *(2026-03-10-da-formatter-spot-test)* | Chain Reliability, Format Fidelity |
+| **URL recovery (resolve-urls + Stage 1.5)** | 15/15 sourceable claims have real https:// URLs, zero "unattributed". PASS *(2026-03-10-url-recovery-validation)* | **Research Trustworthiness** |
+| **Confidence hedging (Stage 3.5)** | 14/14 medium/inference claims hedged in prose, zero misses. PASS *(2026-03-10-research-trustworthiness-fixes)* | **Research Trustworthiness** |
+| Full 9-step chain (v1.7.0) | R→resolve-urls→RF→DA→DAF→W→WF→save completed, 17,892 bytes saved. PASS | Chain Reliability |
 
 ---
 
@@ -143,6 +144,7 @@ when test evidence exists; not updated on spec changes alone.
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v2.2 | 2026-03-10 | **URL recovery + hedging validated.** Shipped three architectural fixes: researcher-formatter Stage 1.5 (URL reconstruction), resolve-urls pipeline step (verified URL lookup), writer-formatter Stage 3.5 (confidence hedging). Research-chain v1.7.0 (9 steps). Validation: 15/15 sourceable claims with URLs (100%), 14/14 claims hedged, zero "unattributed". Research Trustworthiness 4→5, Overall 6→7. *(test log 2026-03-10-url-recovery-validation)* |
 | v2.1 | 2026-03-10 | **Full chain validation.** Ran research-chain v1.6.0 end-to-end (Poolside AI topic). Chain Reliability 7→8: longest chain variant proven. Research Trustworthiness stays 4: inference traces, source URLs, and confidence hedging all fail to survive to final document. Four new action items logged. *(test log 2026-03-10-poolside-ai-full-chain-audit)* |
 | v2.0 | 2026-03-10 | **Reconciliation.** Consolidated two diverged scorecards into one. Retired `docs/01-vision/SCORECARD.md`. Anchored all dimension definitions to `SUCCESS-METRICS.md` § Scoring Rubric (new section added there). Added Scoring Rules to prevent future drift. Re-scored against reconciled rubric: Chain Reliability 9→7 (full chain unproven), Format Fidelity 10→7 (word budgets, audience calibration, #14 untested). Overall 7→6. |
 | v1.2 | 2026-03-10 | Shipped #34 (da-formatter). Format Fidelity 9→10, Chain Reliability 8→9, Research Trustworthiness 3→4. |
