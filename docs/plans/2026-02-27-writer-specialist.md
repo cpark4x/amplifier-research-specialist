@@ -247,15 +247,15 @@ Current `agents` section:
 ```yaml
 agents:
   include:
-    - specialists:specialists/researcher
+    - specialists:researcher
 ```
 
 Replace with:
 ```yaml
 agents:
   include:
-    - specialists:specialists/researcher
-    - specialists:specialists/writer
+    - specialists:researcher
+    - specialists:writer
 ```
 
 **Step 3: Verify**

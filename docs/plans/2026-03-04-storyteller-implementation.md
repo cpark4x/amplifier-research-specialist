@@ -600,7 +600,7 @@ git add specialists/storyteller/README.md && git commit -m "feat: add storytelle
 ## Task 4: Register in `behaviors/specialists.yaml`
 
 **Files:**
-- Modify: `behaviors/specialists.yaml` (line 22, after `specialists:specialists/researcher-formatter`)
+- Modify: `behaviors/specialists.yaml` (line 22, after `specialists:researcher-formatter`)
 
 **Step 1: Add one line to `agents.include`**
 
@@ -609,11 +609,11 @@ In `behaviors/specialists.yaml`, find the `agents.include` list. It currently lo
 ```yaml
 agents:
   include:
-    - specialists:specialists/researcher
-    - specialists:specialists/writer
-    - specialists:specialists/competitive-analysis
-    - specialists:specialists/data-analyzer
-    - specialists:specialists/researcher-formatter
+    - specialists:researcher
+    - specialists:writer
+    - specialists:competitive-analysis
+    - specialists:data-analyzer
+    - specialists:researcher-formatter
 ```
 
 Add the storyteller after `researcher-formatter`:
@@ -621,17 +621,17 @@ Add the storyteller after `researcher-formatter`:
 ```yaml
 agents:
   include:
-    - specialists:specialists/researcher
-    - specialists:specialists/writer
-    - specialists:specialists/competitive-analysis
-    - specialists:specialists/data-analyzer
-    - specialists:specialists/researcher-formatter
-    - specialists:specialists/storyteller
+    - specialists:researcher
+    - specialists:writer
+    - specialists:competitive-analysis
+    - specialists:data-analyzer
+    - specialists:researcher-formatter
+    - specialists:storyteller
 ```
 
 **Step 2: Verify**
 
-Read `behaviors/specialists.yaml` back and confirm the line `    - specialists:specialists/storyteller` is present as the last entry in `agents.include`.
+Read `behaviors/specialists.yaml` back and confirm the line `    - specialists:storyteller` is present as the last entry in `agents.include`.
 
 **Step 3: Commit**
 
@@ -662,11 +662,11 @@ Find the `## Available Specialists` section. After the `researcher-formatter` en
 
 **Step 2: Add to "When to Use Each" section**
 
-Find the `## When to Use Each` section. After the `**Delegate to specialists:specialists/competitive-analysis when:**` block (currently ending around line 59), add:
+Find the `## When to Use Each` section. After the `**Delegate to specialists:competitive-analysis when:**` block (currently ending around line 59), add:
 
 ```markdown
 
-**Delegate to `specialists:specialists/storyteller` when:**
+**Delegate to `specialists:storyteller` when:**
 - Source material (research, analysis, competitive brief, or existing document) needs to
   become a compelling narrative rather than a structured document
 - The audience needs to be moved or persuaded, not just informed
@@ -682,9 +682,9 @@ Find the `## Typical Chain` section. After the competitive intelligence chain bl
 
 For narrative output from a research chain:
 1. `specialists:researcher` → gathers and validates evidence
-2. `specialists:specialists/researcher-formatter` → normalizes to canonical RESEARCH OUTPUT block
-3. `specialists:specialists/data-analyzer` → draws labeled inferences
-4. `specialists:specialists/storyteller` → transforms analysis into compelling narrative
+2. `specialists:researcher-formatter` → normalizes to canonical RESEARCH OUTPUT block
+3. `specialists:data-analyzer` → draws labeled inferences
+4. `specialists:storyteller` → transforms analysis into compelling narrative
 ```
 
 **Step 4: Verify**
@@ -1375,7 +1375,7 @@ context:
 
 steps:
   - id: "research"
-    agent: "specialists:specialists/researcher"
+    agent: "specialists:researcher"
     prompt: |
       Research the following question thoroughly. Follow your full research pipeline
       and return your complete research narrative with sourced evidence, confidence
@@ -1388,7 +1388,7 @@ steps:
     timeout: 2700
 
   - id: "format-research"
-    agent: "specialists:specialists/researcher-formatter"
+    agent: "specialists:researcher-formatter"
     prompt: |
       Normalize the following research narrative into your canonical RESEARCH OUTPUT
       block format. Apply all standard formatting rules: structured sections, source
@@ -1400,7 +1400,7 @@ steps:
     timeout: 600
 
   - id: "analyze"
-    agent: "specialists:specialists/data-analyzer"
+    agent: "specialists:data-analyzer"
     prompt: |
       Analyze the following formatted research output. Draw inferences, identify
       patterns, surface key insights, and flag confidence gaps. Follow your full
@@ -1412,7 +1412,7 @@ steps:
     timeout: 900
 
   - id: "narrate"
-    agent: "specialists:specialists/storyteller"
+    agent: "specialists:storyteller"
     prompt: |
       Transform the following analysis into a compelling narrative. Follow your full
       5-stage pipeline: Parse, Find the Drama, Select and Structure, Draft, and
@@ -1455,7 +1455,7 @@ steps:
 Read `recipes/narrative-chain.yaml` back and confirm:
 - [ ] 5 steps: research → format-research → analyze → narrate → save
 - [ ] Steps 1–3 are identical to `research-chain.yaml` (same agents, same prompts)
-- [ ] Step 4 uses `specialists:specialists/storyteller` (not writer)
+- [ ] Step 4 uses `specialists:storyteller` (not writer)
 - [ ] Step 4 passes `audience` and `tone` context variables
 - [ ] Step 5 saves to `docs/research-output/`
 - [ ] Context variables include `research_question` (required), `audience`, `tone`, `quality_threshold`
@@ -1575,7 +1575,7 @@ In an Amplifier session with the bundle active, invoke the Storyteller directly 
 
 ```python
 delegate(
-    agent="specialists:specialists/storyteller",
+    agent="specialists:storyteller",
     instruction="""Transform this analysis into a compelling narrative for a board of directors. Tone: trustworthy.
 
 ANALYSIS OUTPUT
@@ -1638,7 +1638,7 @@ Invoke the Storyteller with deliberately insufficient input — too sparse for a
 
 ```python
 delegate(
-    agent="specialists:specialists/storyteller",
+    agent="specialists:storyteller",
     instruction="""Transform this into a compelling narrative.
 
 ANALYSIS OUTPUT

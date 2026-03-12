@@ -25,7 +25,7 @@ tags: ["competitive-analysis", "writing", "chain"]
 
 steps:
   - id: "analyze"
-    agent: "specialists:specialists/competitive-analysis"
+    agent: "specialists:competitive-analysis"
     prompt: |
       Run a full competitive analysis on the following question.
 
@@ -41,7 +41,7 @@ steps:
     timeout: 1800
 
   - id: "write"
-    agent: "specialists:specialists/writer"
+    agent: "specialists:writer"
     prompt: |
       Transform the following competitive analysis output into a polished document.
 
@@ -98,7 +98,7 @@ tags: ["competitive-analysis", "research", "writing", "chain"]
 
 steps:
   - id: "research"
-    agent: "specialists:specialists/researcher"
+    agent: "specialists:researcher"
     prompt: |
       Research the following competitive question. Gather sourced evidence for all
       relevant subjects across key competitive dimensions.
@@ -111,7 +111,7 @@ steps:
     timeout: 2700
 
   - id: "analyze"
-    agent: "specialists:specialists/competitive-analysis"
+    agent: "specialists:competitive-analysis"
     prompt: |
       Run a competitive analysis using the pre-gathered research below.
       Skip Stage 2 (Research) — the research field is provided.
@@ -129,7 +129,7 @@ steps:
     timeout: 1800
 
   - id: "write"
-    agent: "specialists:specialists/writer"
+    agent: "specialists:writer"
     prompt: |
       Transform the following competitive analysis output into a polished document.
 
@@ -231,7 +231,7 @@ Invoke the Writer with competitive-analysis output containing specific numerical
 The output should include a `CLAIMS TO VERIFY` block listing at least one flagged claim.
 
 ```
-delegate -> specialists:specialists/writer
+delegate -> specialists:writer
 instruction: "Transform this competitive analysis output into a brief.
   Source: [paste any CompetitiveAnalysisOutput that contains specific numbers]
   Format: brief. Audience: general."

@@ -346,7 +346,7 @@ Expected: approximately 240–260 lines (down from 393). If it's still above 300
 
 **Step 4: Run the researcher on a test topic**
 
-Delegate to `specialists:specialists/researcher` with this prompt:
+Delegate to `specialists:researcher` with this prompt:
 
 ```
 Research the following question thoroughly. Follow your full research pipeline.
@@ -563,7 +563,7 @@ grep -c "0.97" specialists/researcher-formatter/index.md
 
 Take the researcher output from Task 7 Step 4 (the "What is Jina AI?" run). Pass it to the formatter.
 
-Delegate to `specialists:specialists/researcher-formatter` with this prompt:
+Delegate to `specialists:researcher-formatter` with this prompt:
 
 ```
 Normalize the following research narrative into your canonical RESEARCH OUTPUT
@@ -622,7 +622,7 @@ Do NOT push yet.
 Find:
 
 ```
-**Rule 5 — Formatter Is Always In The Path**: When the researcher's output feeds ANY downstream specialist (writer, data-analyzer, storyteller, competitive-analysis), **always** route through `specialists:specialists/researcher-formatter` first. The researcher produces excellent content but its format is inconsistent (~1 in 3 topics produces canonical output). The formatter normalizes it in seconds. This is not optional — skip it only if the user explicitly says 'skip formatter' or 'raw research'.
+**Rule 5 — Formatter Is Always In The Path**: When the researcher's output feeds ANY downstream specialist (writer, data-analyzer, storyteller, competitive-analysis), **always** route through `specialists:researcher-formatter` first. The researcher produces excellent content but its format is inconsistent (~1 in 3 topics produces canonical output). The formatter normalizes it in seconds. This is not optional — skip it only if the user explicitly says 'skip formatter' or 'raw research'.
 
 **Mandatory gate — before delegating to writer, data-analyzer, storyteller, or competitive-analysis:** If researcher ran earlier in this chain, stop and answer: "Did I route through researcher-formatter?" If the answer is no — run formatter now before proceeding. Do not continue to the next specialist until this check passes. Skipping formatter means ~1 in 3 runs the downstream specialist receives non-canonical input and parsing fails silently.
 ```
@@ -630,7 +630,7 @@ Find:
 Replace with:
 
 ```
-**Rule 5 — Formatter Is Always In The Path**: The researcher and formatter are a matched pair by design — the researcher produces trustworthy evidence, the formatter canonicalizes it into machine-parseable format. When the researcher's output feeds ANY downstream specialist (writer, data-analyzer, storyteller, competitive-analysis), **always** route through `specialists:specialists/researcher-formatter` first. This is the designed architecture, not a workaround. Skip it only if the user explicitly says 'skip formatter' or 'raw research'.
+**Rule 5 — Formatter Is Always In The Path**: The researcher and formatter are a matched pair by design — the researcher produces trustworthy evidence, the formatter canonicalizes it into machine-parseable format. When the researcher's output feeds ANY downstream specialist (writer, data-analyzer, storyteller, competitive-analysis), **always** route through `specialists:researcher-formatter` first. This is the designed architecture, not a workaround. Skip it only if the user explicitly says 'skip formatter' or 'raw research'.
 
 **Mandatory gate — before delegating to writer, data-analyzer, storyteller, or competitive-analysis:** If researcher ran earlier in this chain, stop and answer: "Did I route through researcher-formatter?" If the answer is no — run formatter now before proceeding. Do not continue to the next specialist until this check passes.
 ```
@@ -909,7 +909,7 @@ Run three sequential delegations to test the full pipeline. Use "What is Jina AI
 
 **Step 1: Run the researcher**
 
-Delegate to `specialists:specialists/researcher` with:
+Delegate to `specialists:researcher` with:
 
 ```
 Research the following question thoroughly. Follow your full research pipeline.
@@ -925,7 +925,7 @@ Save the full output — you'll need it for Step 2.
 
 **Step 2: Run the formatter on that output**
 
-Delegate to `specialists:specialists/researcher-formatter` with:
+Delegate to `specialists:researcher-formatter` with:
 
 ```
 Normalize the following research narrative into your canonical RESEARCH OUTPUT
@@ -952,7 +952,7 @@ Save the full output — you'll need it for Step 3.
 
 **Step 3: Run the writer on formatter output**
 
-Delegate to `specialists:specialists/writer` with:
+Delegate to `specialists:writer` with:
 
 ```
 Transform the following research output into a polished document. Follow your full

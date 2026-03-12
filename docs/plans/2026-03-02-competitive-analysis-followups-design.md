@@ -24,12 +24,12 @@ invokable workflow. Callers no longer dispatch both agents manually.
 **Pipeline:**
 ```
 Step 1: competitive-analysis
-  Agent:  specialists:specialists/competitive-analysis
+  Agent:  specialists:competitive-analysis
   Input:  {{query}}, optional {{dimensions}}, optional {{subjects}}
   Output: competitive_analysis_output
 
 Step 2: writer
-  Agent:  specialists:specialists/writer
+  Agent:  specialists:writer
   Input:  {{competitive_analysis_output}}, {{format}} (default: report), {{audience}}
   Output: final_document
 ```
@@ -54,17 +54,17 @@ tiering and confidence scoring vs. the self-research path.
 **Pipeline:**
 ```
 Step 1: researcher
-  Agent:  specialists:specialists/researcher
+  Agent:  specialists:researcher
   Input:  {{query}}
   Output: research_output
 
 Step 2: competitive-analysis
-  Agent:  specialists:specialists/competitive-analysis
+  Agent:  specialists:competitive-analysis
   Input:  {{query}}, research: {{research_output}}   ← skips Stage 2
   Output: competitive_analysis_output
 
 Step 3: writer
-  Agent:  specialists:specialists/writer
+  Agent:  specialists:writer
   Input:  {{competitive_analysis_output}}, {{format}}, {{audience}}
   Output: final_document
 ```

@@ -430,7 +430,7 @@ Add to the Available Specialists list:
 
 Add to the "When to Use Each" section:
 ```markdown
-**Delegate to `specialists:specialists/prioritizer` when:**
+**Delegate to `specialists:prioritizer` when:**
 - The user has a list of items and needs them ranked by priority
 - Backlog grooming, roadmap planning, feature triage
 - Any situation where "what should we do first?" needs a structured, justified answer
@@ -439,7 +439,7 @@ Add to the "When to Use Each" section:
 
 Add the agent ID to the delegation list on line 32:
 ```
-`specialists:specialists/prioritizer`
+`specialists:prioritizer`
 ```
 
 **Verification:**

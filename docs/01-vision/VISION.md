@@ -116,7 +116,7 @@ Breaking it is a breaking change.
   Corroborator → Quality Gate → Synthesizer)
 - Source tiering (primary/secondary/tertiary) with per-claim confidence
 - Paywall fallback ladder
-- Wired as Amplifier agent at `specialists:specialists/researcher`
+- Wired as Amplifier agent at `specialists:researcher`
 
 ### V2 — Writer + Researcher-Formatter Architecture
 - **Writer specialist** — takes research output and produces structured content

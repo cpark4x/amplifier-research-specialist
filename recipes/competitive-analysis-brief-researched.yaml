@@ -30,7 +30,7 @@ context:
 
 steps:
   - id: "research"
-    agent: "specialists:specialists/researcher"
+    agent: "specialists:researcher"
     prompt: |
       Research the following competitive question. Gather sourced evidence for all
       relevant subjects across key competitive dimensions.
@@ -43,7 +43,7 @@ steps:
     timeout: 2700
 
   - id: "analyze"
-    agent: "specialists:specialists/competitive-analysis"
+    agent: "specialists:competitive-analysis"
     prompt: |
       Run a competitive analysis using the pre-gathered research below.
       Skip Stage 2 (Research) — the research field is provided.
@@ -61,7 +61,7 @@ steps:
     timeout: 1800
 
   - id: "write"
-    agent: "specialists:specialists/writer"
+    agent: "specialists:writer"
     prompt: |
       Transform the following competitive analysis output into a polished document.
 
@@ -79,7 +79,7 @@ steps:
     timeout: 900
 
   - id: "format-writer"
-    agent: "specialists:specialists/writer-formatter"
+    agent: "specialists:writer-formatter"
     prompt: |
       Produce the canonical Writer output block from the following writer output.
 

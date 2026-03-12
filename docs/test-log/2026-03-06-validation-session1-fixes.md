@@ -12,8 +12,8 @@ Ran 4 parallel delegates to validate the three sprint items shipped in Session 1
 
 | Test | Target Fix | Method |
 |---|---|---|
-| Researcher x3 (Jina AI, Anthropic RSP, Rust borrow checker) | #5 — confidence tiers + URLs | Direct delegation to `specialists:specialists/researcher` |
-| Writer x1 (canned Rust input, format=brief) | #6 — word budget enforcement | Direct delegation to `specialists:specialists/writer` with 5-claim input |
+| Researcher x3 (Jina AI, Anthropic RSP, Rust borrow checker) | #5 — confidence tiers + URLs | Direct delegation to `specialists:researcher` |
+| Writer x1 (canned Rust input, format=brief) | #6 — word budget enforcement | Direct delegation to `specialists:writer` with 5-claim input |
 
 #27 (formatter gate) was not directly testable — the gate is in coordinator instructions and requires a live chat session, not a direct delegation test.
 

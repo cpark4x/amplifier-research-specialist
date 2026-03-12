@@ -146,9 +146,9 @@ Add your specialist to the `agents.include` list:
 ```yaml
 agents:
   include:
-    - specialists:specialists/researcher
-    - specialists:specialists/writer
-    - specialists:specialists/[your-specialist-name]   # ← add this line
+    - specialists:researcher
+    - specialists:writer
+    - specialists:[your-specialist-name]   # ← add this line
 ```
 
 Without this step, the specialist file exists but is never loaded when the bundle is included.
@@ -179,7 +179,7 @@ Start an Amplifier session with the bundle active and call your specialist direc
 
 ```python
 delegate(
-    agent="specialists:specialists/[your-name]",
+    agent="specialists:[your-name]",
     instruction="[test input that matches your input contract]"
 )
 ```

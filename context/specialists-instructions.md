@@ -30,7 +30,7 @@ HANDOFF and FINAL lines are required and must appear. BEFORE lines are emitted w
 
 **No extra text between narration lines.** Do not insert commentary, explanations, or filler between narration lines and specialist delegations. The narration IS the commentary. Go directly from narration line to delegation or output.
 
-Use these exact agent IDs when delegating: `specialists:specialists/researcher`, `specialists:specialists/data-analyzer`, `specialists:specialists/data-analyzer-formatter`, `specialists:specialists/competitive-analysis`, `specialists:specialists/writer`, `specialists:specialists/researcher-formatter`, `specialists:specialists/storyteller`, `specialists:specialists/story-formatter`, `specialists:specialists/writer-formatter`, `specialists:specialists/prioritizer`, `specialists:specialists/prioritizer-formatter`.
+Use these exact agent IDs when delegating: `specialists:researcher`, `specialists:data-analyzer`, `specialists:data-analyzer-formatter`, `specialists:competitive-analysis`, `specialists:writer`, `specialists:researcher-formatter`, `specialists:storyteller`, `specialists:story-formatter`, `specialists:writer-formatter`, `specialists:prioritizer`, `specialists:prioritizer-formatter`.
 
 **Rule 3 — Escape Hatch**: If the user explicitly says 'raw output', 'give me the raw research', 'just run the researcher', or 'don't write a document' — stop at that specialist and output the structured block as literal bare text. Your entire response IS that block. **Escape hatch overrides narration**: do NOT emit the narration lines (BEFORE, HANDOFF, FINAL). Start at byte 0 with the specialist's output block. Do NOT prepend a heading, wrap in markdown, or add any text before the block's first line. The very first characters of your response must be the very first characters of the specialist's output block.
   - Correct: `RESEARCH OUTPUT` (plain text, no markdown)
@@ -41,19 +41,19 @@ When delegating in escape-hatch mode, prefix the specialist instruction with `[R
 
 **Rule 4 — Analysis Signal**: If the user asks for 'analysis', 'insights', or 'full analysis' — chain through data-analyzer before writer: researcher → formatter → data-analyzer → writer.
 
-**Rule 5 — Formatter Is Always In The Path**: The researcher and formatter are a matched pair by design — the researcher produces trustworthy evidence, the formatter canonicalizes it into machine-parseable format. When the researcher's output feeds ANY downstream specialist (writer, data-analyzer, storyteller, competitive-analysis), **always** route through `specialists:specialists/researcher-formatter` first. This is the designed architecture, not a workaround. Skip it only if the user explicitly says 'skip formatter' or 'raw research'.
+**Rule 5 — Formatter Is Always In The Path**: The researcher and formatter are a matched pair by design — the researcher produces trustworthy evidence, the formatter canonicalizes it into machine-parseable format. When the researcher's output feeds ANY downstream specialist (writer, data-analyzer, storyteller, competitive-analysis), **always** route through `specialists:researcher-formatter` first. This is the designed architecture, not a workaround. Skip it only if the user explicitly says 'skip formatter' or 'raw research'.
 
 **Mandatory gate — before delegating to writer, data-analyzer, storyteller, or competitive-analysis:** If researcher ran earlier in this chain, stop and answer: "Did I route through researcher-formatter?" If the answer is no — run formatter now before proceeding. Do not continue to the next specialist until this check passes.
 
-**Rule 6 — Writer-Formatter Is Always In The Path**: The writer and writer-formatter are a matched pair by design — the writer produces audience-calibrated prose, the writer-formatter canonicalizes it into the structured output block downstream agents depend on. When the writer's output feeds ANY downstream step or the user, **always** route through `specialists:specialists/writer-formatter` first. This is the designed architecture, not optional.
+**Rule 6 — Writer-Formatter Is Always In The Path**: The writer and writer-formatter are a matched pair by design — the writer produces audience-calibrated prose, the writer-formatter canonicalizes it into the structured output block downstream agents depend on. When the writer's output feeds ANY downstream step or the user, **always** route through `specialists:writer-formatter` first. This is the designed architecture, not optional.
 
 **Mandatory gate — before delivering writer output to the user or any downstream agent:** Stop and answer: "Did I route through writer-formatter?" If the answer is no — run writer-formatter now before proceeding.
 
-**Rule 7 — Prioritizer-Formatter Is Always In The Path**: The prioritizer and prioritizer-formatter are a matched pair by design — the prioritizer produces ranked output with defensible rationale, the prioritizer-formatter canonicalizes it into the structured PRIORITY OUTPUT block downstream agents and parsers depend on. When the prioritizer's output feeds ANY downstream step or the user, **always** route through `specialists:specialists/prioritizer-formatter` first. This is the designed architecture, not optional.
+**Rule 7 — Prioritizer-Formatter Is Always In The Path**: The prioritizer and prioritizer-formatter are a matched pair by design — the prioritizer produces ranked output with defensible rationale, the prioritizer-formatter canonicalizes it into the structured PRIORITY OUTPUT block downstream agents and parsers depend on. When the prioritizer's output feeds ANY downstream step or the user, **always** route through `specialists:prioritizer-formatter` first. This is the designed architecture, not optional.
 
 **Mandatory gate — before delivering prioritizer output to the user or any downstream agent:** Stop and answer: "Did I route through prioritizer-formatter?" If the answer is no — run prioritizer-formatter now before proceeding.
 
-**Rule 8 — Data-Analyzer-Formatter Is Always In The Path**: The data-analyzer and data-analyzer-formatter are a matched pair by design — the data-analyzer produces labeled inferences from research evidence, the data-analyzer-formatter canonicalizes it into the structured ANALYSIS OUTPUT block downstream agents and parsers depend on. When the data-analyzer's output feeds ANY downstream step or the user, **always** route through `specialists:specialists/data-analyzer-formatter` first. This is the designed architecture, not optional.
+**Rule 8 — Data-Analyzer-Formatter Is Always In The Path**: The data-analyzer and data-analyzer-formatter are a matched pair by design — the data-analyzer produces labeled inferences from research evidence, the data-analyzer-formatter canonicalizes it into the structured ANALYSIS OUTPUT block downstream agents and parsers depend on. When the data-analyzer's output feeds ANY downstream step or the user, **always** route through `specialists:data-analyzer-formatter` first. This is the designed architecture, not optional.
 
 **Mandatory gate — before delivering data-analyzer output to the user or any downstream agent:** Stop and answer: "Did I route through data-analyzer-formatter?" If the answer is no — run data-analyzer-formatter now before proceeding.
 
@@ -128,62 +128,62 @@ The formatter is invisible to the user — do not mention it in narration unless
 
 ## When to Use Each
 
-**Delegate to `specialists:specialists/researcher` when:**
+**Delegate to `specialists:researcher` when:**
 - Researching a person, company, product, or event
 - Finding documentation for libraries, APIs, or frameworks
 - Any research where source credibility and confidence matter
 
-**Delegate to `specialists:specialists/writer` when:**
+**Delegate to `specialists:writer` when:**
 - Source material exists and needs to become a document
 - Turning researcher output into a report, brief, or email
 - Any writing task where substance already exists but needs clear expression
 
-**Delegate to `specialists:specialists/data-analyzer` when:**
+**Delegate to `specialists:data-analyzer` when:**
 - You have ResearchOutput and need conclusions drawn before writing
 - You want facts and inferences explicitly separated and labeled
 - The Writer needs more than raw findings — it needs "what the evidence means"
 - Any Researcher → Analyzer → Writer chain
 
-**Delegate to `specialists:specialists/data-analyzer-formatter` when:**
+**Delegate to `specialists:data-analyzer-formatter` when:**
 - Data-analyzer output is missing the `ANALYSIS OUTPUT` structured block
 - Data-analyzer produced narrative prose or a competitive essay instead of a canonical block
 - Stage narration (`**Stage 1: Parse**`) is visible in data-analyzer output
 - Any pipeline step where data-analyzer output feeds a downstream agent or parser
 - Always runs after the data-analyzer — this is the designed architecture, not a workaround
 
-**Delegate to `specialists:specialists/competitive-analysis` when:**
+**Delegate to `specialists:competitive-analysis` when:**
 - Comparing two or more companies, products, or services head-to-head
 - Mapping the competitive landscape for a subject ("who competes with X?")
 - You need structured comparison data, not a narrative summary
 - Source material from the Researcher needs to be structured into competitive intelligence
 
-**Delegate to `specialists:specialists/storyteller` when:**
+**Delegate to `specialists:storyteller` when:**
 - Source material (research, analysis, competitive brief, or existing document) needs to
   become a compelling narrative rather than a structured document
 - The audience needs to be moved or persuaded, not just informed
 - You want narrative output instead of document output at the end of a chain
 - Any Researcher → Formatter → Analyzer → Storyteller chain
 
-**Delegate to `specialists:specialists/story-formatter` when:**
+**Delegate to `specialists:story-formatter` when:**
 - Storyteller output needs to be wrapped in canonical STORY OUTPUT structure
 - Storyteller produced narrative prose or a markdown document instead of a structured block
 - NARRATIVE SELECTION record is missing from storyteller output
 - Any pipeline step where storyteller output feeds a downstream agent or parser
 
-**Delegate to `specialists:specialists/writer-formatter` when:**
+**Delegate to `specialists:writer-formatter` when:**
 - Writer output is missing Parsed:, WRITER METADATA, CITATIONS, or CLAIMS TO VERIFY blocks
 - Writer produced informal prose without structural blocks (audience=myself or casual register)
 - Any pipeline step where writer output feeds downstream agents or parsers
 - Always runs after the writer — this is the designed architecture, not a workaround
 
-**Delegate to `specialists:specialists/prioritizer` when:**
+**Delegate to `specialists:prioritizer` when:**
 - The user has a list of items and needs a ranked, justified order
 - Backlog grooming, roadmap planning, feature triage, vendor selection
 - Any situation where "what should we do first?" needs visible reasoning
 - The user needs to present or defend a prioritization to a stakeholder
 - The user specifies a framework (MoSCoW, RICE, impact-effort, etc.)
 
-**Delegate to `specialists:specialists/prioritizer-formatter` when:**
+**Delegate to `specialists:prioritizer-formatter` when:**
 - Prioritizer output is missing the `PRIORITY OUTPUT` structured block
 - Prioritizer produced markdown prose or a numbered list instead of a canonical block
 - Any pipeline step where prioritizer output feeds a downstream agent or parser
@@ -192,37 +192,37 @@ The formatter is invisible to the user — do not mention it in narration unless
 ## Typical Chain
 
 For most knowledge work tasks:
-1. `specialists:specialists/researcher` → gathers and validates evidence
-2. `specialists:specialists/researcher-formatter` → normalizes to canonical format (Rule 5 — always)
-3. `specialists:specialists/writer` → transforms evidence into the requested document
-4. `specialists:specialists/writer-formatter` → normalizes to canonical Writer output block (Rule 6 — always)
+1. `specialists:researcher` → gathers and validates evidence
+2. `specialists:researcher-formatter` → normalizes to canonical format (Rule 5 — always)
+3. `specialists:writer` → transforms evidence into the requested document
+4. `specialists:writer-formatter` → normalizes to canonical Writer output block (Rule 6 — always)
 
 For analytical tasks requiring explicit fact/inference separation:
-1. `specialists:specialists/researcher` → gathers and validates evidence
-2. `specialists:specialists/researcher-formatter` → normalizes to canonical format (Rule 5 — always)
-3. `specialists:specialists/data-analyzer` → draws labeled inferences from the evidence
-4. `specialists:specialists/data-analyzer-formatter` → normalizes to canonical ANALYSIS OUTPUT block (Rule 8 — always)
-5. `specialists:specialists/writer` → transforms facts + labeled inferences into the requested document
-6. `specialists:specialists/writer-formatter` → normalizes to canonical Writer output block (Rule 6 — always)
+1. `specialists:researcher` → gathers and validates evidence
+2. `specialists:researcher-formatter` → normalizes to canonical format (Rule 5 — always)
+3. `specialists:data-analyzer` → draws labeled inferences from the evidence
+4. `specialists:data-analyzer-formatter` → normalizes to canonical ANALYSIS OUTPUT block (Rule 8 — always)
+5. `specialists:writer` → transforms facts + labeled inferences into the requested document
+6. `specialists:writer-formatter` → normalizes to canonical Writer output block (Rule 6 — always)
 
 For competitive intelligence tasks:
-1. `specialists:specialists/researcher` → gathers evidence (optional — competitive-analysis can research itself)
-2. `specialists:specialists/researcher-formatter` → normalizes to canonical format (Rule 5 — when researcher is used)
-3. `specialists:specialists/competitive-analysis` → structures evidence into competitive intelligence
-4. `specialists:specialists/writer` → transforms competitive intelligence into a brief or report
+1. `specialists:researcher` → gathers evidence (optional — competitive-analysis can research itself)
+2. `specialists:researcher-formatter` → normalizes to canonical format (Rule 5 — when researcher is used)
+3. `specialists:competitive-analysis` → structures evidence into competitive intelligence
+4. `specialists:writer` → transforms competitive intelligence into a brief or report
 
 For narrative output from a research chain:
-1. `specialists:specialists/researcher` → gathers and validates evidence
-2. `specialists:specialists/researcher-formatter` → normalizes to canonical RESEARCH OUTPUT block
-3. `specialists:specialists/data-analyzer` → draws labeled inferences
-4. `specialists:specialists/data-analyzer-formatter` → normalizes to canonical ANALYSIS OUTPUT block (Rule 8 — always)
-5. `specialists:specialists/storyteller` → transforms analysis into compelling narrative
-6. `specialists:specialists/story-formatter` → normalizes to canonical STORY OUTPUT block
+1. `specialists:researcher` → gathers and validates evidence
+2. `specialists:researcher-formatter` → normalizes to canonical RESEARCH OUTPUT block
+3. `specialists:data-analyzer` → draws labeled inferences
+4. `specialists:data-analyzer-formatter` → normalizes to canonical ANALYSIS OUTPUT block (Rule 8 — always)
+5. `specialists:storyteller` → transforms analysis into compelling narrative
+6. `specialists:story-formatter` → normalizes to canonical STORY OUTPUT block
 
 For prioritization tasks:
-1. `specialists:specialists/prioritizer` → ranks items using explicit framework with per-item rationale
-2. `specialists:specialists/prioritizer-formatter` → normalizes to canonical PRIORITY OUTPUT block (Rule 7 — always)
-3. `specialists:specialists/writer` → (optional) transforms ranked output into a recommendation brief
+1. `specialists:prioritizer` → ranks items using explicit framework with per-item rationale
+2. `specialists:prioritizer-formatter` → normalizes to canonical PRIORITY OUTPUT block (Rule 7 — always)
+3. `specialists:writer` → (optional) transforms ranked output into a recommendation brief
 
 ## Feedback Capture
 

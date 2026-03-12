@@ -225,7 +225,7 @@ Failing items: dramatic question (not determinable), protagonist (not identifiab
 - 34+ source documents downloaded to tmp files: ✅ (comprehensive real research underway)
 - Output file in `docs/research-output/`: ⏸ pending — research step in progress
 
-**Method note:** The recipe was started and confirmed executing via the specialists bundle runtime. The research step (specialists:specialists/researcher) requires a 2700-second (45-minute) timeout window to complete comprehensive web research across authoritative sources before passing to steps 2–5. The recipe is running; the final saved file will appear in `docs/research-output/` on completion.
+**Method note:** The recipe was started and confirmed executing via the specialists bundle runtime. The research step (specialists:researcher) requires a 2700-second (45-minute) timeout window to complete comprehensive web research across authoritative sources before passing to steps 2–5. The recipe is running; the final saved file will appear in `docs/research-output/` on completion.
 
 **Sources gathered so far (partial list):**
 - McKinsey State of AI 2024 + 2025

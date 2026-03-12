@@ -173,7 +173,7 @@ git commit -m "docs(writer): add section attribution to README contract"
 
 **Step 1: Invoke the writer**
 
-Use the delegate tool to call `specialists:specialists/writer` with this input:
+Use the delegate tool to call `specialists:writer` with this input:
 
 ```
 Source material:

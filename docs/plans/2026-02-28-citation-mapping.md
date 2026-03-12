@@ -174,7 +174,7 @@ Pass a short piece of structured source material (3-5 distinct factual claims) a
 
 ```
 delegate(
-  agent="specialists:specialists/writer",
+  agent="specialists:writer",
   instruction="""
   Source material:
   - The canvas-specialists writer runs a 5-stage pipeline.

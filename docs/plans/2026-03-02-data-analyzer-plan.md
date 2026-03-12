@@ -126,7 +126,7 @@ meta:
 
     <example>
     user: 'Analyze the research findings on enterprise AI market consolidation'
-    assistant: 'I will delegate to specialists:specialists/data-analyzer with the ResearchOutput to draw labeled inferences.'
+    assistant: 'I will delegate to specialists:data-analyzer with the ResearchOutput to draw labeled inferences.'
     <commentary>Returns AnalysisOutput — findings passthrough + labeled inferences traceable to specific findings. Writer consumes this as analysis-output input type.</commentary>
     </example>
 ---
@@ -504,13 +504,13 @@ cat behaviors/specialists.yaml
 
 Find:
 ```yaml
-    - specialists:specialists/competitive-analysis
+    - specialists:competitive-analysis
 ```
 
 Replace with:
 ```yaml
-    - specialists:specialists/competitive-analysis
-    - specialists:specialists/data-analyzer
+    - specialists:competitive-analysis
+    - specialists:data-analyzer
 ```
 
 **Step 3: Verify**
@@ -564,12 +564,12 @@ Replace with:
 
 Find:
 ```
-**Delegate to `specialists:specialists/competitive-analysis` when:**
+**Delegate to `specialists:competitive-analysis` when:**
 ```
 
 Add this block immediately before it:
 ```
-**Delegate to `specialists:specialists/data-analyzer` when:**
+**Delegate to `specialists:data-analyzer` when:**
 - You have ResearchOutput and need conclusions drawn before writing
 - You want facts and inferences explicitly separated and labeled
 - The Writer needs more than raw findings — it needs "what the evidence means"
@@ -594,7 +594,7 @@ For most knowledge work tasks:
 
 For analytical tasks requiring explicit fact/inference separation:
 1. `specialists:researcher` → gathers and validates evidence
-2. `specialists:specialists/data-analyzer` → draws labeled inferences from the evidence
+2. `specialists:data-analyzer` → draws labeled inferences from the evidence
 3. `specialists:writer` → transforms facts + labeled inferences into the requested document
 ```
 
@@ -800,7 +800,7 @@ grep "AnalysisOutput" shared/interface/types.md
 Delegate to the specialist with minimal ResearchOutput:
 ```
 delegate(
-  agent="specialists:specialists/data-analyzer",
+  agent="specialists:data-analyzer",
   instruction="""
   Analyze these research findings:
 
@@ -844,7 +844,7 @@ Check manually:
 Pass the AnalysisOutput to the Writer:
 ```
 delegate(
-  agent="specialists:specialists/writer",
+  agent="specialists:writer",
   instruction="Transform the following AnalysisOutput into a brief for enterprise technology leaders.
   [paste AnalysisOutput from Step 2]
   Format: brief. Audience: enterprise CTO."

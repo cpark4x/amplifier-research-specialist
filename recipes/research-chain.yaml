@@ -146,7 +146,7 @@ context:
 
 steps:
   - id: "research"
-    agent: "specialists:specialists/researcher"
+    agent: "specialists:researcher"
     prompt: |
       REQUIRED: research_question must not be blank. If {{research_question}} is empty
       or blank, stop immediately and return: "ERROR: research_question is required but
@@ -219,7 +219,7 @@ steps:
     timeout: 600
 
   - id: "format-research"
-    agent: "specialists:specialists/researcher-formatter"
+    agent: "specialists:researcher-formatter"
     prompt: |
       Normalize the following research narrative into your canonical RESEARCH OUTPUT
       block format. Apply all standard formatting rules: structured sections, source
@@ -257,7 +257,7 @@ steps:
     timeout: 30
 
   - id: "analyze"
-    agent: "specialists:specialists/data-analyzer"
+    agent: "specialists:data-analyzer"
     prompt: |
       Analyze the following formatted research output. Draw inferences, identify
       patterns, surface key insights, and flag confidence gaps. Follow your full
@@ -269,7 +269,7 @@ steps:
     timeout: 900
 
   - id: "format-analysis"
-    agent: "specialists:specialists/data-analyzer-formatter"
+    agent: "specialists:data-analyzer-formatter"
     prompt: |
       Normalize the following data-analyzer output into a canonical ANALYSIS OUTPUT block.
 
@@ -282,7 +282,7 @@ steps:
     timeout: 600
 
   - id: "write"
-    agent: "specialists:specialists/writer"
+    agent: "specialists:writer"
     prompt: |
       Transform the following analysis into a polished document. Follow your full
       writing pipeline and return WRITER METADATA, the document body with section
@@ -306,7 +306,7 @@ steps:
     timeout: 1800
 
   - id: "format-writer"
-    agent: "specialists:specialists/writer-formatter"
+    agent: "specialists:writer-formatter"
     prompt: |
       Produce the canonical Writer output block from the following writer output.
 

@@ -84,7 +84,7 @@ tools:
 
 agents:
   include:
-    - specialists:specialists/researcher
+    - specialists:researcher
 
 context:
   include:

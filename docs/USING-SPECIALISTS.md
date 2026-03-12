@@ -42,7 +42,7 @@ The result: output you can audit. You know what was found, what wasn't, what's a
 **Invoke:**
 ```python
 research = delegate(
-    agent="specialists:specialists/researcher",
+    agent="specialists:researcher",
     instruction="""
     Research question: [your question]
     quality_threshold: medium   # low | medium | high
@@ -70,7 +70,7 @@ research = delegate(
 **Invoke:**
 ```python
 analysis = delegate(
-    agent="specialists:specialists/data-analyzer",
+    agent="specialists:data-analyzer",
     instruction="""
     Analyze the following research findings.
 
@@ -88,7 +88,7 @@ analysis = delegate(
 Or pass the Researcher's full output directly:
 ```python
 analysis = delegate(
-    agent="specialists:specialists/data-analyzer",
+    agent="specialists:data-analyzer",
     instruction=f"Analyze the following research. quality_threshold: medium\n\n{research.response}"
 )
 ```
@@ -123,7 +123,7 @@ analysis = delegate(
 **Invoke:**
 ```python
 document = delegate(
-    agent="specialists:specialists/writer",
+    agent="specialists:writer",
     instruction=f"""
     Format: brief           # report | brief | email | memo | proposal | executive-summary
     Audience: [who's reading this]
@@ -146,7 +146,7 @@ document = delegate(
 **Invoke:**
 ```python
 comp = delegate(
-    agent="specialists:specialists/competitive-analysis",
+    agent="specialists:competitive-analysis",
     instruction="""
     Compare [A] vs [B] for [use case].
     Mode: head-to-head      # head-to-head | landscape
@@ -163,7 +163,7 @@ Use when you need sourced evidence and will write or analyze it yourself.
 
 ```python
 research = delegate(
-    agent="specialists:specialists/researcher",
+    agent="specialists:researcher",
     instruction="Research question: [your question]"
 )
 # research.response contains structured findings, source citations, evidence gaps
@@ -176,12 +176,12 @@ Use when you need a document from sourced evidence, without drawing explicit con
 
 ```python
 research = delegate(
-    agent="specialists:specialists/researcher",
+    agent="specialists:researcher",
     instruction="Research question: [your question]"
 )
 
 document = delegate(
-    agent="specialists:specialists/writer",
+    agent="specialists:writer",
     instruction=f"""
     Format: brief
     Audience: [your audience]
@@ -199,17 +199,17 @@ Use when you need a document that contains *conclusions*, not just facts. The An
 
 ```python
 research = delegate(
-    agent="specialists:specialists/researcher",
+    agent="specialists:researcher",
     instruction="Research question: [your question]"
 )
 
 analysis = delegate(
-    agent="specialists:specialists/data-analyzer",
+    agent="specialists:data-analyzer",
     instruction=f"Analyze the following research. quality_threshold: medium\n\n{research.response}"
 )
 
 document = delegate(
-    agent="specialists:specialists/writer",
+    agent="specialists:writer",
     instruction=f"""
     Format: brief
     Audience: [your audience]

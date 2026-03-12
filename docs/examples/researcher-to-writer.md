@@ -16,7 +16,7 @@ This walkthrough shows the full researcher → writer pipeline using a realistic
 
 ```python
 research = delegate(
-    agent="specialists:specialists/researcher",
+    agent="specialists:researcher",
     instruction="""
     Research the key productivity challenges facing remote-first organizations in 2025.
     Focus on: communication overhead, async coordination, focus/deep work, and onboarding.
@@ -82,7 +82,7 @@ QUALITY THRESHOLD RESULT: MET
 
 ```python
 document = delegate(
-    agent="specialists:specialists/writer",
+    agent="specialists:writer",
     instruction=f"""
     Write an executive brief for HR leadership.
     Format: executive-summary
@@ -190,13 +190,13 @@ CITATIONS
 
 **Research only (no writing needed):**
 ```python
-delegate(agent="specialists:specialists/researcher", instruction="Research X")
+delegate(agent="specialists:researcher", instruction="Research X")
 ```
 
 **Write from existing notes (no researcher needed):**
 ```python
 delegate(
-    agent="specialists:specialists/writer",
+    agent="specialists:writer",
     instruction="Write a report brief from these notes: [your notes here]"
 )
 ```

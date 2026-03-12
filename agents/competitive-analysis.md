@@ -14,13 +14,13 @@ meta:
 
     <example>
     user: 'Compare Microsoft vs Anthropic competitive positioning'
-    assistant: 'I will delegate to specialists:specialists/competitive-analysis for structured competitive intelligence.'
+    assistant: 'I will delegate to specialists:competitive-analysis for structured competitive intelligence.'
     <commentary>Returns CompetitiveAnalysisOutput — structured data the Writer can transform into a brief.</commentary>
     </example>
 
     <example>
     user: 'Who are the main competitors to Notion and how do they compare?'
-    assistant: 'I will delegate to specialists:specialists/competitive-analysis with landscape mode.'
+    assistant: 'I will delegate to specialists:competitive-analysis with landscape mode.'
     <commentary>Landscape mode: specialist discovers the competitive field first, then profiles each competitor.</commentary>
     </example>
 ---

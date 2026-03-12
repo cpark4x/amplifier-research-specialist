@@ -30,7 +30,7 @@ context:
 
 steps:
   - id: "analyze"
-    agent: "specialists:specialists/competitive-analysis"
+    agent: "specialists:competitive-analysis"
     prompt: |
       Run a full competitive analysis on the following question.
 
@@ -46,7 +46,7 @@ steps:
     timeout: 1800
 
   - id: "write"
-    agent: "specialists:specialists/writer"
+    agent: "specialists:writer"
     prompt: |
       Transform the following competitive analysis output into a polished document.
 
@@ -64,7 +64,7 @@ steps:
     timeout: 900
 
   - id: "format-writer"
-    agent: "specialists:specialists/writer-formatter"
+    agent: "specialists:writer-formatter"
     prompt: |
       Produce the canonical Writer output block from the following writer output.
 

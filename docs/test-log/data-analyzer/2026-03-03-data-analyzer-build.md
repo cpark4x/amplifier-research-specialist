@@ -30,7 +30,7 @@ accuracy and coverage assessment do not apply and are marked N/A._
   four types but the Stage 2 instructions didn't explicitly enforce the enum — leaving
   room for novel type names. Fixed by commit 227c682.
 - **Post-build registration test reveals format compliance gap.** A same-day test
-  (`delegate(agent="specialists:specialists/data-analyzer", instruction="Analyze:
+  (`delegate(agent="specialists:data-analyzer", instruction="Analyze:
   Is TypeScript worth adopting...")`) with a simplified input format produced rich
   narrative prose with markdown headers — NOT the required structured `ANALYSIS OUTPUT /
   Specialist: data-analyzer / Version: 1.0` block format. The test used a non-standard

@@ -185,13 +185,13 @@ meta:
 
     <example>
     user: 'Compare Microsoft vs Anthropic competitive positioning'
-    assistant: 'I will delegate to specialists:specialists/competitive-analysis for structured competitive intelligence.'
+    assistant: 'I will delegate to specialists:competitive-analysis for structured competitive intelligence.'
     <commentary>Returns CompetitiveAnalysisOutput — structured data the Writer can transform into a brief.</commentary>
     </example>
 
     <example>
     user: 'Who are the main competitors to Notion and how do they compare?'
-    assistant: 'I will delegate to specialists:specialists/competitive-analysis with landscape mode.'
+    assistant: 'I will delegate to specialists:competitive-analysis with landscape mode.'
     <commentary>Landscape mode: specialist discovers the competitive field first, then profiles each competitor.</commentary>
     </example>
 ---
@@ -445,17 +445,17 @@ Find:
 ```yaml
 agents:
   include:
-    - specialists:specialists/researcher
-    - specialists:specialists/writer
+    - specialists:researcher
+    - specialists:writer
 ```
 
 Replace with:
 ```yaml
 agents:
   include:
-    - specialists:specialists/researcher
-    - specialists:specialists/writer
-    - specialists:specialists/competitive-analysis
+    - specialists:researcher
+    - specialists:writer
+    - specialists:competitive-analysis
 ```
 
 Commit:
@@ -476,7 +476,7 @@ Add to the **Available Specialists** list (after the writer entry):
 
 Add to the **When to Use Each** section (after the writer block):
 ```markdown
-**Delegate to `specialists:specialists/competitive-analysis` when:**
+**Delegate to `specialists:competitive-analysis` when:**
 - Comparing two or more companies, products, or services head-to-head
 - Mapping the competitive landscape for a subject ("who competes with X?")
 - You need structured comparison data, not a narrative summary
@@ -487,7 +487,7 @@ Add to the **Typical Chain** section:
 ```markdown
 For competitive intelligence tasks:
 1. `specialists:researcher` → gathers evidence (optional — competitive-analysis can research itself)
-2. `specialists:specialists/competitive-analysis` → structures evidence into competitive intelligence
+2. `specialists:competitive-analysis` → structures evidence into competitive intelligence
 3. `specialists:writer` → transforms competitive intelligence into a brief or report
 ```
 
@@ -680,7 +680,7 @@ git commit -m "docs: update Epic 04 status to In Progress in docs README"
 Invoke the specialist with a test query:
 
 ```
-delegate to specialists:specialists/competitive-analysis:
+delegate to specialists:competitive-analysis:
 
 "Compare Notion vs Obsidian as note-taking tools for knowledge workers.
 Focus on: collaboration, plugin ecosystem, pricing, learning curve, data portability."

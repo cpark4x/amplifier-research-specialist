@@ -15,17 +15,17 @@ tools:
 
 agents:
   include:
-    - specialists:specialists/researcher
-    - specialists:specialists/writer
-    - specialists:specialists/competitive-analysis
-    - specialists:specialists/data-analyzer
-    - specialists:specialists/data-analyzer-formatter
-    - specialists:specialists/researcher-formatter
-    - specialists:specialists/storyteller
-    - specialists:specialists/story-formatter
-    - specialists:specialists/writer-formatter
-    - specialists:specialists/prioritizer
-    - specialists:specialists/prioritizer-formatter
+    - specialists:researcher
+    - specialists:writer
+    - specialists:competitive-analysis
+    - specialists:data-analyzer
+    - specialists:data-analyzer-formatter
+    - specialists:researcher-formatter
+    - specialists:storyteller
+    - specialists:story-formatter
+    - specialists:writer-formatter
+    - specialists:prioritizer
+    - specialists:prioritizer-formatter
 
 # hooks:
 #   - module: hook-specialist-narration

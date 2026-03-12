@@ -625,7 +625,7 @@ at this step. Return to Task 2 and fix before continuing.
 Copy the full Researcher response without modification and pass it to the Data Analyzer:
 ```
 delegate(
-  agent="specialists:specialists/data-analyzer",
+  agent="specialists:data-analyzer",
   instruction="""
   Analyze the following research output. quality_threshold: medium
 

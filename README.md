@@ -75,7 +75,7 @@ amplifier bundle use specialists --project
 
 ```python
 research = delegate(
-    agent="specialists:specialists/researcher",
+    agent="specialists:researcher",
     instruction="Research the enterprise AI infrastructure market. Return structured findings."
 )
 ```
@@ -87,19 +87,19 @@ Specialists are composable by design. Each one's output schema is the next one's
 ```python
 # Stage 1: gather evidence
 research = delegate(
-    agent="specialists:specialists/researcher",
+    agent="specialists:researcher",
     instruction="Research X. Return structured findings."
 )
 
 # Stage 2: draw inferences
 analysis = delegate(
-    agent="specialists:specialists/data-analyzer",
+    agent="specialists:data-analyzer",
     instruction=f"Analyze these findings and draw labeled inferences: {research.response}"
 )
 
 # Stage 3: produce the document
 document = delegate(
-    agent="specialists:specialists/writer",
+    agent="specialists:writer",
     instruction=f"Write an executive brief for a product team. Source material: {analysis.response}"
 )
 ```

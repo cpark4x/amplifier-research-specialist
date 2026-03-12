@@ -247,13 +247,13 @@ FORMAT_MAP: dict[str, str] = {
     "researcher": "research",
 }
 
-SPECIALIST_PREFIX = "specialists:specialists/"
+SPECIALIST_PREFIX = "specialists:"
 
 
 def _extract_specialist(agent: str) -> str | None:
     """Extract the specialist short name from a delegate agent path.
 
-    e.g. "specialists:specialists/writer" -> "writer"
+    e.g. "specialists:writer" -> "writer"
     Returns None if the agent is not a specialists bundle specialist.
     """
     if agent.startswith(SPECIALIST_PREFIX):
@@ -467,12 +467,12 @@ tools:
 
 agents:
   include:
-    - specialists:specialists/researcher
-    - specialists:specialists/writer
-    - specialists:specialists/competitive-analysis
-    - specialists:specialists/data-analyzer
-    - specialists:specialists/researcher-formatter
-    - specialists:specialists/storyteller
+    - specialists:researcher
+    - specialists:writer
+    - specialists:competitive-analysis
+    - specialists:data-analyzer
+    - specialists:researcher-formatter
+    - specialists:storyteller
 
 hooks:
   - module: hook-specialist-narration

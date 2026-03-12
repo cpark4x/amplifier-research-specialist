@@ -200,7 +200,7 @@ You're looking for 4 things to add:
 1. Rule 8 (the mandatory gate, matching Rules 5-7)
 2. Description for `data-analyzer-formatter` in the Available Specialists section
 3. Entry in the Typical Chain section
-4. Agent ID (`specialists:specialists/data-analyzer-formatter`) in the Use these exact agent IDs line
+4. Agent ID (`specialists:data-analyzer-formatter`) in the Use these exact agent IDs line
 
 **Step 2: Add Rule 8**
 
@@ -212,7 +212,7 @@ data-analyzer-formatter are a matched pair by design — the data-analyzer produ
 labeled inferences from research evidence, the data-analyzer-formatter canonicalizes
 it into the structured ANALYSIS OUTPUT block downstream agents and parsers depend on.
 When the data-analyzer's output feeds ANY downstream step or the user, **always**
-route through `specialists:specialists/data-analyzer-formatter` first. This is the
+route through `specialists:data-analyzer-formatter` first. This is the
 designed architecture, not optional.
 
 **Mandatory gate — before delivering data-analyzer output to the user or any downstream
@@ -239,17 +239,17 @@ In the Typical Chain section, add a chain entry showing the full analysis pipeli
 
 ```
 For full analysis chain (facts and inferences explicitly separated):
-1. `specialists:specialists/researcher` → gathers and validates evidence
-2. `specialists:specialists/researcher-formatter` → normalizes to canonical format (Rule 5)
-3. `specialists:specialists/data-analyzer` → draws labeled inferences from evidence
-4. `specialists:specialists/data-analyzer-formatter` → normalizes to canonical ANALYSIS OUTPUT (Rule 8)
-5. `specialists:specialists/writer` → transforms analysis into requested document
-6. `specialists:specialists/writer-formatter` → normalizes to canonical Writer output block (Rule 6)
+1. `specialists:researcher` → gathers and validates evidence
+2. `specialists:researcher-formatter` → normalizes to canonical format (Rule 5)
+3. `specialists:data-analyzer` → draws labeled inferences from evidence
+4. `specialists:data-analyzer-formatter` → normalizes to canonical ANALYSIS OUTPUT (Rule 8)
+5. `specialists:writer` → transforms analysis into requested document
+6. `specialists:writer-formatter` → normalizes to canonical Writer output block (Rule 6)
 ```
 
 **Step 5: Add agent ID**
 
-In the "Use these exact agent IDs" line (or equivalent list), add: `specialists:specialists/data-analyzer-formatter`
+In the "Use these exact agent IDs" line (or equivalent list), add: `specialists:data-analyzer-formatter`
 
 **Step 6: Commit**
 
@@ -279,7 +279,7 @@ Find the step that invokes the data-analyzer. You need to:
 **Step 2: Add the da-formatter step**
 
 Insert a new step after the data-analyzer step. The step should:
-- Use agent `specialists:specialists/data-analyzer-formatter`
+- Use agent `specialists:data-analyzer-formatter`
 - Receive DA output from the previous step's output variable
 - Receive original research from the formatter step earlier in the chain (the research-chain already has a researcher-formatter step — its output is the original research)
 - Store output in a new context variable (e.g., `analyzed_output` or `da_formatted_output`)
@@ -342,7 +342,7 @@ You need two inputs:
 
 **Step 2: Invoke the formatter in a session**
 
-Delegate to `specialists:specialists/data-analyzer-formatter` with both inputs. Observe:
+Delegate to `specialists:data-analyzer-formatter` with both inputs. Observe:
 - Does output start with `ANALYSIS OUTPUT`?
 - Is the parse summary line present and correctly identifies `da-format=narrative`?
 - Are FINDINGS re-extracted from the original research (not from the DA narrative)?

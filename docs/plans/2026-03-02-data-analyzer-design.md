@@ -252,7 +252,7 @@ interface UnusedFinding {
 | Create | `specialists/data-analyzer/README.md` | Interface contract (accepts, returns, can/cannot do) |
 | Modify | `shared/interface/types.md` | Add AnalysisOutput, Inference, UnusedFinding types |
 | Modify | `specialists/writer/index.md` | Add `analysis-output` input type handling |
-| Modify | `behaviors/specialists.yaml` | Register `specialists:specialists/data-analyzer` |
+| Modify | `behaviors/specialists.yaml` | Register `specialists:data-analyzer` |
 | Modify | `context/specialists-instructions.md` | Add data-analyzer to dispatch guide |
 | Modify | `README.md` | Add to specialists table |
 | Create | `docs/02-requirements/epics/08-data-analyzer.md` | Epic file |
