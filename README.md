@@ -58,13 +58,17 @@ canvas-specialists runs on [Amplifier](https://github.com/microsoft/amplifier) �
 
 ### 1. Add the bundle
 
-In your `.amplifier/settings.yaml`:
-
-```yaml
-bundles:
-  - source: git+https://github.com/[owner]/canvas-specialists@main
-    name: specialists
+```bash
+amplifier bundle add git+https://github.com/cpark4x/canvas-specialists@main --app
 ```
+
+The `--app` flag registers canvas-specialists as an **app bundle** — it is automatically composed onto every Amplifier session you run, regardless of which primary bundle is active. No per-project configuration needed.
+
+> **Project-only setup** — to scope specialists to a single project, run these two commands from inside your project directory:
+> ```bash
+> amplifier bundle add git+https://github.com/cpark4x/canvas-specialists@main
+> amplifier bundle use specialists --project
+> ```
 
 ### 2. Invoke a specialist
 
