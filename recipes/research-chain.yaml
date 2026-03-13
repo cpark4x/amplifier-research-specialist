@@ -2,6 +2,19 @@
 # CHANGELOG
 # =============================================================================
 #
+# v1.9.0 (2026-03-13):
+#   - FEATURE: Added validate-research gate after research step
+#     * ROOT CAUSE: ~50% of research runs produce only a truncated metadata
+#       summary instead of full research body. The writer then faithfully writes
+#       a brief about the failure itself. This was the #1 reliability blocker
+#       and was untracked in the backlog.
+#     * FIX: Inserted bash validation step that checks (1) minimum byte count
+#       (500 bytes) and (2) minimum evidence markers (3+ mentions of finding/
+#       source/confidence/claim/evidence). Fails the pipeline with a clear
+#       GATE_FAIL message instead of silently passing garbage downstream.
+#     * RESULT: Truncated research runs fail fast with a clear error instead
+#       of producing a polished document about their own failure.
+#
 # v1.8.1 (2026-03-11):
 #   - FIX: Hardened both bash strip steps against edge cases
 #     * strip-parsed-prefix: Added fallback — if no "RESEARCH OUTPUT" line found,
@@ -134,7 +147,7 @@
 
 name: "research-chain"
 description: "Full research pipeline with format normalization — Researcher → URL Resolution → Formatter → Data Analyzer → Writer → Writer Formatter → Save"
-version: "1.8.2"
+version: "1.9.0"
 tags: ["research", "analysis", "writing", "chain"]
 
 context:
@@ -167,6 +180,30 @@ steps:
       - Target a maximum of 3,000 words and 30 sourced claims in your final output
     output: "research_output"
     timeout: 2700
+
+  - id: "validate-research"
+    type: "bash"
+    command: |
+      _vr_tmp=$(mktemp)
+      cat > "$_vr_tmp" <<'__VALIDATE_EOF__'
+      {{research_output}}
+      __VALIDATE_EOF__
+      _bytes=$(wc -c < "$_vr_tmp")
+      _has_findings=$(grep -ci -E '(finding|source|confidence|claim|evidence)' "$_vr_tmp" || true)
+      if [ "$_bytes" -lt 500 ]; then
+        echo "GATE_FAIL: Research output is only ${_bytes} bytes — likely a truncated metadata summary, not full research. Aborting pipeline."
+        rm -f "$_vr_tmp"
+        exit 1
+      elif [ "$_has_findings" -lt 3 ]; then
+        echo "GATE_FAIL: Research output has fewer than 3 evidence markers (findings/sources/confidence). Likely not substantive research. Aborting pipeline."
+        rm -f "$_vr_tmp"
+        exit 1
+      else
+        echo "GATE_PASS: Research output is ${_bytes} bytes with ${_has_findings} evidence markers."
+        rm -f "$_vr_tmp"
+      fi
+    output: "research_validation"
+    timeout: 30
 
   - id: "resolve-urls"
     agent: "foundation:web-research"

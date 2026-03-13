@@ -5,7 +5,7 @@ topic: storyteller-format-compliance-verification
 date: 2026-03-10
 quality_signal: pass
 closes: "#30 (Storyteller OUTPUT CONTRACT compliance), #18 (inference auditability), #19 (quality_threshold parameter)"
-action_items_promoted: false
+action_items_promoted: true
 ---
 
 ## Purpose

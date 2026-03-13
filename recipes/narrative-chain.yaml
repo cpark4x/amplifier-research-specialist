@@ -89,7 +89,7 @@
 
 name: "narrative-chain"
 description: "Full research-to-narrative pipeline — Researcher → Formatter → Data Analyzer → Storyteller → Story Formatter → Save. Produces compelling narrative output instead of a structured document."
-version: "1.2.2"
+version: "1.3.0"
 tags: ["research", "analysis", "narrative", "storytelling", "chain"]
 
 context:
@@ -117,6 +117,30 @@ steps:
       - Target a maximum of 3,000 words and 30 sourced claims in your final output
     output: "research_output"
     timeout: 4500
+
+  - id: "validate-research"
+    type: "bash"
+    command: |
+      _vr_tmp=$(mktemp)
+      cat > "$_vr_tmp" <<'__VALIDATE_EOF__'
+      {{research_output}}
+      __VALIDATE_EOF__
+      _bytes=$(wc -c < "$_vr_tmp")
+      _has_findings=$(grep -ci -E '(finding|source|confidence|claim|evidence)' "$_vr_tmp" || true)
+      if [ "$_bytes" -lt 500 ]; then
+        echo "GATE_FAIL: Research output is only ${_bytes} bytes — likely a truncated metadata summary, not full research. Aborting pipeline."
+        rm -f "$_vr_tmp"
+        exit 1
+      elif [ "$_has_findings" -lt 3 ]; then
+        echo "GATE_FAIL: Research output has fewer than 3 evidence markers (findings/sources/confidence). Likely not substantive research. Aborting pipeline."
+        rm -f "$_vr_tmp"
+        exit 1
+      else
+        echo "GATE_PASS: Research output is ${_bytes} bytes with ${_has_findings} evidence markers."
+        rm -f "$_vr_tmp"
+      fi
+    output: "research_validation"
+    timeout: 30
 
   - id: "format-research"
     agent: "specialists:researcher-formatter"

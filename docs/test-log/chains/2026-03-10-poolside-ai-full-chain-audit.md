@@ -4,7 +4,7 @@ chain: "researcher → researcher-formatter → data-analyzer → da-formatter �
 topic: poolside-ai-full-chain-audit
 date: 2026-03-10
 quality_signal: mixed
-action_items_promoted: false
+action_items_promoted: true
 ---
 
 ## Purpose

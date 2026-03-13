@@ -5,7 +5,7 @@ topic: da-format-b-hardening-and-code-fence-prevention
 date: 2026-03-10
 quality_signal: conditional-pass
 closes: "#17 (code-fence prevention), #16 (Format B hardening — partial)"
-action_items_promoted: false
+action_items_promoted: true
 ---
 
 ## Purpose

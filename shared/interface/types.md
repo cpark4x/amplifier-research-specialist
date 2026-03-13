@@ -209,6 +209,83 @@ interface UnusedFinding {
 
 ---
 
+## WriterOutput
+
+The canonical output of the Writer pipeline (Writer → Writer-Formatter). The Writer
+produces audience-calibrated prose; the Writer-Formatter normalizes it into this schema.
+Downstream consumers depend on formatter output, not raw writer output.
+
+```typescript
+interface WriterOutput {
+  // Parse metadata — first line of output
+  claims_count: number
+  input_type: 'researcher-output' | 'analyst-output' | 'analysis-output' | 'story-output' | 'raw-notes'
+  output_format: 'report' | 'brief' | 'proposal' | 'exec-summary' | 'email' | 'memo'
+  audience: string
+
+  // Source claims extracted from input material — numbered S1, S2...
+  claims: WriterClaim[]
+
+  // The document body — audience-calibrated prose with per-section source attribution
+  document: string
+
+  // Claims flagged for verification — specific numbers, percentages, named statistics
+  claims_to_verify: ClaimToVerify[]
+
+  // Production metadata
+  metadata: WriterMetadata
+
+  // Every source claim accounted for — used or not used
+  citations: WriterCitation[]
+}
+
+interface WriterClaim {
+  id: string                     // "S1", "S2", "S3"...
+  claim: string                  // The discrete factual claim from source material
+  confidence: 'high' | 'medium' | 'low' | 'unrated' | 'inference'
+  source_url: string | null      // From upstream Finding's source field
+  traces_to: string[] | null     // For inference claims only — e.g. ["F3", "F7"]
+}
+
+interface ClaimToVerify {
+  claim_id: string               // "S4"
+  quote: string                  // The specific value — "$37.5M Series A"
+  type: 'specific_number' | 'percentage' | 'named_statistic' | 'specific_measurement'
+}
+
+interface WriterMetadata {
+  specialist: 'writer'
+  version: string
+  input_type: string
+  output_format: string
+  audience: string
+  voice: string
+  word_count: number
+  coverage: 'full' | 'partial'
+  coverage_gaps: string[]        // empty array if full coverage
+  confidence_distribution: {
+    high: number
+    medium: number
+    low: number
+    unrated: number
+    inference: number
+  }
+}
+
+interface WriterCitation {
+  claim_id: string               // "S1"
+  claim: string                  // Brief quote of the claim
+  used_in: string | null         // Section name, or null if not used
+  confidence: 'high' | 'medium' | 'low' | 'unrated' | 'inference'
+  confidence_numeric: number | null  // 0.9 | 0.6 | 0.3 | null
+  source_url: string | null      // Carried from upstream
+  type: 'inference' | null       // Only present on inference claims
+  traces_to: string[] | null     // Only present on inference claims
+}
+```
+
+---
+
 ## StoryOutput
 
 The canonical output of the Storyteller specialist.
@@ -300,4 +377,4 @@ interface UnrankableItem {
 
 ## Schema Version
 
-`v1.2` — updated 2026-03-09. Added PrioritizerOutput for the Prioritizer specialist. Previous: v1.1 (2026-03-04).
+`v1.3` — updated 2026-03-13. Added WriterOutput interface (the most-consumed specialist now has a typed contract). Previous: v1.2 (2026-03-09).

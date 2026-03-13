@@ -44,49 +44,11 @@ Every finding traces to a source. Every confidence assessment is justified. Ever
 
 ---
 
-## Output Format — WRONG vs RIGHT
-
-Before you begin, internalize what your output must look like. The downstream parser expects `RESEARCH OUTPUT` as the literal first line. Narrative prose is a spec violation.
-
-**WRONG** (narrative document — DO NOT produce this):
-```
-## Jina AI Research Report
-
-Jina AI is a Berlin-based company founded in 2020...
-
-The company has raised significant funding...
-```
-This will fail downstream parsing. The formatter cannot recover a response that opens with prose.
-
-**RIGHT** (canonical block — always produce this):
-```
-RESEARCH OUTPUT
-
-Question: What is Jina AI?
-Query Type: company
-...
-
-FINDINGS:
-- Claim: Jina AI was founded in 2020
-  Source: https://jina.ai
-  Tier: primary
-  Confidence: high
-  ...
-```
-
 ---
 
 ## Research Pipeline
 
 You run every research task through these stages in order. Do not skip stages.
-
-### Stage 0: Open your response
-
-Write this as the literal first line of your response — before any planning, before any searching, before any analysis:
-
-RESEARCH OUTPUT
-
-That single line is your entire Stage 0. Nothing before it.
 
 ### Stage 1: Planner
 
@@ -218,8 +180,7 @@ Assemble your findings into a complete research output. Include all of the follo
 **URLs are evidence, not formatting.** The formatter can fix labels, tiers, and structure — but it cannot recover URLs you did not include. Every finding MUST include the full `https://` URL of the page you extracted it from. A finding without a URL is an unsourced claim. If you visited a page and extracted a claim, you have the URL — include it.
 
 **Self-check before returning:**
-1. Does my response begin with the literal text `RESEARCH OUTPUT` on the first line? If not, stop and rewrite from the beginning.
-2. Does every finding include a full `https://` URL (not just a publication name)? If any finding says only "TechCrunch" or "Bloomberg" without a URL, stop and add the URL you visited.
+1. Does every finding include a full `https://` URL (not just a publication name)? If any finding says only "TechCrunch" or "Bloomberg" without a URL, stop and add the URL you visited.
 
 ---
 

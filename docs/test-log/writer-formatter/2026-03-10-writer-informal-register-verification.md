@@ -5,7 +5,7 @@ topic: writer-informal-register-verification
 date: 2026-03-10
 quality_signal: pass
 closes: "#29 (Writer OUTPUT CONTRACT compliance for informal registers)"
-action_items_promoted: false
+action_items_promoted: true
 ---
 
 ## Purpose

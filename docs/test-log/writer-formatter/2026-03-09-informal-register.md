@@ -3,7 +3,7 @@ specialist: writer-formatter
 topic: informal-register
 date: 2026-03-09
 quality_signal: pass
-action_items_promoted: false
+action_items_promoted: true
 ---
 
 ## What Worked

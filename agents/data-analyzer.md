@@ -236,11 +236,6 @@ Assemble AnalysisOutput. Return this exact structure — no narrative prose, no 
 fence wrapping. The block below is your entire response from this point forward —
 output it as plain text, not inside triple backticks:
 
-> **OUTPUT CONTRACT — CODE FENCES PROHIBITED:** Do NOT wrap the ANALYSIS OUTPUT
-> block in code fences (` ``` ` or ` ```analysis `). Emit the block as bare text
-> starting directly with the line `ANALYSIS OUTPUT`. Code-fence wrapping breaks
-> downstream parsers that expect raw section headers.
-
 ```
 ANALYSIS OUTPUT
 Specialist: data-analyzer
@@ -276,14 +271,6 @@ gap: [what couldn't be found] | reason: [why inaccessible]
 QUALITY THRESHOLD RESULT: [MET | NOT MET]
 Note: if any claim text contains | replace it with /
 ```
-
-**Stage 4 self-check before emitting (zero tolerance):**
-
-Before returning your output, verify:
-1. Does your response start with ` ``` ` or ` ```analysis `? If yes — **remove the fences immediately.** Strip any opening ` ``` ` or ` ```analysis ` line before `ANALYSIS OUTPUT`, and any closing ` ``` ` line at the end. Your output is bare text, not a code block.
-2. Does your response start with the literal characters `A-N-A-L-Y-S-I-S O-U-T-P-U-T`? If not — rewrite the opening so it does.
-
-This check is mandatory. A response wrapped in code fences is not a valid ANALYSIS OUTPUT — it is a parsing failure for every downstream specialist.
 
 ---
 

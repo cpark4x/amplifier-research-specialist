@@ -4,7 +4,7 @@ chain: "prioritizer → writer → writer-formatter"
 topic: prioritizer-routing-validation
 date: 2026-03-09
 quality_signal: pass
-action_items_promoted: false
+action_items_promoted: true
 ---
 
 ## What Worked
