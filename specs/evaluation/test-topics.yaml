@@ -1,0 +1,72 @@
+# =============================================================================
+# Test Topic Bank for Pipeline Evaluation
+# =============================================================================
+#
+# 5 initial topics that exercise different pipeline behaviors. Each topic
+# probes specific weaknesses in the research → analysis → writing chain.
+#
+# Each topic has:
+#   - id: stable identifier (used in score-history.yaml)
+#   - query: the literal string passed to the pipeline as research_question
+#   - expected_traits: behaviors we expect to see in output (for critic context)
+#   - purpose: why this topic was chosen (what dimension it stress-tests)
+#
+# Scoring: MINIMUM across ALL topics, not average.
+# The pipeline is only as strong as its weakest performance.
+# =============================================================================
+
+topics:
+  - id: well-documented
+    query: "What is Anthropic and what is their approach to AI safety?"
+    expected_traits:
+      - high_confidence_findings
+      - multiple_primary_sources
+      - minimal_gaps
+    purpose: >
+      Baseline — lots of sources available, should produce high-quality output
+      across all dimensions. If this topic fails, something fundamental is broken.
+
+  - id: recent-event
+    query: "What are the key provisions and implications of the EU AI Act as enacted?"
+    expected_traits:
+      - recency_matters
+      - secondary_sources_dominant
+      - moderate_gaps
+      - regulatory_complexity
+    purpose: >
+      Tests handling of recent/evolving information where primary sources are
+      regulatory documents and secondary sources dominate commentary. Confidence
+      calibration matters when information is still settling.
+
+  - id: niche-topic
+    query: "What is the current state of neuromorphic computing hardware?"
+    expected_traits:
+      - evidence_gaps_expected
+      - tertiary_sources_common
+      - low_confidence_acceptable
+    purpose: >
+      Tests evidence gap disclosure and honest confidence calibration when sources
+      are thin. The pipeline should NOT paper over gaps or inflate confidence.
+
+  - id: controversial
+    query: "What are the arguments for and against open-sourcing large language models?"
+    expected_traits:
+      - contradictions_expected
+      - multiple_perspectives
+      - evaluative_inferences
+      - balanced_coverage_required
+    purpose: >
+      Tests contradiction handling and evaluative inference quality. The pipeline
+      must present both sides. Inferences should be evaluative, not just summarizing
+      positions. The writer must hedge appropriately for contested claims.
+
+  - id: comparison
+    query: "Compare React, Vue, and Angular as frontend JavaScript frameworks"
+    expected_traits:
+      - competitive_analysis
+      - comparison_matrix
+      - multiple_entities
+    purpose: >
+      Tests structured comparison across multiple entities with consistent
+      dimensions. Source tier assignment is tricky — official docs are primary,
+      developer surveys are secondary, blog opinions are tertiary.
