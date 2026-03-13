@@ -26,6 +26,7 @@ agents:
     - specialists:writer-formatter
     - specialists:prioritizer
     - specialists:prioritizer-formatter
+    - specialists:planner
 
 # hooks:
 #   - module: hook-specialist-narration
