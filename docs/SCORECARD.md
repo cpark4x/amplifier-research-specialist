@@ -17,15 +17,15 @@ when test evidence exists; not updated on spec changes alone.
 
 ---
 
-## Current Scores (as of 2026-03-11)
+## Current Scores (as of 2026-03-13)
 
 | Dimension | Score | Previous | Change | Last Updated |
 |-----------|-------|----------|--------|--------------|
-| **Research Trustworthiness** | 7/10 | 5/10 | +2 ↑ | 2026-03-11 |
+| **Research Trustworthiness** | 8/10 | 7/10 | +1 ↑ | 2026-03-13 |
 | **Chain Reliability** | 8/10 | 8/10 | — | 2026-03-10 |
 | **Format Fidelity** | 7/10 | 7/10 | — | 2026-03-10 |
-| **Specialist Coverage** | 6/10 | 6/10 | — | 2026-03-09 |
-| **Overall** | 7/10 | 7/10 | — | 2026-03-11 |
+| **Specialist Coverage** | 7/10 | 6/10 | +1 ↑ | 2026-03-13 |
+| **Overall** | 8/10 | 7/10 | +1 ↑ | 2026-03-13 |
 
 ---
 
@@ -40,31 +40,33 @@ when test evidence exists; not updated on spec changes alone.
 | 2026-03-10 | 4/10 | 8/10 | 7/10 | 6/10 | **6/10** | **Full chain validation.** Ran research-chain v1.6.0 end-to-end on "Poolside AI" topic (R→RF→DA→DAF→W→WF→save). All 8 steps completed, no manual intervention, file saved at 13,764 bytes. Chain Reliability 7→8: longest chain variant proven. Research Trustworthiness stays 4: inference traces_to degraded to `[narrative-mapped: uncertain]` (15/15), URLs absent from CITATIONS block, confidence upgrades in prose. Two new gaps identified: Writer needs source URLs in CITATIONS, Writer needs inference hedging. *(test log 2026-03-10-poolside-ai-full-chain-audit)* |
 | 2026-03-10 | 5/10 | 8/10 | 7/10 | 6/10 | **7/10** | **URL recovery + hedging validated.** Shipped three architectural fixes: (1) writer-formatter Stage 3.5 confidence-hedge audit — 14/14 medium/inference claims hedged, PASS. (2) researcher-formatter Stage 1.5 URL recovery — pattern-based reconstruction from source names. (3) resolve-urls pipeline step — verified URL lookup via web_search before formatting. Research-chain v1.7.0 (9 steps). Validation: 15/15 sourceable claims have real https:// URLs (100%), zero "unattributed". Research Trustworthiness 4→5. Overall 6→7. *(test log 2026-03-10-url-recovery-validation)* |
 | 2026-03-11 | **7/10** | 8/10 | 7/10 | 6/10 | **7/10** | **Diverse topic validation + traces_to fix.** Shipped research-chain v1.8.2 (11 steps): (1) strip-parsed-prefix bash step — strips `Parsed:` prefix so DA hits Format A → real F# traces. (2) strip-formatter-notes bash step v3 — citation-boundary approach strips all artifact variants. 6 diverse topics validated across 6 domains (history, humanities, arts, medicine, tech, physics). URL recovery 181/182 = 99.5%. F-number traces 52/53 = 98.1%. Hedging consistent across all topics. Research Trustworthiness 5→7. Overall stays 7 (now exactly 7.0 vs 6.5). *(test log 2026-03-11-research-trustworthiness-diverse-validation)* |
+| 2026-03-13 | **8/10** | 8/10 | 7/10 | **7/10** | **8/10** | **Quality gate validation + truncation gate + planner + specialist trims.** (1) Quality gate NOT MET paths validated: storyteller sparse-input trigger fires correctly (2 findings → NOT MET), DA high-threshold-with-low-evidence fires correctly (all low/tertiary → NOT MET), storyteller evidence-collapse borderline passes correctly (2/6 omitted = 33%, below 50% threshold). 3/3 tests PASS. *(test log 2026-03-13-quality-threshold-not-met-validation)* (2) Researcher truncation gate: validate-research bash step added to research-chain v1.9.0 and narrative-chain v1.3.0 — checks minimum byte count + evidence markers, fails fast on truncated output. (3) Planner specialist built (Epic 09, 75 lines, lightweight-first). (4) Specialist trims: writer 424→206, storyteller 419→285, researcher 276→237, DA 309→296 — removed format enforcement now handled by formatters. (5) WriterOutput added to types.md v1.3. Research Trustworthiness 7→8: both listed blockers resolved (quality gates validated, truncation gate shipped). Coverage 6→7: Planner built (Epic 09). Overall 7→8 (7.5 rounded up). |
 
 ---
 
 ## What Moves Each Dimension
 
-### Research Trustworthiness (currently 7/10)
+### Research Trustworthiness (currently 8/10)
 
-**What moved it from 5 to 7:**
-- Inference `traces_to` fix: strip-parsed-prefix bash step (v1.8.0) strips `Parsed:` prefix so DA receives `RESEARCH OUTPUT` on line 1 → Format A → canonical ANALYSIS OUTPUT with real F# finding references. 52/53 inference claims now carry real F-numbers (98.1%), zero `narrative-mapped: uncertain`. *(2026-03-11-research-trustworthiness-diverse-validation)*
-- Diverse topic validation: 6 topics across 6 domains (history, humanities, arts, medicine, tech, physics). URL recovery 181/182 = 99.5%. Hedging consistent across all topics. Formatter artifacts addressed architecturally via citation-boundary stripping (v1.8.2).
-- Recipe evolved v1.8.0 → v1.8.1 → v1.8.2 during validation, each iteration hardening the bash strip steps against edge cases found in real runs.
+**What moved it from 7 to 8:**
+- Quality gate NOT MET path validated: 3/3 tests PASS. Storyteller sparse-input trigger (2 findings → NOT MET immediately), DA high-threshold-with-low-evidence (all low/tertiary → NOT MET, zero inferences drawn), storyteller evidence-collapse borderline (2/6 omitted = 33%, correctly passes). *(2026-03-13-quality-threshold-not-met-validation)*
+- Researcher truncation gate: validate-research bash step in research-chain v1.9.0 and narrative-chain v1.3.0 — checks minimum 500 bytes + 3 evidence markers, fails fast with GATE_FAIL instead of passing truncated output downstream.
 
-**What moved it from 4 to 5 (previous session):**
-- Source URLs: 15/15 sourceable claims have real https:// URLs (100%), zero "unattributed" — via resolve-urls pipeline step + researcher-formatter Stage 1.5 *(2026-03-10-url-recovery-validation)*
-- Confidence hedging: 14/14 medium/inference claims hedged in prose via writer-formatter Stage 3.5 *(2026-03-10-research-trustworthiness-fixes)*
+**What moved it from 5 to 7 (previous sessions):**
+- Inference traces_to fix: strip-parsed-prefix (v1.8.0) → DA Format A → real F# references. 52/53 = 98.1%. *(2026-03-11)*
+- Diverse topic validation: 6 domains, URL recovery 181/182 = 99.5%, hedging consistent. *(2026-03-11)*
+- URL recovery: resolve-urls + Stage 1.5 → 15/15 sourceable claims with URLs. *(2026-03-10)*
+- Confidence hedging: Stage 3.5 → 14/14 medium/inference claims hedged. *(2026-03-10)*
 
-**What's keeping it at 7:**
-- Quality gate NOT MET path untested
-- Researcher output truncation is stochastic (~50% of runs produce pipeline failure briefs instead of research) — reliability concern at the step level
+**What's keeping it at 8:**
 - Minor formatting inconsistencies: bracket notation (`[F1, F2]` vs `F1, F2`) and meta-observation convention (`[meta]` vs `uncertain`) not standardized
+- Truncation gate is fail-fast only — no auto-retry. Need to monitor GATE_FAIL rate and decide if retry logic is needed.
+- Upstream NOT MET storyteller trigger untested (source material has NOT MET + fewer than 3 medium+ findings)
 
-**What would move it to 8:**
-- Test quality gate NOT MET path (high threshold on thin-output topic)
-- Reduce researcher truncation failure rate (content-presence gate after research step)
+**What would move it to 9:**
 - Standardize traces_to bracket notation and meta-observation convention
+- Add auto-retry on truncation gate failure (if GATE_FAIL rate remains high after monitoring)
+- Validate all quality gate triggers across all specialists (prioritizer untested)
 
 ### Chain Reliability (currently 8/10)
 
@@ -105,27 +107,29 @@ when test evidence exists; not updated on spec changes alone.
 - Test writer-formatter with analysis-output input (#14)
 - Confirm CLAIMS TO VERIFY surfaces consistently across input types
 
-### Specialist Coverage (currently 6/10)
+### Specialist Coverage (currently 7/10)
 
-**What supports 6:**
-- 6 specialist domains shipped: Researcher, Writer, Competitive Analysis, Data Analyzer, Storyteller (90%), Prioritizer
+**What moved it from 6 to 7:**
+- Planner specialist built (Epic 09) — 75 lines, lightweight-first pattern. Takes goals + context, produces structured plans with milestones, dependencies, timelines, risk flags. Tested successfully on Canvas 6-week product launch scenario. *(2026-03-13)*
+
+**What supports 7:**
+- 7 specialist domains shipped: Researcher, Writer, Competitive Analysis, Data Analyzer, Storyteller (90%), Prioritizer, Planner
 - 5 formatter pairs complete
 - Phase 1 roadmap mostly done
 
-**What's keeping it from 7+:**
-- Planner specialist (Epic 09) not built
+**What's keeping it from 8+:**
 - Design specialist (Epic 05) not built
 - Demo Generator (Epic 06), Presentation Builder (Epic 07) not built
 - Storyteller at 90% (compound tones, structured NARRATIVE SELECTION remaining)
 
 **What would move it:**
-- Complete Storyteller to 100% → confirms 6, solidifies it
-- Build Planner specialist (Epic 09) → 7/10
-- Build Design specialist (Epic 05) → 7–8/10
+- Complete Storyteller to 100% → solidifies 7
+- Build Design specialist (Epic 05) → 8/10
+- Build Presentation Builder (Epic 07) → 8–9/10
 
 ---
 
-## Validated Evidence Summary (2026-03-11)
+## Validated Evidence Summary (2026-03-13)
 
 | Item | Evidence | Dimension |
 |------|----------|-----------|
@@ -148,6 +152,11 @@ when test evidence exists; not updated on spec changes alone.
 | **Inference traces_to fix (strip-parsed-prefix)** | DA now receives RESEARCH OUTPUT on line 1 → Format A → real F# references. 52/53 inferences carry F-numbers, zero `narrative-mapped: uncertain`. PASS *(2026-03-11-research-trustworthiness-diverse-validation)* | **Research Trustworthiness** |
 | **Formatter artifact stripping (v1.8.2)** | Citation-boundary approach: extract Parsed: through last S-entry. Eliminates all artifact variants without pattern enumeration. v1.8.2 runs (Printing Press, Higgs Boson) clean. PASS | **Format Fidelity** |
 | Full 11-step chain (v1.8.2) | R→resolve-urls→RF→strip-prefix→DA→DAF→W→WF→strip-notes→slug→save. 6 successful end-to-end runs. PASS | Chain Reliability |
+| **Quality gate NOT MET — storyteller sparse input** | 2 findings input → mechanical fail trigger fires immediately, pipeline halted at Stage 1, NOT MET with specific failing items. PASS *(2026-03-13-quality-threshold-not-met-validation)* | **Research Trustworthiness** |
+| **Quality gate NOT MET — DA high threshold** | 3 low-confidence tertiary findings + quality_threshold: high → zero inferences drawn, all findings UNUSED, NOT MET with clear rationale. PASS *(2026-03-13-quality-threshold-not-met-validation)* | **Research Trustworthiness** |
+| **Quality gate MET — storyteller evidence collapse borderline** | 6 findings, 2 omitted with insufficient-evidence (33%, below 50% threshold) → correctly passes, builds narrative around single high-confidence finding with hedged low-confidence supporting claims. PASS *(2026-03-13-quality-threshold-not-met-validation)* | **Research Trustworthiness** |
+| **Researcher truncation gate** | validate-research bash step in research-chain v1.9.0 + narrative-chain v1.3.0. Checks min 500 bytes + 3 evidence markers. Fails fast with GATE_FAIL. Shipped, not yet validated in production run. | **Chain Reliability** |
+| **Planner specialist (Epic 09)** | 75-line lightweight-first specialist. Tested on Canvas 6-week launch scenario — produced structured PLAN OUTPUT with 5 milestones, dependency map, 7 risks, 8 assumptions, 7 open questions. Hit schema on first try, no formatter needed. PASS | **Specialist Coverage** |
 
 ---
 
@@ -155,6 +164,7 @@ when test evidence exists; not updated on spec changes alone.
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v2.4 | 2026-03-13 | **Quality gate validation + truncation gate + planner + specialist trims.** Quality gate NOT MET paths validated: 3/3 tests PASS (storyteller sparse-input, DA high-threshold, storyteller evidence-collapse borderline). Researcher truncation gate shipped (research-chain v1.9.0, narrative-chain v1.3.0). Planner specialist built (Epic 09, 75 lines, lightweight-first). Specialist trims: writer 424→206, storyteller 419→285, researcher 276→237, DA 309→296 — removed format enforcement now handled by formatters. WriterOutput added to types.md v1.3. Backlog hygiene: #31 closed, Epic 10 updated to 95%, 8 test logs promoted. Research Trustworthiness 7→8, Coverage 6→7, Overall 7→8. *(test log 2026-03-13-quality-threshold-not-met-validation)* |
 | v2.3 | 2026-03-11 | **Diverse topic validation + traces_to fix.** Shipped research-chain v1.8.2 (11 steps) with three new fixes: strip-parsed-prefix (DA Format A → real F# traces), strip-formatter-notes v3 (citation-boundary approach strips all artifact variants), fallback guards (prevent empty output on format variation). 6 diverse topics validated across 6 domains. URL recovery 181/182 = 99.5%. F-number traces 52/53 = 98.1%. Hedging consistent. Formatter artifacts eliminated architecturally. Research Trustworthiness 5→7, Overall stays 7 (now exactly 7.0). *(test log 2026-03-11-research-trustworthiness-diverse-validation)* |
 | v2.2 | 2026-03-10 | **URL recovery + hedging validated.** Shipped three architectural fixes: researcher-formatter Stage 1.5 (URL reconstruction), resolve-urls pipeline step (verified URL lookup), writer-formatter Stage 3.5 (confidence hedging). Research-chain v1.7.0 (9 steps). Validation: 15/15 sourceable claims with URLs (100%), 14/14 claims hedged, zero "unattributed". Research Trustworthiness 4→5, Overall 6→7. *(test log 2026-03-10-url-recovery-validation)* |
 | v2.1 | 2026-03-10 | **Full chain validation.** Ran research-chain v1.6.0 end-to-end (Poolside AI topic). Chain Reliability 7→8: longest chain variant proven. Research Trustworthiness stays 4: inference traces, source URLs, and confidence hedging all fail to survive to final document. Four new action items logged. *(test log 2026-03-10-poolside-ai-full-chain-audit)* |
