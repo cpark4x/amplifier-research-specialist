@@ -472,9 +472,9 @@ steps:
       __CA_REPORT_EOF__
 
       # Extract scores from temp files
-      _fc_score=$(grep -oP 'Score: \K[0-9]+\.?[0-9]*' "$_fc_tmp" | head -1)
-      _ic_score=$(grep -oP 'Score: \K[0-9]+\.?[0-9]*' "$_ic_tmp" | head -1)
-      _ca_score=$(grep -oP 'Score: \K[0-9]+\.?[0-9]*' "$_ca_tmp" | head -1)
+      _fc_score=$(sed -n 's/.*Score:[* ]* *\([0-9][0-9.]*\).*/\1/p' "$_fc_tmp" | head -1)
+      _ic_score=$(sed -n 's/.*Score:[* ]* *\([0-9][0-9.]*\).*/\1/p' "$_ic_tmp" | head -1)
+      _ca_score=$(sed -n 's/.*Score:[* ]* *\([0-9][0-9.]*\).*/\1/p' "$_ca_tmp" | head -1)
 
       rm -f "$_fc_tmp" "$_ic_tmp" "$_ca_tmp"
 
@@ -532,9 +532,9 @@ steps:
       {{consistency_audit_report}}
       __CA_SAVE_EOF__
 
-      _fc_score=$(grep -oP 'Score: \K[0-9]+\.?[0-9]*' "$_fc_tmp" | head -1)
-      _ic_score=$(grep -oP 'Score: \K[0-9]+\.?[0-9]*' "$_ic_tmp" | head -1)
-      _ca_score=$(grep -oP 'Score: \K[0-9]+\.?[0-9]*' "$_ca_tmp" | head -1)
+      _fc_score=$(sed -n 's/.*Score:[* ]* *\([0-9][0-9.]*\).*/\1/p' "$_fc_tmp" | head -1)
+      _ic_score=$(sed -n 's/.*Score:[* ]* *\([0-9][0-9.]*\).*/\1/p' "$_ic_tmp" | head -1)
+      _ca_score=$(sed -n 's/.*Score:[* ]* *\([0-9][0-9.]*\).*/\1/p' "$_ca_tmp" | head -1)
 
       rm -f "$_fc_tmp" "$_ic_tmp" "$_ca_tmp"
 
