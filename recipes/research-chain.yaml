@@ -2,6 +2,19 @@
 # CHANGELOG
 # =============================================================================
 #
+# v1.10.0 (2026-03-14):
+#   - FEATURE: Added smart skip gates for DA-formatter and writer-formatter
+#     * ROOT CAUSE: Formatter steps take ~6 min combined but are no-ops when
+#       upstream specialists produce well-formed canonical output. On the
+#       well-documented eval topic, both formatters were pure pass-through.
+#     * FIX: Added bash validation gates before format-analysis and format-writer.
+#       Each gate checks for canonical structure markers (ANALYSIS OUTPUT header +
+#       INFERENCES + traces_to for DA; Parsed: + S-claims + CITATIONS for writer).
+#       If markers present, a pass-through step copies input directly to output,
+#       skipping the LLM formatter. If markers missing, formatter runs as before.
+#     * RESULT: ~6 min saved on well-formed runs (22min → 16min pipeline).
+#       researcher-formatter NOT gated because it performs URL integration.
+#
 # v1.9.0 (2026-03-13):
 #   - FEATURE: Added validate-research gate after research step
 #     * ROOT CAUSE: ~50% of research runs produce only a truncated metadata
@@ -147,7 +160,7 @@
 
 name: "research-chain"
 description: "Full research pipeline with format normalization — Researcher → URL Resolution → Formatter → Data Analyzer → Writer → Writer Formatter → Save"
-version: "1.9.0"
+version: "1.10.0"
 tags: ["research", "analysis", "writing", "chain"]
 
 context:
@@ -305,7 +318,37 @@ steps:
     output: "analysis_output"
     timeout: 900
 
+  - id: "check-analysis-format"
+    type: "bash"
+    command: |
+      _tmp=$(mktemp)
+      cat > "$_tmp" <<'__CHECK_AN_EOF__'
+      {{analysis_output}}
+      __CHECK_AN_EOF__
+      _has_header=$(grep -c '^ANALYSIS OUTPUT' "$_tmp" || true)
+      _has_inferences=$(grep -c '^INFERENCES' "$_tmp" || true)
+      _has_traces=$(grep -ci 'traces_to' "$_tmp" || true)
+      rm -f "$_tmp"
+      if [ "$_has_header" -ge 1 ] && [ "$_has_inferences" -ge 1 ] && [ "$_has_traces" -ge 1 ]; then
+        echo "SKIP"
+      else
+        echo "RUN"
+      fi
+    output: "_fmt_analysis_needed"
+    timeout: 10
+
+  - id: "passthrough-analysis"
+    type: "bash"
+    condition: "{{_fmt_analysis_needed}} == SKIP"
+    command: |
+      cat <<'__PASS_AN_EOF__'
+      {{analysis_output}}
+      __PASS_AN_EOF__
+    output: "formatted_analysis"
+    timeout: 10
+
   - id: "format-analysis"
+    condition: "{{_fmt_analysis_needed}} == RUN"
     agent: "specialists:data-analyzer-formatter"
     prompt: |
       Normalize the following data-analyzer output into a canonical ANALYSIS OUTPUT block.
@@ -342,7 +385,37 @@ steps:
     output: "final_document"
     timeout: 1800
 
+  - id: "check-writer-format"
+    type: "bash"
+    command: |
+      _tmp=$(mktemp)
+      cat > "$_tmp" <<'__CHECK_WR_EOF__'
+      {{final_document}}
+      __CHECK_WR_EOF__
+      _has_parsed=$(grep -c '^Parsed:' "$_tmp" || true)
+      _has_claims=$(grep -c '^S[0-9]' "$_tmp" || true)
+      _has_citations=$(grep -ci 'CITATIONS' "$_tmp" || true)
+      rm -f "$_tmp"
+      if [ "$_has_parsed" -ge 1 ] && [ "$_has_claims" -ge 3 ] && [ "$_has_citations" -ge 1 ]; then
+        echo "SKIP"
+      else
+        echo "RUN"
+      fi
+    output: "_fmt_writer_needed"
+    timeout: 10
+
+  - id: "passthrough-writer"
+    type: "bash"
+    condition: "{{_fmt_writer_needed}} == SKIP"
+    command: |
+      cat <<'__PASS_WR_EOF__'
+      {{final_document}}
+      __PASS_WR_EOF__
+    output: "formatted_document"
+    timeout: 10
+
   - id: "format-writer"
+    condition: "{{_fmt_writer_needed}} == RUN"
     agent: "specialists:writer-formatter"
     prompt: |
       Produce the canonical Writer output block from the following writer output.
