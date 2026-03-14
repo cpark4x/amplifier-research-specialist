@@ -286,7 +286,7 @@ steps:
         and MISSING_HEDGE).
       - If the writer output has zero factual claims, score = 10.0.
     output: "consistency_audit_report"
-    timeout: 900
+    timeout: 1800
 
   # ===========================================================================
   # SCORE COMPUTATION
