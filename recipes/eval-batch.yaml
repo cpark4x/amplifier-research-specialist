@@ -1,0 +1,107 @@
+# =============================================================================
+# eval-batch: Batch Evaluation Across All Test Topics
+# =============================================================================
+#
+# Loads topics from test-topics.yaml and runs the evaluation recipe for each
+# topic in parallel. Supports both full pipeline and critics-only fast mode.
+#
+# Usage:
+#   Full evaluation (all topics, parallel):
+#     recipe execute recipes/eval-batch.yaml
+#
+#   Critics-only fast mode (requires prior full run for cache):
+#     recipe execute recipes/eval-batch.yaml \
+#       --context '{"mode": "critics-only"}'
+#
+#   Custom parallelism:
+#     recipe execute recipes/eval-batch.yaml \
+#       --context '{"mode": "full", "parallel_limit": 2}'
+#
+# =============================================================================
+
+name: "eval-batch"
+description: "Batch evaluation — run all test topics through full or critics-only eval"
+version: "1.0.0"
+tags: ["evaluation", "batch", "adversarial", "quality"]
+
+context:
+  mode: "full"               # "full" = pipeline + critics, "critics-only" = cached pipeline
+  parallel_limit: 3          # max concurrent topic evaluations
+
+steps:
+  # ===========================================================================
+  # LOAD TOPICS FROM YAML
+  # ===========================================================================
+  - id: "load-topics"
+    type: "bash"
+    command: |
+      python3 -c "
+      import json, yaml
+      with open('specs/evaluation/test-topics.yaml') as f:
+          data = yaml.safe_load(f)
+      print(json.dumps(data['topics']))
+      "
+    output: "topics"
+    parse_json: true
+    timeout: 10
+
+  # ===========================================================================
+  # RUN FULL EVAL FOR EACH TOPIC (when mode = full)
+  # ===========================================================================
+  - id: "run-full-evals"
+    foreach: "{{topics}}"
+    as: "topic"
+    parallel: "{{parallel_limit}}"
+    collect: "full_results"
+    condition: "{{mode}} == full"
+    type: "recipe"
+    recipe: "recipes/eval-harness.yaml"
+    context:
+      research_question: "{{topic.query}}"
+      topic_id: "{{topic.id}}"
+    output: "single_full_result"
+    timeout: 3600
+    on_error: "continue"
+    max_iterations: 20
+
+  # ===========================================================================
+  # RUN CRITICS-ONLY EVAL FOR EACH TOPIC (when mode = critics-only)
+  # ===========================================================================
+  - id: "run-critics-evals"
+    foreach: "{{topics}}"
+    as: "topic"
+    parallel: "{{parallel_limit}}"
+    collect: "critics_results"
+    condition: "{{mode}} == critics-only"
+    type: "recipe"
+    recipe: "recipes/eval-critics-only.yaml"
+    context:
+      topic_id: "{{topic.id}}"
+    output: "single_critics_result"
+    timeout: 1800
+    on_error: "continue"
+    max_iterations: 20
+
+  # ===========================================================================
+  # AGGREGATE SCORES
+  # ===========================================================================
+  - id: "aggregate-scores"
+    type: "bash"
+    command: |
+      echo "=== BATCH EVALUATION COMPLETE ==="
+      echo ""
+      echo "Mode: {{mode}}"
+      echo "Topics evaluated: $(python3 -c "
+      import yaml
+      with open('specs/evaluation/test-topics.yaml') as f:
+          data = yaml.safe_load(f)
+      print(len(data['topics']))
+      ")"
+      echo ""
+      echo "--- Score History ---"
+      cat specs/evaluation/score-history.yaml
+      echo ""
+      echo "--- Reports ---"
+      ls -la specs/evaluation/reports/ 2>/dev/null || echo "No reports directory"
+    output: "batch_summary"
+    timeout: 30

@@ -1,285 +1,97 @@
 # =============================================================================
-# eval-harness: Adversarial Evaluation for Specialists Pipeline
+# eval-critics-only: Fast Adversarial Re-evaluation from Cached Pipeline Output
 # =============================================================================
 #
-# Runs the full research-chain pipeline on a single test topic, then evaluates
-# the output with three adversarial critics:
-#   1. Fact-checker — verifies claims against source URLs
-#   2. Inference challenger — challenges inference robustness
-#   3. Consistency auditor — checks confidence-language matching
+# Loads cached pipeline outputs from a previous eval-harness run and re-runs
+# only the three adversarial critics + scoring. Use this when iterating on
+# specialist agent prompts (writer, data-analyzer) without re-running the
+# slow research pipeline.
 #
-# Produces a structured evaluation report with per-critic scores and a
-# composite content score.
+# Prerequisites:
+#   Run eval-harness.yaml first to populate the cache:
+#     recipe execute recipes/eval-harness.yaml \
+#       --context '{"research_question": "...", "topic_id": "well-documented"}'
 #
 # Usage:
-#   Run for one topic:
-#     recipe execute recipes/eval-harness.yaml \
-#       --context '{"research_question": "What is Anthropic...", "topic_id": "well-documented"}'
-#
-#   Run for all topics: invoke once per topic in test-topics.yaml
-#
-#   Fast critics-only re-run (uses cached pipeline output):
+#   Fast re-evaluation (~15 min vs ~50 min):
 #     recipe execute recipes/eval-critics-only.yaml \
 #       --context '{"topic_id": "well-documented"}'
 #
 # Scoring: see specs/evaluation/scoring-rubric.md
 # =============================================================================
 
-name: "eval-harness"
-description: "Adversarial evaluation — run research pipeline + three critics on a single topic"
-version: "1.1.0"
-tags: ["evaluation", "adversarial", "quality", "scoring"]
+name: "eval-critics-only"
+description: "Fast adversarial re-evaluation — critics only, from cached pipeline output"
+version: "1.0.0"
+tags: ["evaluation", "adversarial", "quality", "scoring", "fast"]
 
 context:
-  research_question: ""        # Required: the topic query
-  topic_id: ""                 # Required: stable topic ID for score tracking
-  quality_threshold: "medium"  # Pipeline quality threshold
+  topic_id: ""                 # Required: topic ID (must have cached pipeline output)
 
 steps:
   # ===========================================================================
-  # PIPELINE STEPS (from research-chain.yaml v1.9.0)
+  # LOAD CACHED PIPELINE OUTPUTS
   # ===========================================================================
-
-  - id: "research"
-    agent: "specialists:researcher"
-    prompt: |
-      REQUIRED: research_question must not be blank. If {{research_question}} is empty
-      or blank, stop immediately and return: "ERROR: research_question is required but
-      was not provided. Please provide a research question."
-
-      Research the following question thoroughly. Follow your full research pipeline.
-      Focus on finding trustworthy evidence with source tiering and confidence
-      assessments. Do not worry about output format — the formatter handles that.
-
-      Research question: {{research_question}}
-
-      Quality threshold: {{quality_threshold}}
-
-      Scope constraints (required — enforce in Stage 1):
-      - Decompose into no more than 5 sub-questions
-      - Cap your source queue at 15 URLs total across all sub-questions
-      - Run no more than 2 Quality Gate cycles before accepting remaining gaps
-      - Target a maximum of 3,000 words and 30 sourced claims in your final output
-    output: "research_output"
-    timeout: 2700
-
-  - id: "validate-research"
-    type: "bash"
-    command: |
-      _vr_tmp=$(mktemp)
-      cat > "$_vr_tmp" <<'__VALIDATE_EOF__'
-      {{research_output}}
-      __VALIDATE_EOF__
-      _bytes=$(wc -c < "$_vr_tmp")
-      _has_findings=$(grep -ci -E '(finding|source|confidence|claim|evidence)' "$_vr_tmp" || true)
-      if [ "$_bytes" -lt 500 ]; then
-        echo "GATE_FAIL: Research output is only ${_bytes} bytes — likely a truncated metadata summary, not full research. Aborting pipeline."
-        rm -f "$_vr_tmp"
-        exit 1
-      elif [ "$_has_findings" -lt 3 ]; then
-        echo "GATE_FAIL: Research output has fewer than 3 evidence markers (findings/sources/confidence). Likely not substantive research. Aborting pipeline."
-        rm -f "$_vr_tmp"
-        exit 1
-      else
-        echo "GATE_PASS: Research output is ${_bytes} bytes with ${_has_findings} evidence markers."
-        rm -f "$_vr_tmp"
-      fi
-    output: "research_validation"
-    timeout: 30
-
-  - id: "resolve-urls"
-    agent: "foundation:web-research"
-    prompt: |
-      You are a URL verification utility. Your ONLY job is to find verified URLs for
-      source names mentioned in a research output. You do NOT research, analyze, or
-      summarize — you look up URLs.
-
-      Below is a research output that mentions sources by name (e.g., "TechCrunch",
-      "Bloomberg", "Contrary Research", "poolside.ai") but may be missing full
-      https:// URLs for some or all of them.
-
-      Research topic for search context: {{research_question}}
-
-      Research output:
-      {{research_output}}
-
-      TASK:
-      1. Extract every distinct source name mentioned in the research output
-         (publication names, company sites, report titles, blog names).
-         Cap at 15 sources maximum — prioritize primary and secondary tier sources.
-
-      2. For each source name, run ONE web_search to find the actual article URL.
-         Search query pattern: "[source name] [key topic words from research question] [year if mentioned]"
-         Example: "TechCrunch Poolside AI Series B 2024"
-
-      3. From the search results, pick the best-matching URL — same publication,
-         same topic, plausible date. If no good match, mark as "not found".
-
-      4. Return ONLY a source URL map in this exact format — nothing else:
-
-      SOURCE_URL_MAP
-      - name: "TechCrunch — Poolside AI raises $500M"
-        url: "https://techcrunch.com/2024/10/15/poolside-ai-raises-500m-series-b/"
-        match: verified
-      - name: "Contrary Research — Poolside Business Breakdown"
-        url: "https://research.contrary.com/company/poolside-ai"
-        match: verified
-      - name: "Some Obscure Blog"
-        url: not found
-        match: none
-      END_SOURCE_URL_MAP
-
-      Rules:
-      - One web_search per source, no more. This step must stay fast.
-      - Never fabricate a URL. If search results don't have a clear match, say "not found".
-      - The map format must be exactly as shown — downstream parsing depends on it.
-      - Do not include any text before SOURCE_URL_MAP or after END_SOURCE_URL_MAP.
-    output: "source_url_map"
-    timeout: 600
-
-  - id: "format-research"
-    agent: "specialists:researcher-formatter"
-    prompt: |
-      Normalize the following research narrative into your canonical RESEARCH OUTPUT
-      block format. Apply all standard formatting rules: structured sections, source
-      tiering, per-claim confidence scores, and gap flags.
-
-      Research narrative to format:
-      {{research_output}}
-
-      SOURCE URL MAP (verified URLs for sources named in the narrative):
-      {{source_url_map}}
-
-      URL resolution instructions: A prior pipeline step searched for verified URLs
-      matching source names in the research narrative. When you encounter a source
-      name that matches an entry in the URL map with match: verified, use that URL
-      as the Source value for that finding. This is extracted data, not invention —
-      the URLs were verified via web search. Only fall back to your own URL recovery
-      (Stage 1.5) or "unknown" for sources not in the map or marked "not found".
-    output: "formatted_research"
-    timeout: 1200
-
-  - id: "strip-parsed-prefix"
-    type: "bash"
-    command: |
-      _sp_tmp=$(mktemp)
-      cat > "$_sp_tmp" <<'__STRIP_PARSED_EOF__'
-      {{formatted_research}}
-      __STRIP_PARSED_EOF__
-      if grep -q '^RESEARCH OUTPUT' "$_sp_tmp"; then
-        awk '/^RESEARCH OUTPUT/{found=1} found{print}' "$_sp_tmp"
-      else
-        cat "$_sp_tmp"
-      fi
-      rm -f "$_sp_tmp"
-    output: "formatted_research_clean"
-    timeout: 30
-
-  - id: "analyze"
-    agent: "specialists:data-analyzer"
-    prompt: |
-      Analyze the following formatted research output. Draw inferences, identify
-      patterns, surface key insights, and flag confidence gaps. Follow your full
-      analysis pipeline.
-
-      Formatted research:
-      {{formatted_research_clean}}
-    output: "analysis_output"
-    timeout: 900
-
-  - id: "format-analysis"
-    agent: "specialists:data-analyzer-formatter"
-    prompt: |
-      Normalize the following data-analyzer output into a canonical ANALYSIS OUTPUT block.
-
-      Data-analyzer output to format:
-      {{analysis_output}}
-
-      Original research (authoritative source for F1-Fn findings):
-      {{formatted_research}}
-    output: "formatted_analysis"
-    timeout: 600
-
-  - id: "write"
-    agent: "specialists:writer"
-    prompt: |
-      Transform the following analysis into a polished document. Follow your full
-      writing pipeline and return WRITER METADATA, the document body with section
-      attribution lines, CITATIONS, and CLAIMS TO VERIFY blocks.
-
-      Analysis:
-      {{formatted_analysis}}
-
-      SOURCE URL MAP (verified URLs for sources — use these in CITATIONS):
-      {{source_url_map}}
-
-      Output format: brief
-      Audience: evaluation pipeline (internal)
-      Voice: executive
-
-      When building your CITATIONS block, match source names to the URL map above
-      and use the verified https:// URLs. This ensures source provenance survives
-      the analysis step.
-    output: "final_document"
-    timeout: 1800
-
-  - id: "format-writer"
-    agent: "specialists:writer-formatter"
-    prompt: |
-      Produce the canonical Writer output block from the following writer output.
-
-      Original source material (source of S-numbered claims):
-      {{formatted_analysis}}
-
-      Writer output to format:
-      {{final_document}}
-    output: "formatted_document"
-    timeout: 1200
-
-  - id: "strip-formatter-notes"
-    type: "bash"
-    command: |
-      _fn_tmp=$(mktemp)
-      cat > "$_fn_tmp" <<'__STRIP_NOTES_EOF__'
-      {{formatted_document}}
-      __STRIP_NOTES_EOF__
-      _start=$(grep -n '^Parsed:' "$_fn_tmp" | head -1 | cut -d: -f1)
-      _end=$(grep -n '^S[0-9]\{1,\}:' "$_fn_tmp" | tail -1 | cut -d: -f1)
-      if [ -n "$_start" ] && [ -n "$_end" ]; then
-        sed -n "${_start},${_end}p" "$_fn_tmp"
-      elif [ -n "$_start" ]; then
-        awk '/^Parsed:/ && !s{s=1} s && /^[*][*].*:[*][*]$/{exit} s{print}' "$_fn_tmp"
-      else
-        cat "$_fn_tmp"
-      fi
-      rm -f "$_fn_tmp"
-    output: "formatted_document_clean"
-    timeout: 30
-
-  # ===========================================================================
-  # CACHE PIPELINE OUTPUTS (for critics-only re-runs)
-  # ===========================================================================
-  - id: "save-pipeline-cache"
+  - id: "load-cache"
     type: "bash"
     command: |
       _cache_dir="specs/evaluation/cache/{{topic_id}}"
-      mkdir -p "$_cache_dir"
 
-      cat > "$_cache_dir/formatted_research_clean.txt" <<'__CACHE_RC_EOF__'
-      {{formatted_research_clean}}
-      __CACHE_RC_EOF__
+      if [ ! -d "$_cache_dir" ]; then
+        echo "ERROR: No cached pipeline output found at $_cache_dir"
+        echo "Run eval-harness.yaml first to populate the cache."
+        exit 1
+      fi
 
-      cat > "$_cache_dir/formatted_analysis.txt" <<'__CACHE_AN_EOF__'
-      {{formatted_analysis}}
-      __CACHE_AN_EOF__
+      for _f in formatted_research_clean.txt formatted_analysis.txt formatted_document_clean.txt; do
+        if [ ! -f "$_cache_dir/$_f" ]; then
+          echo "ERROR: Missing cached file: $_cache_dir/$_f"
+          echo "Run eval-harness.yaml first to populate the cache."
+          exit 1
+        fi
+      done
 
-      cat > "$_cache_dir/formatted_document_clean.txt" <<'__CACHE_DC_EOF__'
-      {{formatted_document_clean}}
-      __CACHE_DC_EOF__
+      echo "Cache validated: $_cache_dir"
+    output: "cache_check"
+    timeout: 10
 
-      echo "Pipeline outputs cached to $_cache_dir"
-    output: "cache_result"
-    timeout: 30
+  - id: "load-research"
+    type: "bash"
+    command: |
+      cat "specs/evaluation/cache/{{topic_id}}/formatted_research_clean.txt"
+    output: "formatted_research_clean"
+    timeout: 10
+
+  - id: "load-analysis"
+    type: "bash"
+    command: |
+      cat "specs/evaluation/cache/{{topic_id}}/formatted_analysis.txt"
+    output: "formatted_analysis"
+    timeout: 10
+
+  - id: "load-document"
+    type: "bash"
+    command: |
+      cat "specs/evaluation/cache/{{topic_id}}/formatted_document_clean.txt"
+    output: "formatted_document_clean"
+    timeout: 10
+
+  - id: "load-question"
+    type: "bash"
+    command: |
+      python3 -c "
+      import yaml
+      with open('specs/evaluation/test-topics.yaml') as f:
+          data = yaml.safe_load(f)
+      for t in data['topics']:
+          if t['id'] == '{{topic_id}}':
+              print(t['query'])
+              break
+      else:
+          print('Unknown topic: {{topic_id}}')
+      "
+    output: "research_question"
+    timeout: 10
 
   # ===========================================================================
   # CRITIC 1: Fact-Checker
@@ -482,8 +294,6 @@ steps:
   - id: "compute-scores"
     type: "bash"
     command: |
-      # Write critic reports to temp files using quoted heredocs to avoid
-      # shell metacharacter issues (reports contain parentheses, quotes, etc.)
       _fc_tmp=$(mktemp)
       _ic_tmp=$(mktemp)
       _ca_tmp=$(mktemp)
@@ -500,19 +310,16 @@ steps:
       {{consistency_audit_report}}
       __CA_REPORT_EOF__
 
-      # Extract scores from temp files
       _fc_score=$(sed -n 's/.*Score:[* ]* *\([0-9][0-9.]*\).*/\1/p' "$_fc_tmp" | head -1)
       _ic_score=$(sed -n 's/.*Score:[* ]* *\([0-9][0-9.]*\).*/\1/p' "$_ic_tmp" | head -1)
       _ca_score=$(sed -n 's/.*Score:[* ]* *\([0-9][0-9.]*\).*/\1/p' "$_ca_tmp" | head -1)
 
       rm -f "$_fc_tmp" "$_ic_tmp" "$_ca_tmp"
 
-      # Default to 0.0 if extraction failed
       _fc_score=${_fc_score:-0.0}
       _ic_score=${_ic_score:-0.0}
       _ca_score=${_ca_score:-0.0}
 
-      # Compute composite: 0.40 * fact + 0.35 * inference + 0.25 * consistency
       _composite=$(python3 -c "
       fc = float('${_fc_score}')
       ic = float('${_ic_score}')
@@ -544,7 +351,6 @@ steps:
     command: |
       mkdir -p specs/evaluation
 
-      # Write critic reports to temp files (same pattern as compute-scores)
       _fc_tmp=$(mktemp)
       _ic_tmp=$(mktemp)
       _ca_tmp=$(mktemp)
