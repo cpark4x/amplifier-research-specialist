@@ -453,10 +453,30 @@ steps:
   - id: "compute-scores"
     type: "bash"
     command: |
-      # Extract scores from the three critic reports using grep
-      _fc_score=$(echo '{{fact_check_report}}' | grep -oP 'Score: \K[0-9]+\.?[0-9]*' | head -1)
-      _ic_score=$(echo '{{inference_challenge_report}}' | grep -oP 'Score: \K[0-9]+\.?[0-9]*' | head -1)
-      _ca_score=$(echo '{{consistency_audit_report}}' | grep -oP 'Score: \K[0-9]+\.?[0-9]*' | head -1)
+      # Write critic reports to temp files using quoted heredocs to avoid
+      # shell metacharacter issues (reports contain parentheses, quotes, etc.)
+      _fc_tmp=$(mktemp)
+      _ic_tmp=$(mktemp)
+      _ca_tmp=$(mktemp)
+
+      cat > "$_fc_tmp" <<'__FC_REPORT_EOF__'
+      {{fact_check_report}}
+      __FC_REPORT_EOF__
+
+      cat > "$_ic_tmp" <<'__IC_REPORT_EOF__'
+      {{inference_challenge_report}}
+      __IC_REPORT_EOF__
+
+      cat > "$_ca_tmp" <<'__CA_REPORT_EOF__'
+      {{consistency_audit_report}}
+      __CA_REPORT_EOF__
+
+      # Extract scores from temp files
+      _fc_score=$(grep -oP 'Score: \K[0-9]+\.?[0-9]*' "$_fc_tmp" | head -1)
+      _ic_score=$(grep -oP 'Score: \K[0-9]+\.?[0-9]*' "$_ic_tmp" | head -1)
+      _ca_score=$(grep -oP 'Score: \K[0-9]+\.?[0-9]*' "$_ca_tmp" | head -1)
+
+      rm -f "$_fc_tmp" "$_ic_tmp" "$_ca_tmp"
 
       # Default to 0.0 if extraction failed
       _fc_score=${_fc_score:-0.0}
@@ -495,9 +515,29 @@ steps:
     command: |
       mkdir -p specs/evaluation
 
-      _fc_score=$(echo '{{fact_check_report}}' | grep -oP 'Score: \K[0-9]+\.?[0-9]*' | head -1)
-      _ic_score=$(echo '{{inference_challenge_report}}' | grep -oP 'Score: \K[0-9]+\.?[0-9]*' | head -1)
-      _ca_score=$(echo '{{consistency_audit_report}}' | grep -oP 'Score: \K[0-9]+\.?[0-9]*' | head -1)
+      # Write critic reports to temp files (same pattern as compute-scores)
+      _fc_tmp=$(mktemp)
+      _ic_tmp=$(mktemp)
+      _ca_tmp=$(mktemp)
+
+      cat > "$_fc_tmp" <<'__FC_SAVE_EOF__'
+      {{fact_check_report}}
+      __FC_SAVE_EOF__
+
+      cat > "$_ic_tmp" <<'__IC_SAVE_EOF__'
+      {{inference_challenge_report}}
+      __IC_SAVE_EOF__
+
+      cat > "$_ca_tmp" <<'__CA_SAVE_EOF__'
+      {{consistency_audit_report}}
+      __CA_SAVE_EOF__
+
+      _fc_score=$(grep -oP 'Score: \K[0-9]+\.?[0-9]*' "$_fc_tmp" | head -1)
+      _ic_score=$(grep -oP 'Score: \K[0-9]+\.?[0-9]*' "$_ic_tmp" | head -1)
+      _ca_score=$(grep -oP 'Score: \K[0-9]+\.?[0-9]*' "$_ca_tmp" | head -1)
+
+      rm -f "$_fc_tmp" "$_ic_tmp" "$_ca_tmp"
+
       _fc_score=${_fc_score:-0.0}
       _ic_score=${_ic_score:-0.0}
       _ca_score=${_ca_score:-0.0}
