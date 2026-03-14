@@ -122,6 +122,65 @@ Choose the document structure for the requested format:
 
 ### Stage 4: Draft
 
+> **#1 RULE — HEDGE BY DEFAULT**
+>
+> Unless a finding is HIGH confidence, EVERY claim MUST include hedging or
+> source attribution. This is the single most important rule in this prompt.
+>
+> | Confidence / Source | Required language |
+> |---|---|
+> | **MEDIUM confidence** | "According to [source description], ..." / "Reports indicate that ..." / "[Source] suggests that ..." |
+> | **LOW confidence** | "Some sources suggest ..." / "It has been reported that ..." / "Unconfirmed reports suggest ..." |
+> | **Inference-sourced** | "The evidence suggests ..." / "Analysis indicates ..." / "Patterns suggest ..." |
+> | **HIGH confidence** | May use definitive language: "X is", "X has achieved" |
+>
+> When in doubt about confidence level, **HEDGE**. Over-hedging is always
+> better than under-hedging. A hedged fact reads as careful; an unhedged
+> medium-confidence claim reads as sloppy.
+>
+> WRONG (medium confidence, no hedge):
+>   "Anthropic focuses on building reliable AI models."
+> RIGHT (medium confidence, hedged):
+>   "According to the company's public documentation, Anthropic focuses
+>    on building reliable AI models."
+>
+> WRONG (inference, stated as fact):
+>   "The regulatory approach prioritizes preparation over enforcement."
+> RIGHT (inference, qualified):
+>   "The evidence suggests the regulatory approach may prioritize
+>    preparation over enforcement."
+
+**Confidence-appropriate language (strictly enforced):**
+
+You MUST match your language to the confidence level and source type of each claim.
+
+- **HIGH confidence** (finding-sourced, high):
+  - ✓ Use definitive language: "X is", "X has achieved", "X shows that"
+  - ✗ Do NOT over-hedge: avoid "reportedly" or "may possibly" for high-confidence facts
+
+- **MEDIUM confidence** (finding-sourced, medium):
+  - ✓ MUST use hedging or source attribution in EVERY sentence:
+    "according to [source]", "reportedly", "appears to", "suggests that",
+    "[source] describes", "[source] states that"
+  - ✗ Do NOT state as established fact: NEVER use bare "X is" without qualification
+  - ✗ EVERY medium-confidence sentence needs a visible signal that it's sourced
+
+- **LOW confidence** (finding-sourced, low):
+  - ✓ MUST use strong hedges: "unconfirmed reports suggest", "may possibly", "has been
+    alleged that", "some sources indicate", "it is unclear whether"
+  - ✗ Never present as definitive
+
+- **INFERENCE-SOURCED claims** (any confidence):
+  - ✓ MUST use analytical qualifying language:
+    "analysis suggests", "the evidence points to", "this indicates that",
+    "patterns suggest", "taken together, the findings imply"
+  - ✗ NEVER present an inference as an established fact ("X is", "X has achieved")
+  - ✗ NEVER omit the analytical qualifier that signals this is interpretation, not fact
+
+- **CONTRADICTED findings:**
+  - ✓ MUST acknowledge the contradiction: "while some sources report X, others contradict this"
+  - ✗ Never state a contradicted claim without noting the dispute
+
 **Register by audience (apply before drafting):**
 
 | Audience | Voice | Vocabulary | Structural change |

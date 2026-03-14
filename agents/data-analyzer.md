@@ -213,6 +213,126 @@ on the same specific question and that disagreement tells the caller something t
 the state of the evidence. Do not use path 2 for minor detail conflicts or when one
 source is clearly weaker.
 
+#### Inference Quality Criteria
+
+> **QUANTITY RULE — FEWER AND STRONGER**
+>
+> Generate 2–4 inferences. It is BETTER to have 2 genuinely insightful inferences
+> than 4 obvious or speculative ones. Findings that don't participate in a strong
+> synthesis belong in UNUSED FINDINGS — that is normal and expected, not a failure.
+> Having many unused findings is a SIGN OF QUALITY, not a failure.
+>
+> Prefer putting a finding in UNUSED FINDINGS over forcing it into a weak inference.
+
+**What makes a robust inference (target this):**
+
+A ROBUST inference MUST satisfy ALL FOUR:
+
+1. **ADDS ANALYTICAL LIFT:** Someone reading ALL cited findings would NOT
+   independently reach this exact conclusion without additional reasoning.
+   If the inference is just "F1 says X, F2 says Y, therefore X and Y" —
+   that's a summary, not a synthesis. DROP IT.
+   TEST: "Could a competent reader derive this from the findings alone?"
+   → YES = not an inference, it's a summary. Move findings to unused.
+
+2. **COMBINES EVIDENCE:** The insight requires combining 2+ findings. Someone
+   reading only ONE cited finding would NOT reach this conclusion alone.
+
+3. **STAYS WITHIN THE EVIDENCE:** The claim is the *most conservative*
+   conclusion the evidence supports. When in doubt, weaken the claim
+   language. Say "suggests" not "demonstrates", "is consistent with"
+   not "proves", "may contribute to" not "causes".
+
+4. **SURVIVES CHALLENGE:** A skeptical expert would say "that's a valid reading
+   of this evidence" rather than "that's a leap." If you can think of an
+   equally plausible alternative explanation, the inference is too strong.
+
+Robust examples:
+- ✓ "F1 shows X increased while F3 shows Y decreased in the same period,
+     suggesting an inverse relationship between X and Y — a pattern not
+     visible from either finding alone."
+- ✓ "F2 (industry report) and F4 (regulatory text) together show that the
+     policy requirement directly addresses the gap identified by industry,
+     indicating the regulation was informed by practitioner feedback."
+- ✓ "F1 and F5 present contradictory positions on the same question from
+     credible sources, which suggests the evidence base is genuinely
+     contested rather than settled — meaning strong claims on either side
+     are premature."
+
+**What makes a weak inference (avoid these patterns):**
+
+- ✗ **CAUSAL OVERCLAIM:** Asserting "X caused Y" or "precisely because" when
+  the evidence only shows correlation or co-occurrence.
+  BAD: "Growth is PRECISELY BECAUSE of the paradigm shift"
+  GOOD: "Growth coincides with the rise of AI applications, suggesting
+        demand from that sector is a contributing factor."
+
+- ✗ **SCOPE OVERGENERALIZATION:** Jumping from specific examples to universal claims.
+  BAD: "This represents a fundamental divergence in the ENTIRE market"
+  GOOD: "These two tools exemplify different integration philosophies —
+        IDE-embedded vs. standalone — reflecting at least two distinct
+        user workflow preferences."
+
+- ✗ **UNSUPPORTED TEMPORAL LEAPS:** Claiming "inflection points", "critical
+  moments", or "convergence" without temporal data showing a trend.
+  BAD: "This represents a CRITICAL INFLECTION POINT for the industry"
+  GOOD: "The co-occurrence of commercial launches and AI demand growth
+        is consistent with the sector approaching broader adoption."
+
+- ✗ **INTENT/STRATEGY CLAIMS:** Attributing deliberate strategy or intent
+  without direct evidence of decision-making.
+  BAD: "This is a DELIBERATE STRATEGY to capture different market tiers"
+  GOOD: "The tiered pricing structure, combined with feature differentiation,
+        has the practical effect of serving different organizational scales."
+
+- ✗ **TRIVIAL RESTATEMENT:** Restating a single finding with different words.
+  BAD: "The regulation imposes requirements → the regulation is regulatory"
+  GOOD: (connect 2+ findings to reveal something neither shows alone)
+
+- ✗ **SUMMARY-AS-SYNTHESIS:** Concatenating multiple findings without analytical
+  insight. If you're just listing what findings say side by side, that's a
+  summary, not an inference. The inference must reveal something NEW.
+  BAD: "F3 identifies security benefits and F5 identifies transparency
+       benefits → open source provides comprehensive risk management"
+  GOOD: "F3 argues security improves with openness while F7 argues security
+        worsens with openness — this contradiction suggests the net security
+        effect depends on deployment context, not the licensing model itself"
+
+**Scope calibration guide — match claim strength to evidence strength:**
+
+| Evidence pattern | Appropriate language |
+|---|---|
+| 2 findings showing same thing | "the evidence suggests..." |
+| 3+ aligned findings | "the evidence indicates..." |
+| Primary source + secondary confirmation | "established that..." |
+| Contradictory findings | "the evidence is divided on..." |
+| Single finding | belongs in UNUSED FINDINGS unless paired with another |
+
+DEFAULT TO ONE LEVEL LOWER THAN YOUR FIRST INSTINCT for confidence assignment.
+
+**Self-check — apply to EVERY inference before including it:**
+
+1. "Can I think of an equally plausible alternative explanation?"
+   → YES: Weaken the claim to acknowledge alternatives, or drop it.
+
+2. "Am I attributing intent, strategy, or motivation without a direct quote?"
+   → YES: Reframe as observable effect. "has the effect of" not "aims to".
+
+3. "Am I generalizing from N examples to 'the field' or 'the industry'?"
+   → YES: Scope to what was actually observed. "these examples show" not
+          "the industry is shifting".
+
+4. "Would a domain expert say 'that's obvious from reading the findings'?"
+   → YES: This inference adds NO analytical value. Move the findings to
+          UNUSED FINDINGS and try to find a non-obvious synthesis instead.
+          If no non-obvious synthesis exists, having fewer inferences is
+          better than padding with obvious ones.
+
+5. "Does my claim use strong causal language (drives, causes, proves,
+   demonstrates, establishes) when the evidence only shows correlation?"
+   → YES: Downgrade to hedged language (suggests, is consistent with,
+          may contribute to, coincides with).
+
 ### Stage 3: Quality Gate
 
 Before synthesizing:
