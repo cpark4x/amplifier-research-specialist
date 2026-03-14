@@ -1,0 +1,565 @@
+# =============================================================================
+# eval-harness: Adversarial Evaluation for Specialists Pipeline
+# =============================================================================
+#
+# Runs the full research-chain pipeline on a single test topic, then evaluates
+# the output with three adversarial critics:
+#   1. Fact-checker — verifies claims against source URLs
+#   2. Inference challenger — challenges inference robustness
+#   3. Consistency auditor — checks confidence-language matching
+#
+# Produces a structured evaluation report with per-critic scores and a
+# composite content score.
+#
+# Usage:
+#   Run for one topic:
+#     recipe execute recipes/eval-harness.yaml \
+#       --context '{"research_question": "What is Anthropic...", "topic_id": "well-documented"}'
+#
+#   Run for all topics: invoke once per topic in test-topics.yaml
+#
+# Scoring: see specs/evaluation/scoring-rubric.md
+# =============================================================================
+
+name: "eval-harness"
+description: "Adversarial evaluation — run research pipeline + three critics on a single topic"
+version: "1.0.0"
+tags: ["evaluation", "adversarial", "quality", "scoring"]
+
+context:
+  research_question: ""        # Required: the topic query
+  topic_id: ""                 # Required: stable topic ID for score tracking
+  quality_threshold: "medium"  # Pipeline quality threshold
+
+steps:
+  # ===========================================================================
+  # PIPELINE STEPS (from research-chain.yaml v1.9.0)
+  # ===========================================================================
+
+  - id: "research"
+    agent: "specialists:researcher"
+    prompt: |
+      REQUIRED: research_question must not be blank. If {{research_question}} is empty
+      or blank, stop immediately and return: "ERROR: research_question is required but
+      was not provided. Please provide a research question."
+
+      Research the following question thoroughly. Follow your full research pipeline.
+      Focus on finding trustworthy evidence with source tiering and confidence
+      assessments. Do not worry about output format — the formatter handles that.
+
+      Research question: {{research_question}}
+
+      Quality threshold: {{quality_threshold}}
+
+      Scope constraints (required — enforce in Stage 1):
+      - Decompose into no more than 5 sub-questions
+      - Cap your source queue at 15 URLs total across all sub-questions
+      - Run no more than 2 Quality Gate cycles before accepting remaining gaps
+      - Target a maximum of 3,000 words and 30 sourced claims in your final output
+    output: "research_output"
+    timeout: 2700
+
+  - id: "validate-research"
+    type: "bash"
+    command: |
+      _vr_tmp=$(mktemp)
+      cat > "$_vr_tmp" <<'__VALIDATE_EOF__'
+      {{research_output}}
+      __VALIDATE_EOF__
+      _bytes=$(wc -c < "$_vr_tmp")
+      _has_findings=$(grep -ci -E '(finding|source|confidence|claim|evidence)' "$_vr_tmp" || true)
+      if [ "$_bytes" -lt 500 ]; then
+        echo "GATE_FAIL: Research output is only ${_bytes} bytes — likely a truncated metadata summary, not full research. Aborting pipeline."
+        rm -f "$_vr_tmp"
+        exit 1
+      elif [ "$_has_findings" -lt 3 ]; then
+        echo "GATE_FAIL: Research output has fewer than 3 evidence markers (findings/sources/confidence). Likely not substantive research. Aborting pipeline."
+        rm -f "$_vr_tmp"
+        exit 1
+      else
+        echo "GATE_PASS: Research output is ${_bytes} bytes with ${_has_findings} evidence markers."
+        rm -f "$_vr_tmp"
+      fi
+    output: "research_validation"
+    timeout: 30
+
+  - id: "resolve-urls"
+    agent: "foundation:web-research"
+    prompt: |
+      You are a URL verification utility. Your ONLY job is to find verified URLs for
+      source names mentioned in a research output. You do NOT research, analyze, or
+      summarize — you look up URLs.
+
+      Below is a research output that mentions sources by name (e.g., "TechCrunch",
+      "Bloomberg", "Contrary Research", "poolside.ai") but may be missing full
+      https:// URLs for some or all of them.
+
+      Research topic for search context: {{research_question}}
+
+      Research output:
+      {{research_output}}
+
+      TASK:
+      1. Extract every distinct source name mentioned in the research output
+         (publication names, company sites, report titles, blog names).
+         Cap at 15 sources maximum — prioritize primary and secondary tier sources.
+
+      2. For each source name, run ONE web_search to find the actual article URL.
+         Search query pattern: "[source name] [key topic words from research question] [year if mentioned]"
+         Example: "TechCrunch Poolside AI Series B 2024"
+
+      3. From the search results, pick the best-matching URL — same publication,
+         same topic, plausible date. If no good match, mark as "not found".
+
+      4. Return ONLY a source URL map in this exact format — nothing else:
+
+      SOURCE_URL_MAP
+      - name: "TechCrunch — Poolside AI raises $500M"
+        url: "https://techcrunch.com/2024/10/15/poolside-ai-raises-500m-series-b/"
+        match: verified
+      - name: "Contrary Research — Poolside Business Breakdown"
+        url: "https://research.contrary.com/company/poolside-ai"
+        match: verified
+      - name: "Some Obscure Blog"
+        url: not found
+        match: none
+      END_SOURCE_URL_MAP
+
+      Rules:
+      - One web_search per source, no more. This step must stay fast.
+      - Never fabricate a URL. If search results don't have a clear match, say "not found".
+      - The map format must be exactly as shown — downstream parsing depends on it.
+      - Do not include any text before SOURCE_URL_MAP or after END_SOURCE_URL_MAP.
+    output: "source_url_map"
+    timeout: 600
+
+  - id: "format-research"
+    agent: "specialists:researcher-formatter"
+    prompt: |
+      Normalize the following research narrative into your canonical RESEARCH OUTPUT
+      block format. Apply all standard formatting rules: structured sections, source
+      tiering, per-claim confidence scores, and gap flags.
+
+      Research narrative to format:
+      {{research_output}}
+
+      SOURCE URL MAP (verified URLs for sources named in the narrative):
+      {{source_url_map}}
+
+      URL resolution instructions: A prior pipeline step searched for verified URLs
+      matching source names in the research narrative. When you encounter a source
+      name that matches an entry in the URL map with match: verified, use that URL
+      as the Source value for that finding. This is extracted data, not invention —
+      the URLs were verified via web search. Only fall back to your own URL recovery
+      (Stage 1.5) or "unknown" for sources not in the map or marked "not found".
+    output: "formatted_research"
+    timeout: 1200
+
+  - id: "strip-parsed-prefix"
+    type: "bash"
+    command: |
+      _sp_tmp=$(mktemp)
+      cat > "$_sp_tmp" <<'__STRIP_PARSED_EOF__'
+      {{formatted_research}}
+      __STRIP_PARSED_EOF__
+      if grep -q '^RESEARCH OUTPUT' "$_sp_tmp"; then
+        awk '/^RESEARCH OUTPUT/{found=1} found{print}' "$_sp_tmp"
+      else
+        cat "$_sp_tmp"
+      fi
+      rm -f "$_sp_tmp"
+    output: "formatted_research_clean"
+    timeout: 30
+
+  - id: "analyze"
+    agent: "specialists:data-analyzer"
+    prompt: |
+      Analyze the following formatted research output. Draw inferences, identify
+      patterns, surface key insights, and flag confidence gaps. Follow your full
+      analysis pipeline.
+
+      Formatted research:
+      {{formatted_research_clean}}
+    output: "analysis_output"
+    timeout: 900
+
+  - id: "format-analysis"
+    agent: "specialists:data-analyzer-formatter"
+    prompt: |
+      Normalize the following data-analyzer output into a canonical ANALYSIS OUTPUT block.
+
+      Data-analyzer output to format:
+      {{analysis_output}}
+
+      Original research (authoritative source for F1-Fn findings):
+      {{formatted_research}}
+    output: "formatted_analysis"
+    timeout: 600
+
+  - id: "write"
+    agent: "specialists:writer"
+    prompt: |
+      Transform the following analysis into a polished document. Follow your full
+      writing pipeline and return WRITER METADATA, the document body with section
+      attribution lines, CITATIONS, and CLAIMS TO VERIFY blocks.
+
+      Analysis:
+      {{formatted_analysis}}
+
+      SOURCE URL MAP (verified URLs for sources — use these in CITATIONS):
+      {{source_url_map}}
+
+      Output format: brief
+      Audience: evaluation pipeline (internal)
+      Voice: executive
+
+      When building your CITATIONS block, match source names to the URL map above
+      and use the verified https:// URLs. This ensures source provenance survives
+      the analysis step.
+    output: "final_document"
+    timeout: 1800
+
+  - id: "format-writer"
+    agent: "specialists:writer-formatter"
+    prompt: |
+      Produce the canonical Writer output block from the following writer output.
+
+      Original source material (source of S-numbered claims):
+      {{formatted_analysis}}
+
+      Writer output to format:
+      {{final_document}}
+    output: "formatted_document"
+    timeout: 1200
+
+  - id: "strip-formatter-notes"
+    type: "bash"
+    command: |
+      _fn_tmp=$(mktemp)
+      cat > "$_fn_tmp" <<'__STRIP_NOTES_EOF__'
+      {{formatted_document}}
+      __STRIP_NOTES_EOF__
+      _start=$(grep -n '^Parsed:' "$_fn_tmp" | head -1 | cut -d: -f1)
+      _end=$(grep -n '^S[0-9]\{1,\}:' "$_fn_tmp" | tail -1 | cut -d: -f1)
+      if [ -n "$_start" ] && [ -n "$_end" ]; then
+        sed -n "${_start},${_end}p" "$_fn_tmp"
+      elif [ -n "$_start" ]; then
+        awk '/^Parsed:/ && !s{s=1} s && /^[*][*].*:[*][*]$/{exit} s{print}' "$_fn_tmp"
+      else
+        cat "$_fn_tmp"
+      fi
+      rm -f "$_fn_tmp"
+    output: "formatted_document_clean"
+    timeout: 30
+
+  # ===========================================================================
+  # CRITIC 1: Fact-Checker
+  # ===========================================================================
+  - id: "fact-check"
+    agent: "foundation:web-research"
+    prompt: |
+      You are an adversarial FACT-CHECKER evaluating a research pipeline's output.
+      Your job: verify each finding's claim against its source URL.
+
+      RESEARCH OUTPUT TO EVALUATE:
+      {{formatted_research_clean}}
+
+      INSTRUCTIONS:
+      For each finding (lines starting with "- Claim:"):
+        1. Extract the Claim text and Source URL
+        2. Fetch the source URL using web_fetch
+        3. Read the page content (first 8000 chars if large)
+        4. Compare: does the source content support the claim?
+        5. Assign a verdict:
+           - VERIFIED: source content supports the claim as stated
+           - MISREPRESENTED: source exists but claim distorts/exaggerates it
+           - FABRICATED: source content does not contain or support the claim
+           - UNREACHABLE: URL returned error (403, 404, timeout, no content)
+
+      If a source URL is "unknown" or "unattributed", mark UNREACHABLE.
+      If the page content is a login wall or paywall, mark UNREACHABLE.
+      Do NOT mark FABRICATED just because the source is behind a paywall.
+
+      Return your report in this exact format:
+
+      FACT-CHECK REPORT
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━
+      Findings checked: [N]
+      Verified: [N]
+      Misrepresented: [N]
+      Fabricated: [N]
+      Unreachable: [N]
+      Score: [verified / (total - unreachable) * 10, to 2 decimal places]
+
+      VERDICTS:
+      - F1: [VERDICT] — [1-sentence evidence: what the source said vs. the claim]
+      - F2: [VERDICT] — [evidence]
+      ...
+
+      Rules:
+      - Check EVERY finding. Do not skip any.
+      - Score denominator excludes UNREACHABLE (they're access problems, not quality)
+      - If all findings are UNREACHABLE, score = 0.0 with note "all sources unreachable"
+      - Be strict: VERIFIED means the source actually says what the claim says.
+        A claim that is "close but exaggerated" is MISREPRESENTED, not VERIFIED.
+    output: "fact_check_report"
+    timeout: 1800
+
+  # ===========================================================================
+  # CRITIC 2: Inference Challenger
+  # ===========================================================================
+  - id: "challenge-inferences"
+    agent: "self"
+    prompt: |
+      You are an adversarial INFERENCE CHALLENGER evaluating analysis quality.
+      Your job: determine whether each inference adds genuine analytical value.
+
+      ANALYSIS OUTPUT TO EVALUATE:
+      {{formatted_analysis}}
+
+      RESEARCH FINDINGS (the evidence base):
+      {{formatted_research_clean}}
+
+      For EACH inference in the INFERENCES section, run this TWO-PHASE protocol:
+
+      PHASE 1 — INDEPENDENT DERIVATION:
+      Read ONLY the findings listed in the inference's traces_to field.
+      Ask yourself: "What conclusions would a competent analyst draw from ONLY
+      these findings?" Write your independent conclusions.
+
+      PHASE 2 — ADVERSARIAL CHALLENGE:
+      Now read the actual inference claim. Ask:
+      a) Does it add insight beyond what Phase 1 produced? (analytical lift)
+      b) What is the strongest counterargument or alternative explanation?
+      c) Does the claim language match the evidence strength?
+
+      Assign a verdict:
+      - ROBUST: Genuine analytical lift. Phase 1 didn't produce this exact insight.
+        Counterargument is weaker than the inference. Claim language is calibrated.
+      - SUPPORTED_BUT_OBVIOUS: Phase 1 independently reached the same conclusion.
+        The inference is valid but adds no analytical value — it's a summary
+        masquerading as synthesis. A competent reader would derive this from the
+        findings alone.
+      - WEAK: One or more of:
+        * Causal overclaim (asserts causation from correlation)
+        * Scope overgeneralization (specific examples → universal claims)
+        * Unsupported temporal leap ("inflection point" without trend data)
+        * Intent/strategy attribution without direct evidence
+        * Trivial restatement of a single finding
+        * Equally plausible alternative explanation exists
+
+      Return your report in this exact format:
+
+      INFERENCE CHALLENGE REPORT
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━
+      Inferences challenged: [N]
+      Robust: [N]
+      Obvious: [N]
+      Weak: [N]
+      Score: [robust_count / total * 10, to 2 decimal places]
+
+      VERDICTS:
+      - I1: [VERDICT]
+        Phase 1 derivation: [what you concluded from the findings alone]
+        Challenge: [strongest counterargument]
+        Rationale: [1-2 sentences explaining verdict]
+      - I2: [VERDICT]
+        ...
+
+      If there are zero inferences, return score = 0.0 with note "no inferences to evaluate".
+      OBVIOUS inferences score 0 — they are padding, not analysis.
+    output: "inference_challenge_report"
+    timeout: 900
+
+  # ===========================================================================
+  # CRITIC 3: Consistency Auditor
+  # ===========================================================================
+  - id: "audit-consistency"
+    agent: "self"
+    prompt: |
+      You are an adversarial CONSISTENCY AUDITOR evaluating whether the writer's
+      prose language matches the confidence level of each claim's source.
+
+      WRITER OUTPUT TO EVALUATE:
+      {{formatted_document_clean}}
+
+      ANALYSIS OUTPUT (source of confidence levels):
+      {{formatted_analysis}}
+
+      For EACH factual claim in the writer output, perform this check:
+
+      1. Identify the claim in the prose
+      2. Trace it to its source in the analysis output (finding or inference)
+      3. Determine the source confidence level (high/medium/low) and source type
+         (finding vs inference)
+      4. Check whether the prose language matches:
+
+         HIGH confidence finding:
+           ✓ Definitive language OK: "X is", "X has achieved"
+           ✗ Over-hedging is a minor issue, not a violation
+
+         MEDIUM confidence finding:
+           ✓ MUST have hedging or source attribution: "according to", "reportedly",
+             "suggests that", "[source] states"
+           ✗ VIOLATION (MISSING_HEDGE): bare "X is" without any qualifier
+           ✗ VIOLATION (CONFIDENCE_UPGRADE): definitive language for medium source
+
+         LOW confidence finding:
+           ✓ MUST have strong hedges: "unconfirmed reports suggest", "may possibly"
+           ✗ VIOLATION (CONFIDENCE_UPGRADE): any definitive or moderate language
+
+         Inference-sourced claim (any confidence):
+           ✓ MUST have analytical qualifier: "analysis suggests", "evidence points to",
+             "patterns suggest", "findings imply"
+           ✗ VIOLATION (INFERENCE_AS_FACT): presented as established fact
+
+         Contradicted finding:
+           ✓ MUST acknowledge the contradiction
+           ✗ VIOLATION (MISSING_HEDGE): stated without noting the dispute
+
+      Return your report in this exact format:
+
+      CONSISTENCY AUDIT REPORT
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━
+      Claims audited: [N]
+      Clean: [N]
+      Violations: [N]
+        CONFIDENCE_UPGRADE: [N]
+        MISSING_HEDGE: [N]
+        INFERENCE_AS_FACT: [N]
+      Score: [(1 - violations/total) * 10, to 2 decimal places]
+
+      FINDINGS:
+      - S1: CLEAN — [brief note]
+      - S2: VIOLATION (MISSING_HEDGE) — "medium confidence claim stated as: '[exact quote]'
+        without hedging. Should use: 'According to [source], ...'"
+      - S3: VIOLATION (INFERENCE_AS_FACT) — "inference presented as: '[exact quote]'
+        without analytical qualifier"
+      ...
+
+      Rules:
+      - Audit EVERY factual claim. Transition sentences and structural elements are exempt.
+      - Be strict on MEDIUM confidence: every sentence needs a visible hedge signal.
+      - Be strict on inferences: NEVER presented as established fact.
+      - A single sentence can have multiple violations (e.g., both CONFIDENCE_UPGRADE
+        and MISSING_HEDGE).
+      - If the writer output has zero factual claims, score = 10.0.
+    output: "consistency_audit_report"
+    timeout: 900
+
+  # ===========================================================================
+  # SCORE COMPUTATION
+  # ===========================================================================
+  - id: "compute-scores"
+    type: "bash"
+    command: |
+      # Extract scores from the three critic reports using grep
+      _fc_score=$(echo '{{fact_check_report}}' | grep -oP 'Score: \K[0-9]+\.?[0-9]*' | head -1)
+      _ic_score=$(echo '{{inference_challenge_report}}' | grep -oP 'Score: \K[0-9]+\.?[0-9]*' | head -1)
+      _ca_score=$(echo '{{consistency_audit_report}}' | grep -oP 'Score: \K[0-9]+\.?[0-9]*' | head -1)
+
+      # Default to 0.0 if extraction failed
+      _fc_score=${_fc_score:-0.0}
+      _ic_score=${_ic_score:-0.0}
+      _ca_score=${_ca_score:-0.0}
+
+      # Compute composite: 0.40 * fact + 0.35 * inference + 0.25 * consistency
+      _composite=$(python3 -c "
+      fc = float('${_fc_score}')
+      ic = float('${_ic_score}')
+      ca = float('${_ca_score}')
+      composite = 0.40 * fc + 0.35 * ic + 0.25 * ca
+      print(f'{composite:.2f}')
+      ")
+
+      _timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+      cat <<EOF
+      EVAL SCORES
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━
+      Topic: {{topic_id}}
+      Timestamp: ${_timestamp}
+      Fact-checker score: ${_fc_score}/10 (weight: 0.40)
+      Inference challenger score: ${_ic_score}/10 (weight: 0.35)
+      Consistency auditor score: ${_ca_score}/10 (weight: 0.25)
+      Composite score: ${_composite}/10
+      EOF
+    output: "eval_scores"
+    timeout: 30
+
+  # ===========================================================================
+  # SAVE SCORE HISTORY
+  # ===========================================================================
+  - id: "save-scores"
+    type: "bash"
+    command: |
+      mkdir -p specs/evaluation
+
+      _fc_score=$(echo '{{fact_check_report}}' | grep -oP 'Score: \K[0-9]+\.?[0-9]*' | head -1)
+      _ic_score=$(echo '{{inference_challenge_report}}' | grep -oP 'Score: \K[0-9]+\.?[0-9]*' | head -1)
+      _ca_score=$(echo '{{consistency_audit_report}}' | grep -oP 'Score: \K[0-9]+\.?[0-9]*' | head -1)
+      _fc_score=${_fc_score:-0.0}
+      _ic_score=${_ic_score:-0.0}
+      _ca_score=${_ca_score:-0.0}
+      _composite=$(python3 -c "
+      fc = float('${_fc_score}')
+      ic = float('${_ic_score}')
+      ca = float('${_ca_score}')
+      print(f'{0.40*fc + 0.35*ic + 0.25*ca:.2f}')
+      ")
+      _timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+      cat >> specs/evaluation/score-history.yaml <<EOF
+      - topic_id: {{topic_id}}
+        timestamp: "${_timestamp}"
+        fact_checker_score: ${_fc_score}
+        inference_challenger_score: ${_ic_score}
+        consistency_auditor_score: ${_ca_score}
+        composite_score: ${_composite}
+        research_question: "{{research_question}}"
+      EOF
+
+      echo "Score appended to specs/evaluation/score-history.yaml"
+    output: "save_result"
+    timeout: 30
+
+  # ===========================================================================
+  # SAVE FULL EVALUATION REPORT
+  # ===========================================================================
+  - id: "save-report"
+    agent: "foundation:file-ops"
+    prompt: |
+      Save the following evaluation report to disk.
+
+      File path: specs/evaluation/reports/{{topic_id}}-eval.md
+      Create the specs/evaluation/reports/ directory if it does not exist.
+      Report the full file path you saved to.
+
+      Content to save:
+      # Evaluation Report: {{topic_id}}
+
+      **Research question:** {{research_question}}
+
+      ---
+
+      {{eval_scores}}
+
+      ---
+
+      ## Fact-Checker Report
+
+      {{fact_check_report}}
+
+      ---
+
+      ## Inference Challenge Report
+
+      {{inference_challenge_report}}
+
+      ---
+
+      ## Consistency Audit Report
+
+      {{consistency_audit_report}}
+    output: "report_path"
+    timeout: 300
