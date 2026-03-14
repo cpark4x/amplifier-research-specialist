@@ -318,7 +318,7 @@ steps:
       Misrepresented: [N]
       Fabricated: [N]
       Unreachable: [N]
-      Score: [verified / (total - unreachable) * 10, to 2 decimal places]
+      Score: [FINAL SCORE ONLY — a single number to 2 decimal places, computed as verified / (total - unreachable) * 10. Do NOT show the formula or intermediate values on this line.]
 
       VERDICTS:
       - F1: [VERDICT] — [1-sentence evidence: what the source said vs. the claim]
@@ -512,6 +512,11 @@ steps:
       _ic_score=${_ic_score:-0.0}
       _ca_score=${_ca_score:-0.0}
 
+      # Clamp scores to 0-10 range (safety net for extraction errors)
+      _fc_score=$(python3 -c "print(f'{min(10.0, max(0.0, float(\"${_fc_score}\"))):.2f}')")
+      _ic_score=$(python3 -c "print(f'{min(10.0, max(0.0, float(\"${_ic_score}\"))):.2f}')")
+      _ca_score=$(python3 -c "print(f'{min(10.0, max(0.0, float(\"${_ca_score}\"))):.2f}')")
+
       # Compute composite: 0.40 * fact + 0.35 * inference + 0.25 * consistency
       _composite=$(python3 -c "
       fc = float('${_fc_score}')
@@ -570,6 +575,11 @@ steps:
       _fc_score=${_fc_score:-0.0}
       _ic_score=${_ic_score:-0.0}
       _ca_score=${_ca_score:-0.0}
+
+      # Clamp scores to 0-10 range (safety net for extraction errors)
+      _fc_score=$(python3 -c "print(f'{min(10.0, max(0.0, float(\"${_fc_score}\"))):.2f}')")
+      _ic_score=$(python3 -c "print(f'{min(10.0, max(0.0, float(\"${_ic_score}\"))):.2f}')")
+      _ca_score=$(python3 -c "print(f'{min(10.0, max(0.0, float(\"${_ca_score}\"))):.2f}')")
       _composite=$(python3 -c "
       fc = float('${_fc_score}')
       ic = float('${_ic_score}')
