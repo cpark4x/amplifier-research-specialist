@@ -1,123 +1,104 @@
 # canvas-specialists
 
-**When you ask a generalist AI to research something, you get confident-sounding prose with no way to audit the claims.** canvas-specialists produces structured research and writing outputs where every finding traces to a source, every inference is labeled as an inference, and every gap is named explicitly — output you can hand to a decision-maker without re-verifying everything first.
+You ask an AI to research something and write it up. It reads well. Then someone asks "where did this number come from?" and you don't know. The document is fluent and completely unverifiable.
 
-Battle-tested across 2,500+ agent runs. Used for competitive briefs on AI providers, market analysis, and product research.
+canvas-specialists is a different architecture for AI research. Separate agents handle research, analysis, and writing independently — the researcher finds and sources evidence, the analyzer draws inferences and labels each one with the specific findings that support it, the writer produces prose where facts read like facts and conclusions read like conclusions. No single model doing everything in one pass with no accountability.
+
+What it won't do matters as much as what it will. Missing evidence is reported, not hidden. Low-confidence claims are hedged, not asserted. Inferences that don't survive adversarial challenge don't ship. The output is trustworthy because it's honest about its limits.
+
+Two speeds. **Quick** (3–5 min): researcher → writer, for exploration. **Deep** (~15 min): full pipeline with source verification, cross-finding analysis, and confidence calibration — for work someone will push back on.
+
+Quality is measured, not claimed. Three adversarial critics — fact-checker, inference challenger, consistency auditor — score every pipeline run. On baseline evaluation: zero fabricated claims, zero misrepresented sources. Inference quality is the hardest dimension — it tests whether conclusions add genuine analytical value beyond restating the evidence — and it's actively improving with each pipeline iteration.
 
 ---
 
-## What makes it different
+## What the output looks like
 
-Here's what a typical AI research output looks like:
+A typical AI research response:
 
 > *"OpenAI holds a dominant position in the enterprise AI market, with strong adoption among Fortune 500 companies. Anthropic is gaining ground, particularly among safety-conscious organizations."*
 
-No sources. No confidence levels. No acknowledgment of what it doesn't know. You can't audit it.
-
-Here's what canvas-specialists produces:
+canvas-specialists on the same question:
 
 ```
 FINDING [HIGH CONFIDENCE]
 OpenAI holds ~60% share of enterprise API spend among F500 companies.
 Sources: [S1] Menlo Ventures Enterprise AI Report 2024 (primary)
-          [S2] Bloomberg Technology Survey Q3 2024 (secondary)
+         [S2] Bloomberg Technology Survey Q3 2024 (secondary)
 
 FINDING [MEDIUM CONFIDENCE]
-Anthropic is the preferred alternative in regulated industries (finance, healthcare).
-Source: [S3] Axios Pro Rata, Dec 2024 — based on 3 vendor interviews (secondary)
-Note: No published survey data found. Treat as directional, not quantified.
+Anthropic is the preferred alternative in regulated industries.
+Source: [S3] Axios Pro Rata, Dec 2024 — 3 vendor interviews (secondary)
+Note: No published survey data found. Treat as directional.
+
+INFERENCE [traces to: F1, F3]
+The enterprise AI market is bifurcating along risk tolerance lines —
+regulated industries selecting for safety positioning over capability benchmarks.
+Confidence: medium. Type: pattern.
 
 EVIDENCE GAP
-No independent data on Anthropic's enterprise contract count or ARR.
-Vendor claims only. Treat Anthropic market share figures as unverified until confirmed.
+No independent data on Anthropic enterprise contract count or ARR.
+Vendor claims only. Treat market share figures as unverified.
 ```
 
-Every claim is traceable. Every inference is labeled. Every gap is named.
+Every claim sourced. Inferences traced to the findings that support them. Gaps named, not hidden.
 
 ---
 
 ## The specialists
 
-| Specialist | What it produces | Status |
-|---|---|---|
-| **researcher** | Structured findings with source tiering (primary / secondary / tertiary), per-claim confidence ratings (high / medium / low), and explicit evidence gap reporting | v1 |
-| **writer** | Polished documents with inline citations `[S1]`, a `CLAIMS TO VERIFY` block, and audience-calibrated prose | v1 |
-| **competitive-analysis** | Comparison matrices, positioning gaps, and win conditions — head-to-head or landscape modes | v1 |
-| **data-analyzer** | Labeled inferences that bridge fact and conclusion — explicitly separated from source findings so the reasoning is always visible | v1 |
-| [storyteller](specialists/storyteller/) | cognitive mode translation — converts structured findings (AnalysisOutput, ResearchOutput) into narrative-mode artifacts with a documented NARRATIVE SELECTION record | v1 |
-| [story-formatter](specialists/story-formatter/) | format normalization for storyteller output — takes narrative prose in any format and produces canonical STORY OUTPUT blocks with NARRATIVE SELECTION classification | v1 |
-| [writer-formatter](specialists/writer-formatter/) | format normalization for writer output — takes prose in any format plus source material and produces canonical Writer output with Parsed:, WRITER METADATA, CITATIONS, and CLAIMS TO VERIFY blocks | v1 |
+**Core pipeline** — these work together:
 
-All shipped and production-ready. More specialists are planned, including Presentation Builder — see [docs/BACKLOG.md](docs/BACKLOG.md) for what's coming next.
+| Specialist | What it does |
+|---|---|
+| **researcher** | Finds and sources evidence — source tiering, per-claim confidence ratings, explicit evidence gaps |
+| **data-analyzer** | Draws labeled inferences from findings — every conclusion traces to specific evidence |
+| **writer** | Produces audience-calibrated prose — facts cited, inferences hedged, gaps surfaced, provenance footer |
+
+**Specialized tools** — invoke directly for specific tasks:
+
+| Specialist | What it does |
+|---|---|
+| **competitive-analysis** | Comparison matrices, positioning gaps, win conditions — head-to-head or landscape |
+| **prioritizer** | Ranked lists with explicit framework scores and defensible rationale per item |
+| **planner** | Structured plans with milestones, dependencies, timelines, and risk flags |
+| **storyteller** | Converts structured findings into narrative with editorial selection record |
 
 ---
 
 ## Quick start
 
-canvas-specialists runs on [Amplifier](https://github.com/microsoft/amplifier) — a lightweight agent framework that handles routing, context passing, and multi-step orchestration. If you're already using Amplifier, specialists drop in as a bundle. If you're not, start there first.
-
-### 1. Add the bundle
-
-Run these two commands from inside your project directory:
+canvas-specialists runs on [Amplifier](https://github.com/microsoft/amplifier).
 
 ```bash
 amplifier bundle add git+https://github.com/cpark4x/canvas-specialists@main
-amplifier bundle use specialists --project
+amplifier bundle use specialists --app
 ```
 
-> **Global install** — to make specialists available in every Amplifier session you run, regardless of project:
-> ```bash
-> amplifier bundle add git+https://github.com/cpark4x/canvas-specialists@main --app
-> ```
-> The `--app` flag registers canvas-specialists as an app bundle that is automatically composed onto every session. Useful if you use specialists regularly across many projects.
+Then, in any Amplifier session:
 
-### 2. Invoke a specialist
+*"Research Anthropic's approach to AI safety. I need to send this to my VP."*
 
-```python
-research = delegate(
-    agent="specialists:researcher",
-    instruction="Research the enterprise AI infrastructure market. Return structured findings."
-)
-```
+The system detects that's a deep research request, runs the full pipeline, and returns a sourced brief in about 15 minutes. If you'd said *"quick overview of Anthropic"* instead, you'd get a lighter answer in 3–5 minutes.
 
-### 3. Chain them together
+That's it. The routing, specialist selection, and formatting happen automatically.
 
-Specialists are composable by design. Each one's output schema is the next one's input contract.
-
-```python
-# Stage 1: gather evidence
-research = delegate(
-    agent="specialists:researcher",
-    instruction="Research X. Return structured findings."
-)
-
-# Stage 2: draw inferences
-analysis = delegate(
-    agent="specialists:data-analyzer",
-    instruction=f"Analyze these findings and draw labeled inferences: {research.response}"
-)
-
-# Stage 3: produce the document
-document = delegate(
-    agent="specialists:writer",
-    instruction=f"Write an executive brief for a product team. Source material: {analysis.response}"
-)
-```
-
-See [docs/USING-SPECIALISTS.md](docs/USING-SPECIALISTS.md) for the full practical guide, and [docs/examples/researcher-to-writer.md](docs/examples/researcher-to-writer.md) for a walkthrough with sample inputs and outputs.
+For direct control, see the [full usage guide](docs/USING-SPECIALISTS.md) — manual chaining, recipe invocation, and per-specialist parameters.
 
 ---
 
 ## How it works
 
-Each specialist runs as a sequence of discrete, auditable stages — not a single prompt. The researcher runs source retrieval, tiering, claim extraction, and confidence rating as separate steps, each with a clean output. Individual stages are improvable, debuggable, and replaceable independently.
+**Quick path** — you ask something exploratory ("what is X", "overview of Y"). The researcher gathers evidence, the writer turns it into a brief. Two agents, 3–5 minutes.
 
-**The output schema is the stable contract.** Implementations can evolve freely. The schema does not change without a version bump and coordinated update to callers. Downstream specialists — and your orchestrator — depend on the schema, not the implementation details.
+**Deep path** — you ask for work product ("write me a brief on X", "I need to send this to my VP"). The full research-chain pipeline runs: research, source verification, analysis, writing. Each stage has one job and a typed output. The researcher only finds evidence. The analyzer only draws inferences. The writer only produces prose. No stage does another's job. About 15 minutes.
 
-**Gaps are first-class outputs.** Missing evidence is never silently dropped. If the researcher can't find primary source data for a claim, it says so. The writer surfaces that as `CLAIMS TO VERIFY`. You know exactly what needs verification before anything gets published or presented.
+The system reads your intent and picks the right path. If it's ambiguous, it asks once. You can always say "go deeper" or "just give me a quick answer" to override.
+
+Output schemas are the stable contract between stages. Implementations evolve freely — swap the researcher without touching the writer.
 
 ---
 
 ## Built by
 
-[Chris Park](https://www.linkedin.com/in/chrispark) — Senior PM at Microsoft's Office of the CTO, AI Incubation group, with 17 years of PM experience and an engineering degree from Waterloo. Building the tools he actually uses.
+[Chris Park](https://www.linkedin.com/in/chrispark) — Microsoft Office of the CTO, AI Incubation. Building the tools he actually uses.
