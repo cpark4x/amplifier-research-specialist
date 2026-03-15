@@ -1,109 +1,94 @@
 ---
 title: Using Canvas Specialists
-audience: new users, orchestrator authors
-last_updated: 2026-03-03
+audience: new users, orchestrator authors, AI agents
+last_updated: 2026-03-14
 ---
 
 # Using Canvas Specialists
 
-A practical guide to invoking specialists, understanding their output, and chaining them together.
+A practical guide to getting research done with specialists.
 
 ---
 
-## Why specialists instead of just asking an LLM?
+## How to use it
 
-When you ask an LLM to "research X and write me a report," it does both in one pass — with no separation between facts and inferences, no explicit source tiering, no stated confidence, and no honest accounting of what it couldn't find. The output sounds authoritative. You have no way to verify it is.
+Three paths, from simplest to most control.
 
-Specialists solve this by enforcing role separation:
+### Just ask
 
-- The **Researcher** gathers facts. It cites every claim, rates every source, and names every gap. It never infers.
-- The **Data Analyzer** draws conclusions. Every inference traces to specific findings. It never fabricates.
-- The **Writer** writes prose. Every sentence traces to source material. It never adds interpretation.
+In any Amplifier session with specialists installed, ask your question:
 
-The result: output you can audit. You know what was found, what wasn't, what's a fact, what's a conclusion, and how confident each claim is.
+*"Research Anthropic's approach to AI safety. I need to send this to my VP."*
+
+The system determines depth from your request:
+
+| Your message signals... | What happens | Time |
+|---|---|---|
+| Exploration — "what is X", "overview of Y", "quick summary" | Researcher → Writer | 3–5 min |
+| Work product — "write me a brief", "deep dive", "I need to send this to..." | Full research-chain pipeline | ~15 min |
+| Ambiguous | System asks once: "Quick answer or deep research?" | — |
+
+You can always override: "go deeper" or "just give me a quick answer."
+
+### Run the recipe
+
+For the full sourced pipeline directly:
+
+```bash
+amplifier tool invoke recipes operation=execute \
+  recipe_path=recipes/research-chain.yaml \
+  context='{"research_question": "Your question here"}'
+```
+
+### Chain manually
+
+For full control over which specialists run and what you pass between them:
+
+```python
+research = delegate(agent="specialists:researcher", instruction="Research X")
+analysis = delegate(agent="specialists:data-analyzer", instruction=f"Analyze: {research.response}")
+document = delegate(agent="specialists:writer", instruction=f"Brief for product team: {analysis.response}")
+```
+
+Each specialist's output schema is the next one's input contract. Skip stages when you don't need them — the Writer works fine with raw research, no analysis required.
 
 ---
 
-## The Specialists
+## Specialist reference
 
 ### Researcher
 
-**Job:** Find, source, and confidence-rate discrete factual claims. Return structured evidence — not a summary, not an analysis.
+**Job:** Find, source, and confidence-rate factual claims.
 
-**When to use:** Anytime you need sourced evidence you can defend. Market research, competitive intelligence, technical due diligence, fact-checking.
-
-**What it does that a one-shot LLM call won't:**
-- Runs a structured source discovery pass before fetching anything
-- Attempts paywall fallbacks before giving up
-- Rates every finding (primary / secondary / tertiary source, high / medium / low confidence)
-- Corroborates claims across independent sources before marking them high-confidence
-- Names what it couldn't find, with fallbacks tried — evidence gaps are first-class output
+**When to use:** You need sourced evidence you can defend — market research, competitive intelligence, due diligence, fact-checking.
 
 **Invoke:**
 ```python
 research = delegate(
     agent="specialists:researcher",
-    instruction="""
-    Research question: [your question]
-    quality_threshold: medium   # low | medium | high
-    """
+    instruction="Research question: [your question]\nquality_threshold: medium"
 )
 ```
 
-**Parameters:**
-- `quality_threshold` — sets the bar for how much corroboration the quality gate requires before returning. Default: `medium`.
+**quality_threshold:** `low` (exploratory, single-source OK) | `medium` (default, corroboration required) | `high` (additional passes, slower, for high-stakes work)
 
 ---
 
 ### Data Analyzer
 
-**Job:** Read sourced findings. Draw labeled, traceable conclusions. Return findings + inferences together — clearly separated.
+**Job:** Draw labeled, traceable inferences from research findings. Every conclusion traces to specific evidence.
 
-**When to use:** You have research findings and need to know what they *mean* — not just what they say. Between the Researcher and the Writer in a chain, or standalone when you have your own findings.
-
-**What it does that a one-shot LLM call won't:**
-- Every inference traces to specific finding IDs — no ungrounded conclusions
-- Every finding is accounted for: either used in an inference or listed as unused with a typed reason
-- Inference types are explicit: `pattern` | `causal` | `evaluative` | `predictive`
-- Fails loud — if evidence doesn't support a confident inference, it says so
+**When to use:** You have findings and need to know what they *mean* — not just what they say. Works between the Researcher and Writer, or standalone with your own findings.
 
 **Invoke:**
 ```python
 analysis = delegate(
     agent="specialists:data-analyzer",
-    instruction="""
-    Analyze the following research findings.
-
-    Research question: [your question]
-
-    Findings:
-    - Claim: [...]  Source: [...] | Tier: [primary|secondary|tertiary] | Confidence: [high|medium|low]
-    - Claim: [...]  Source: [...] | Tier: [...] | Confidence: [...]
-
-    quality_threshold: medium   # low | medium | high
-    """
+    instruction=f"Analyze the following research.\n\n{research.response}"
 )
 ```
 
-Or pass the Researcher's full output directly:
-```python
-analysis = delegate(
-    agent="specialists:data-analyzer",
-    instruction=f"Analyze the following research. quality_threshold: medium\n\n{research.response}"
-)
-```
-
-**Parameters:**
-- `quality_threshold` — minimum confidence for an inference to be included. Default: `medium`.
-- `focus_question` — optional. Sharpens inferences toward a specific sub-question. Findings outside scope are marked `out_of_scope` in unused findings.
-
-**Inference types:**
-| Type | When it fires |
-|---|---|
-| `pattern` | Multiple findings point the same direction ("consistently true across sources") |
-| `causal` | One finding explains another ("X because Y") |
-| `evaluative` | A judgment the evidence supports ("X is ready / not ready") |
-| `predictive` | A forward-looking conclusion the evidence warrants ("X suggests Y will...") |
+**Inference types:** `pattern` (multiple findings converge) | `causal` (X because Y) | `evaluative` (X is ready / not ready) | `predictive` (X suggests Y will...)
 
 ---
 
@@ -111,122 +96,91 @@ analysis = delegate(
 
 **Job:** Transform structured evidence or analysis into polished, format-faithful prose. Never adds claims the source material doesn't support.
 
-**When to use:** You have research or analysis output and need it turned into a document a human can read and act on.
-
-**What it does that a one-shot LLM call won't:**
-- Audits coverage before writing — flags what can't be supported before drafting
-- Every factual sentence has an inline source marker
-- CITATIONS block maps every marker back to its source and confidence
-- Inferences are labeled as conclusions in prose ("the evidence suggests...") — not stated as facts
-- Surfaces coverage gaps explicitly — doesn't write around missing evidence
+**When to use:** You have research or analysis output and need a document a human can read and act on.
 
 **Invoke:**
 ```python
 document = delegate(
     agent="specialists:writer",
-    instruction=f"""
-    Format: brief           # report | brief | email | memo | proposal | executive-summary
-    Audience: [who's reading this]
-    Voice: executive        # formal | conversational | executive
-
-    Source material:
-    {research.response}     # or analysis.response
-    """
+    instruction=f"Format: brief\nAudience: [who reads this]\nVoice: executive\n\n{analysis.response}"
 )
 ```
+
+**Formats:** `brief` | `report` | `email` | `memo` | `proposal` | `executive-summary`
+
+Every document ends with a provenance footer: *"Based on N sourced findings from M sources. K analytical inferences drawn from cross-finding synthesis."*
 
 ---
 
 ### Competitive Analysis
 
-**Job:** Structure competitive intelligence — comparison matrices, positioning gaps, win conditions. Two modes: head-to-head and landscape.
+**Job:** Comparison matrices, positioning gaps, win conditions.
 
-**When to use:** Comparing products, vendors, or competitors. Returns structured data designed for decision-making, not narrative.
+**When to use:** Comparing products, vendors, or competitors. Returns structured data for decision-making.
 
 **Invoke:**
 ```python
 comp = delegate(
     agent="specialists:competitive-analysis",
-    instruction="""
-    Compare [A] vs [B] for [use case].
-    Mode: head-to-head      # head-to-head | landscape
-    """
+    instruction="Compare [A] vs [B] for [use case].\nMode: head-to-head"
 )
 ```
 
+**Modes:** `head-to-head` | `landscape`
+
 ---
 
-## The Three Chains
+### Prioritizer
 
-### Chain 1: Research only
-Use when you need sourced evidence and will write or analyze it yourself.
+**Job:** Rank items with explicit framework scores and defensible rationale.
 
+**When to use:** Backlog grooming, roadmap decisions, vendor selection — any list that needs justified ordering.
+
+**Invoke:**
 ```python
-research = delegate(
-    agent="specialists:researcher",
-    instruction="Research question: [your question]"
+ranked = delegate(
+    agent="specialists:prioritizer",
+    instruction="Prioritize these items for next sprint:\n[your items]"
 )
-# research.response contains structured findings, source citations, evidence gaps
 ```
+
+**Frameworks:** MoSCoW | impact-effort | RICE | weighted scoring (auto-selected or specify)
 
 ---
 
-### Chain 2: Research → Write
-Use when you need a document from sourced evidence, without drawing explicit conclusions. The Writer stays close to the facts.
+### Planner
 
+**Job:** Structured plans with milestones, dependencies, timelines, and risk flags.
+
+**When to use:** Going from "here's what I want" to "here's the plan."
+
+**Invoke:**
 ```python
-research = delegate(
-    agent="specialists:researcher",
-    instruction="Research question: [your question]"
-)
-
-document = delegate(
-    agent="specialists:writer",
-    instruction=f"""
-    Format: brief
-    Audience: [your audience]
-
-    Source material:
-    {research.response}
-    """
+plan = delegate(
+    agent="specialists:planner",
+    instruction="Plan the migration to microservices. Timeline: 6 months."
 )
 ```
 
 ---
 
-### Chain 3: Research → Analyze → Write
-Use when you need a document that contains *conclusions*, not just facts. The Analyzer explicitly labels what's a finding vs what's an inference, so the Writer can represent each correctly in prose.
+### Storyteller
 
+**Job:** Convert structured findings into narrative with a documented editorial selection record.
+
+**When to use:** The audience needs to be moved, not just informed — board narratives, executive briefings, change communications.
+
+**Invoke:**
 ```python
-research = delegate(
-    agent="specialists:researcher",
-    instruction="Research question: [your question]"
-)
-
-analysis = delegate(
-    agent="specialists:data-analyzer",
-    instruction=f"Analyze the following research. quality_threshold: medium\n\n{research.response}"
-)
-
-document = delegate(
-    agent="specialists:writer",
-    instruction=f"""
-    Format: brief
-    Audience: [your audience]
-
-    Source material:
-    {analysis.response}
-    """
+story = delegate(
+    agent="specialists:storyteller",
+    instruction=f"Board narrative. Audience: board. Tone: trustworthy.\n\n{analysis.response}"
 )
 ```
 
-**When does Chain 3 matter over Chain 2?**
-
-Chain 2 produces a document that reports what was found. Chain 3 produces a document that also says what it *means*. If the document needs a "recommendation" or "so what" section grounded in the evidence — use Chain 3.
-
 ---
 
-## Real Example: Data Analyzer in Action
+## Example: Data Analyzer in action
 
 **Input (5 findings on monolith → microservices migration):**
 
@@ -238,16 +192,12 @@ Chain 2 produces a document that reports what was found. Chain 3 produces a docu
 - Companies with < 50 engineers rarely see net productivity gains (secondary, medium confidence)
 ```
 
-**What the Data Analyzer produced:**
-
-> *Teams that migrated to microservices reported 40% faster independent deployment cycles.*
-> *Microservices increase operational complexity — teams need service mesh, distributed tracing, and container orchestration expertise.*
-
-It recognized the core tension immediately:
+The Analyzer recognized the core tension immediately:
 
 > **"The question isn't 'do microservices work?' The question is 'are we in the band where they work?'"**
 
 And produced a decision framework:
+
 ```
 Gate 1 — Team size ≥ 50 engineers?
   NO  → Do not migrate. Net productivity gain is unlikely.
@@ -260,44 +210,23 @@ Gate 2 — Is the primary pain organizational (team coupling, deployment bottlen
 ```
 
 And named what the findings couldn't answer:
+
 > *No failure / stall rate data. No cost-of-inaction data. F5's threshold is a heuristic, not a studied cutoff.*
 
-This is what the specialist adds. A one-shot "analyze these findings" call produces a verdict. The Analyzer produces a *traceable* verdict with typed inferences, explicit unused findings, and named gaps — the difference between an answer and a defensible answer.
+A direct LLM call produces a verdict. The Analyzer produces a *traceable* verdict with typed inferences, explicit unused findings, and named gaps — the difference between an answer and a defensible answer.
 
 ---
 
-## What Good Output Looks Like
+## Common questions
 
-**Researcher:** Every finding has a source URL, tier (primary/secondary/tertiary), confidence (high/medium/low), and corroboration count. Evidence gaps are named with fallbacks attempted. The output is auditable — you can trace every claim.
-
-**Data Analyzer:** Every inference says which findings support it (`traces_to: F1, F3`), its type (`evaluative`), and its confidence. Findings that didn't yield inferences appear in UNUSED FINDINGS with a reason. Nothing is silently dropped.
-
-**Writer:** Every factual sentence has an inline source marker. A CITATIONS block at the end maps every marker back to its source and location in the document. Coverage gaps appear before the document begins — the Writer surfaces what it couldn't write, rather than writing around it.
-
----
-
-## Known Limitations
-
-**Format compliance on complex topics.** When given a highly engaging research question, the Researcher and Writer sometimes produce rich narrative output rather than the exact structured block format (RESEARCH OUTPUT, WRITER METADATA). The content is high quality — sources, citations, and confidence ratings are present — but the machine-parseable block structure may not be perfectly formed. This affects automated downstream parsing more than human readability.
-
-**The Data Analyzer accepts both formats.** It can process canonical RESEARCH OUTPUT block format and narrative Researcher output. If the Researcher produces narrative, the Analyzer still works.
-
-**Mitigation in progress.** A provider-level fix (PR #38 against amplifier-module-provider-anthropic) implements Anthropic's native structured output API, which will enforce format compliance at the API level rather than relying on prompt instructions. Until that merges, treat structured block format as best-effort for the Researcher and Writer, and reliable for the Data Analyzer.
-
----
-
-## Common Questions
-
-**Can I use the Data Analyzer without running the Researcher first?**
-Yes. Pass your own findings directly in the instruction. The format is flexible — you can provide findings as bullet points, a structured block, or even notes from your own research.
-
-**Can I use the Writer without the Researcher?**
-Yes. Pass any source material — notes, a document, findings — and specify `input type: raw-notes`. The Writer will audit coverage and write from whatever you give it.
+**Can I use any specialist standalone?**
+Yes. Each specialist accepts direct input. Pass findings to the Analyzer, notes to the Writer, items to the Prioritizer. No chaining required.
 
 **What if the Researcher can't find sources?**
-Evidence gaps are explicit in the output, not hidden. The Researcher will name what it couldn't find, what fallbacks it attempted, and why it was inaccessible. A partial result with honest gaps is more useful than a confident-sounding complete result.
+Gaps are explicit output, not failures. The Researcher names what it couldn't find, what it tried, and why. A partial result with honest gaps is more useful than a confident-sounding complete result.
 
-**What quality_threshold should I use?**
-- `low` — return findings even with single-source, low-confidence claims. Good for exploratory research.
-- `medium` — default. Requires corroboration for high-priority claims.
-- `high` — triggers additional corroboration passes. Slower, stricter. Use when you need to stake something important on the findings.
+**Quick or deep — how do I choose?**
+Quick for orientation ("is this topic worth digging into?"). Deep for anything someone else will read. When in doubt, the system asks.
+
+**What are the formatters?**
+Internal pipeline stages (researcher-formatter, data-analyzer-formatter, writer-formatter) that normalize specialist output into canonical format. You never invoke them directly — the pipeline handles them automatically, and skips them when the output is already well-formed.
