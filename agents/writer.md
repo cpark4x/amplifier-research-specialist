@@ -222,6 +222,15 @@ After drafting each section, immediately append a source attribution line:
   - Sections with no factual claims (transitions, headings only) do not get an attribution line
   - Write the section first, then append the attribution — never interrupt prose
 
+**Provenance footer:** After the final section (including any Next Steps or Coverage Gaps), append a single italicized line summarizing how the document was built:
+
+  > *Based on [N] sourced findings from [M] sources. [K] analytical inferences drawn from cross-finding synthesis.*
+
+  - Count findings (F-numbered), distinct sources, and inferences (I-numbered) from the input material
+  - If there are zero inferences (no analysis-output input), omit the inference clause
+  - The footer is the last line of the document, before CLAIMS TO VERIFY and CITATIONS blocks
+  - Do not explain the footer or draw attention to it — it is a quiet confidence signal for the reader
+
 ### Stage 5: Verify
 
 Before returning output:
