@@ -261,6 +261,7 @@ Design techniques to use freely:
 - Quote blocks with decorative elements
 - Timeline/process flows with connected steps
 - Hover and transition effects where they add polish
+- **CSS animations for aliveness** (see Micro-Animations below)
 
 **Every slide should feel intentionally designed.** Vary the visual treatment across
 slides — a data slide should look completely different from an argument slide.
@@ -276,6 +277,22 @@ breathing room that keeps an audience engaged.
 (metric cards, list items, timeline steps, table rows, comparison cards). If the
 source material requires more, split across two slides. Two clean slides always
 beat one dense slide.
+
+### Micro-Animations: Aliveness
+
+Static slides are forgettable. Purposeful CSS animation makes a slide feel alive —
+like the content is actively doing something, not just sitting there.
+
+A scanning line sweeping over a code block says "we're analyzing this." A bar chart
+that draws itself says "watch the gap." A metric that counts up says "this number
+matters." Animation reinforces the slide's assertion — it's not decoration.
+
+**Constraints:**
+- **Max 1 animated element per slide.** Two competing animations both lose.
+- **2–4 animated slides per deck.** Concentrate on the slides that carry the most
+  weight. Not every slide gets motion.
+- **Slow and subtle.** 3–8 second durations, ease-in-out. Fast animations feel cheap.
+- **Trigger on `.active`** so animations start when the slide appears, not on page load.
 
 ### Speaker Notes
 
