@@ -70,7 +70,7 @@ steps:
   #
   # No model override — uses the specialist's default model configuration.
   - id: "generate-presentation"
-    agent: "specialists:specialists/presentation-builder"
+    agent: "specialists:presentation-builder"
     prompt: |
       Generate a presentation from the following test scenario.
 
@@ -112,7 +112,9 @@ steps:
 
       # Write raw agent output to temp file
       raw_path="${output_path}.raw"
-      printf '%s' '{{deck_output}}' > "${raw_path}"
+      cat > "${raw_path}" <<'_CANVAS_DECK_EOF_7f3a9c'
+      {{deck_output}}
+      _CANVAS_DECK_EOF_7f3a9c
 
       # Extract just the HTML — the agent wraps output in prose and markdown fences
       python3 -c "
