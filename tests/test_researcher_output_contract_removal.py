@@ -10,7 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-RESEARCHER_INDEX = REPO_ROOT / "specialists" / "researcher" / "index.md"
+RESEARCHER_INDEX = REPO_ROOT / "agents" / "researcher.md"
 
 
 def test_no_output_contract_text_in_researcher():

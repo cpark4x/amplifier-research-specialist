@@ -7,9 +7,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-SPEC_FILE = (
-    Path(__file__).parent.parent / "specialists" / "competitive-analysis" / "index.md"
-)
+SPEC_FILE = Path(__file__).parent.parent / "agents" / "competitive-analysis.md"
 
 
 def _content() -> str:

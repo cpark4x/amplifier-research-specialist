@@ -6,7 +6,7 @@ Validates acceptance criteria for task-5: Add Routing Hint to Data Analyzer.
 from functools import lru_cache
 from pathlib import Path
 
-SPEC_FILE = Path(__file__).parent.parent / "specialists" / "data-analyzer" / "index.md"
+SPEC_FILE = Path(__file__).parent.parent / "agents" / "data-analyzer.md"
 
 
 @lru_cache(maxsize=None)

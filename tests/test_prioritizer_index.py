@@ -2,6 +2,7 @@
 Static tests for specialists/prioritizer/index.md
 Validates that the Prioritizer specialist spec follows all required patterns.
 """
+
 from __future__ import annotations
 
 import re
@@ -10,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-SPEC_FILE = Path(__file__).parent.parent / "specialists" / "prioritizer" / "index.md"
+SPEC_FILE = Path(__file__).parent.parent / "agents" / "prioritizer.md"
 
 
 @lru_cache(maxsize=None)
@@ -109,10 +110,10 @@ def test_output_contract_appears_before_stage_1() -> None:
 
 
 def test_output_contract_mentions_parsed_as_first_output() -> None:
-    """10. OUTPUT CONTRACT mentions `Parsed:` as the required first output."""
+    """10. OUTPUT CONTRACT mentions `PRIORITY OUTPUT` as the required first output."""
     output_contract_block = content().split("OUTPUT CONTRACT")[1].split("---")[0]
-    assert "Parsed:" in output_contract_block, (
-        "OUTPUT CONTRACT must mention 'Parsed:' as the required first output"
+    assert "PRIORITY OUTPUT" in output_contract_block, (
+        "OUTPUT CONTRACT must mention 'PRIORITY OUTPUT' as the required first output"
     )
 
 
@@ -124,9 +125,15 @@ def test_output_contract_mentions_parsed_as_first_output() -> None:
 def test_all_four_stages_present() -> None:
     """11. All 4 stages present: Stage 1 (Parse), Stage 2 (Score), Stage 3 (Rank), Stage 4 (Quality Gate)."""
     c = content()
-    assert re.search(r"Stage 1.*Parse", c, re.IGNORECASE), "Stage 1: Parse must be present"
-    assert re.search(r"Stage 2.*Score", c, re.IGNORECASE), "Stage 2: Score must be present"
-    assert re.search(r"Stage 3.*Rank", c, re.IGNORECASE), "Stage 3: Rank must be present"
+    assert re.search(r"Stage 1.*Parse", c, re.IGNORECASE), (
+        "Stage 1: Parse must be present"
+    )
+    assert re.search(r"Stage 2.*Score", c, re.IGNORECASE), (
+        "Stage 2: Score must be present"
+    )
+    assert re.search(r"Stage 3.*Rank", c, re.IGNORECASE), (
+        "Stage 3: Rank must be present"
+    )
     assert re.search(r"Stage 4.*Quality Gate", c, re.IGNORECASE), (
         "Stage 4: Quality Gate must be present"
     )
@@ -166,9 +173,7 @@ def test_impact_effort_framework_described() -> None:
 
 def test_rice_framework_described() -> None:
     """15. RICE framework described."""
-    assert "RICE" in content(), (
-        "Spec must describe the RICE prioritization framework"
-    )
+    assert "RICE" in content(), "Spec must describe the RICE prioritization framework"
 
 
 def test_weighted_scoring_framework_described() -> None:
@@ -184,21 +189,21 @@ def test_weighted_scoring_framework_described() -> None:
 
 
 def test_prioritizer_output_block_present_in_stage_4() -> None:
-    """17. PRIORITIZER OUTPUT block present in Stage 4."""
+    """17. PRIORITY OUTPUT block present in Stage 4."""
     c = content()
     stage4_section = c.split("### Stage 4")[1] if "### Stage 4" in c else ""
-    assert "PRIORITIZER OUTPUT" in stage4_section, (
-        "PRIORITIZER OUTPUT block must be present in Stage 4"
+    assert "PRIORITY OUTPUT" in stage4_section, (
+        "PRIORITY OUTPUT block must be present in Stage 4"
     )
 
 
-def test_output_block_has_context_section() -> None:
-    """18. CONTEXT section present in output block."""
+def test_output_block_has_framework_rationale() -> None:
+    """18. Framework rationale field present in output block."""
     c = content()
-    # Use Stage 4 section to avoid matching prose references to "PRIORITIZER OUTPUT"
+    # Use Stage 4 section to avoid matching prose references to "PRIORITY OUTPUT"
     stage4_section = c.split("### Stage 4")[1] if "### Stage 4" in c else ""
-    assert "CONTEXT" in stage4_section, (
-        "PRIORITIZER OUTPUT block in Stage 4 must contain a CONTEXT section"
+    assert "Framework rationale:" in stage4_section, (
+        "PRIORITY OUTPUT block in Stage 4 must contain a 'Framework rationale:' field"
     )
 
 
@@ -229,16 +234,14 @@ def test_output_block_has_quality_threshold_result() -> None:
 def test_output_block_emitted_in_stage_4_not_earlier() -> None:
     """22. Output block emitted in Stage 4 (not Stage 0 or Stage 1)."""
     c = content()
-    # Look for the standalone block header form (not prose references to "PRIORITIZER OUTPUT")
-    # The block header appears as a bare line: "\nPRIORITIZER OUTPUT\nSpecialist:"
-    block_header_match = re.search(r"\nPRIORITIZER OUTPUT\nSpecialist:", c)
     stage4_start = c.find("### Stage 4")
     assert stage4_start != -1, "Stage 4 must be present"
+    stage4_section = c[stage4_start:]
+    # The full PRIORITY OUTPUT block (divider line + Goal: field) must appear within Stage 4.
+    # Stage 0 emits only the stub; Stage 4 emits the complete block with Framework rationale.
+    block_header_match = re.search(r"\nPRIORITY OUTPUT\n[━]+\nGoal:", stage4_section)
     assert block_header_match is not None, (
-        "PRIORITIZER OUTPUT block header (followed by 'Specialist:') must be present"
-    )
-    assert block_header_match.start() > stage4_start, (
-        "PRIORITIZER OUTPUT block header must appear in Stage 4, not before it"
+        "Full PRIORITY OUTPUT block (with divider and 'Goal:') must appear in Stage 4"
     )
 
 
@@ -281,11 +284,11 @@ def test_routing_signal_section_present() -> None:
 
 
 def test_routing_signal_mentions_prioritizer_output() -> None:
-    """27. Routing signal mentions PRIORITIZER OUTPUT."""
+    """27. Routing signal mentions PRIORITY OUTPUT."""
     c = content()
     routing_block = c.split("## Routing Signal")[1] if "## Routing Signal" in c else ""
-    assert "PRIORITIZER OUTPUT" in routing_block, (
-        "Routing signal section must mention PRIORITIZER OUTPUT"
+    assert "PRIORITY OUTPUT" in routing_block, (
+        "Routing signal section must mention PRIORITY OUTPUT"
     )
 
 
@@ -313,6 +316,6 @@ def test_prioritizer_registered_in_specialists_yaml() -> None:
     yaml_path = Path(__file__).parent.parent / "behaviors" / "specialists.yaml"
     assert yaml_path.exists(), f"behaviors/specialists.yaml not found: {yaml_path}"
     yaml_content = yaml_path.read_text(encoding="utf-8")
-    assert "specialists:specialists/prioritizer" in yaml_content, (
-        "'specialists:specialists/prioritizer' must be registered in behaviors/specialists.yaml"
+    assert "specialists:prioritizer" in yaml_content, (
+        "'specialists:prioritizer' must be registered in behaviors/specialists.yaml"
     )

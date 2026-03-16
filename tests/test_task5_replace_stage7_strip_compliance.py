@@ -19,9 +19,7 @@ from pathlib import Path
 
 import pytest
 
-RESEARCHER_PATH = (
-    Path(__file__).parent.parent / "specialists" / "researcher" / "index.md"
-)
+RESEARCHER_PATH = Path(__file__).parent.parent / "agents" / "researcher.md"
 
 
 @pytest.fixture

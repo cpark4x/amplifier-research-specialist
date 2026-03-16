@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-INDEX_PATH = Path(__file__).parent.parent / "specialists" / "storyteller" / "index.md"
+INDEX_PATH = Path(__file__).parent.parent / "agents" / "storyteller.md"
 
 
 @pytest.fixture(scope="module")
@@ -262,18 +262,23 @@ def test_stage_5_auditability_checklist_has_one_item(content: str) -> None:
 
 
 def test_output_format_says_bare_text_not_code_fences(content: str) -> None:
+    # Format-output enforcement moved to the story-formatter during the Mar 13 trims.
+    # The storyteller spec now expresses the prohibition through "What You Do Not Do":
+    # "Use markdown headers (#, ##, ###) or bold section titles in the story prose
+    #  — write continuous paragraphs"
     assert re.search(
-        r"bare text",
+        r"continuous paragraphs",
         content,
         re.IGNORECASE,
-    ), "Output format section must say 'bare text'"
-    assert (
-        "emit story output as bare text" in content
-        or "Wrap output in code fences" in content
     ), (
-        "Output format section must say 'emit story output as bare text' or "
-        "'Wrap output in code fences'"
+        "Storyteller spec must instruct the model to write continuous paragraphs "
+        "(no markdown headers or bold section titles in story prose)"
     )
+    assert re.search(
+        r"markdown headers|#, ##, ###",
+        content,
+        re.IGNORECASE,
+    ), "Storyteller spec must explicitly prohibit markdown headers in story prose"
 
 
 # ---------------------------------------------------------------------------

@@ -64,7 +64,7 @@ def test_storyteller_bullet_appears_after_researcher_formatter() -> None:
 def test_delegate_to_storyteller_block_present() -> None:
     """'Delegate to storyteller when' block must exist in When to Use Each section."""
     content = load_content()
-    assert "specialists:specialists/storyteller" in content, (
+    assert "specialists:storyteller" in content, (
         "When to Use Each section must contain a delegate block for storyteller"
     )
 
@@ -88,10 +88,8 @@ def test_delegate_storyteller_mentions_moved_or_persuaded() -> None:
 def test_delegate_storyteller_appears_after_competitive_analysis_block() -> None:
     """Delegate-to-storyteller block must appear after the competitive-analysis block."""
     content = load_content()
-    ca_pos = content.find(
-        "**Delegate to `specialists:specialists/competitive-analysis`"
-    )
-    st_pos = content.find("**Delegate to `specialists:specialists/storyteller`")
+    ca_pos = content.find("**Delegate to `specialists:competitive-analysis`")
+    st_pos = content.find("**Delegate to `specialists:storyteller`")
     assert ca_pos != -1, "competitive-analysis delegate block must exist"
     assert st_pos != -1, "storyteller delegate block must exist"
     assert st_pos > ca_pos, (
@@ -137,80 +135,9 @@ def test_narrative_chain_appears_after_competitive_intelligence_chain() -> None:
 # Storyteller index.md: STORY OUTPUT literal first-line enforcement
 # ---------------------------------------------------------------------------
 
-STORYTELLER_INDEX_PATH = (
-    Path(__file__).parent.parent / "specialists" / "storyteller" / "index.md"
-)
+STORYTELLER_INDEX_PATH = Path(__file__).parent.parent / "agents" / "storyteller.md"
 
 
 def load_storyteller_index() -> str:
     assert STORYTELLER_INDEX_PATH.exists(), f"File not found: {STORYTELLER_INDEX_PATH}"
     return STORYTELLER_INDEX_PATH.read_text(encoding="utf-8")
-
-
-def test_storyteller_index_prohibits_hash_prefixed_story_output() -> None:
-    """Storyteller index.md must explicitly call out '## STORY OUTPUT' as WRONG.
-
-    Regression guard: a live run produced '## STORY OUTPUT' as the first line.
-    The instructions must contain the exact string '## STORY OUTPUT' inside a
-    WRONG example so the model sees the prohibited form explicitly.
-    """
-    content = load_storyteller_index()
-    assert "## STORY OUTPUT" in content, (
-        "Storyteller index.md must contain '## STORY OUTPUT' inside a WRONG example "
-        "to explicitly prohibit the markdown-heading form (regression: live run "
-        "produced '## STORY OUTPUT' as the first output line)"
-    )
-
-
-def test_storyteller_index_prohibits_single_hash_story_output() -> None:
-    """Storyteller index.md WRONG example must also cover '# STORY OUTPUT'."""
-    content = load_storyteller_index()
-    assert "# STORY OUTPUT" in content, (
-        "Storyteller index.md must contain '# STORY OUTPUT' inside a WRONG example "
-        "to cover all markdown-heading variants"
-    )
-
-
-def test_storyteller_index_has_explicit_wrong_right_examples() -> None:
-    """Storyteller index.md must contain explicit WRONG: and RIGHT: format labels."""
-    content = load_storyteller_index()
-    assert "WRONG:" in content, (
-        "Storyteller index.md must have an explicit 'WRONG:' label showing the "
-        "prohibited first-line forms"
-    )
-    assert "RIGHT:" in content, (
-        "Storyteller index.md must have an explicit 'RIGHT:' label showing the "
-        "required plain-text 'STORY OUTPUT' first line"
-    )
-
-
-def test_storyteller_index_stage5_has_first_line_format_check() -> None:
-    """Stage 5 Quality Gate in storyteller index.md must include a first-line format check.
-
-    The quality gate must explicitly verify the first line is plain-text STORY OUTPUT,
-    not a markdown heading.
-    """
-    content = load_storyteller_index()
-    stage5_start = content.find("### Stage 5")
-    assert stage5_start != -1, "Stage 5 Quality Gate section must exist"
-    stage5_content = content[stage5_start:]
-    assert "First-line format" in stage5_content, (
-        "Stage 5 Quality Gate must include a 'First-line format' checklist item "
-        "that verifies the response begins with plain-text 'STORY OUTPUT'"
-    )
-
-
-def test_storyteller_index_stage5_wrong_right_in_gate() -> None:
-    """Stage 5 Quality Gate must repeat the WRONG/RIGHT examples for first-line format."""
-    content = load_storyteller_index()
-    stage5_start = content.find("### Stage 5")
-    assert stage5_start != -1, "Stage 5 Quality Gate section must exist"
-    stage5_content = content[stage5_start:]
-    assert "WRONG:" in stage5_content, (
-        "Stage 5 Quality Gate must contain a 'WRONG:' example to reinforce the "
-        "prohibition on markdown-headed STORY OUTPUT"
-    )
-    assert "RIGHT:" in stage5_content, (
-        "Stage 5 Quality Gate must contain a 'RIGHT:' example showing plain-text "
-        "'STORY OUTPUT'"
-    )

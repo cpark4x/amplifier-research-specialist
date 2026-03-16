@@ -6,9 +6,7 @@ Validates acceptance criteria for task-6: Add Routing Hint to Researcher Formatt
 from functools import lru_cache
 from pathlib import Path
 
-SPEC_FILE = (
-    Path(__file__).parent.parent / "specialists" / "researcher-formatter" / "index.md"
-)
+SPEC_FILE = Path(__file__).parent.parent / "agents" / "researcher-formatter.md"
 
 
 @lru_cache(maxsize=None)
