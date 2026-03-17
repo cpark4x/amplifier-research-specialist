@@ -78,12 +78,12 @@ Default Amplifier research gives you a readable answer with no source accountabi
 
 **Specialized tools** — invoke directly for specific tasks:
 
-| Specialist | When to use it |
+| Specialist | What you get |
 |---|---|
-| **competitive-analysis** | Comparing vendors, products, or companies — produces structured comparison matrices |
-| **prioritizer** | Ranking a backlog, roadmap items, or options — produces defensible ranked lists with rationale |
-| **planner** | Breaking a goal into milestones — produces plans with dependencies, timelines, and risk flags |
-| **storyteller** | Turning structured findings into narrative — for board decks, change comms, or persuasive briefs |
+| **competitive-analysis** | A comparison matrix your VP can read without asking follow-up questions |
+| **prioritizer** | A ranked backlog you can defend to stakeholders — every item scored with visible rationale |
+| **planner** | A plan with milestones, dependencies, and risks flagged before they surprise you |
+| **storyteller** | Board decks and change comms that tell a story instead of dumping data |
 
 ### 6. Is it slow?
 
@@ -95,11 +95,15 @@ Yes. The deep chain spawns multiple specialist agents in sequence, which means m
 
 ### 8. What are the limitations?
 
-Three honest ones. First, the pipeline can only research what's publicly accessible — it can't reach behind paywalls, internal wikis, or private repositories. If your evidence lives in places the web can't reach, you'll get evidence gaps instead of findings. Second, the output is structured for traceability, not presentation — the RESEARCH OUTPUT and ANALYSIS OUTPUT blocks are machine-parseable but don't paste cleanly into Slack or email without reformatting. Third, the deep chain is token-heavy — five or more agent sessions in sequence means real API spend. For teams watching costs, quick mode handles most exploratory work at a fraction of the cost.
+- **Public web only.** The pipeline can't reach behind paywalls, internal wikis, or private repositories. If your evidence lives in places the web can't reach, you'll get evidence gaps instead of findings.
+- **Structured for traceability, not presentation.** RESEARCH OUTPUT and ANALYSIS OUTPUT blocks are machine-parseable but don't paste cleanly into Slack or email. You'll need to reformat before sharing outside Amplifier.
+- **Deep chain is token-heavy.** Five or more agent sessions in sequence means real API spend. Quick mode handles most exploratory work at a fraction of the cost.
 
 ### 9. What would cause this to fail?
 
-Two things. If the structured output is too inconvenient to use — if people have to manually reformat every brief before sending it — the time saved on research gets eaten by formatting work. Output presentation is an active area of improvement. Second, if the quality gates produce too many false "NOT MET" results on topics with legitimately sparse public evidence, users will stop trusting the gates and override them habitually, which defeats the purpose. The gates need to be calibrated tightly enough to catch real gaps without crying wolf.
+Two scenarios. You run a 15-minute deep research chain, get a sourced brief with trace references and confidence labels — then spend 10 minutes stripping all of that out so you can paste it into Slack. The time saved on research gets eaten by formatting. If that happens often enough, people stop using deep mode. Output presentation is an active area of improvement.
+
+The other scenario: you research a niche topic with legitimately sparse public evidence. The quality gates fire `NOT MET` on every finding because nothing has two independent sources. You override the gates, get your brief anyway, and next time you skip the gates entirely. Once people learn to ignore the gates, the whole trust architecture collapses. The gates need to be calibrated tightly enough to catch real gaps without crying wolf on every emerging-market query.
 
 ### 10. Can I use individual specialists without the full chain?
 
