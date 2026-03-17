@@ -130,14 +130,13 @@ them literally:
 fences. The first character of your response should be `<` and the last should be
 `>`. This is critical — the output is saved directly as an .html file.
 
-### Required: Use This Skeleton
+### HTML Structure Contract
 
-Your output MUST follow this exact skeleton. Copy it, then add your slides inside
-the `slides-container` and your custom CSS inside the `<style>` block. Do NOT
-restructure the HTML, remove the `<script>`, or change the navigation pattern.
+Your output MUST be a complete HTML document. The post-processor handles slide
+navigation, engine CSS, speaker notes styling, and print support — your job is
+creative slide content and visual design.
 
-A presentation without the `<script>` block is a scrollable document, not a deck.
-That is a broken output. The `<script>` is not optional.
+**Required structure:**
 
 ```html
 <!DOCTYPE html>
@@ -147,34 +146,6 @@ That is a broken output. The `<script>` is not optional.
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TITLE</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; overflow: hidden; }
-
-  /* --- SLIDE ENGINE (do not modify) --- */
-  .slides-container { position: relative; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; }
-  .slide {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    display: flex; flex-direction: column; justify-content: center;
-    padding: clamp(2rem, 5vw, 5rem); box-sizing: border-box;
-    opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s;
-    overflow-y: auto;
-  }
-  .slide.active { opacity: 1; visibility: visible; }
-  .nav-dots { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10; }
-  .nav-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: background 0.3s; }
-  .nav-dot.active { background: var(--accent, #fff); }
-  .slide-counter { position: fixed; bottom: 20px; right: 30px; font-size: 13px; opacity: 0.5; z-index: 10; }
-  .speaker-notes { display: none; position: fixed; bottom: 0; left: 0; right: 0; max-height: 40vh; overflow-y: auto;
-    padding: clamp(0.75rem, 2vw, 1.5rem); background: rgba(0,0,0,0.92); color: #e0e0e0;
-    font-size: clamp(0.7rem, 1.5vw, 0.85rem); line-height: 1.5; z-index: 100; border-top: 2px solid var(--accent, #666); }
-  .show-notes .speaker-notes { display: block; }
-  @media print {
-    body { overflow: visible; }
-    .slides-container { position: static; height: auto; }
-    .slide { position: static; opacity: 1 !important; visibility: visible !important; page-break-after: always; height: auto; min-height: 100vh; }
-    .nav-dots, .slide-counter, .speaker-notes { display: none !important; }
-  }
-
   /* --- YOUR DESIGN TOKENS (customize these — choose a palette that fits the content) --- */
   :root {
     --bg: /* YOUR BACKGROUND */;
@@ -195,52 +166,22 @@ That is a broken output. The `<script>` is not optional.
   <!-- add more slides -->
 </div>
 
-<div class="nav-dots"></div>
-<div class="slide-counter"></div>
-
-<script>
-// --- SLIDE ENGINE (do not modify) ---
-const slides = document.querySelectorAll('.slide');
-let cur = 0;
-const total = slides.length;
-const dots = document.querySelector('.nav-dots');
-const counter = document.querySelector('.slide-counter');
-slides.forEach((_, i) => { const d = document.createElement('div'); d.className = 'nav-dot' + (i === 0 ? ' active' : ''); d.onclick = () => go(i); dots.appendChild(d); });
-counter.textContent = '1 / ' + total;
-
-function go(n) {
-  slides[cur].classList.remove('active');
-  cur = (n + total) % total;
-  slides[cur].classList.add('active');
-  dots.querySelectorAll('.nav-dot').forEach((d, i) => d.classList.toggle('active', i === cur));
-  counter.textContent = (cur + 1) + ' / ' + total;
-}
-document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(cur + 1); }
-  if (e.key === 'ArrowLeft') { e.preventDefault(); go(cur - 1); }
-  if (e.key === 's' || e.key === 'S') document.body.classList.toggle('show-notes');
-});
-document.addEventListener('click', e => {
-  if (e.target.closest('.nav-dot, .speaker-notes, button, a')) return;
-  e.clientX > innerWidth / 2 ? go(cur + 1) : go(cur - 1);
-});
-let tx;
-document.addEventListener('touchstart', e => { tx = e.changedTouches[0].screenX; });
-document.addEventListener('touchend', e => { const d = tx - e.changedTouches[0].screenX; if (Math.abs(d) > 50) d > 0 ? go(cur + 1) : go(cur - 1); });
-</script>
-
 <!-- METADATA AND CONTENT MAP GO HERE AS HTML COMMENTS -->
 </body>
 </html>
 ```
 
 **Rules:**
-1. **No external dependencies.** No `@import url(...)`, no Google Fonts, no CDN links.
-2. **Do not remove or modify the slide engine CSS or the `<script>` block.** Add your
-   styles below the engine CSS. Add your slides inside `slides-container`.
+1. **No `<script>` tags.** Navigation (arrow keys, click, touch), nav dots, slide counter,
+   and speaker notes toggle are injected by the post-processor. Do not write any JavaScript.
+2. **No external dependencies.** No `@import url(...)`, no Google Fonts, no CDN links.
+   System font stack only.
 3. **Use `clamp()` for all font sizes and spacing** so the deck works on phones
    through projectors: headlines `clamp(1.8rem, 5vw, 3.5rem)`, body
    `clamp(0.9rem, 1.8vw, 1.1rem)`, big numbers `clamp(3rem, 15vw, 8rem)`.
+4. **Slide structure:** `<div class="slides-container">` containing `<div class="slide">`
+   elements. First slide gets `class="slide active"`. Speaker notes go inside each
+   slide as `<div class="speaker-notes">...</div>` — styling is injected automatically.
 
 ### Visual Design
 
@@ -306,15 +247,9 @@ matters." Animation reinforces the slide's assertion — it's not decoration.
 
 ### Speaker Notes
 
-Include speaker notes on content slides, toggled with S key:
-
-```css
-.speaker-notes { display: none; position: fixed; bottom: 0; left: 0; right: 0;
-  max-height: 40vh; overflow-y: auto; padding: clamp(0.75rem, 2vw, 1.5rem);
-  background: rgba(0,0,0,0.92); color: #e0e0e0; font-size: clamp(0.7rem, 1.5vw, 0.85rem);
-  line-height: 1.5; z-index: 100; border-top: 2px solid var(--accent); }
-.show-notes .speaker-notes { display: block; }
-```
+Include speaker notes on content slides, toggled with the S key. Add
+`<div class="speaker-notes">` inside each slide — the post-processor injects
+the CSS to show and hide them; you do not need to add any speaker notes styling.
 
 Notes should help a presenter deliver the slide. Structure each note with these
 four named fields — the rubric scores against this exact structure:
@@ -328,18 +263,6 @@ four named fields — the rubric scores against this exact structure:
   the next slide's content specifically.
 - **confidence** — source tier and corroboration level when relevant ("single
   secondary source — worth verifying", "three primary sources corroborate").
-
-### Print Support
-
-```css
-@media print {
-  body { overflow: visible; }
-  .slides-container { position: static; height: auto; }
-  .slide { position: static; opacity: 1 !important; visibility: visible !important;
-    page-break-after: always; height: auto; min-height: 100vh; }
-  .nav-dots, .slide-counter, .speaker-notes { display: none !important; }
-}
-```
 
 ### Metadata
 
@@ -383,7 +306,7 @@ This signal is for orchestrator routing and narration only — it does not appea
 - Draw new inferences — that's the Data Analyzer's job
 - Write prose documents — that's the Writer's job
 - Fabricate claims not in the source material
-- Produce HTML without working navigation
+- Produce navigation JavaScript — the post-processor handles slide navigation
 - Import external fonts, CSS, or JavaScript
 - Wrap your output in markdown — return raw HTML only
 
@@ -394,21 +317,16 @@ This signal is for orchestrator routing and narration only — it does not appea
 **STOP. Before returning your HTML, verify every item below. A single failure means
 the deck is broken.**
 
-1. **`<script>` tag exists with `ArrowRight` handler.** If the script block is
-   missing, the deck has no navigation — it's a scrollable page, not a presentation.
-   This is the most common failure mode. Go back and use the skeleton.
-2. **`body { overflow: hidden }` is set.** If the body can scroll, the deck is
-   broken — it will behave as a long scrollable document instead of discrete slides.
-3. **Zero `@import` statements.** No Google Fonts, no CDN links. System font stack
+1. **Zero `@import` statements.** No Google Fonts, no CDN links. System font stack
    only.
-4. **No fabricated numbers.** Scan every number in your deck. If it does not appear
+2. **No fabricated numbers.** Scan every number in your deck. If it does not appear
    in the source material, remove it or replace with a source number.
-5. **No more than 5 items per slide.** If any slide has more than 5 content elements,
+3. **No more than 5 items per slide.** If any slide has more than 5 content elements,
    split it.
-6. **Assertion titles, not labels.** Read every slide title. Each one should state a
+4. **Assertion titles, not labels.** Read every slide title. Each one should state a
    claim ("We cut latency 60%"), not label a topic ("Performance Results"). If any
    title is a label, rewrite it.
-7. **Visual rhythm.** Check your heavy/medium/light sequence. No two consecutive heavy
+5. **Visual rhythm.** Check your heavy/medium/light sequence. No two consecutive heavy
    slides. At least one light slide per three.
 
 If you skip this check, the output will fail evaluation.

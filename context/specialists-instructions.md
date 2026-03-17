@@ -150,9 +150,13 @@ The formatter is invisible to the user — do not mention it in narration unless
   keyboard navigation (arrow keys). Principles-based design grounded in cognitive
   science and visual hierarchy — audience calibration, ghost deck methodology, and
   visual rhythm. Produces decks that open directly in a browser.
-  **No formatter companion** — presentation-builder produces self-contained HTML,
-  not a structured text block, so the formatter pattern does not apply. This is an
-  intentional architectural exception, not a missing piece.
+  **Post-processor, not an LLM formatter** — after presentation-builder returns,
+  `tests/presentation-builder/fix-navigation.py` always runs to inject slide
+  navigation, slide engine CSS, speaker notes CSS, and print support
+  deterministically. This is the mechanical equivalent of the formatter pattern:
+  the model handles creative work, the script handles plumbing. No LLM formatter
+  exists because navigation injection requires no judgment — a deterministic script
+  is 100% reliable, costs zero tokens, and runs in milliseconds.
 
 ## When to Use Each
 

@@ -169,7 +169,9 @@ steps:
       eval_path="{{output_dir}}/${deck_basename}-evaluation.md"
 
       # Write evaluation result
-      printf '%s' '{{evaluation_result}}' > "${eval_path}"
+      cat > "${eval_path}" <<'_CANVAS_EVAL_EOF_7f3a9c'
+      {{evaluation_result}}
+      _CANVAS_EVAL_EOF_7f3a9c
 
       # Verify write succeeded
       if [ -s "${eval_path}" ]; then

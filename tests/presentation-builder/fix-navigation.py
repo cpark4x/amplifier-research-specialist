@@ -1,16 +1,23 @@
 #!/usr/bin/env python3
 """
-Post-processor for generated HTML presentations.
+Production post-processor for presentation-builder HTML output.
 
-The presentation-builder agent runs as an Amplifier agent, which means its output
-includes conversational prose and markdown fences around the HTML. This script:
+The presentation-builder specialist focuses on creative slide content and visual
+design. This script handles all mechanical structure deterministically — analogous
+to the formatter pattern used by other specialists, but implemented as a script
+rather than an LLM because navigation injection requires no judgment.
+
+This script always runs after presentation-builder in the pipeline. It:
 
 1. Extracts clean HTML — strips prose preamble, markdown fences, trailing commentary
 2. Ensures body has overflow: hidden
 3. Wraps slides in a .slides-container if missing
 4. Adds .active to the first slide if missing
-5. Injects the keyboard/click/touch navigation script if missing
-6. Adds nav dots and slide counter if missing
+5. Injects the slide engine CSS (position, opacity, transition) if missing
+6. Injects speaker notes CSS if missing
+7. Injects print support CSS if missing
+8. Adds nav dots and slide counter elements if missing
+9. Injects the keyboard/click/touch navigation script if missing
 
 Usage:
     python fix-navigation.py <file.html>
@@ -81,6 +88,24 @@ body { overflow: hidden !important; }
 }
 .slides-container > .slide.active,
 .slides-container > section.slide.active { opacity: 1; visibility: visible; }
+"""
+
+SPEAKER_NOTES_CSS = """
+/* --- injected speaker notes --- */
+.speaker-notes { display: none; position: fixed; bottom: 0; left: 0; right: 0; max-height: 40vh; overflow-y: auto;
+  padding: clamp(0.75rem, 2vw, 1.5rem); background: rgba(0,0,0,0.92); color: #e0e0e0;
+  font-size: clamp(0.7rem, 1.5vw, 0.85rem); line-height: 1.5; z-index: 100; border-top: 2px solid var(--accent, #666); }
+.show-notes .speaker-notes { display: block; }
+"""
+
+PRINT_CSS = """
+/* --- injected print support --- */
+@media print {
+  body { overflow: visible; }
+  .slides-container { position: static; height: auto; }
+  .slide { position: static; opacity: 1 !important; visibility: visible !important; page-break-after: always; height: auto; min-height: 100vh; }
+  .nav-dots, .slide-counter, .speaker-notes { display: none !important; }
+}
 """
 
 
@@ -191,7 +216,17 @@ def fix_html(html: str) -> tuple[str, list[str]]:
         html = html.replace("</style>", SLIDE_ENGINE_CSS + "\n</style>", 1)
         changes.append("Injected slide engine CSS (position:absolute + opacity)")
 
-    # 6. Add nav dots and counter if missing
+    # 6. Inject speaker notes CSS if missing
+    if ".speaker-notes" not in html:
+        html = html.replace("</style>", SPEAKER_NOTES_CSS + "\n</style>", 1)
+        changes.append("Injected speaker notes CSS")
+
+    # 7. Inject print support CSS if missing
+    if "@media print" not in html:
+        html = html.replace("</style>", PRINT_CSS + "\n</style>", 1)
+        changes.append("Injected print support CSS (@media print)")
+
+    # 8. Add nav dots and counter if missing
     if "nav-dots" not in html:
         html = html.replace("</body>", NAV_DOTS_HTML + "\n</body>", 1)
         changes.append("Added nav-dots element")
@@ -200,7 +235,7 @@ def fix_html(html: str) -> tuple[str, list[str]]:
         html = html.replace("</body>", COUNTER_HTML + "\n</body>", 1)
         changes.append("Added slide-counter element")
 
-    # 7. Inject navigation script if missing
+    # 9. Inject navigation script if missing
     has_script = bool(re.search(r"<script\b", html))
     has_arrow = "ArrowRight" in html
     if not has_script or not has_arrow:
@@ -225,13 +260,15 @@ def process_file(path: Path) -> bool:
     if was_extracted:
         changes.append(f"Extracted HTML ({len(html)} bytes from {len(content)} bytes)")
 
-    # Quick check: does it already have working navigation?
+    # Quick check: does it already have all post-processor components?
     has_script = bool(re.search(r"<script\b", html))
     has_arrow = "ArrowRight" in html
     has_container = "slides-container" in html
+    has_speaker_notes_css = ".speaker-notes" in html
+    has_print_css = "@media print" in html
 
-    if has_script and has_arrow and has_container and not was_extracted:
-        print(f"  OK: {path.name} (navigation intact)")
+    if has_script and has_arrow and has_container and has_speaker_notes_css and has_print_css and not was_extracted:
+        print(f"  OK: {path.name} (all post-processor components present)")
         return False
 
     fixed, nav_changes = fix_html(html)
