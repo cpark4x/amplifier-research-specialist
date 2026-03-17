@@ -90,8 +90,8 @@ steps:
          `<` (e.g., `<!DOCTYPE html>`) and the last MUST be `>` (e.g.,
          `</html>`). No prose, no explanation, no markdown fences, no
          "Here is the presentation" preamble. Raw HTML only.
-      5. Your HTML MUST include the `<script>` navigation block from the
-         skeleton in your instructions. Without it the deck is broken.
+      5. Do NOT include a `<script>` tag — slide navigation is injected
+         by a post-processor after generation.
 
       === SCENARIO FILE ===
       {{scenario_content}}
@@ -164,16 +164,14 @@ steps:
         exit 1
       fi
 
-      # Post-process: inject navigation if the model dropped it.
-      # This is a SAFETY NET, not normal flow. If fix-navigation patches
-      # anything, the agent failed to follow its own skeleton instructions.
+      # Post-process: inject slide navigation, slide engine CSS, speaker notes
+      # CSS, and print support. This is the designed production path — the model
+      # focuses on creative work, the script handles mechanical plumbing.
       FIX_SCRIPT="tests/presentation-builder/fix-navigation.py"
       if [ -f "$FIX_SCRIPT" ]; then
         echo ""
-        echo "Running navigation post-processor (safety net)..."
+        echo "Running post-processor (injecting navigation + slide engine)..."
         python3 "$FIX_SCRIPT" "${output_path}"
-        echo "NOTE: If changes were made above, the agent dropped its skeleton."
-        echo "The evaluation will score the PATCHED output, not the raw agent output."
       fi
     output: "save_result"
     timeout: 30

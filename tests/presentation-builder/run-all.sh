@@ -42,7 +42,7 @@ done
 if [ -z "$ROUND" ]; then
   # Auto-increment: find highest existing round and add 1
   latest=$(ls -d "${ROUNDS_DIR}"/round-* 2>/dev/null | sort -V | tail -1 | grep -oE '[0-9]+$' || echo "0")
-  ROUND=$(printf "%02d" $((latest + 1)))
+  ROUND=$(printf "%02d" $((10#$latest + 1)))
 else
   ROUND=$(printf "%02d" "$ROUND")
 fi
