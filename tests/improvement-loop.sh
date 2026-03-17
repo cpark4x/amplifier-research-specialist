@@ -46,7 +46,7 @@ IMPROVE_RECIPE="${SCRIPT_DIR}/analyze-and-improve.yaml"
 
 # Flags
 ITERATIONS=5
-BUILDER="both"
+BUILDER="pb"
 SKIP_FIRST=false
 
 while [[ $# -gt 0 ]]; do

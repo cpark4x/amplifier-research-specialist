@@ -150,6 +150,9 @@ The formatter is invisible to the user — do not mention it in narration unless
   keyboard navigation (arrow keys). Principles-based design grounded in cognitive
   science and visual hierarchy — audience calibration, ghost deck methodology, and
   visual rhythm. Produces decks that open directly in a browser.
+  **No formatter companion** — presentation-builder produces self-contained HTML,
+  not a structured text block, so the formatter pattern does not apply. This is an
+  intentional architectural exception, not a missing piece.
 
 ## When to Use Each
 
@@ -234,7 +237,7 @@ The formatter is invisible to the user — do not mention it in narration unless
 **Writer vs. Presentation Builder disambiguation:** When both seem to fit, use these signals:
 - Slide-signal words ("deck", "slides", "presentation", "pitch", "keynote", "all-hands") → Presentation Builder
 - Document-signal words ("report", "brief", "memo", "email", "write up", "summary", "document") → Writer
-- Executive audience + no format signal → default to Presentation Builder
+- Executive audience + no format signal → default to Writer, proactively offer a deck ("Want me to also build a slide deck from this?")
 - Delivery context is a live spoken event (board meeting, pitch, demo) → Presentation Builder
 - Output will be read asynchronously → Writer
 - If genuinely ambiguous, ask the user: "Should this be a slide deck or a written document?"
