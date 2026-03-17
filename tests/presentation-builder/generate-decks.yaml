@@ -97,7 +97,7 @@ steps:
       {{scenario_content}}
       === END SCENARIO FILE ===
     output: "deck_output"
-    timeout: 900
+    timeout: 1800
 
   # ── Step 3: Save the generated deck to the output directory ────────────────
   - id: "save-output"

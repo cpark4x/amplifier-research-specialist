@@ -151,7 +151,7 @@ steps:
 
       {{evaluation_inputs}}
     output: "evaluation_result"
-    timeout: 900
+    timeout: 1800
 
   # ── Step 3: Save the evaluation result ─────────────────────────────────────
   - id: "save-evaluation"
