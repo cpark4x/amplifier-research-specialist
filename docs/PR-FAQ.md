@@ -93,10 +93,14 @@ Quick mode takes 3–5 minutes. Deep mode takes about 15 minutes. That's the cos
 
 Yes. The deep chain spawns multiple specialist agents in sequence, which means more API calls and more tokens than a single-pass answer. The tradeoff is auditability — you're paying for source verification, fact/inference separation, and quality gates. For teams watching spend, use quick mode for exploration and reserve deep mode for deliverables.
 
-### 8. What if the evidence doesn't support a confident answer?
+### 8. What are the limitations?
 
-The pipeline tells you. Quality gates at multiple stages produce explicit `QUALITY THRESHOLD RESULT: NOT MET` outputs when evidence is thin. Evidence gaps are named in the output as `EVIDENCE GAP` entries. This is a feature — an honest "I don't have enough to be confident" is more valuable than a polished paragraph built on nothing.
+Three honest ones. First, the pipeline can only research what's publicly accessible — it can't reach behind paywalls, internal wikis, or private repositories. If your evidence lives in places the web can't reach, you'll get evidence gaps instead of findings. Second, the output is structured for traceability, not presentation — the RESEARCH OUTPUT and ANALYSIS OUTPUT blocks are machine-parseable but don't paste cleanly into Slack or email without reformatting. Third, the deep chain is token-heavy — five or more agent sessions in sequence means real API spend. For teams watching costs, quick mode handles most exploratory work at a fraction of the cost.
 
-### 9. Can I use individual specialists without the full chain?
+### 9. What would cause this to fail?
+
+Two things. If the structured output is too inconvenient to use — if people have to manually reformat every brief before sending it — the time saved on research gets eaten by formatting work. Output presentation is an active area of improvement. Second, if the quality gates produce too many false "NOT MET" results on topics with legitimately sparse public evidence, users will stop trusting the gates and override them habitually, which defeats the purpose. The gates need to be calibrated tightly enough to catch real gaps without crying wolf.
+
+### 10. Can I use individual specialists without the full chain?
 
 Yes. Delegate directly to any specialist — `delegate(agent="specialists:researcher", ...)` — or run pre-built recipes for common chains (research-chain, competitive-analysis-brief, narrative-chain). You can also chain specialists manually in any order. The pipeline is composable, not monolithic.
