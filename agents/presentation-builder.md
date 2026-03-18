@@ -172,11 +172,18 @@ creative slide content and visual design.
 ```
 
 **Rules:**
-1. **No `<script>` tags.** Navigation (arrow keys, click, touch), nav dots, slide counter,
+1. **Flat slide structure.** Every `<div class="slide">` must be a **direct child** of
+   `<div class="slides-container">`. Do NOT wrap slides in an additional container div.
+   No nesting — the post-processor's CSS and navigation depend on slides being direct
+   children of `.slides-container`.
+2. **No `<script>` tags.** Navigation (arrow keys, click, touch), nav dots, slide counter,
    and speaker notes toggle are injected by the post-processor. Do not write any JavaScript.
-2. **No external dependencies.** No `@import url(...)`, no Google Fonts, no CDN links.
+3. **No slide visibility CSS.** Do NOT write `display: none`, `opacity: 0`,
+   `visibility: hidden`, or any show/hide logic for `.slide` elements. The post-processor
+   injects the slide engine CSS that handles visibility and transitions.
+4. **No external dependencies.** No `@import url(...)`, no Google Fonts, no CDN links.
    System font stack only.
-3. **Use `clamp()` for all font sizes and spacing** so the deck works on phones
+5. **Use `clamp()` for all font sizes and spacing** so the deck works on phones
    through projectors: headlines `clamp(1.8rem, 5vw, 3.5rem)`, body
    `clamp(0.9rem, 1.8vw, 1.1rem)`, big numbers `clamp(3rem, 15vw, 8rem)`.
 4. **Slide structure:** `<div class="slides-container">` containing `<div class="slide">`

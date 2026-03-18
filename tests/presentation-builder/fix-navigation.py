@@ -211,7 +211,31 @@ def fix_html(html: str) -> tuple[str, list[str]]:
             )
             changes.append("Wrapped slides in .slides-container")
 
-    # 5. Inject slide engine CSS into style block
+    # 5. Flatten nested slide wrappers
+    # The model sometimes wraps all slides in a container div that also has
+    # class "slide" (e.g., <div class="slide actives-container">). This breaks
+    # the child-combinator CSS (.slides-container > .slide) because the real
+    # slides aren't direct children. Fix: remove "slide" from any element that
+    # contains other .slide elements — it's a wrapper, not a content slide.
+    wrapper_re = re.compile(
+        r'(<(?:div|section)\s+[^>]*class=")'  # opening tag with class="
+        r'([^"]*\bslide\b[^"]*)'  # class list containing "slide"
+        r'("[^>]*>)'  # rest of opening tag
+        r"(.*?)"  # content between open and close
+        r"(</(?:div|section)>)",  # closing tag
+        re.DOTALL,
+    )
+    for match in list(wrapper_re.finditer(html)):
+        inner_content = match.group(4)
+        if re.search(r'class="[^"]*\bslide\b', inner_content):
+            # This element contains nested .slide elements — it's a wrapper
+            old_class = match.group(2)
+            new_class = re.sub(r"\bslide\b", "slide-wrapper", old_class, count=1)
+            html = html[: match.start(2)] + new_class + html[match.end(2) :]
+            changes.append(f"Renamed wrapper class '{old_class}' to '{new_class}'")
+            break  # re-find after modification to avoid offset issues
+
+    # 6. Inject slide engine CSS into style block
     # Check if slides already use position: absolute
     has_absolute = bool(re.search(r"\.slide\s*\{[^}]*position:\s*absolute", html))
     if not has_absolute:
@@ -234,17 +258,17 @@ def fix_html(html: str) -> tuple[str, list[str]]:
         html = html.replace("</style>", SLIDE_ENGINE_CSS + "\n</style>", 1)
         changes.append("Injected slide engine CSS (position:absolute + opacity)")
 
-    # 6. Inject speaker notes CSS if missing
+    # 7. Inject speaker notes CSS if missing
     if ".speaker-notes" not in html:
         html = html.replace("</style>", SPEAKER_NOTES_CSS + "\n</style>", 1)
         changes.append("Injected speaker notes CSS")
 
-    # 7. Inject print support CSS if missing
+    # 8. Inject print support CSS if missing
     if "@media print" not in html:
         html = html.replace("</style>", PRINT_CSS + "\n</style>", 1)
         changes.append("Injected print support CSS (@media print)")
 
-    # 8. Add nav dots and counter if missing
+    # 9. Add nav dots and counter if missing
     if "nav-dots" not in html:
         html = html.replace("</body>", NAV_DOTS_HTML + "\n</body>", 1)
         changes.append("Added nav-dots element")
@@ -253,7 +277,7 @@ def fix_html(html: str) -> tuple[str, list[str]]:
         html = html.replace("</body>", COUNTER_HTML + "\n</body>", 1)
         changes.append("Added slide-counter element")
 
-    # 9. Inject navigation script if missing
+    # 10. Inject navigation script if missing
     has_script = bool(re.search(r"<script\b", html))
     has_arrow = "ArrowRight" in html
     if not has_script or not has_arrow:
@@ -291,6 +315,16 @@ def process_file(path: Path) -> bool:
         or re.search(r"\.slide\{[^}]*display\s*:\s*none", html)
     )
 
+    # Check for nested slide wrapper (a .slide element containing other .slide elements)
+    has_nested_wrapper = bool(
+        re.search(
+            r'<(?:div|section)\s+[^>]*class="[^"]*\bslide\b[^"]*"[^>]*>'
+            r'.*?class="[^"]*\bslide\b',
+            html,
+            re.DOTALL,
+        )
+    )
+
     if (
         has_script
         and has_arrow
@@ -299,6 +333,7 @@ def process_file(path: Path) -> bool:
         and has_print_css
         and not was_extracted
         and not has_display_none_conflict
+        and not has_nested_wrapper
     ):
         print(f"  OK: {path.name} (all post-processor components present)")
         return False
