@@ -109,6 +109,44 @@ PRINT_CSS = """
 """
 
 
+# Module-level compiled regex for detecting/renaming wrapper slides.
+# Shared by fix_html (step 5) and the process_file quick-check so the two
+# paths stay in sync automatically.
+#
+# Pattern notes:
+#   \bslide\b(?!-)  — matches the standalone "slide" class token but never
+#                     "slide-wrapper", "slide-title", etc.  Without (?!-),
+#                     plain \bslide\b fires on "slide-" because '-' is a
+#                     non-word character that satisfies the \b assertion.
+#   "(?:\s[^>]*)?>  — tolerates extra attributes after the class attribute
+#                     without accidentally consuming into the next tag.
+_WRAPPER_RE = re.compile(
+    r'(<(?:div|section)\s+[^>]*class=")'  # opening tag up to class="
+    r'([^"]*\bslide\b(?!-)[^"]*)'  # standalone "slide" token in class list
+    r'("(?:\s[^>]*)?>)'  # closing of the opening tag
+    r"(.*?)"  # inner content (lazy — stops at first matching close)
+    r"(</(?:div|section)>)",  # closing tag
+    re.DOTALL,
+)
+
+
+def _has_nested_wrappers(html: str) -> bool:
+    """Return True if any element with a standalone 'slide' class contains
+    descendant elements that also carry a standalone 'slide' class.
+
+    Uses the same regex and inner-content check as fix_html step 5 so the
+    quick-check in process_file is always consistent with the fixer logic.
+    """
+    for match in _WRAPPER_RE.finditer(html):
+        inner = match.group(4)
+        # Require an actual HTML opening tag before the nested class= so that
+        # sibling slide text / class names like "slide-title" on child elements
+        # don't produce false positives.
+        if re.search(r'<[^>]+class="[^"]*\bslide\b(?!-)', inner):
+            return True
+    return False
+
+
 def extract_html(content: str) -> tuple[str, bool]:
     """Extract clean HTML from agent output that may include prose and markdown fences.
     Returns (html, was_extracted)."""
@@ -133,7 +171,14 @@ def extract_html(content: str) -> tuple[str, bool]:
     if len(html) < 500:
         return content, False
 
-    return html, start > 0 or end < len(content)
+    # Only consider it "extracted" if there is actual non-whitespace prose
+    # before the HTML start or after the HTML end.  A bare trailing newline
+    # (very common from editors) must NOT set was_extracted=True — that would
+    # bypass the quick-check and force reprocessing on every run.
+    was_extracted = (start > 0 and content[:start].strip() != "") or (
+        content[end:].strip() != ""
+    )
+    return html, was_extracted
 
 
 def fix_html(html: str) -> tuple[str, list[str]]:
@@ -156,8 +201,11 @@ def fix_html(html: str) -> tuple[str, list[str]]:
             changes.append("Injected body { overflow: hidden } rule")
 
     # 2. Check for slides - support both <div class="slide"> and <section class="slide">
+    # Use \bslide\b(?!-) so that "slides-container" (no boundary at e/s) and
+    # "slide-wrapper" / "slide-title" (boundary at e/- but negative lookahead)
+    # are never mistaken for content slides.
     slide_pattern = re.compile(
-        r'<(div|section)\s+[^>]*class="[^"]*slide[^"]*"', re.IGNORECASE
+        r'<(div|section)\s+[^>]*class="[^"]*\bslide\b(?!-)[^"]*"', re.IGNORECASE
     )
     slides = list(slide_pattern.finditer(html))
 
@@ -168,7 +216,14 @@ def fix_html(html: str) -> tuple[str, list[str]]:
     first_slide = slides[0]
     first_slide_text = first_slide.group(0)
     if "active" not in first_slide_text:
-        fixed = first_slide_text.replace('class="slide', 'class="slide active')
+        # Use a token-aware substitution so that class="slide-something" is never
+        # accidentally mutated into class="slide active-something".
+        fixed = re.sub(
+            r'(class="[^"]*)\bslide\b(?!-)',
+            r"\1slide active",
+            first_slide_text,
+            count=1,
+        )
         html = html[: first_slide.start()] + fixed + html[first_slide.end() :]
         changes.append("Added 'active' class to first slide")
 
@@ -217,20 +272,20 @@ def fix_html(html: str) -> tuple[str, list[str]]:
     # the child-combinator CSS (.slides-container > .slide) because the real
     # slides aren't direct children. Fix: remove "slide" from any element that
     # contains other .slide elements — it's a wrapper, not a content slide.
-    wrapper_re = re.compile(
-        r'(<(?:div|section)\s+[^>]*class=")'  # opening tag with class="
-        r'([^"]*\bslide\b[^"]*)'  # class list containing "slide"
-        r'("[^>]*>)'  # rest of opening tag
-        r"(.*?)"  # content between open and close
-        r"(</(?:div|section)>)",  # closing tag
-        re.DOTALL,
-    )
-    for match in list(wrapper_re.finditer(html)):
+    # All correctness constraints are documented on the module-level _WRAPPER_RE.
+    for match in list(_WRAPPER_RE.finditer(html)):
         inner_content = match.group(4)
-        if re.search(r'class="[^"]*\bslide\b', inner_content):
+        # Require a real HTML opening tag before the nested "slide" class so
+        # that sibling slide text / inline mentions don't count as nesting.
+        if re.search(r'<[^>]+class="[^"]*\bslide\b(?!-)', inner_content):
             # This element contains nested .slide elements — it's a wrapper
             old_class = match.group(2)
-            new_class = re.sub(r"\bslide\b", "slide-wrapper", old_class, count=1)
+            # Replace only the exact bare "slide" token; never touch compound
+            # tokens like "slide-wrapper" or "slide-title".
+            new_class = " ".join(
+                "slide-wrapper" if token == "slide" else token
+                for token in old_class.split()
+            )
             html = html[: match.start(2)] + new_class + html[match.end(2) :]
             changes.append(f"Renamed wrapper class '{old_class}' to '{new_class}'")
             break  # re-find after modification to avoid offset issues
@@ -315,15 +370,12 @@ def process_file(path: Path) -> bool:
         or re.search(r"\.slide\{[^}]*display\s*:\s*none", html)
     )
 
-    # Check for nested slide wrapper (a .slide element containing other .slide elements)
-    has_nested_wrapper = bool(
-        re.search(
-            r'<(?:div|section)\s+[^>]*class="[^"]*\bslide\b[^"]*"[^>]*>'
-            r'.*?class="[^"]*\bslide\b',
-            html,
-            re.DOTALL,
-        )
-    )
+    # Check for nested slide wrapper (a .slide element containing other .slide elements).
+    # Uses the shared _has_nested_wrappers() helper so this check is always
+    # identical to what fix_html step 5 would actually act on — eliminating the
+    # class of bug where the quick-check forces a re-run but fix_html finds
+    # nothing to fix (infinite churn on already-clean files).
+    has_nested_wrapper = _has_nested_wrappers(html)
 
     if (
         has_script
