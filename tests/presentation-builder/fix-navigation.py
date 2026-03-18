@@ -156,7 +156,9 @@ def fix_html(html: str) -> tuple[str, list[str]]:
             changes.append("Injected body { overflow: hidden } rule")
 
     # 2. Check for slides - support both <div class="slide"> and <section class="slide">
-    slide_pattern = re.compile(r'<(div|section)\s+[^>]*class="[^"]*slide[^"]*"', re.IGNORECASE)
+    slide_pattern = re.compile(
+        r'<(div|section)\s+[^>]*class="[^"]*slide[^"]*"', re.IGNORECASE
+    )
     slides = list(slide_pattern.finditer(html))
 
     if not slides:
@@ -167,7 +169,7 @@ def fix_html(html: str) -> tuple[str, list[str]]:
     first_slide_text = first_slide.group(0)
     if "active" not in first_slide_text:
         fixed = first_slide_text.replace('class="slide', 'class="slide active')
-        html = html[:first_slide.start()] + fixed + html[first_slide.end():]
+        html = html[: first_slide.start()] + fixed + html[first_slide.end() :]
         changes.append("Added 'active' class to first slide")
 
     # 4. Wrap slides in .slides-container if missing
@@ -181,7 +183,7 @@ def fix_html(html: str) -> tuple[str, list[str]]:
             last_slide = slides_found[-1]
             tag_name = last_slide.group(1)  # div or section
             # Find the closing tag after the last slide's opening
-            rest = html[last_slide.end():]
+            rest = html[last_slide.end() :]
             # Count nesting to find the matching close
             depth = 1
             pos = 0
@@ -211,8 +213,24 @@ def fix_html(html: str) -> tuple[str, list[str]]:
 
     # 5. Inject slide engine CSS into style block
     # Check if slides already use position: absolute
-    has_absolute = bool(re.search(r'\.slide\s*\{[^}]*position:\s*absolute', html))
+    has_absolute = bool(re.search(r"\.slide\s*\{[^}]*position:\s*absolute", html))
     if not has_absolute:
+        # Strip model's display:none/flex visibility pattern — conflicts with
+        # the injected opacity/visibility engine. The model often writes its own
+        # slide visibility system (display:none + .active{display:flex}) which
+        # fights the injected engine (opacity:0 + .active{opacity:1}).
+        # Remove display:none from .slide rules and display:flex from .slide.active.
+        html = re.sub(
+            r"(\.slide\s*\{[^}]*?)display\s*:\s*none\s*;?\s*",
+            r"\1",
+            html,
+        )
+        html = re.sub(
+            r"(\.slide\.active\s*\{[^}]*?)display\s*:\s*flex\s*;?\s*",
+            r"\1",
+            html,
+        )
+        changes.append("Stripped model's display:none/flex visibility pattern")
         html = html.replace("</style>", SLIDE_ENGINE_CSS + "\n</style>", 1)
         changes.append("Injected slide engine CSS (position:absolute + opacity)")
 
@@ -267,7 +285,21 @@ def process_file(path: Path) -> bool:
     has_speaker_notes_css = ".speaker-notes" in html
     has_print_css = "@media print" in html
 
-    if has_script and has_arrow and has_container and has_speaker_notes_css and has_print_css and not was_extracted:
+    # Also check for conflicting display:none visibility pattern from the model
+    has_display_none_conflict = bool(
+        re.search(r"\.slide\s*\{[^}]*display\s*:\s*none", html)
+        or re.search(r"\.slide\{[^}]*display\s*:\s*none", html)
+    )
+
+    if (
+        has_script
+        and has_arrow
+        and has_container
+        and has_speaker_notes_css
+        and has_print_css
+        and not was_extracted
+        and not has_display_none_conflict
+    ):
         print(f"  OK: {path.name} (all post-processor components present)")
         return False
 
