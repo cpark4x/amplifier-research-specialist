@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Slide 06 — Evidence / Proof</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #F0F2F6;
+      --surface:      #FFFFFF;
+      --border:       #DDE1E9;
+      --text-primary: #18202E;
+      --text-secondary:#52606D;
+      --text-muted:   #8896A7;
+      --green:        #16A34A;
+      --green-light:  #DCFCE7;
+      --green-border: #86EFAC;
+      --amber:        #D97706;
+      --amber-light:  #FEF3C7;
+      --amber-border: #FCD34D;
+      --hero-border:  #16A34A;
+      --hero-glow:    rgba(22, 163, 74, 0.13);
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+    }
+
+    /* ── Slide shell ─────────────────────────────────── */
+    .slide {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: clamp(20px, 3vh, 40px) clamp(32px, 5.5vw, 72px);
+      gap: clamp(10px, 1.6vh, 20px);
+    }
+
+    /* ── Header ──────────────────────────────────────── */
+    .slide-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .eyebrow {
+      font-size: clamp(9px, 0.8vw, 11px);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green);
+    }
+
+    .slide-title {
+      font-size: clamp(18px, 2.1vw, 28px);
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--text-primary);
+    }
+
+    /* ── Card grid ───────────────────────────────────── */
+    .cards-grid {
+      display: flex;
+      gap: clamp(12px, 1.8vw, 22px);
+      flex: 1;
+      align-items: stretch;
+      min-height: 0;
+    }
+
+    /* ── Individual card ─────────────────────────────── */
+    .card {
+      flex: 1;
+      background: var(--surface);
+      border-radius: 14px;
+      border: 1.5px solid var(--border);
+      padding: clamp(12px, 1.4vh, 18px) clamp(14px, 1.6vw, 22px);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(4px, 0.6vh, 8px);
+      opacity: 0;
+      /* stagger applied inline via style attribute */
+    }
+
+    .card.animate { animation: cardIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+
+    /* Hero card — the most impressive result */
+    .card.hero {
+      flex: 1.28; /* slightly wider */
+      border: 2px solid var(--hero-border);
+      box-shadow:
+        0 0 0 4px var(--hero-glow),
+        0 8px 32px rgba(22, 163, 74, 0.10),
+        0 2px 8px rgba(0,0,0,0.06);
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Status pill (top of each card) */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: clamp(9px, 0.8vw, 11px);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 999px;
+      width: fit-content;
+    }
+
+    .status-pill.exceeded {
+      background: var(--green-light);
+      color: var(--green);
+      border: 1px solid var(--green-border);
+    }
+
+    .status-pill.missed {
+      background: var(--amber-light);
+      color: var(--amber);
+      border: 1px solid var(--amber-border);
+    }
+
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-pill.exceeded .status-dot { background: var(--green); }
+    .status-pill.missed   .status-dot { background: var(--amber); }
+
+    /* OKR label */
+    .okr-label {
+      font-size: clamp(10px, 0.95vw, 13px);
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Big metric */
+    .metric-number {
+      font-size: clamp(28px, 3.8vw, 52px);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+    }
+
+    .card.hero .metric-number {
+      font-size: clamp(36px, 4.6vw, 62px);
+      color: var(--green);
+    }
+
+    /* Metric sub-label */
+    .metric-label {
+      font-size: clamp(10px, 0.9vw, 13px);
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Hero annotation */
+    .hero-annotation {
+      margin-top: 2px;
+      padding: clamp(6px, 0.7vh, 8px) clamp(8px, 0.9vw, 12px);
+      background: var(--green-light);
+      border-radius: 7px;
+      font-size: clamp(10px, 0.9vw, 12.5px);
+      color: var(--green);
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    /* Progress bar (optional visual) */
+    .progress-track {
+      height: 4px;
+      background: #E9ECF2;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--green);
+      width: 0;
+      transition: width 0.8s ease;
+    }
+
+    .card.hero .progress-fill { background: var(--green); }
+
+    .progress-fill.missed { background: var(--amber); }
+
+    /* ── Footer line ─────────────────────────────────── */
+    .footer-line {
+      font-size: clamp(10px, 0.9vw, 12.5px);
+      color: var(--text-muted);
+      text-align: center;
+      opacity: 0;
+      animation: fadeIn 0.4s ease forwards;
+      animation-delay: 1.8s;
+    }
+
+    /* ── Animations ──────────────────────────────────── */
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(22px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0)    scale(1); }
+    }
+
+    @keyframes fillBar {
+      from { width: 0; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .card, .footer-line {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .progress-fill {
+        transition: none !important;
+      }
+    }
+
+    /* ── Speaker notes (hidden) ──────────────────────── */
+    .speaker-notes { display: none; }
+  </style>
+</head>
+<body>
+  <div class="slide">
+
+    <div class="slide-header">
+      <p class="eyebrow">Q3 OKR Results</p>
+      <h1 class="slide-title">Q3 exceeded targets on 4 of 5 OKRs despite the August outage</h1>
+    </div>
+
+    <div class="cards-grid">
+
+      <!-- Card 1: Revenue (HERO) -->
+      <div class="card hero animate" style="animation-delay: 0.1s;" aria-label="Revenue OKR: exceeded">
+        <span class="status-pill exceeded"><span class="status-dot"></span>Exceeded</span>
+        <p class="okr-label">Revenue</p>
+        <p class="metric-number">112%</p>
+        <p class="metric-label">of target</p>
+        <div class="progress-track" aria-hidden="true">
+          <div class="progress-fill" style="width: 100%; background: var(--green);"></div>
+        </div>
+        <div class="hero-annotation">
+          Revenue OKR: 112% of target — best quarter since launch
+        </div>
+      </div>
+
+      <!-- Card 2: Retention -->
+      <div class="card animate" style="animation-delay: 0.3s;" aria-label="Retention OKR: exceeded">
+        <span class="status-pill exceeded"><span class="status-dot"></span>Exceeded</span>
+        <p class="okr-label">Retention</p>
+        <p class="metric-number">104%</p>
+        <p class="metric-label">of target</p>
+        <div class="progress-track" aria-hidden="true">
+          <div class="progress-fill" style="width: 93%;"></div>
+        </div>
+      </div>
+
+      <!-- Card 3: Activation -->
+      <div class="card animate" style="animation-delay: 0.5s;" aria-label="Activation OKR: exceeded">
+        <span class="status-pill exceeded"><span class="status-dot"></span>Exceeded</span>
+        <p class="okr-label">Activation</p>
+        <p class="metric-number">108%</p>
+        <p class="metric-label">of target</p>
+        <div class="progress-track" aria-hidden="true">
+          <div class="progress-fill" style="width: 88%;"></div>
+        </div>
+      </div>
+
+      <!-- Card 4: Expansion -->
+      <div class="card animate" style="animation-delay: 0.7s;" aria-label="Expansion OKR: exceeded">
+        <span class="status-pill exceeded"><span class="status-dot"></span>Exceeded</span>
+        <p class="okr-label">Expansion</p>
+        <p class="metric-number">101%</p>
+        <p class="metric-label">of target</p>
+        <div class="progress-track" aria-hidden="true">
+          <div class="progress-fill" style="width: 82%;"></div>
+        </div>
+      </div>
+
+      <!-- Card 5: Reliability (MISSED) -->
+      <div class="card animate" style="animation-delay: 0.9s;" aria-label="Reliability OKR: missed">
+        <span class="status-pill missed"><span class="status-dot"></span>Missed</span>
+        <p class="okr-label">Reliability</p>
+        <p class="metric-number">87%</p>
+        <p class="metric-label">of target</p>
+        <div class="progress-track" aria-hidden="true">
+          <div class="progress-fill missed" style="width: 78%;"></div>
+        </div>
+      </div>
+
+    </div><!-- /.cards-grid -->
+
+    <p class="footer-line">Full OKR breakdown with sub-metric detail in appendix slides</p>
+
+    <div class="speaker-notes">
+      <p><strong>Key point:</strong> The August outage hurt Reliability but the business absorbed the impact — Revenue, Retention, Activation, and Expansion all held or exceeded targets, which tells us our customer relationships are resilient and our value proposition is stronger than the incident.</p>
+      <p><strong>If challenged:</strong> The Reliability miss is real — 87% of target means we hit 99.2% uptime against a 99.9% OKR. That's 5.5 additional hours of downtime. The post-mortem is in Appendix D and the remediation is already live in the stack we'll cover next.</p>
+      <p><strong>Transition:</strong> On Revenue specifically — 112% of target is the best quarter since launch, and it happened during a month when the product was partially down. That durability is worth unpacking, and it connects directly to the deployment improvements we made in September.</p>
+      <p><strong>Confidence:</strong> High — all figures pulled from the Q3 Board Report, cross-referenced with Salesforce (Revenue) and Amplitude (Activation/Retention) dashboards. Reliability calculated from PagerDuty incident logs.</p>
+    </div>
+
+  </div>
+
+  <script>
+    // Trigger progress bar fills after card animations land
+    document.addEventListener('DOMContentLoaded', () => {
+      // bars are already set via inline width styles; just ensure they
+      // visually animate in on load using the transition
+      const fills = document.querySelectorAll('.progress-fill');
+      fills.forEach((el, i) => {
+        const finalWidth = el.style.width;
+        el.style.width = '0';
+        setTimeout(() => { el.style.width = finalWidth; }, 400 + i * 200);
+      });
+    });
+
+    // Respect reduced-motion
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.querySelectorAll('.progress-fill').forEach(el => {
+        el.style.transition = 'none';
+      });
+    }
+  </script>
+</body>
+</html>

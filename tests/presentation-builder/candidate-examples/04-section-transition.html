@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Section Transition — What We Found</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: -apple-system, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      /*
+        Gradient lives here and animates via background-position.
+        The gradient is larger than the viewport so shifting it reads
+        as a slow color drift — creates tension without motion-sickness.
+      */
+      background: linear-gradient(
+        138deg,
+        #1a0050 0%,
+        #2e0068 18%,
+        #4a0a7a 34%,
+        #340060 50%,
+        #1e0048 64%,
+        #3a0070 78%,
+        #5a1090 100%
+      );
+      background-size: 320% 320%;
+      animation: drift 10s ease infinite;
+    }
+
+    @keyframes drift {
+      0%   { background-position: 0%   30%; }
+      33%  { background-position: 60%  70%; }
+      66%  { background-position: 100% 20%; }
+      100% { background-position: 0%   30%; }
+    }
+
+    /* ── Full-slide layout ───────────────────────────── */
+    .slide {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(2.5rem, 6vw, 5rem) clamp(2rem, 8vw, 8rem);
+      position: relative;
+    }
+
+    /* ── Section indicator (top of slide) ───────────── */
+    .section-label {
+      position: absolute;
+      top: clamp(1.5rem, 3.5vw, 3rem);
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: clamp(0.6rem, 0.9vw, 0.72rem);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      /*
+        Intentionally muted — this label is a wayfinding whisper,
+        not a competing element. The statement owns the slide.
+      */
+      color: rgba(255, 255, 255, 0.22);
+      white-space: nowrap;
+      animation: label-in 1s ease-out 0.2s both;
+    }
+
+    /* ── Central statement ───────────────────────────── */
+    .statement {
+      text-align: center;
+      color: #fff;
+      /*
+        Type treatment IS the design.
+        Large, confident, breathing room in the line-height.
+        Weight 600 not 800 — authority without aggression.
+      */
+      font-size: clamp(2.6rem, 7.5vw, 5.5rem);
+      font-weight: 600;
+      line-height: 1.12;
+      letter-spacing: -0.025em;
+      max-width: 14ch;
+      /*
+        A hair of text-shadow softens the type against the gradient
+        without making it glow — just enough to feel considered.
+      */
+      text-shadow: 0 2px 40px rgba(0,0,0,0.35);
+      animation: statement-in 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+    }
+
+    /*
+      "surprised" gets the visual stress — slightly more weight
+      and a subtle warm tint so the eye lands there last.
+    */
+    .statement em {
+      font-style: normal;
+      color: rgba(255, 220, 180, 0.95);
+    }
+
+    /* ── Keyframes ───────────────────────────────────── */
+    @keyframes label-in {
+      from { opacity: 0; letter-spacing: 0.5em; }
+      to   { opacity: 1; letter-spacing: 0.3em; }
+    }
+
+    @keyframes statement-in {
+      0%   { opacity: 0; transform: translateY(0.18em); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Reduced motion ──────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      body { animation: none !important; background-position: 30% 60%; }
+      .section-label,
+      .statement {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+        letter-spacing: inherit;
+      }
+      /* Ensure label keeps its own letter-spacing */
+      .section-label { letter-spacing: 0.3em; }
+    }
+
+    /* ── Speaker notes (hidden) ──────────────────────── */
+    .speaker-notes { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="slide">
+
+    <p class="section-label">Part II</p>
+
+    <p class="statement">
+      What we found<br><em>surprised us</em>
+    </p>
+
+  </div>
+
+  <div class="speaker-notes">
+    <p><strong>Key point:</strong> The data did not confirm our hypothesis. We expected the failure mode to be tooling — it wasn't. It was the gap between what teams knew and what they shared. That finding changed the entire direction of the solution.</p>
+    <p><strong>If challenged:</strong> I want to show you the data before I explain the conclusion. The conclusion only makes sense in context — if you jump ahead, the recommendation looks wrong. Let me earn the finding.</p>
+    <p><strong>Transition:</strong> Part II covers three datasets — incident post-mortems, on-call survey responses, and automated log correlation. Each pointed to the same root cause from a different angle.</p>
+    <p><strong>Confidence:</strong> The surprise is genuine — this was not a confirmation exercise. Our initial brief was wrong and we changed course based on evidence. That honesty is intentional and important for credibility.</p>
+  </div>
+
+</body>
+</html>

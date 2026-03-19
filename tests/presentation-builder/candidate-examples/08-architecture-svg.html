@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Slide 08 — Architecture / Event Mesh</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #080F1C;
+      --surface:      #0D1929;
+      --teal:         #00C896;
+      --teal-dim:     rgba(0, 200, 150, 0.22);
+      --teal-faint:   rgba(0, 200, 150, 0.08);
+      --blue:         #4D8EFF;
+      --blue-dim:     rgba(77, 142, 255, 0.18);
+      --node-fill:    #0F2038;
+      --node-stroke:  #1E4D7A;
+      --conn-stroke:  #1B3755;
+      --text-bright:  #E2E8F0;
+      --text-mid:     #7C94B0;
+      --text-dim:     #405570;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text-bright);
+    }
+
+    /* ── Slide shell ─────────────────────────────────── */
+    .slide {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: clamp(20px, 3.2vh, 40px) clamp(32px, 5vw, 64px) clamp(16px, 2.4vh, 30px);
+      gap: clamp(10px, 1.8vh, 20px);
+    }
+
+    /* ── Header ──────────────────────────────────────── */
+    .slide-header {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .eyebrow {
+      font-size: clamp(9px, 0.8vw, 11px);
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--teal);
+    }
+
+    .slide-title {
+      font-size: clamp(17px, 2vw, 26px);
+      font-weight: 700;
+      line-height: 1.28;
+      color: var(--text-bright);
+    }
+
+    /* ── SVG container ───────────────────────────────── */
+    .diagram-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      position: relative;
+    }
+
+    .mesh-svg {
+      width: 100%;
+      height: 100%;
+      max-width: 900px;
+      overflow: visible;
+    }
+
+    /* ── Connection lines (static, drawn in) ─────────── */
+    .conn-line {
+      stroke: var(--conn-stroke);
+      stroke-width: 1.5;
+      fill: none;
+      stroke-dasharray: 150;
+      stroke-dashoffset: 150;
+    }
+
+    .conn-line.c1 { animation: drawLine 0.5s ease forwards 1.5s; }
+    .conn-line.c2 { animation: drawLine 0.5s ease forwards 1.6s; }
+    .conn-line.c3 { animation: drawLine 0.5s ease forwards 1.7s; }
+    .conn-line.c4 { animation: drawLine 0.5s ease forwards 1.8s; }
+    .conn-line.c5 { animation: drawLine 0.5s ease forwards 1.9s; }
+    .conn-line.c6 { animation: drawLine 0.5s ease forwards 2.0s; }
+
+    /* ── Data flow lines (animated on top of conn lines) */
+    .flow-line {
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      opacity: 0;
+    }
+
+    .flow-line.teal  { stroke: var(--teal); }
+    .flow-line.blue  { stroke: var(--blue); }
+
+    /* flow-out: dashes move hub → node (forward, negative offset) */
+    .flow-out {
+      stroke-dasharray: 6 16;
+      animation:
+        flowReveal 0.3s ease forwards 2.4s,
+        flowOut    1.4s linear    infinite 2.4s;
+    }
+    /* flow-in: dashes move node → hub (backward, positive offset) */
+    .flow-in {
+      stroke-dasharray: 6 16;
+      animation:
+        flowReveal 0.3s ease forwards 2.4s,
+        flowIn     1.4s linear    infinite 2.4s;
+    }
+
+    /* ── Service node groups ──────────────────────────── */
+    .svc-node { opacity: 0; }
+    .svc-node.n1 { animation: nodeIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards 0.1s; }
+    .svc-node.n2 { animation: nodeIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards 0.3s; }
+    .svc-node.n3 { animation: nodeIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards 0.5s; }
+    .svc-node.n4 { animation: nodeIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards 0.7s; }
+    .svc-node.n5 { animation: nodeIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards 0.9s; }
+    .svc-node.n6 { animation: nodeIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards 1.1s; }
+
+    /* Node circle */
+    .node-circle {
+      fill: var(--node-fill);
+      stroke: var(--node-stroke);
+      stroke-width: 1.5;
+    }
+
+    /* Node inner accent dot */
+    .node-dot {
+      fill: var(--blue);
+    }
+
+    /* Service label text */
+    .node-text {
+      fill: var(--text-mid);
+      font-family: -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+
+    /* ── Hub group ────────────────────────────────────── */
+    .hub-group {
+      opacity: 0;
+      animation: nodeIn 0.6s cubic-bezier(0.22,1,0.36,1) forwards 1.3s;
+    }
+
+    /* Ripple ring (behind hub) */
+    .hub-ripple {
+      fill: none;
+      stroke: var(--teal);
+      stroke-width: 1.5;
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .hub-ripple.r1 { animation: hubPulse 2s ease-out infinite 1.8s; }
+    .hub-ripple.r2 { animation: hubPulse 2s ease-out infinite 2.5s; }
+
+    /* Hub main circle */
+    .hub-circle {
+      fill: #00291E;
+      stroke: var(--teal);
+      stroke-width: 2.5;
+      filter: drop-shadow(0 0 12px rgba(0,200,150,0.35));
+    }
+
+    /* Hub label */
+    .hub-text {
+      fill: var(--teal);
+      font-family: -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+      font-weight: 800;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+
+    .hub-text.line1 { font-size: 15px; }
+    .hub-text.line2 { font-size: 11px; font-weight: 600; opacity: 0.75; letter-spacing: 0.08em; text-transform: uppercase; }
+
+    /* ── Annotation footer ────────────────────────────── */
+    .annotation-bar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      opacity: 0;
+      animation: fadeIn 0.5s ease forwards 3.0s;
+    }
+
+    .annotation-line {
+      width: 32px;
+      height: 1px;
+      background: var(--text-dim);
+    }
+
+    .annotation-text {
+      font-size: clamp(10px, 0.95vw, 13px);
+      color: var(--text-mid);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .annotation-text strong {
+      color: var(--teal);
+      font-weight: 700;
+    }
+
+    /* ── Keyframes ────────────────────────────────────── */
+    @keyframes nodeIn {
+      from { opacity: 0; transform: scale(0.6); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes drawLine {
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes flowReveal {
+      from { opacity: 0; }
+      to   { opacity: 0.9; }
+    }
+
+    /* Dashes move forward along path (hub → node direction) */
+    @keyframes flowOut {
+      from { stroke-dashoffset: 0; }
+      to   { stroke-dashoffset: -22; }
+    }
+
+    /* Dashes move backward along path (node → hub direction) */
+    @keyframes flowIn {
+      from { stroke-dashoffset: 0; }
+      to   { stroke-dashoffset: 22; }
+    }
+
+    @keyframes hubPulse {
+      0%   { r: 52; opacity: 0.55; }
+      80%  { r: 88; opacity: 0; }
+      100% { r: 88; opacity: 0; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* ── Reduced motion ───────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      .conn-line, .svc-node, .hub-group, .annotation-bar {
+        animation: none !important;
+        opacity: 1 !important;
+        stroke-dashoffset: 0 !important;
+        transform: none !important;
+      }
+      .flow-line   { animation: none !important; opacity: 0.7 !important; }
+      .hub-ripple  { animation: none !important; }
+    }
+
+    /* ── Speaker notes (hidden) ──────────────────────── */
+    .speaker-notes { display: none; }
+  </style>
+</head>
+<body>
+  <div class="slide">
+
+    <div class="slide-header">
+      <p class="eyebrow">System Architecture</p>
+      <h1 class="slide-title">The event mesh connects every service without point-to-point coupling</h1>
+    </div>
+
+    <div class="diagram-wrap" role="img" aria-label="Event mesh architecture diagram showing 6 services connected through a central hub">
+      <!--
+        Hub center:     (400, 235)  Hub radius: 46
+        Service radius: 145 from hub center
+        Node positions (hex, starting from top, clockwise):
+          Orders       (400,  90)   — top
+          Payments     (526, 163)   — top-right
+          Analytics    (526, 308)   — bottom-right
+          Shipping     (400, 380)   — bottom
+          Notifications(274, 308)   — bottom-left
+          Inventory    (274, 163)   — top-left
+      -->
+      <svg
+        class="mesh-svg"
+        viewBox="0 0 800 470"
+        preserveAspectRatio="xMidYMid meet"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <defs>
+          <!-- Glow filter for hub -->
+          <filter id="hubGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="6" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <!-- Subtle node glow -->
+          <filter id="nodeGlow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- ── Background grid dots (subtle depth) ──── -->
+        <g opacity="0.06">
+          <!-- Sparse dot grid — just enough to suggest a technical canvas -->
+          <circle cx="100" cy="80"  r="1.5" fill="#4D8EFF"/>
+          <circle cx="200" cy="60"  r="1.5" fill="#4D8EFF"/>
+          <circle cx="600" cy="60"  r="1.5" fill="#4D8EFF"/>
+          <circle cx="700" cy="80"  r="1.5" fill="#4D8EFF"/>
+          <circle cx="100" cy="390" r="1.5" fill="#4D8EFF"/>
+          <circle cx="200" cy="420" r="1.5" fill="#4D8EFF"/>
+          <circle cx="600" cy="420" r="1.5" fill="#4D8EFF"/>
+          <circle cx="700" cy="390" r="1.5" fill="#4D8EFF"/>
+          <circle cx="60"  cy="235" r="1.5" fill="#4D8EFF"/>
+          <circle cx="740" cy="235" r="1.5" fill="#4D8EFF"/>
+        </g>
+
+        <!-- ── Connection lines (draw in after nodes appear) ── -->
+        <g>
+          <!-- Hub (400,235) → Orders (400,90) -->
+          <line class="conn-line c1" x1="400" y1="235" x2="400" y2="118"/>
+          <!-- Hub → Payments (526,163) -->
+          <line class="conn-line c2" x1="400" y1="235" x2="500" y2="184"/>
+          <!-- Hub → Analytics (526,308) -->
+          <line class="conn-line c3" x1="400" y1="235" x2="500" y2="286"/>
+          <!-- Hub → Shipping (400,380) -->
+          <line class="conn-line c4" x1="400" y1="235" x2="400" y2="352"/>
+          <!-- Hub → Notifications (274,308) -->
+          <line class="conn-line c5" x1="400" y1="235" x2="300" y2="286"/>
+          <!-- Hub → Inventory (274,163) -->
+          <line class="conn-line c6" x1="400" y1="235" x2="300" y2="184"/>
+        </g>
+
+        <!-- ── Data flow lines (animated dashes, layered on top) ── -->
+        <g>
+          <!-- Orders → hub (inward / "publish") -->
+          <line class="flow-line teal flow-in"  x1="400" y1="235" x2="400" y2="118"/>
+          <!-- hub → Payments (outward / "subscribe") -->
+          <line class="flow-line blue flow-out" x1="400" y1="235" x2="500" y2="184"/>
+          <!-- Analytics → hub (inward) -->
+          <line class="flow-line teal flow-in"  x1="400" y1="235" x2="500" y2="286"/>
+          <!-- hub → Shipping (outward) -->
+          <line class="flow-line blue flow-out" x1="400" y1="235" x2="400" y2="352"/>
+          <!-- Notifications → hub (inward) -->
+          <line class="flow-line teal flow-in"  x1="400" y1="235" x2="300" y2="286"/>
+          <!-- hub → Inventory (outward) -->
+          <line class="flow-line blue flow-out" x1="400" y1="235" x2="300" y2="184"/>
+        </g>
+
+        <!-- ── Hub ripple rings ──────────────────────── -->
+        <circle class="hub-ripple r1" cx="400" cy="235" r="52"/>
+        <circle class="hub-ripple r2" cx="400" cy="235" r="52"/>
+
+        <!-- ── Hub ──────────────────────────────────── -->
+        <g class="hub-group" filter="url(#hubGlow)">
+          <circle class="hub-circle" cx="400" cy="235" r="46"/>
+          <text class="hub-text line1" x="400" y="230">Event</text>
+          <text class="hub-text line2" x="400" y="249">Mesh</text>
+        </g>
+
+        <!-- ── Service nodes ────────────────────────── -->
+
+        <!-- Orders — top (400, 90) -->
+        <g class="svc-node n1" filter="url(#nodeGlow)">
+          <circle class="node-circle" cx="400" cy="90" r="30"/>
+          <circle class="node-dot" cx="400" cy="90" r="7" opacity="0.8"/>
+          <!-- label below -->
+          <text class="node-text" x="400" y="132" fill="#94A3B8" font-size="12">Orders</text>
+        </g>
+
+        <!-- Payments — top-right (526, 163) -->
+        <g class="svc-node n2" filter="url(#nodeGlow)">
+          <circle class="node-circle" cx="526" cy="163" r="30"/>
+          <circle class="node-dot" cx="526" cy="163" r="7" opacity="0.8"/>
+          <!-- label right -->
+          <text class="node-text" x="578" y="163" fill="#94A3B8" font-size="12" dominant-baseline="middle">Payments</text>
+        </g>
+
+        <!-- Analytics — bottom-right (526, 308) -->
+        <g class="svc-node n3" filter="url(#nodeGlow)">
+          <circle class="node-circle" cx="526" cy="308" r="30"/>
+          <circle class="node-dot" cx="526" cy="308" r="7" opacity="0.8"/>
+          <!-- label right -->
+          <text class="node-text" x="578" y="308" fill="#94A3B8" font-size="12" dominant-baseline="middle">Analytics</text>
+        </g>
+
+        <!-- Shipping — bottom (400, 380) -->
+        <g class="svc-node n4" filter="url(#nodeGlow)">
+          <circle class="node-circle" cx="400" cy="380" r="30"/>
+          <circle class="node-dot" cx="400" cy="380" r="7" opacity="0.8"/>
+          <!-- label above -->
+          <text class="node-text" x="400" y="340" fill="#94A3B8" font-size="12">Shipping</text>
+        </g>
+
+        <!-- Notifications — bottom-left (274, 308) -->
+        <g class="svc-node n5" filter="url(#nodeGlow)">
+          <circle class="node-circle" cx="274" cy="308" r="30"/>
+          <circle class="node-dot" cx="274" cy="308" r="7" opacity="0.8"/>
+          <!-- label left -->
+          <text class="node-text" x="222" y="308" fill="#94A3B8" font-size="12" dominant-baseline="middle">Notifications</text>
+        </g>
+
+        <!-- Inventory — top-left (274, 163) -->
+        <g class="svc-node n6" filter="url(#nodeGlow)">
+          <circle class="node-circle" cx="274" cy="163" r="30"/>
+          <circle class="node-dot" cx="274" cy="163" r="7" opacity="0.8"/>
+          <!-- label left -->
+          <text class="node-text" x="222" y="163" fill="#94A3B8" font-size="12" dominant-baseline="middle">Inventory</text>
+        </g>
+
+        <!-- ── Legend: teal = publish, blue = subscribe ── -->
+        <g opacity="0" style="animation: fadeIn 0.5s ease forwards 3.1s;">
+          <circle cx="580" cy="440" r="4" fill="#00C896"/>
+          <text x="590" y="440" fill="#405570" font-size="11" dominant-baseline="middle" font-family="-apple-system, system-ui, sans-serif">publish → mesh</text>
+          <circle cx="690" cy="440" r="4" fill="#4D8EFF"/>
+          <text x="700" y="440" fill="#405570" font-size="11" dominant-baseline="middle" font-family="-apple-system, system-ui, sans-serif">mesh → subscribe</text>
+        </g>
+
+      </svg>
+    </div>
+
+    <!-- ── Annotation ────────────────────────────────── -->
+    <div class="annotation-bar">
+      <div class="annotation-line"></div>
+      <p class="annotation-text">
+        <strong>87</strong> point-to-point integrations replaced by <strong>6</strong> event subscriptions
+      </p>
+      <div class="annotation-line"></div>
+    </div>
+
+    <div class="speaker-notes">
+      <p><strong>Key point:</strong> Before the event mesh, every new integration required a direct API connection between two services — 87 of them, each a potential failure point and maintenance burden. Now each service subscribes to topics it cares about, and the mesh handles routing. Adding a new service requires exactly zero changes to existing services.</p>
+      <p><strong>If challenged:</strong> "What about ordering guarantees?" The mesh uses Kafka under the hood, so ordering is preserved within a partition by key. The Payments and Orders services both use order-ID as the partition key, so all events for a given order are strictly ordered. The architecture decision log (ADR-014) covers the tradeoffs in detail.</p>
+      <p><strong>Transition:</strong> This architecture is also what made the deployment improvements you saw on the previous slide possible — because services are fully decoupled, we can deploy and roll back any one of them independently without triggering a cascade.</p>
+      <p><strong>Confidence:</strong> High — the 87-to-6 figure is from the integration registry, audited by the platform team in September. The architecture diagram matches the production topology as of the last infra review.</p>
+    </div>
+
+  </div>
+</body>
+</html>

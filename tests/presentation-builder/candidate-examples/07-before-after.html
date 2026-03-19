@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Slide 07 — Before / After Reveal</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* Before palette — cool, muted, slightly desaturated */
+      --before-bg:        #E8EDF5;
+      --before-surface:   #F4F6FA;
+      --before-text:      #4A5568;
+      --before-text-sub:  #8896AB;
+      --before-num:       #5A6A82;
+      --before-border:    #CDD5E0;
+      --before-label-bg:  #DCE3EE;
+      --before-label-txt: #5A6880;
+
+      /* After palette — warm, vibrant, alive */
+      --after-bg:         #F5F0E8;
+      --after-surface:    #FFFBF5;
+      --after-text:       #1A1A1A;
+      --after-text-sub:   #6B6460;
+      --after-num:        #2D6A4F;
+      --after-border:     #C7DFD4;
+      --after-label-bg:   #D8EFE4;
+      --after-label-txt:  #2D6A4F;
+      --after-accent:     #F59E0B;
+
+      /* Divider */
+      --divider-color:    #A8B8D0;
+      --divider-glow:     rgba(94, 140, 200, 0.35);
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* ── Slide shell ─────────────────────────────────── */
+    .slide {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Title bar ───────────────────────────────────── */
+    .slide-header {
+      background: #FFFFFF;
+      border-bottom: 1px solid #E4E8F0;
+      padding: clamp(14px, 2.4vh, 28px) clamp(32px, 5vw, 68px);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 10;
+      flex-shrink: 0;
+    }
+
+    .eyebrow {
+      font-size: clamp(9px, 0.8vw, 11px);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #7C8DA8;
+    }
+
+    .slide-title {
+      font-size: clamp(16px, 1.85vw, 24px);
+      font-weight: 700;
+      line-height: 1.3;
+      color: #18202E;
+    }
+
+    /* ── Split body ──────────────────────────────────── */
+    .split-body {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      position: relative;
+    }
+
+    /* ── Half panels ─────────────────────────────────── */
+    .half {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: clamp(28px, 4.5vh, 56px) clamp(36px, 4.5vw, 64px);
+      gap: clamp(16px, 2.8vh, 32px);
+    }
+
+    .before { background: var(--before-bg); }
+    .after  { background: var(--after-bg); }
+
+    /* Label pill */
+    .half-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: clamp(10px, 0.9vw, 12px);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 999px;
+      width: fit-content;
+    }
+
+    .before .half-label {
+      background: var(--before-label-bg);
+      color: var(--before-label-txt);
+    }
+
+    .after .half-label {
+      background: var(--after-label-bg);
+      color: var(--after-label-txt);
+    }
+
+    /* Time context */
+    .half-time {
+      font-size: clamp(10px, 0.9vw, 12px);
+      font-weight: 500;
+      color: var(--before-text-sub);
+      margin-left: 2px;
+    }
+
+    .after .half-time { color: var(--after-text-sub); }
+
+    /* Metrics list */
+    .metrics-list {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(10px, 2vh, 24px);
+      flex: 1;
+      justify-content: center;
+    }
+
+    .metric-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .metric-value {
+      font-size: clamp(36px, 5vw, 66px);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+
+    .before .metric-value { color: var(--before-num); }
+    .after  .metric-value { color: var(--after-num); }
+
+    .metric-desc {
+      font-size: clamp(12px, 1.1vw, 15px);
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .before .metric-desc { color: var(--before-text-sub); }
+    .after  .metric-desc { color: var(--after-text-sub); }
+
+    /* Animate the AFTER metrics only */
+    .after .metric-row {
+      opacity: 0;
+      animation: fadeSlideRight 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .after .metric-row:nth-child(1) { animation-delay: 0.55s; }
+    .after .metric-row:nth-child(2) { animation-delay: 0.75s; }
+    .after .metric-row:nth-child(3) { animation-delay: 0.95s; }
+
+    /* Before metrics: static, no animation, slightly desaturated feel */
+    .before .metric-row {
+      opacity: 0.82;
+    }
+
+    /* ── Transformation arrow ────────────────────────── */
+    /* Overlaid on the divider */
+    .transform-arrow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      animation: arrowReveal 0.4s ease forwards;
+      animation-delay: 0.35s;
+    }
+
+    .arrow-circle {
+      width: clamp(40px, 4.5vw, 58px);
+      height: clamp(40px, 4.5vw, 58px);
+      background: #FFFFFF;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .arrow-icon {
+      width: clamp(18px, 2vw, 26px);
+      height: clamp(18px, 2vw, 26px);
+      color: #5E8CC8;
+    }
+
+    .arrow-label {
+      font-size: clamp(8px, 0.7vw, 10px);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #8896AB;
+      background: #FFF;
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    /* ── Animated divider line ───────────────────────── */
+    /* The gradient IS the metaphor: muted blue (before) bleeds into
+       warm amber (after), top to bottom — static, no looping needed. */
+    .divider {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 2px;
+      height: 100%;
+      background: linear-gradient(
+        to bottom,
+        var(--before-border)  0%,
+        var(--divider-color)  38%,
+        #8CB8A0               62%,
+        var(--after-accent)   100%
+      );
+      transform: translateX(-50%);
+      z-index: 15;
+      opacity: 0.75;
+    }
+
+    /* ── Animations ──────────────────────────────────── */
+    @keyframes fadeSlideRight {
+      from { opacity: 0; transform: translateX(16px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes arrowReveal {
+      from { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+      to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .after .metric-row {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .transform-arrow {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: translate(-50%, -50%) !important;
+      }
+    }
+
+    /* ── Speaker notes (hidden) ──────────────────────── */
+    .speaker-notes { display: none; }
+  </style>
+</head>
+<body>
+  <div class="slide">
+
+    <!-- Title bar -->
+    <div class="slide-header">
+      <p class="eyebrow">Deployment Transformation</p>
+      <h1 class="slide-title">Three months of focused work transformed our deployment story</h1>
+    </div>
+
+    <!-- Split body -->
+    <div class="split-body" role="main">
+
+      <!-- Vertical divider -->
+      <div class="divider" aria-hidden="true"></div>
+
+      <!-- Transformation arrow (overlaid on divider) -->
+      <div class="transform-arrow" aria-hidden="true">
+        <div class="arrow-circle">
+          <!-- Right arrow SVG -->
+          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </div>
+        <span class="arrow-label">3 months</span>
+      </div>
+
+      <!-- BEFORE half -->
+      <div class="half before" aria-label="Before state">
+        <span class="half-label">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M6 3v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Before — June
+        </span>
+
+        <div class="metrics-list">
+          <div class="metric-row">
+            <div class="metric-value">4 hr</div>
+            <div class="metric-desc">deploy windows<br>Scheduled weekends only</div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-value">23%</div>
+            <div class="metric-desc">rollback rate<br>Failed or partially failed</div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-value">12 hrs</div>
+            <div class="metric-desc">monthly maintenance<br>Required weekend downtime</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AFTER half -->
+      <div class="half after" aria-label="After state">
+        <span class="half-label">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M3.5 6l2 2 3-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          After — September
+        </span>
+
+        <div class="metrics-list">
+          <div class="metric-row">
+            <div class="metric-value">12 min</div>
+            <div class="metric-desc">deploys, anytime<br>Any engineer, any day</div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-value">2%</div>
+            <div class="metric-desc">rollback rate<br>Down from 23% — 11× improvement</div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-value">Zero</div>
+            <div class="metric-desc">-downtime releases<br>Blue/green with instant rollback</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.split-body -->
+
+    <div class="speaker-notes">
+      <p><strong>Key point:</strong> This isn't incremental improvement — 4-hour deploy windows down to 12 minutes and a 23% rollback rate down to 2% are step-change transformations that happened in a single quarter. The team fundamentally re-platformed the delivery pipeline.</p>
+      <p><strong>If challenged:</strong> The rollback rate drop is the most significant metric because it's a quality signal, not just a speed one. We went from 1-in-4 deploys requiring rollback to 1-in-50. That change alone recovered an estimated 60 engineer-hours per month.</p>
+      <p><strong>Transition:</strong> The mechanism behind this transformation is the event-mesh architecture we introduced in September — it decoupled services so that a failing component no longer cascades. Let me show you how it's structured.</p>
+      <p><strong>Confidence:</strong> High — deploy times measured from CI/CD pipeline logs (Buildkite). Rollback rate from deployment records in Spinnaker. Both before/after windows confirmed independently by platform and product engineering leads.</p>
+    </div>
+
+  </div>
+</body>
+</html>

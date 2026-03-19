@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hero Stat — CAC Drop 47%</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg:           #f7f6f1;
+      --teal:         #0a6b5e;
+      --teal-dark:    #074d44;
+      --teal-subtle:  #e4f0ee;
+      --amber:        #c96a10;
+      --amber-light:  #fdf0e3;
+      --text:         #1a1a18;
+      --muted:        #7a7a72;
+      --card-bg:      #ffffff;
+      --card-border:  #e3e3db;
+      --green:        #1a7a4a;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: -apple-system, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: clamp(2rem, 5vw, 4rem) clamp(2rem, 8vw, 7rem);
+    }
+
+    /* ── Layout ───────────────────────────────────────── */
+    .slide {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(1.25rem, 2.5vw, 2rem);
+    }
+
+    /* ── Eyebrow / assertion ──────────────────────────── */
+    .eyebrow {
+      font-size: clamp(0.7rem, 1.1vw, 0.875rem);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      text-align: center;
+      max-width: 52ch;
+      line-height: 1.5;
+      animation: fade-in 0.5s ease-out 0.05s both;
+    }
+
+    /* ── Hero block ───────────────────────────────────── */
+    .hero-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(0.25rem, 0.6vw, 0.5rem);
+    }
+
+    .hero-kicker {
+      font-size: clamp(0.65rem, 1vw, 0.8rem);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      font-weight: 500;
+      animation: fade-in 0.4s ease-out 0.2s both;
+    }
+
+    .hero-number {
+      font-size: clamp(7rem, 22vw, 15rem);
+      font-weight: 800;
+      color: var(--teal);
+      line-height: 0.88;
+      letter-spacing: -0.04em;
+      /* Tabular nums so it doesn't jitter during entrance */
+      font-variant-numeric: tabular-nums;
+      animation: scale-in 0.75s cubic-bezier(0.22, 1.2, 0.36, 1) 0.25s both;
+    }
+
+    .annotation {
+      font-size: clamp(0.85rem, 1.4vw, 1.05rem);
+      font-weight: 600;
+      color: var(--amber);
+      text-align: center;
+      letter-spacing: 0.01em;
+      animation: fade-in 0.55s ease-out 0.85s both;
+    }
+
+    /* ── Metric cards ─────────────────────────────────── */
+    .cards {
+      display: flex;
+      gap: clamp(0.75rem, 1.8vw, 1.25rem);
+      width: 100%;
+      justify-content: center;
+      margin-top: clamp(0.25rem, 0.8vw, 0.75rem);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: clamp(1rem, 1.8vw, 1.4rem) clamp(1.25rem, 2.2vw, 1.8rem);
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      flex: 1;
+      max-width: 240px;
+      /* Top accent */
+      border-top: 3px solid var(--teal-subtle);
+      transition: border-top-color 0.2s;
+    }
+
+    .card:hover {
+      border-top-color: var(--teal);
+    }
+
+    .card:nth-child(1) { animation: fade-up 0.55s ease-out 1.05s both; }
+    .card:nth-child(2) { animation: fade-up 0.55s ease-out 1.25s both; }
+    .card:nth-child(3) { animation: fade-up 0.55s ease-out 1.45s both; }
+
+    .card-value {
+      font-size: clamp(1.5rem, 3.2vw, 2.1rem);
+      font-weight: 700;
+      color: var(--teal-dark);
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    .card-label {
+      font-size: clamp(0.62rem, 0.95vw, 0.78rem);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .card-delta {
+      font-size: clamp(0.7rem, 1vw, 0.82rem);
+      color: var(--green);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.25em;
+    }
+
+    .card-delta::before {
+      content: "↑";
+      font-size: 0.9em;
+    }
+
+    .card-delta.down::before {
+      content: "↓";
+    }
+
+    /* ── Keyframes ────────────────────────────────────── */
+    @keyframes scale-in {
+      0%   { transform: scale(0.2) translateY(0.05em); opacity: 0; }
+      60%  { transform: scale(1.04) translateY(0); opacity: 1; }
+      80%  { transform: scale(0.985); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Reduced motion ───────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      .hero-number,
+      .annotation,
+      .eyebrow,
+      .hero-kicker,
+      .card {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
+
+    /* ── Speaker notes (hidden, for model learning) ───── */
+    .speaker-notes { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="slide">
+
+    <p class="eyebrow">
+      Customer acquisition cost dropped 47% after automating the qualification pipeline
+    </p>
+
+    <div class="hero-block">
+      <span class="hero-kicker">Cost reduction</span>
+      <div class="hero-number">47%</div>
+      <p class="annotation">Saving $1.2M annually across 340 qualified leads</p>
+    </div>
+
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-value">2.4×</div>
+        <div class="card-label">Pipeline Velocity</div>
+        <div class="card-delta">vs. prior quarter</div>
+      </div>
+
+      <div class="card">
+        <div class="card-value">38%</div>
+        <div class="card-label">Conversion Rate</div>
+        <div class="card-delta">from 22% baseline</div>
+      </div>
+
+      <div class="card">
+        <div class="card-value">−11 days</div>
+        <div class="card-label">Time to Close</div>
+        <div class="card-delta down">median cycle time</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="speaker-notes">
+    <p><strong>Key point:</strong> The 47% reduction is a direct result of removing manual SDR qualification — automated scoring handles top-of-funnel, humans engage only at SQL threshold. This is not optimization; it's a structural change.</p>
+    <p><strong>If challenged:</strong> This is blended CAC across inbound and outbound channels. Outbound-only improvement is 61%; inbound is 33%. Both are significant and directionally consistent.</p>
+    <p><strong>Transition:</strong> These gains compound — faster cycles mean more cycles per quarter. Let's look at what that means for total pipeline capacity heading into Q3.</p>
+    <p><strong>Confidence:</strong> High — 6-month cohort with full attribution through CRM. Finance reviewed and approved the $1.2M annualized figure using fully-loaded cost basis.</p>
+  </div>
+
+</body>
+</html>

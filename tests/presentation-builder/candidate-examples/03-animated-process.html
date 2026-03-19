@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animated Process — Security Scanner</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg:          #0c0f1a;
+      --panel-code:  #111827;
+      --panel-edge:  #1f2d45;
+      --panel-res:   #0d1526;
+      --scan-color:  #f97316;
+      --scan-glow:   rgba(249, 115, 22, 0.35);
+      /* Syntax colors — VSCode-ish but not identical */
+      --c-kw:        #7cb7ff;    /* keywords */
+      --c-fn:        #dab970;    /* function names */
+      --c-str:       #ce9178;    /* strings */
+      --c-cmt:       #5c7a5c;    /* comments */
+      --c-type:      #4dc9b0;    /* types */
+      --c-num:       #b5d499;    /* numbers */
+      --c-punc:      #8892aa;    /* punctuation / default */
+      --c-line:      #3a4257;    /* line number */
+      /* Severity */
+      --sev-crit:    #ef4444;
+      --sev-high:    #f97316;
+      --sev-med:     #eab308;
+      --sev-ok:      #22c55e;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: -apple-system, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: #c8d0e8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: clamp(1.25rem, 3vw, 2.5rem) clamp(1.5rem, 4vw, 4rem);
+      gap: clamp(1rem, 1.8vw, 1.5rem);
+    }
+
+    /* ── Assertion title ─────────────────────────────── */
+    .assertion {
+      font-size: clamp(0.65rem, 1vw, 0.8rem);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #4a5578;
+      text-align: center;
+      max-width: 70ch;
+    }
+
+    /* ── Two-panel container ─────────────────────────── */
+    .panels {
+      display: flex;
+      width: 100%;
+      max-width: 1140px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--panel-edge);
+      /* Subtle drop shadow */
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.04);
+    }
+
+    /* ── Code panel (60%) ────────────────────────────── */
+    .code-panel {
+      flex: 3;
+      background: var(--panel-code);
+      position: relative;
+      overflow: hidden;
+      border-right: 1px solid var(--panel-edge);
+    }
+
+    .code-panel-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1rem;
+      background: #0d1220;
+      border-bottom: 1px solid var(--panel-edge);
+    }
+
+    .traffic-light {
+      display: flex;
+      gap: 6px;
+    }
+    .traffic-light span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .traffic-light span:nth-child(1) { background: #ff5f57; }
+    .traffic-light span:nth-child(2) { background: #febc2e; }
+    .traffic-light span:nth-child(3) { background: #28c840; }
+
+    .file-tab {
+      font-family: ui-monospace, 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+      font-size: 0.7rem;
+      color: #7a8aaa;
+      margin-left: 0.5rem;
+      letter-spacing: 0.02em;
+    }
+
+    .file-tab span {
+      color: #c8d0e8;
+    }
+
+    /* ── Code content ────────────────────────────────── */
+    pre.code {
+      font-family: ui-monospace, 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+      font-size: clamp(0.65rem, 1.05vw, 0.82rem);
+      line-height: 1.75;
+      padding: 1rem 1.25rem 1rem 0;
+      tab-size: 2;
+      white-space: pre;
+      color: var(--c-punc);
+      counter-reset: line-number;
+      /* Critical: this is the positioning context for the scan line */
+      position: relative;
+    }
+
+    .line {
+      display: flex;
+      align-items: baseline;
+    }
+
+    .ln {
+      display: inline-block;
+      min-width: 3em;
+      padding: 0 0.75rem 0 1rem;
+      color: var(--c-line);
+      user-select: none;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .line-content {
+      flex: 1;
+    }
+
+    /* Vulnerable line highlight — turns on via JS class */
+    .line.vuln-line { transition: background 0.3s, border-left-color 0.3s; }
+    .line.vuln-line.lit {
+      background: rgba(239, 68, 68, 0.08);
+      border-left: 2px solid rgba(239, 68, 68, 0.5);
+      padding-left: 0;
+    }
+    .line.vuln-line.lit .ln { padding-left: calc(1rem - 2px); }
+
+    /* Syntax classes */
+    .kw   { color: var(--c-kw); }
+    .fn   { color: var(--c-fn); }
+    .str  { color: var(--c-str); }
+    .cmt  { color: var(--c-cmt); font-style: italic; }
+    .type { color: var(--c-type); }
+    .num  { color: var(--c-num); }
+    .pn   { color: var(--c-punc); }
+    .op   { color: #c678dd; }  /* operators */
+    .prop { color: #abb2bf; }  /* property names */
+
+    /* ── Scan line ───────────────────────────────────── */
+    #scan-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -3px;
+      height: 3px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        var(--scan-glow) 15%,
+        var(--scan-color) 50%,
+        var(--scan-glow) 85%,
+        transparent 100%
+      );
+      box-shadow: 0 0 12px 2px var(--scan-glow), 0 0 24px 4px rgba(249,115,22,0.15);
+      opacity: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* ── Results panel (40%) ─────────────────────────── */
+    .results-panel {
+      flex: 2;
+      background: var(--panel-res);
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+    }
+
+    .results-header {
+      padding: 0.65rem 1.25rem;
+      background: #0a1020;
+      border-bottom: 1px solid var(--panel-edge);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    /* Status icon — spinning ring while scanning, checkmark when done */
+    .status-icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-icon.scanning {
+      border: 2px solid rgba(249, 115, 22, 0.2);
+      border-top-color: var(--scan-color);
+      animation: spin 0.8s linear infinite;
+    }
+
+    .status-icon.secure {
+      background: var(--sev-ok);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .status-icon.secure::after {
+      content: "✓";
+      color: white;
+      font-size: 9px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .status-label {
+      font-size: 0.7rem;
+      color: #4a5578;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      flex: 1;
+    }
+
+    .found-counter {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--sev-crit);
+      letter-spacing: 0.04em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .found-counter.zero { color: #4a5578; }
+
+    /* ── Vuln list ───────────────────────────────────── */
+    .vuln-list {
+      flex: 1;
+      padding: 0.875rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    /* Keyframe reveal — fires fresh every time .visible is added,
+       regardless of prior computed style. translateY avoids any
+       interaction with the panels overflow:hidden boundary.         */
+    @keyframes cardReveal {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0);   }
+    }
+
+    .vuln-item {
+      /* Hidden base state — no transition so reset() is instant */
+      opacity: 0;
+      border-radius: 8px;
+      border: 1px solid var(--panel-edge);
+      background: rgba(255,255,255,0.02);
+      padding: 0.7rem 0.875rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      /* Promote layer so browser doesn't skip opacity-0 elements */
+      will-change: opacity, transform;
+    }
+
+    /* Adding .visible always fires the animation from its from-state */
+    .vuln-item.visible {
+      animation: cardReveal 0.38s ease forwards;
+    }
+
+    .vuln-header {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .sev-badge {
+      font-size: 0.58rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.12em 0.45em;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .sev-badge.critical {
+      background: rgba(239,68,68,0.18);
+      color: var(--sev-crit);
+    }
+    .sev-badge.high {
+      background: rgba(249,115,22,0.15);
+      color: var(--sev-high);
+    }
+    .sev-badge.medium {
+      background: rgba(234,179,8,0.13);
+      color: var(--sev-med);
+    }
+
+    .vuln-title {
+      font-family: ui-monospace, 'Fira Code', 'Courier New', monospace;
+      font-size: 0.74rem;
+      color: #c8d0e8;
+      font-weight: 600;
+    }
+
+    .vuln-desc {
+      font-size: 0.68rem;
+      color: #5c6a88;
+      line-height: 1.5;
+    }
+
+    .vuln-loc {
+      font-family: ui-monospace, 'Fira Code', monospace;
+      font-size: 0.63rem;
+      color: #3d4d6a;
+    }
+
+    /* ── Secure badge ────────────────────────────────── */
+    @keyframes badgeReveal {
+      from { opacity: 0; transform: scale(0.92); }
+      to   { opacity: 1; transform: scale(1);    }
+    }
+
+    .secure-badge {
+      margin: 0 1.25rem 1.25rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      background: rgba(34, 197, 94, 0.07);
+      border: 1px solid rgba(34, 197, 94, 0.22);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      opacity: 0;
+      will-change: opacity, transform;
+    }
+
+    .secure-badge.visible {
+      animation: badgeReveal 0.45s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+    }
+
+    .secure-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--sev-ok);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 12px;
+      color: white;
+      font-weight: 700;
+    }
+
+    .secure-text strong {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--sev-ok);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .secure-text span {
+      font-size: 0.65rem;
+      color: #3a5040;
+    }
+
+    /* ── Reduced motion override ─────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      .status-icon.scanning { animation: none !important; }
+      /* Override keyframe animations for reduced-motion users */
+      .vuln-item.visible   { animation: none !important; opacity: 1 !important; }
+      .secure-badge.visible { animation: none !important; opacity: 1 !important; }
+    }
+
+    /* ── Speaker notes (hidden) ──────────────────────── */
+    .speaker-notes { display: none; }
+  </style>
+</head>
+<body>
+
+  <p class="assertion">
+    Every commit triggers a security review that catches vulnerabilities before they reach production
+  </p>
+
+  <div class="panels">
+
+    <!-- ─── LEFT: Code Editor ─────────────────────────── -->
+    <div class="code-panel">
+      <div class="code-panel-header">
+        <div class="traffic-light">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="file-tab">auth/<span>token-validator.ts</span></div>
+      </div>
+
+      <pre class="code" id="code-panel">
+
+<div class="line"><span class="ln">1</span><span class="line-content"><span class="cmt">// auth/middleware/token-validator.ts</span></span></div>
+<div class="line"><span class="ln">2</span><span class="line-content"><span class="kw">import</span> <span class="pn">jwt</span> <span class="kw">from</span> <span class="str">'jsonwebtoken'</span><span class="pn">;</span></span></div>
+<div class="line"><span class="ln">3</span><span class="line-content"><span class="kw">import</span> <span class="pn">{ db }</span> <span class="kw">from</span> <span class="str">'../db/client'</span><span class="pn">;</span></span></div>
+<div class="line"><span class="ln">4</span><span class="line-content"></span></div>
+<div class="line"><span class="ln">5</span><span class="line-content"><span class="kw">export async function</span> <span class="fn">validateToken</span><span class="pn">(</span></span></div>
+<div class="line"><span class="ln">6</span><span class="line-content">  <span class="prop">req</span><span class="pn">:</span> <span class="type">AuthedRequest</span><span class="pn">,</span></span></div>
+<div class="line"><span class="ln">7</span><span class="line-content">  <span class="prop">res</span><span class="pn">:</span> <span class="type">Response</span><span class="pn">,</span></span></div>
+<div class="line"><span class="ln">8</span><span class="line-content">  <span class="prop">next</span><span class="pn">:</span> <span class="type">NextFunction</span></span></div>
+<div class="line"><span class="ln">9</span><span class="line-content"><span class="pn">) {</span></span></div>
+<div class="line"><span class="ln">10</span><span class="line-content">  <span class="kw">const</span> <span class="prop">raw</span> <span class="op">=</span> <span class="prop">req</span><span class="pn">.</span><span class="prop">headers</span><span class="pn">[</span><span class="str">'authorization'</span><span class="pn">];</span></span></div>
+<div class="line"><span class="ln">11</span><span class="line-content">  <span class="kw">if</span> <span class="pn">(!</span><span class="prop">raw</span><span class="pn">)</span> <span class="kw">return</span> <span class="prop">res</span><span class="pn">.</span><span class="fn">status</span><span class="pn">(</span><span class="num">401</span><span class="pn">).</span><span class="fn">json</span><span class="pn">({</span> <span class="prop">error</span><span class="pn">:</span> <span class="str">'Unauthorized'</span> <span class="pn">});</span></span></div>
+<div class="line"><span class="ln">12</span><span class="line-content"></span></div>
+<div class="line vuln-line" id="vline-1"><span class="ln">13</span><span class="line-content">  <span class="kw">const</span> <span class="prop">payload</span> <span class="op">=</span> <span class="prop">jwt</span><span class="pn">.</span><span class="fn">decode</span><span class="pn">(</span><span class="prop">raw</span><span class="pn">);</span>  <span class="cmt">// no verify!</span></span></div>
+<div class="line"><span class="ln">14</span><span class="line-content">  <span class="kw">const</span> <span class="pn">{ rows } =</span> <span class="kw">await</span> <span class="prop">db</span><span class="pn">.</span><span class="fn">query</span><span class="pn">(</span></span></div>
+<div class="line vuln-line" id="vline-2"><span class="ln">15</span><span class="line-content">    <span class="str">`SELECT * FROM users WHERE id = <span class="pn">${</span><span class="prop">payload</span><span class="pn">.</span><span class="prop">sub</span><span class="pn">}</span>`</span></span></div>
+<div class="line"><span class="ln">16</span><span class="line-content">  <span class="pn">);</span></span></div>
+<div class="line"><span class="ln">17</span><span class="line-content"></span></div>
+<div class="line vuln-line" id="vline-3"><span class="ln">18</span><span class="line-content">  <span class="prop">req</span><span class="pn">.</span><span class="prop">user</span> <span class="op">=</span> <span class="prop">rows</span><span class="pn">[</span><span class="num">0</span><span class="pn">];</span>  <span class="cmt">// unsanitized; Bearer prefix not stripped</span></span></div>
+<div class="line"><span class="ln">19</span><span class="line-content">  <span class="fn">next</span><span class="pn">();</span></span></div>
+<div class="line"><span class="ln">20</span><span class="line-content"><span class="pn">}</span></span></div>
+
+      <div id="scan-line"></div>
+      </pre>
+
+    </div><!-- /code-panel -->
+
+    <!-- ─── RIGHT: Results ────────────────────────────── -->
+    <div class="results-panel">
+
+      <div class="results-header">
+        <div class="status-icon scanning" id="status-icon"></div>
+        <span class="status-label" id="status-text">Scanning…</span>
+        <span class="found-counter zero" id="found-counter">0 found</span>
+      </div>
+
+      <div class="vuln-list">
+
+        <div class="vuln-item" id="vuln-0">
+          <div class="vuln-header">
+            <span class="sev-badge critical">Critical</span>
+            <span class="vuln-title">jwt.decode()</span>
+          </div>
+          <div class="vuln-desc">
+            Signature not verified — any token passes validation
+          </div>
+          <div class="vuln-loc">Line 13 · CWE-347</div>
+        </div>
+
+        <div class="vuln-item" id="vuln-1">
+          <div class="vuln-header">
+            <span class="sev-badge high">High</span>
+            <span class="vuln-title">SQL Injection</span>
+          </div>
+          <div class="vuln-desc">
+            User-controlled value interpolated into raw query string
+          </div>
+          <div class="vuln-loc">Line 15 · CWE-89</div>
+        </div>
+
+        <div class="vuln-item" id="vuln-2">
+          <div class="vuln-header">
+            <span class="sev-badge medium">Medium</span>
+            <span class="vuln-title">Malformed token</span>
+          </div>
+          <div class="vuln-desc">
+            Raw Authorization header used — Bearer prefix not stripped
+          </div>
+          <div class="vuln-loc">Line 18 · CWE-20</div>
+        </div>
+
+      </div>
+
+      <div class="secure-badge" id="secure-badge">
+        <div class="secure-icon">✓</div>
+        <div class="secure-text">
+          <strong>3 issues reported</strong>
+          <span>Blocked from merging · Notify author</span>
+        </div>
+      </div>
+
+    </div><!-- /results-panel -->
+
+  </div><!-- /panels -->
+
+  <div class="speaker-notes">
+    <p><strong>Key point:</strong> The scanner runs on every push — not nightly, not on PR merge. The latency between writing vulnerable code and receiving a block is under 90 seconds. Developers get the feedback in the same context where they wrote the bug.</p>
+    <p><strong>If challenged:</strong> Yes, this catches syntactic and pattern-based vulnerabilities. It's not a substitute for threat modeling on new surfaces. We run both — this is the fast path that handles the 80% of recurring issues.</p>
+    <p><strong>Transition:</strong> This is the before state — a file that would have reached production 6 months ago. Let me show you what the pipeline caught in Q4 across all 47 services.</p>
+    <p><strong>Confidence:</strong> High — this is a live demo of the actual scanner on a de-identified real incident from November. The line numbers correspond to the original commit.</p>
+  </div>
+
+  <script>
+  (function () {
+    // ─── Config ──────────────────────────────────────────
+    const CYCLE_MS  = 7200;   // full loop duration
+    const TIMINGS   = [1300, 2700, 3900]; // ms when each vuln appears
+    const SCAN_MS   = 5200;   // scan line travel time
+    const SECURE_MS = 5500;   // when secure badge appears
+
+    // ─── Elements ────────────────────────────────────────
+    const codePanel   = document.getElementById('code-panel');
+    const scanLine    = document.getElementById('scan-line');
+    const vulnItems   = [0,1,2].map(i => document.getElementById(`vuln-${i}`));
+    const vulnLines   = ['vline-1','vline-2','vline-3'].map(id => document.getElementById(id));
+    const foundCtr    = document.getElementById('found-counter');
+    const statusIcon  = document.getElementById('status-icon');
+    const statusText  = document.getElementById('status-text');
+    const secureBadge = document.getElementById('secure-badge');
+
+    let timers = [];
+
+    function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+
+    function reset() {
+      clearTimers();
+
+      // ── Scan line: instant reset before re-animating ──────────
+      scanLine.style.transition = 'none';
+      scanLine.style.top = '-3px';
+      scanLine.style.opacity = '0';
+
+      // ── Vuln cards: remove .visible so the keyframe animation is
+      //    torn down immediately (element falls back to opacity:0
+      //    from the base .vuln-item rule). The void reflow forces the
+      //    browser to commit this removal before any future add. ──
+      vulnItems.forEach(v => {
+        v.classList.remove('visible');
+        void v.offsetHeight; // flush style — ensures clean keyframe restart
+      });
+      vulnLines.forEach(l => l.classList.remove('lit'));
+
+      secureBadge.classList.remove('visible');
+      void secureBadge.offsetHeight;
+
+      // ── Status UI ─────────────────────────────────────────────
+      foundCtr.textContent = '0 found';
+      foundCtr.className = 'found-counter zero';
+      statusIcon.className = 'status-icon scanning';
+      statusText.textContent = 'Scanning…';
+    }
+
+    function runCycle() {
+      reset();
+
+      // Kick off scan line — double rAF lets the transition:none flush
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const h = codePanel.scrollHeight;
+        scanLine.style.opacity = '1';
+        scanLine.style.transition = `top ${SCAN_MS}ms linear`;
+        scanLine.style.top = (h - 3) + 'px';
+      }));
+
+      // Reveal vuln cards at staggered times.
+      // requestAnimationFrame inside setTimeout guarantees we're in a
+      // paint frame when the class is added — keyframe always fires. ──
+      TIMINGS.forEach((t, i) => {
+        const tid = setTimeout(() => {
+          requestAnimationFrame(() => {
+            vulnItems[i].classList.add('visible');
+            vulnLines[i].classList.add('lit');
+            const count = i + 1;
+            foundCtr.textContent = `${count} found`;
+            foundCtr.className = 'found-counter';
+          });
+        }, t);
+        timers.push(tid);
+      });
+
+      // Secure badge + status update
+      timers.push(setTimeout(() => {
+        scanLine.style.transition = 'opacity 0.3s';
+        scanLine.style.opacity = '0';
+        statusIcon.className = 'status-icon secure';
+        statusText.textContent = 'Scan complete';
+        requestAnimationFrame(() => secureBadge.classList.add('visible'));
+      }, SECURE_MS));
+
+      // Queue next cycle
+      timers.push(setTimeout(runCycle, CYCLE_MS));
+    }
+
+    // ─── Reduced motion: show end-state statically ────────
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      vulnItems.forEach(v => v.classList.add('visible'));
+      vulnLines.forEach(l => l.classList.add('lit'));
+      secureBadge.classList.add('visible');
+      foundCtr.textContent = '3 found';
+      foundCtr.className = 'found-counter';
+      statusIcon.className = 'status-icon secure';
+      statusText.textContent = 'Scan complete';
+      scanLine.style.display = 'none';
+      return;
+    }
+
+    runCycle();
+  })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gap Slide — $4.2M Lost</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: -apple-system, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #111110;
+      color: #e5e4df;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    /* ── Slide shell ─────────────────────────────── */
+    .slide {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(1.25rem, 2.5vw, 2rem);
+      text-align: center;
+      padding: clamp(3rem, 8vw, 7rem);
+    }
+
+    /* ── Eyebrow label ───────────────────────────── */
+    .eyebrow {
+      font-size: clamp(0.62rem, 0.95vw, 0.78rem);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: #484840;
+      font-weight: 600;
+      animation: fade-in 0.8s ease-out 0.1s both;
+    }
+
+    /* ── The number — this IS the slide ─────────── */
+    .hero-number {
+      font-size: clamp(4rem, 18vw, 11rem);
+      font-weight: 800;
+      /* Desaturated, heavy coral-red — not alarming, just wrong */
+      color: #b84040;
+      line-height: 0.88;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+      animation:
+        appear 1s ease-out 0.3s both,
+        breathe 3s ease-in-out 1.5s infinite;
+    }
+
+    /* ── One-line context ────────────────────────── */
+    .context {
+      font-size: clamp(0.72rem, 1.15vw, 0.92rem);
+      /* Intentionally understated — almost whispered */
+      color: #484840;
+      max-width: 46ch;
+      line-height: 1.7;
+      letter-spacing: 0.02em;
+      animation: fade-in 1s ease-out 1.1s both;
+    }
+
+    /* ── Keyframes ───────────────────────────────── */
+    @keyframes appear {
+      0%   { opacity: 0; transform: translateY(0.04em); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Barely-there pulse — uncomfortable, not theatrical */
+    @keyframes breathe {
+      0%, 100% { opacity: 0.85; }
+      50%       { opacity: 1; }
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* ── Reduced motion ──────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      .hero-number,
+      .eyebrow,
+      .context {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
+
+    /* ── Speaker notes (hidden) ──────────────────── */
+    .speaker-notes { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="slide">
+
+    <p class="eyebrow">Engineering hours lost to preventable incidents — 2024</p>
+
+    <div class="hero-number">$4.2M</div>
+
+    <p class="context">
+      342 P1 incidents in 2024 — 67% matched patterns from previous incidents
+    </p>
+
+  </div>
+
+  <div class="speaker-notes">
+    <p><strong>Key point:</strong> Two-thirds of our P1 incidents were not novel failures — they were repeats of patterns we had already seen and documented. This is a process failure, not a technical one. The knowledge existed. We just didn't act on it.</p>
+    <p><strong>If challenged:</strong> The $4.2M is engineering-hours-only at fully-loaded cost. It excludes customer churn from downtime, SLA credits, and brand damage — the true figure is higher. We used the number we could defend, not the largest number we could claim.</p>
+    <p><strong>Transition:</strong> The good news: if it's a pattern, it's detectable. If it's detectable, it's preventable. We built something that does exactly that — let me show you how it works.</p>
+    <p><strong>Confidence:</strong> High on incident count — pulled directly from PagerDuty export. Conservative on dollar figure — 40th percentile engineer fully-loaded cost, not blended team average.</p>
+  </div>
+
+</body>
+</html>

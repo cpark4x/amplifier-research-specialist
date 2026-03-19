@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Slide 05 — Competitive Comparison</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #FAF8F4;
+      --surface:      #FFFFFF;
+      --border:       #E3DDD6;
+      --warm-line:    #EDE8E2;
+      --text-primary: #1C1917;
+      --text-secondary:#6B6460;
+      --text-muted:   #A39E9A;
+      --green:        #2D6A4F;
+      --green-mid:    #40916C;
+      --green-light:  #D8EFE4;
+      --green-tint:   #F0FAF5;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      display: flex;
+      align-items: stretch;
+    }
+
+    /* ── Slide shell ─────────────────────────────────── */
+    .slide {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: clamp(20px, 3.5vh, 44px) clamp(28px, 5vw, 64px);
+      gap: clamp(14px, 2.5vh, 28px);
+    }
+
+    /* ── Header ──────────────────────────────────────── */
+    .slide-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .eyebrow {
+      font-size: clamp(9px, 0.8vw, 11px);
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+    }
+
+    .slide-title {
+      font-size: clamp(17px, 2vw, 26px);
+      font-weight: 700;
+      line-height: 1.28;
+      color: var(--text-primary);
+      max-width: 76ch;
+    }
+
+    /* ── Body: table + anchor ────────────────────────── */
+    .slide-body {
+      flex: 1;
+      display: flex;
+      gap: clamp(20px, 3vw, 44px);
+      min-height: 0;
+    }
+
+    /* LEFT — table column */
+    .table-col {
+      flex: 0 0 60%;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(8px, 1.4vh, 14px);
+      opacity: 0;
+      animation: fadeUp 0.55s ease forwards;
+      animation-delay: 0.15s;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: clamp(13px, 1.2vw, 15.5px);
+      background: var(--surface);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      flex: 1;
+    }
+
+    .comparison-table thead tr {
+      background: #F4F0EB;
+    }
+
+    .comparison-table th {
+      padding: clamp(9px, 1.2vh, 14px) clamp(12px, 1.2vw, 18px);
+      font-size: clamp(11px, 1vw, 13px);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-secondary);
+      border-bottom: 1.5px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .comparison-table th:not(:first-child) { text-align: center; }
+
+    /* column widths */
+    .comparison-table th:first-child,
+    .comparison-table td:first-child { width: 34%; }
+
+    .comparison-table td {
+      padding: clamp(9px, 1.3vh, 13px) clamp(12px, 1.2vw, 18px);
+      border-bottom: 1px solid var(--warm-line);
+      color: var(--text-secondary);
+      vertical-align: middle;
+    }
+
+    .comparison-table tbody tr:last-child td { border-bottom: none; }
+
+    .comparison-table td:not(:first-child) {
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .dim-label {
+      font-size: clamp(13px, 1.1vw, 15px);
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Win cells — green tint, never red for competitors */
+    td.win {
+      background: var(--green-tint);
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    td.win::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: var(--green-mid);
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    td.neutral {
+      color: var(--text-muted);
+    }
+
+    .table-annotation {
+      font-size: clamp(9.5px, 0.85vw, 11.5px);
+      color: var(--text-muted);
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    /* RIGHT — anchor column */
+    .anchor-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(8px, 1.3vh, 14px);
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      /* Tightened padding — was too airy */
+      padding: clamp(14px, 2vh, 22px) clamp(12px, 1.8vw, 22px);
+      border-left: 4px solid var(--green-mid);
+      opacity: 0;
+      animation: scaleUp 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      animation-delay: 0.7s;
+    }
+
+    .anchor-eyebrow {
+      font-size: clamp(9px, 0.85vw, 11px);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+    }
+
+    /* Number sits inside a decorative circular ring for visual weight */
+    .anchor-num-ring {
+      width:  clamp(108px, 13vw, 148px);
+      height: clamp(108px, 13vw, 148px);
+      border-radius: 50%;
+      background: var(--green-tint);
+      border: 2px solid var(--green-light);
+      /* Subtle inner shadow for depth */
+      box-shadow: inset 0 2px 8px rgba(45, 106, 79, 0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      flex-shrink: 0;
+    }
+
+    .anchor-number {
+      font-size: clamp(40px, 5vw, 60px);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      color: var(--green);
+    }
+
+    .anchor-num-sub {
+      font-size: clamp(9px, 0.8vw, 11px);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--green-mid);
+    }
+
+    .anchor-label {
+      font-size: clamp(13px, 1.3vw, 16px);
+      font-weight: 600;
+      color: var(--text-primary);
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .anchor-divider {
+      width: 36px;
+      height: 2px;
+      background: var(--green-light);
+      border-radius: 2px;
+    }
+
+    /* Stat chips replace the plain sub-paragraph for visual density */
+    .anchor-chips {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(4px, 0.7vh, 6px);
+      width: 100%;
+    }
+
+    .anchor-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--green-tint);
+      border: 1px solid var(--green-light);
+      border-radius: 7px;
+      padding: clamp(4px, 0.7vh, 7px) clamp(8px, 1vw, 12px);
+    }
+
+    .chip-val {
+      font-size: clamp(11px, 1vw, 13px);
+      font-weight: 800;
+      color: var(--green);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .chip-txt {
+      font-size: clamp(9px, 0.82vw, 11px);
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    /* ── Animations ──────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes scaleUp {
+      from { opacity: 0; transform: scale(0.88); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .table-col, .anchor-col {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
+
+    /* ── Speaker notes (hidden, for AI training) ─────── */
+    .speaker-notes { display: none; }
+  </style>
+</head>
+<body>
+  <div class="slide">
+
+    <div class="slide-header">
+      <p class="eyebrow">Competitive Landscape</p>
+      <h1 class="slide-title">We lead on reliability and speed; they compete on price — but our TCO is 34% lower</h1>
+    </div>
+
+    <div class="slide-body">
+
+      <!-- LEFT: Comparison table -->
+      <div class="table-col">
+        <table class="comparison-table" aria-label="Competitive comparison across key dimensions">
+          <thead>
+            <tr>
+              <th scope="col">Dimension</th>
+              <th scope="col">Us</th>
+              <th scope="col">Competitor A</th>
+              <th scope="col">Competitor B</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="dim-label">Uptime SLA</span></td>
+              <td class="win">99.99%</td>
+              <td class="neutral">99.9%</td>
+              <td class="neutral">99.95%</td>
+            </tr>
+            <tr>
+              <td><span class="dim-label">Deploy Speed</span></td>
+              <td class="win">~12 min</td>
+              <td class="neutral">~45 min</td>
+              <td class="neutral">~30 min</td>
+            </tr>
+            <tr>
+              <td><span class="dim-label">P1 Support Response</span></td>
+              <td class="win">&lt; 1 hr</td>
+              <td class="neutral">4 hr</td>
+              <td class="neutral">2 hr</td>
+            </tr>
+            <tr>
+              <td><span class="dim-label">Native Integrations</span></td>
+              <td class="win">200+</td>
+              <td class="neutral">80+</td>
+              <td class="neutral">140+</td>
+            </tr>
+            <tr>
+              <td><span class="dim-label">Onboarding Time</span></td>
+              <td class="win">2 weeks</td>
+              <td class="neutral">6 weeks</td>
+              <td class="neutral">8 weeks</td>
+            </tr>
+            <tr>
+              <td><span class="dim-label">Annual List Price</span></td>
+              <td class="neutral">$$$</td>
+              <td class="neutral">$$</td>
+              <td class="neutral">$$$</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="table-annotation">
+          * Based on 24-month total cost including incident response, migration, and training
+        </p>
+      </div>
+
+      <!-- RIGHT: TCO anchor -->
+      <div class="anchor-col" aria-label="Key takeaway: 34% lower total cost of ownership">
+        <p class="anchor-eyebrow">24-Month TCO</p>
+
+        <!-- Number inside a decorative ring for visual grounding -->
+        <div class="anchor-num-ring">
+          <p class="anchor-number">34%</p>
+          <p class="anchor-num-sub">lower TCO</p>
+        </div>
+
+        <p class="anchor-label">vs. nearest<br>competitor</p>
+        <div class="anchor-divider"></div>
+
+        <!-- Stat chips replace the plain sub-paragraph -->
+        <div class="anchor-chips">
+          <div class="anchor-chip">
+            <span class="chip-val">4×</span>
+            <span class="chip-txt">faster onboarding</span>
+          </div>
+          <div class="anchor-chip">
+            <span class="chip-val">10×</span>
+            <span class="chip-txt">fewer P1 incidents</span>
+          </div>
+          <div class="anchor-chip">
+            <span class="chip-val">$0</span>
+            <span class="chip-txt">migration overhead</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.slide-body -->
+
+    <div class="speaker-notes">
+      <p><strong>Key point:</strong> The price objection is real but misleading — when you account for the full 24-month lifecycle, including migration effort, incident-hours, and training ramp, we are actually 34% cheaper than Competitor A despite the higher sticker price.</p>
+      <p><strong>If challenged:</strong> Pull up the TCO worksheet in Appendix B — it shows the per-line cost breakdown. The two biggest drivers are onboarding time (6 weeks saved × fully-loaded engineer cost) and incident response (we averaged 0.4 P1s/month vs their 4.2).</p>
+      <p><strong>Transition:</strong> Now that we have established the business case, let's look at the actual Q3 performance results — because the reliability numbers in this table aren't theoretical.</p>
+      <p><strong>Confidence:</strong> High — TCO figures are validated against three signed customer case studies. Competitor data sourced from publicly available SLAs, Gartner Peer Insights, and G2 reviews current as of Q3.</p>
+    </div>
+
+  </div>
+</body>
+</html>
