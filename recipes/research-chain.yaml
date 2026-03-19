@@ -2,6 +2,16 @@
 # CHANGELOG
 # =============================================================================
 #
+# v1.11.0 (2026-03-19):
+#   - FIX: Removed smart-skip gates for DA-formatter and writer-formatter (#42)
+#     * ROOT CAUSE: Bash heredoc output included trailing whitespace/newlines
+#       that didn't match condition strings ("SKIP"/"RUN"). Both conditions
+#       failed, leaving formatted_analysis undefined and crashing the pipeline.
+#     * FIX: Reverted to always running both formatters. ~6 min slower on
+#       well-formed runs but 100% reliable.
+#     * RESULT: Pipeline completes reliably. Re-add smart-skip when recipe
+#       engine condition matching handles whitespace.
+#
 # v1.10.0 (2026-03-14):
 #   - FEATURE: Added smart skip gates for DA-formatter and writer-formatter
 #     * ROOT CAUSE: Formatter steps take ~6 min combined but are no-ops when
@@ -160,7 +170,7 @@
 
 name: "research-chain"
 description: "Full research pipeline with format normalization — Researcher → URL Resolution → Formatter → Data Analyzer → Writer → Writer Formatter → Save"
-version: "1.10.0"
+version: "1.11.0"
 tags: ["research", "analysis", "writing", "chain"]
 
 context:
@@ -318,37 +328,14 @@ steps:
     output: "analysis_output"
     timeout: 900
 
-  - id: "check-analysis-format"
-    type: "bash"
-    command: |
-      _tmp=$(mktemp)
-      cat > "$_tmp" <<'__CHECK_AN_EOF__'
-      {{analysis_output}}
-      __CHECK_AN_EOF__
-      _has_header=$(grep -c '^ANALYSIS OUTPUT' "$_tmp" || true)
-      _has_inferences=$(grep -c '^INFERENCES' "$_tmp" || true)
-      _has_traces=$(grep -ci 'traces_to' "$_tmp" || true)
-      rm -f "$_tmp"
-      if [ "$_has_header" -ge 1 ] && [ "$_has_inferences" -ge 1 ] && [ "$_has_traces" -ge 1 ]; then
-        echo "SKIP"
-      else
-        echo "RUN"
-      fi
-    output: "_fmt_analysis_needed"
-    timeout: 10
-
-  - id: "passthrough-analysis"
-    type: "bash"
-    condition: "{{_fmt_analysis_needed}} == SKIP"
-    command: |
-      cat <<'__PASS_AN_EOF__'
-      {{analysis_output}}
-      __PASS_AN_EOF__
-    output: "formatted_analysis"
-    timeout: 10
+  # NOTE: Smart-skip gates for DA-formatter removed in v1.11.0.
+  # v1.10.0 gates failed due to condition matching bug (#42) — bash heredoc
+  # output included trailing whitespace that didn't match "SKIP" or "RUN",
+  # leaving formatted_analysis undefined. Always running the formatter is
+  # ~3 min slower but 100% reliable. Re-add when recipe engine condition
+  # matching is fixed.
 
   - id: "format-analysis"
-    condition: "{{_fmt_analysis_needed}} == RUN"
     agent: "specialists:data-analyzer-formatter"
     prompt: |
       Normalize the following data-analyzer output into a canonical ANALYSIS OUTPUT block.
@@ -385,37 +372,10 @@ steps:
     output: "final_document"
     timeout: 1800
 
-  - id: "check-writer-format"
-    type: "bash"
-    command: |
-      _tmp=$(mktemp)
-      cat > "$_tmp" <<'__CHECK_WR_EOF__'
-      {{final_document}}
-      __CHECK_WR_EOF__
-      _has_parsed=$(grep -c '^Parsed:' "$_tmp" || true)
-      _has_claims=$(grep -c '^S[0-9]' "$_tmp" || true)
-      _has_citations=$(grep -ci 'CITATIONS' "$_tmp" || true)
-      rm -f "$_tmp"
-      if [ "$_has_parsed" -ge 1 ] && [ "$_has_claims" -ge 3 ] && [ "$_has_citations" -ge 1 ]; then
-        echo "SKIP"
-      else
-        echo "RUN"
-      fi
-    output: "_fmt_writer_needed"
-    timeout: 10
-
-  - id: "passthrough-writer"
-    type: "bash"
-    condition: "{{_fmt_writer_needed}} == SKIP"
-    command: |
-      cat <<'__PASS_WR_EOF__'
-      {{final_document}}
-      __PASS_WR_EOF__
-    output: "formatted_document"
-    timeout: 10
+  # NOTE: Smart-skip gates for writer-formatter removed in v1.11.0.
+  # Same condition matching bug as DA-formatter gates (#42).
 
   - id: "format-writer"
-    condition: "{{_fmt_writer_needed}} == RUN"
     agent: "specialists:writer-formatter"
     prompt: |
       Produce the canonical Writer output block from the following writer output.
