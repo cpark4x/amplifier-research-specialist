@@ -202,6 +202,7 @@ exact structure:
 In the HTML, render each field label with `<strong>` tags using these exact names:
 `<strong>Key point:</strong>`, `<strong>If challenged:</strong>`,
 `<strong>Transition:</strong>`, `<strong>Confidence:</strong>`.
+Do not use snake_case (`key_point`, `if_challenged`) — use the title-case forms above.
 
 Here is what good speaker notes look like:
 
@@ -2961,7 +2962,7 @@ The animation serves the explanation.
         </g>
 
         <!-- ── Legend: teal = publish, blue = subscribe ── -->
-        <g opacity="0" style="animation: fadeIn 0.5s ease forwards 3.1s;">
+        <g class="legend" opacity="0">
           <circle cx="580" cy="440" r="4" fill="#00C896"/>
           <text x="590" y="440" fill="#405570" font-size="11" dominant-baseline="middle" font-family="-apple-system, system-ui, sans-serif">publish → mesh</text>
           <circle cx="690" cy="440" r="4" fill="#4D8EFF"/>
