@@ -1,0 +1,177 @@
+# =============================================================================
+# Presentation Builder Test Harness — Deck Generation
+# =============================================================================
+#
+# Generates a single presentation deck from a test scenario file by delegating
+# to the presentation-builder specialist. Run once per scenario.
+#
+# Requirements:
+#   - specialists bundle (provides specialists/presentation-builder agent)
+#
+# Usage (single scenario):
+#   amplifier tool invoke recipes operation=execute \
+#     recipe_path=tests/presentation-builder/generate-decks.yaml \
+#     context='{"scenario_path": "tests/presentation-builder/scenarios/01-qbr-status-update.md"}'
+#
+# Usage (all 6 scenarios):
+#   for f in tests/presentation-builder/scenarios/*.md; do
+#     amplifier tool invoke recipes operation=execute \
+#       recipe_path=tests/presentation-builder/generate-decks.yaml \
+#       context="{\"scenario_path\": \"$f\"}"
+#   done
+#
+# Context variables:
+#   - scenario_path (required): Path to a scenario .md file
+#   - output_dir (optional): Directory for generated decks
+#                             (default: tests/presentation-builder/outputs)
+#
+# Typical runtime: 3-8 minutes per scenario
+#
+# =============================================================================
+# CHANGELOG
+# =============================================================================
+#
+# v1.0.0 (2025-07-24):
+#   - Initial recipe: single-scenario deck generation pipeline
+#     * Step 1: Read scenario file (bash, with validation)
+#     * Step 2: Delegate to presentation-builder specialist
+#     * Step 3: Save generated deck to output directory
+#
+# =============================================================================
+
+name: "generate-deck"
+description: "Generate a presentation deck from a test scenario using the presentation-builder specialist"
+version: "1.0.0"
+tags: ["presentation-builder", "testing", "evaluation-harness"]
+
+context:
+  scenario_path: ""                                   # Required: path to scenario .md file
+  output_dir: "tests/presentation-builder/outputs"    # Output directory for generated decks
+
+steps:
+  # ── Step 1: Read and validate the scenario file ────────────────────────────
+  - id: "read-scenario"
+    type: "bash"
+    command: |
+      set -euo pipefail
+      if [ ! -f "{{scenario_path}}" ]; then
+        echo "ERROR: Scenario file not found: {{scenario_path}}" >&2
+        exit 1
+      fi
+      cat "{{scenario_path}}"
+    output: "scenario_content"
+    timeout: 30
+
+  # ── Step 2: Generate presentation via the presentation-builder specialist ──
+  #
+  # The specialist receives the full scenario file content including both the
+  # Parameters section (audience, tone, theme, etc.) and the Source Material
+  # section. It is instructed to extract and follow all parameters.
+  #
+  # No model override — uses the specialist's default model configuration.
+  - id: "generate-presentation"
+    agent: "specialists:presentation-builder"
+    prompt: |
+      Generate a presentation from the following test scenario.
+
+      The scenario file below contains:
+      - A **Parameters** section listing audience, audience_type, purpose, tone,
+        output_format, theme, presentation_mode, include_speaker_notes,
+        include_appendix, and other configuration.
+      - A **Source Material** section containing the structured input to build from.
+
+      Instructions:
+      1. Extract and follow ALL parameters exactly as specified.
+      2. Build the complete presentation from the Source Material section.
+      3. Do NOT fabricate any claims, statistics, or data points not present
+         in the source material.
+      4. Do NOT write to files — return the full content as your response.
+         Return ONLY raw HTML. The first character of your response MUST be
+         `<` (e.g., `<!DOCTYPE html>`) and the last MUST be `>` (e.g.,
+         `</html>`). No prose, no explanation, no markdown fences, no
+         "Here is the presentation" preamble. Raw HTML only.
+      5. Do NOT include a `<script>` tag — slide navigation is injected
+         by a post-processor after generation.
+
+      === SCENARIO FILE ===
+      {{scenario_content}}
+      === END SCENARIO FILE ===
+    output: "deck_output"
+    timeout: 1800
+
+  # ── Step 3: Save the generated deck to the output directory ────────────────
+  - id: "save-output"
+    type: "bash"
+    command: |
+      set -euo pipefail
+      mkdir -p "{{output_dir}}"
+
+      # Derive output filename from scenario path
+      scenario_basename=$(basename "{{scenario_path}}" .md)
+      output_path="{{output_dir}}/${scenario_basename}-output.html"
+
+      # Write raw agent output to temp file
+      raw_path="${output_path}.raw"
+      cat > "${raw_path}" <<'_CANVAS_DECK_EOF_7f3a9c'
+      {{deck_output}}
+      _CANVAS_DECK_EOF_7f3a9c
+
+      # Extract just the HTML — the agent wraps output in prose and markdown fences
+      python3 -c "
+      import sys, re
+      with open('${raw_path}', 'r') as f:
+          content = f.read()
+
+      # Find the HTML between <!DOCTYPE or <html> and </html>
+      start = None
+      for pattern in [r'<!DOCTYPE\s+html', r'<html']:
+          m = re.search(pattern, content, re.IGNORECASE)
+          if m:
+              start = m.start()
+              break
+
+      if start is None:
+          print('ERROR: No HTML found in agent output', file=sys.stderr)
+          # Save raw for debugging
+          print('Raw output saved to: ${raw_path}', file=sys.stderr)
+          sys.exit(1)
+
+      end = content.rfind('</html>')
+      if end == -1:
+          end = len(content)
+      else:
+          end += len('</html>')
+
+      html = content[start:end].strip()
+      if len(html) < 1000:
+          print(f'ERROR: Extracted HTML too small ({len(html)} bytes)', file=sys.stderr)
+          sys.exit(1)
+
+      with open('${output_path}', 'w') as f:
+          f.write(html)
+      print(f'Extracted {len(html)} bytes of HTML')
+      "
+
+      # Clean up raw file
+      rm -f "${raw_path}"
+
+      # Verify write succeeded
+      if [ -s "${output_path}" ]; then
+        byte_count=$(wc -c < "${output_path}")
+        echo "Saved: ${output_path} (${byte_count} bytes)"
+      else
+        echo "ERROR: Write failed or produced empty output" >&2
+        exit 1
+      fi
+
+      # Post-process: inject slide navigation, slide engine CSS, speaker notes
+      # CSS, and print support. This is the designed production path — the model
+      # focuses on creative work, the script handles mechanical plumbing.
+      FIX_SCRIPT="tests/presentation-builder/fix-navigation.py"
+      if [ -f "$FIX_SCRIPT" ]; then
+        echo ""
+        echo "Running post-processor (injecting navigation + slide engine)..."
+        python3 "$FIX_SCRIPT" "${output_path}"
+      fi
+    output: "save_result"
+    timeout: 30

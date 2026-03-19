@@ -1,0 +1,406 @@
+# =============================================================================
+# Presentation Builder Test Harness — Deck Evaluation
+# =============================================================================
+#
+# Evaluates a single generated presentation deck against the evaluation rubric.
+# Reads the original scenario (for source material and expected parameters),
+# the rubric (10-dimension scoring criteria), and the generated deck, then
+# produces a structured evaluation with per-dimension scores and a verdict.
+#
+# Visual evaluation pipeline (steps 2-3):
+#   Screenshots of each slide are captured via agent-browser, then analyzed
+#   by the nano-banana VLM tool (Gemini vision) for visual quality assessment.
+#   The visual analysis is fed to the judge alongside the HTML source so that
+#   visual dimensions (D5, D4, D10) are scored from rendered output, not CSS.
+#
+# Requirements:
+#   - foundation bundle (provides zen-architect agent)
+#   - nano-banana tool (provides VLM visual analysis)
+#   - agent-browser CLI (provides headless browser screenshots)
+#   - GOOGLE_API_KEY environment variable set
+#
+# Usage:
+#   amplifier tool invoke recipes operation=execute \
+#     recipe_path=tests/presentation-builder/evaluate-deck.yaml \
+#     context='{
+#       "scenario_path": "tests/presentation-builder/scenarios/01-qbr-status-update.md",
+#       "deck_path": "tests/presentation-builder/outputs/01-qbr-status-update-output.html"
+#     }'
+#
+# Context variables:
+#   - scenario_path (required): Path to the original scenario .md file
+#   - deck_path (required): Path to the generated deck output file
+#   - rubric_path (optional): Path to evaluation rubric
+#                              (default: tests/presentation-builder/rubric.md)
+#   - output_dir (optional): Directory for evaluation results
+#                              (default: tests/presentation-builder/outputs)
+#
+# Typical runtime: 5-12 minutes per evaluation (includes screenshot + VLM)
+#
+# =============================================================================
+# CHANGELOG
+# =============================================================================
+#
+# v3.0.0 (2026-03-19):
+#   - Expand rubric from 10 to 12 dimensions:
+#     * D11: Insight Density (10%) — "so what" factor, implication clarity
+#     * D12: Information Design (10%) — visual data display effectiveness
+#   - Reweight existing dimensions: D4 10%→8%, D5 10%→8%, D6 10%→12%,
+#     D7 10%→8%, D8 10%→7%
+#   - Switch to explanation-before-score evaluation method: judge writes
+#     analysis paragraph BEFORE committing to a numeric score per dimension
+#   - Update judge prompt with new critical evaluation rules for D11 and D12
+#   - Bump typical runtime estimate to 8-15 minutes (longer analysis output)
+#
+# v2.0.0 (2026-03-18):
+#   - Add visual evaluation pipeline via screenshot + nano-banana VLM
+#     * Step 2: Generate per-slide screenshots using agent-browser
+#     * Step 3: Analyze screenshots with nano-banana for visual quality
+#     * Step 4: Judge now receives both HTML source AND visual analysis
+#   - Bump typical runtime estimate to 5-12 minutes
+#
+# v1.0.0 (2025-07-24):
+#   - Initial recipe: single-deck evaluation pipeline
+#     * Step 1: Read and validate all input files (scenario, rubric, deck)
+#     * Step 2: Judge the deck using zen-architect in REVIEW mode with
+#       reasoning-class model for rigorous critique
+#     * Step 3: Save structured evaluation result alongside the deck
+#
+# =============================================================================
+
+name: "evaluate-deck"
+description: "Evaluate a generated presentation deck against the rubric using structured 12-dimension scoring with visual analysis and explanation-before-score method"
+version: "3.0.0"
+tags: ["presentation-builder", "testing", "evaluation", "judge", "visual"]
+
+context:
+  scenario_path: ""                                   # Required: path to original scenario .md file
+  deck_path: ""                                       # Required: path to generated deck output file
+  rubric_path: "tests/presentation-builder/rubric.md" # Path to evaluation rubric
+  output_dir: "tests/presentation-builder/outputs"    # Directory for evaluation results
+
+steps:
+  # -- Step 1: Read and validate all input files --------------------------------
+  #
+  # Reads the rubric, original scenario, and generated deck into a single
+  # clearly-labeled context variable. Validates all files exist before
+  # proceeding to the expensive LLM evaluation step.
+  - id: "read-inputs"
+    type: "bash"
+    command: |
+      set -euo pipefail
+
+      # Validate all input files exist
+      errors=0
+      for f in "{{scenario_path}}" "{{deck_path}}" "{{rubric_path}}"; do
+        if [ ! -f "$f" ]; then
+          echo "ERROR: File not found: $f" >&2
+          errors=$((errors + 1))
+        fi
+      done
+      if [ "$errors" -gt 0 ]; then
+        exit 1
+      fi
+
+      # Emit all inputs with clear section labels for the judge
+      echo "=== EVALUATION RUBRIC ==="
+      cat "{{rubric_path}}"
+      echo ""
+      echo "=== ORIGINAL SCENARIO (parameters and source material) ==="
+      cat "{{scenario_path}}"
+      echo ""
+      echo "=== GENERATED DECK OUTPUT ==="
+      cat "{{deck_path}}"
+      echo ""
+      echo "=== END OF INPUTS ==="
+    output: "evaluation_inputs"
+    timeout: 60
+
+  # -- Step 2: Capture per-slide screenshots ------------------------------------
+  #
+  # Runs the screenshot script to open the deck in a headless browser and
+  # capture a PNG of each slide. Produces a directory of slide-NN.png files
+  # alongside the deck. Requires agent-browser CLI.
+  - id: "screenshot-slides"
+    type: "bash"
+    command: |
+      set -euo pipefail
+
+      # Derive screenshot directory from deck path
+      deck_basename=$(basename "{{deck_path}}" .html)
+      if [ "$deck_basename" = "$(basename "{{deck_path}}")" ]; then
+        deck_basename=$(basename "{{deck_path}}" .md)
+      fi
+      screenshot_dir="{{output_dir}}/${deck_basename}-screenshots"
+
+      # Run the screenshot script
+      SCRIPT="tests/presentation-builder/screenshot-slides.py"
+      if [ ! -f "$SCRIPT" ]; then
+        echo "ERROR: Screenshot script not found: $SCRIPT" >&2
+        exit 1
+      fi
+
+      python3 "$SCRIPT" "{{deck_path}}" "$screenshot_dir"
+
+      # Output the screenshot directory path and file listing for downstream steps
+      echo ""
+      echo "SCREENSHOT_DIR: $screenshot_dir"
+      echo "FILES:"
+      ls -1 "$screenshot_dir"/slide-*.png 2>/dev/null || echo "  (none)"
+    output: "screenshot_result"
+    timeout: 120
+
+  # -- Step 3: Visual quality analysis via nano-banana VLM ----------------------
+  #
+  # Analyzes slide screenshots using the nano-banana VLM tool (Gemini vision).
+  # Produces a structured visual quality assessment organized by the three rubric
+  # dimensions that depend on visual evidence: D4 (Density Discipline), D5
+  # (Visual Rhythm), and D10 (HTML Quality). The judge cannot see the slides --
+  # this agent is the judge's eyes.
+  - id: "visual-analysis"
+    agent: "self"
+    model_role: "vision"
+    prompt: |
+      You are evaluating the visual quality of a generated HTML presentation deck.
+      Your analysis feeds a judge who scores the deck on a 10-dimension rubric.
+      Three dimensions depend entirely on YOUR visual evidence -- the judge cannot
+      see the slides, only your report. You are the judge's eyes.
+
+      ## The Three Dimensions You Feed
+
+      ### D4: Density Discipline (10% of total score)
+      Can each slide be scanned in seconds? The rubric criteria:
+      - Titles <=20 words
+      - Individual bullets <=25 words
+      - Body text <=100 words per slide
+      - Are dense data slides using visual elements (cards, tables, charts) rather than prose?
+      - Could someone in the back row scan each slide in seconds?
+
+      What to look for visually:
+      - Walls of text vs clean, scannable layouts
+      - Text overflow or cramped content
+      - Readable font sizes at presentation distance
+      - Effective use of whitespace around content blocks
+
+      ### D5: Visual Rhythm (10% of total score)
+      Does the deck vary its visual weight and create pacing? The rubric criteria:
+      - Are there runs of 3+ consecutive heavy/dense slides?
+      - Do section dividers appear between major presentation phases?
+      - Is there layout variety (card grids, tables, two-column, stat cards, full-bleed quotes)?
+      - Are lighter "insight" or "key takeaway" slides interspersed among dense content?
+      - Does the visual pacing create a sense of rhythm and momentum?
+
+      What to look for visually:
+      - Monotonous repetition (every slide looks the same) vs intentional variety
+      - Heavy data slides followed by breathing room
+      - Section dividers creating natural pauses
+      - Mix of layout types across the deck
+
+      ### D10: HTML Rendering Quality (5% of total score)
+      Does the deck actually work as a presentation? The rubric criteria:
+      - Does it render as slides (one at a time) or a scrollable document?
+      - Are slides properly sized to the viewport?
+      - Responsive text sizing (readable, not tiny or overflowing)
+      - CSS custom properties for consistent theming
+      - Any CSS artifacts, broken layout, or rendering issues?
+
+      What to look for visually:
+      - Slides filling the viewport cleanly
+      - No visible scrollbars or overflow
+      - Text that is readable without squinting
+      - Clean rendering without visual glitches
+
+      ## Screenshot Context
+
+      {{screenshot_result}}
+
+      ## Your Task
+
+      1. Parse the SCREENSHOT_DIR path from the output above.
+      2. List the PNG files in that directory.
+      3. Select slides to analyze:
+         - If 6 or fewer slides: analyze ALL of them.
+         - If more than 6: pick 5 evenly spaced (always include first, middle, last).
+      4. For each selected slide, use the nano_banana tool with operation "analyze".
+         In your prompt to nano_banana, ask specifically about:
+         - Text density: is content scannable or are there walls of text?
+         - Layout structure: what type of layout is this slide (title, two-column,
+           card grid, full-text, data table, section divider, stat highlight)?
+         - Whitespace: is there breathing room or is content cramped?
+         - Color contrast: is text readable against the background?
+         - Rendering: any overflow, clipping, broken elements, or CSS artifacts?
+      5. After analyzing individual slides, assess CROSS-SLIDE patterns:
+         - Layout variety across the deck (or lack thereof)
+         - Visual weight progression (heavy -> light -> heavy rhythm)
+         - Section divider presence and placement
+         - Runs of consecutive heavy or identical-looking slides
+      6. Produce the structured report below.
+
+      ## Output Format (produce EXACTLY this)
+
+      ```
+      VISUAL ANALYSIS REPORT
+
+      Slides analyzed: [list of slide numbers]
+      Total slides in deck: [N]
+
+      === D4 EVIDENCE: DENSITY DISCIPLINE ===
+      Overall density assessment: [1-5]
+      Per-slide observations:
+      - Slide [N]: [scannable / dense / wall-of-text] -- [specific observation]
+      - ...
+      Worst offenders: [slide numbers with density problems, or "none"]
+      Summary: [2-3 sentences on overall density discipline]
+
+      === D5 EVIDENCE: VISUAL RHYTHM ===
+      Layout variety assessment: [1-5]
+      Distinct layout types observed: [list, e.g., "title slide, two-column, card grid, full-text, section divider"]
+      Heavy slide runs: [list runs of 3+ consecutive heavy slides, or "none"]
+      Section dividers present: [yes/no, with slide numbers]
+      Pacing pattern: [describe the visual weight progression across the deck]
+      Summary: [2-3 sentences on rhythm and variety]
+
+      === D10 EVIDENCE: HTML RENDERING QUALITY ===
+      Renders as: [slide deck / scrollable document / hybrid]
+      Viewport fit: [slides fill viewport cleanly / overflow / undersized]
+      Text readability: [readable at presentation distance / too small / overflow]
+      CSS artifacts: [none / list specific issues with slide numbers]
+      Summary: [2-3 sentences on rendering quality]
+
+      === CROSS-CUTTING OBSERVATIONS ===
+      Visual strengths: [top 2-3 with slide references]
+      Visual weaknesses: [top 2-3 with slide references]
+      Rendering issues: [any CSS glitches, broken elements, or artifacts]
+      ```
+
+      Be specific. Reference slide numbers. Do not fabricate observations --
+      report only what you see in the actual screenshots.
+    output: "visual_analysis"
+    timeout: 600
+
+  # -- Step 4: Judge the deck against the rubric --------------------------------
+  #
+  # Uses zen-architect in REVIEW mode as the judge. The reasoning model class
+  # is selected for rigorous critique -- evaluation demands careful comparison
+  # of claims against source material, framework adherence checks, and
+  # nuanced scoring across 10 dimensions.
+  #
+  # The judge receives BOTH the HTML source (for structural/content dimensions)
+  # AND the visual analysis from nano-banana (for visual dimensions D4, D5, D10).
+  #
+  # model_role: critique -- this step evaluates existing work, not creating new.
+  - id: "judge-deck"
+    agent: "foundation:zen-architect"
+    mode: "REVIEW"
+    # Critique/evaluation role: benefits from strongest available reasoning model.
+    # Uncomment provider_preferences below to pin to a specific provider, or
+    # leave unset to use the session's default model.
+    # provider_preferences:
+    #   - provider: anthropic
+    #     model: claude-opus-*
+    #   - provider: openai
+    #     model: o3-*
+    prompt: |
+      You are an expert presentation evaluator acting as the judge in a
+      presentation builder evaluation harness.
+
+      Below you will find four clearly labeled sections:
+      1. **EVALUATION RUBRIC** -- the complete grading criteria, the 1-5 scoring
+         scale, dimension weights, verdict thresholds, and the exact output format
+         you must produce.
+      2. **ORIGINAL SCENARIO** -- the source material and parameters that were
+         given to the presentation builder. This is your ground truth.
+      3. **GENERATED DECK OUTPUT** -- the presentation the builder produced.
+         This is what you are evaluating.
+      4. **VISUAL ANALYSIS** -- a VLM-powered analysis of actual rendered
+         screenshots of the slides. Use this for visual dimensions.
+
+      ## Your Task
+
+      Follow the rubric EXACTLY. For each of the 12 dimensions (D1-D12):
+      1. Write a 2-4 sentence ANALYSIS examining specific evidence
+      2. ONLY AFTER completing the analysis, commit to a score on the 1-5 scale
+
+      This order is mandatory. Write analysis FIRST, score SECOND. Do not
+      write the score on the same line as the analysis or before it.
+
+      Apply the verdict thresholds as specified:
+      - PASS: overall >= 4.0 AND no dimension below 3
+      - MARGINAL: overall >= 3.0 AND no dimension below 2
+      - FAIL: overall < 3.0 OR any dimension at 1
+
+      ## Critical Evaluation Rules
+
+      1. **Content fidelity is paramount.** Any number, statistic, percentage,
+         or claim in the deck that cannot be traced to the source material is a
+         FABRICATION -- score D3 accordingly regardless of plausibility.
+      2. **Apply the Newspaper Test literally.** Read ONLY the slide titles in
+         sequence. Either they tell a coherent story or they don't. A title like
+         "Key Findings" fails. A title like "MTTR dropped 51% through automated
+         runbooks" passes.
+      3. **Be specific in evidence.** Quote actual slide titles and content
+         passages. "Generally good" is not acceptable.
+      4. **Speaker notes matter.** Generic notes like "Discuss this slide" are
+         a failure for D8. The 4-field structure is a hard requirement.
+      5. **Use the VISUAL ANALYSIS for visual dimensions.** For D4 (Density
+         Discipline), D5 (Visual Rhythm), D10 (HTML Quality), and D12
+         (Information Design), incorporate the visual analysis findings. The
+         visual analysis tells you what the slides ACTUALLY LOOK LIKE when
+         rendered -- use this over CSS inference. Reference specific visual
+         observations in your rationale.
+      6. **Insight density is about interpretation, not repetition.** Showing
+         a number is not insight. Stating what the number means for the audience
+         is insight. Score D11 based on whether data slides include this
+         interpretive layer.
+      7. **Information design rewards visual thinking.** When source material
+         contains comparison data, the correct display is a table or matrix,
+         not prose. Score D12 based on whether the builder chose the right
+         visual format for the data structure.
+      8. **Write analysis BEFORE scoring.** For each dimension, complete your
+         analytical observations before committing to a number. This is the
+         evaluation method, not a suggestion.
+      9. **Weight the overall score correctly.** The 12 dimensions sum to 113%.
+         Divide the weighted sum by 1.13 to normalize to the 1-5 scale.
+         Calculate to one decimal place.
+
+      Produce your evaluation in the EXACT output format specified in the rubric's
+      "Output Format" section. Do not add extra sections or change the format.
+
+      {{evaluation_inputs}}
+
+      === VISUAL ANALYSIS (from rendered slide screenshots) ===
+      {{visual_analysis}}
+      === END OF VISUAL ANALYSIS ===
+    output: "evaluation_result"
+    timeout: 1800
+
+  # -- Step 5: Save the evaluation result ---------------------------------------
+  - id: "save-evaluation"
+    type: "bash"
+    command: |
+      set -euo pipefail
+      mkdir -p "{{output_dir}}"
+
+      # Derive evaluation filename from deck path
+      deck_basename=$(basename "{{deck_path}}" .html)
+      # Handle case where deck_path doesn't end in .html
+      if [ "$deck_basename" = "$(basename "{{deck_path}}")" ]; then
+        deck_basename=$(basename "{{deck_path}}" .md)
+      fi
+      eval_path="{{output_dir}}/${deck_basename}-evaluation.md"
+
+      # Write evaluation result
+      cat > "${eval_path}" <<'_CANVAS_EVAL_EOF_7f3a9c'
+      {{evaluation_result}}
+      _CANVAS_EVAL_EOF_7f3a9c
+
+      # Verify write succeeded
+      if [ -s "${eval_path}" ]; then
+        byte_count=$(wc -c < "${eval_path}")
+        echo "Evaluation saved: ${eval_path} (${byte_count} bytes)"
+      else
+        echo "ERROR: Evaluation write failed or produced empty output" >&2
+        exit 1
+      fi
+    output: "save_result"
+    timeout: 30

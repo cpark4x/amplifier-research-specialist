@@ -1,0 +1,175 @@
+# =============================================================================
+# Analyze Test Results & Improve Presentation Builder Prompt
+# =============================================================================
+#
+# Reads the latest round of evaluations for a presentation builder, diagnoses
+# the weakest dimensions with specific evidence, and makes targeted edits to
+# the builder's prompt to improve those dimensions.
+#
+# Designed to be called by improvement-loop.sh for each builder independently.
+#
+# Usage:
+#   amplifier tool invoke recipes operation=execute \
+#     recipe_path=tests/analyze-and-improve.yaml \
+#     context='{
+#       "builder_name": "presentation-builder",
+#       "test_dir": "tests/presentation-builder",
+#       "prompt_path": "specialists/presentation-builder/index.md"
+#     }'
+#
+# Context variables:
+#   - builder_name (required): Human-readable name for logging
+#   - test_dir (required): Path to the builder's test directory
+#   - prompt_path (required): Path to the builder's index.md prompt file
+#
+# =============================================================================
+
+name: "analyze-and-improve"
+description: "Diagnose weak dimensions from evaluations and improve the builder prompt"
+version: "1.0.0"
+tags: ["presentation-builder", "prompt-improvement", "evaluation"]
+
+context:
+  builder_name: ""
+  test_dir: ""
+  prompt_path: ""
+
+steps:
+  # — Step 1: Find the latest round and aggregate evaluation data ————————
+  #
+  # Collects the scorecard summary (compact cross-round view) plus the full
+  # evaluation text from the most recent round. This gives the analysis agent
+  # both the big picture (score trends) and specific evidence (quoted issues).
+  - id: "collect-evaluation-data"
+    type: "bash"
+    command: |
+      set -euo pipefail
+      ROUNDS_DIR="{{test_dir}}/rounds"
+
+      # Find the latest round
+      latest_round=$(ls -d "${ROUNDS_DIR}"/round-* 2>/dev/null | sort -V | tail -1)
+      if [ -z "$latest_round" ]; then
+        echo "ERROR: No rounds found in ${ROUNDS_DIR}" >&2
+        exit 1
+      fi
+      round_name=$(basename "$latest_round")
+
+      echo "BUILDER: {{builder_name}}"
+      echo "LATEST ROUND: ${round_name}"
+      echo ""
+
+      # Scorecard — compact cross-round history
+      echo "=== SCORECARD (all rounds) ==="
+      "{{test_dir}}/collect-scores.sh" --print 2>&1 || true
+      echo ""
+
+      # Full evaluations from the latest round — the judge's detailed analysis
+      echo "=== EVALUATIONS FROM ${round_name} ==="
+      for eval_file in "${latest_round}"/*-evaluation.md; do
+        [ -f "$eval_file" ] || continue
+        echo ""
+        echo "--- $(basename "$eval_file") ---"
+        cat "$eval_file"
+        echo ""
+      done
+    output: "evaluation_data"
+    timeout: 120
+
+  # — Step 2: Diagnose weaknesses and improve the prompt ——————————————
+  #
+  # A single agent call that:
+  #   1. Analyzes the evaluation data to find the 2-3 weakest dimensions
+  #   2. Reads the current prompt file (via read_file tool)
+  #   3. Reads the evaluation rubric (via read_file tool)
+  #   4. Makes targeted edits to the prompt (via edit_file tool)
+  #   5. Returns a summary of what was changed and why
+  #
+  # The agent uses tools directly — this is more reliable than trying to
+  # pass the full 30-60KB prompt through recipe context variables.
+  - id: "diagnose-and-improve"
+    agent: "foundation:zen-architect"
+    prompt: |
+      You are a prompt engineering expert. Your job is to improve a presentation
+      builder's prompt based on evaluation test results.
+
+      ## Context
+
+      Builder: {{builder_name}}
+      Prompt file: {{prompt_path}}
+      Rubric file: {{test_dir}}/rubric.md
+
+      ## Evaluation Results
+
+      {{evaluation_data}}
+
+      ## Your Task
+
+      ### Phase 1: Diagnose
+
+      From the evaluation data above:
+      1. Identify the 2-3 dimensions with the LOWEST average scores across scenarios
+      2. For each weak dimension, note the SPECIFIC issues the judge cited
+         (quote the evidence from evaluations)
+      3. Determine if the issue is cross-scenario (prompt-level) or scenario-specific
+         (framework-specific)
+
+      ### Phase 2: Read and Understand
+
+      Use read_file to read:
+      1. The current prompt at {{prompt_path}}
+      2. The rubric at {{test_dir}}/rubric.md
+
+      For each weak dimension from Phase 1, identify which section(s) of the prompt
+      govern that dimension's behavior. Understand what the prompt currently says and
+      why it's insufficient.
+
+      ### Phase 3: Improve
+
+      Use edit_file to make TARGETED improvements to {{prompt_path}}. Rules:
+
+      1. **Minimum viable edit.** Change only what's needed to address the diagnosed
+         weaknesses. Do NOT rewrite the whole prompt.
+      2. **Focus on 2-3 dimensions.** Resist the urge to "improve" sections that
+         are scoring well — you risk regressing them.
+      3. **Add specificity.** The most common fix is replacing vague guidance with
+         specific examples, stronger language, or explicit failure-mode descriptions.
+      4. **Preserve structure.** Keep the prompt's overall organization and philosophy.
+         Add to sections, don't reorganize them.
+      5. **Never remove content** that supports dimensions scoring well.
+      6. **Each edit targets a specific dimension.** Be able to name which rubric
+         dimension each change is meant to improve.
+
+      ### Phase 4: Report
+
+      After making edits, summarize:
+      - Which dimensions you targeted
+      - What specific changes you made (describe each edit)
+      - Which rubric dimension each change addresses
+      - What score improvement you expect
+
+      This summary is your output — it will be logged as the improvement record
+      for this iteration.
+    output: "improvement_summary"
+    timeout: 900
+
+  # — Step 3: Save the diagnosis as a record ———————————————————————
+  - id: "save-diagnosis"
+    type: "bash"
+    command: |
+      set -euo pipefail
+      ROUNDS_DIR="{{test_dir}}/rounds"
+      latest_round=$(ls -d "${ROUNDS_DIR}"/round-* 2>/dev/null | sort -V | tail -1)
+      round_name=$(basename "$latest_round")
+
+      # Save the improvement summary alongside the round's results
+      diagnosis_path="${latest_round}/${round_name}-improvement-log.md"
+      cat > "${diagnosis_path}" <<'__DIAGNOSIS_END__'
+      {{improvement_summary}}
+      __DIAGNOSIS_END__
+
+      echo "Improvement log saved: ${diagnosis_path}"
+      echo ""
+      echo "=== IMPROVEMENT SUMMARY ==="
+      echo "{{improvement_summary}}" | head -50
+    output: "save_result"
+    timeout: 30

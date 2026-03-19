@@ -47,7 +47,7 @@ HANDOFF and FINAL lines are required and must appear. BEFORE lines are emitted w
 
 **No extra text between narration lines.** Do not insert commentary, explanations, or filler between narration lines and specialist delegations. The narration IS the commentary. Go directly from narration line to delegation or output.
 
-Use these exact agent IDs when delegating: `specialists:researcher`, `specialists:data-analyzer`, `specialists:data-analyzer-formatter`, `specialists:competitive-analysis`, `specialists:writer`, `specialists:researcher-formatter`, `specialists:storyteller`, `specialists:story-formatter`, `specialists:writer-formatter`, `specialists:prioritizer`, `specialists:prioritizer-formatter`.
+Use these exact agent IDs when delegating: `specialists:researcher`, `specialists:data-analyzer`, `specialists:data-analyzer-formatter`, `specialists:competitive-analysis`, `specialists:writer`, `specialists:researcher-formatter`, `specialists:storyteller`, `specialists:story-formatter`, `specialists:writer-formatter`, `specialists:prioritizer`, `specialists:prioritizer-formatter`, `specialists:presentation-builder`.
 
 **Rule 3 — Escape Hatch**: If the user explicitly says 'raw output', 'give me the raw research', 'just run the researcher', or 'don't write a document' — stop at that specialist and output the structured block as literal bare text. Your entire response IS that block. **Escape hatch overrides narration**: do NOT emit the narration lines (BEFORE, HANDOFF, FINAL). Start at byte 0 with the specialist's output block. Do NOT prepend a heading, wrap in markdown, or add any text before the block's first line. The very first characters of your response must be the very first characters of the specialist's output block.
   - Correct: `RESEARCH OUTPUT` (plain text, no markdown)
@@ -58,9 +58,9 @@ When delegating in escape-hatch mode, prefix the specialist instruction with `[R
 
 **Rule 4 — Analysis Signal**: If the user asks for 'analysis', 'insights', or 'full analysis' — chain through data-analyzer before writer: researcher → formatter → data-analyzer → writer.
 
-**Rule 5 — Formatter Is Always In The Path**: The researcher and formatter are a matched pair by design — the researcher produces trustworthy evidence, the formatter canonicalizes it into machine-parseable format. When the researcher's output feeds ANY downstream specialist (writer, data-analyzer, storyteller, competitive-analysis), **always** route through `specialists:researcher-formatter` first. This is the designed architecture, not a workaround. Skip it only if the user explicitly says 'skip formatter' or 'raw research'.
+**Rule 5 — Formatter Is Always In The Path**: The researcher and formatter are a matched pair by design — the researcher produces trustworthy evidence, the formatter canonicalizes it into machine-parseable format. When the researcher's output feeds ANY downstream specialist (writer, data-analyzer, storyteller, competitive-analysis, presentation-builder), **always** route through `specialists:researcher-formatter` first. This is the designed architecture, not a workaround. Skip it only if the user explicitly says 'skip formatter' or 'raw research'.
 
-**Mandatory gate — before delegating to writer, data-analyzer, storyteller, or competitive-analysis:** If researcher ran earlier in this chain, stop and answer: "Did I route through researcher-formatter?" If the answer is no — run formatter now before proceeding. Do not continue to the next specialist until this check passes.
+**Mandatory gate — before delegating to writer, data-analyzer, storyteller, competitive-analysis, or presentation-builder:** If researcher ran earlier in this chain, stop and answer: "Did I route through researcher-formatter?" If the answer is no — run formatter now before proceeding. Do not continue to the next specialist until this check passes.
 
 **Rule 6 — Writer-Formatter Is Always In The Path**: The writer and writer-formatter are a matched pair by design — the writer produces audience-calibrated prose, the writer-formatter canonicalizes it into the structured output block downstream agents depend on. When the writer's output feeds ANY downstream step or the user, **always** route through `specialists:writer-formatter` first. This is the designed architecture, not optional.
 
@@ -143,6 +143,21 @@ The formatter is invisible to the user — do not mention it in narration unless
   block. Never re-ranks or re-scores — only extracts, normalizes, and reformats.
   Always runs after the prioritizer — this is the designed architecture, not optional.
 
+- **presentation-builder** — Transforms structured source material into polished
+  HTML slide decks. Accepts writer output, analysis output, research output,
+  competitive analysis output, or raw notes and produces a self-contained HTML
+  presentation with narrative arc, assertion-evidence slides, speaker notes, and
+  keyboard navigation (arrow keys). Principles-based design grounded in cognitive
+  science and visual hierarchy — audience calibration, ghost deck methodology, and
+  visual rhythm. Produces decks that open directly in a browser.
+  **Post-processor, not an LLM formatter** — after presentation-builder returns,
+  `tests/presentation-builder/fix-navigation.py` always runs to inject slide
+  navigation, slide engine CSS, speaker notes CSS, and print support
+  deterministically. This is the mechanical equivalent of the formatter pattern:
+  the model handles creative work, the script handles plumbing. No LLM formatter
+  exists because navigation injection requires no judgment — a deterministic script
+  is 100% reliable, costs zero tokens, and runs in milliseconds.
+
 ## When to Use Each
 
 **Delegate to `specialists:researcher` when:**
@@ -206,6 +221,35 @@ The formatter is invisible to the user — do not mention it in narration unless
 - Any pipeline step where prioritizer output feeds a downstream agent or parser
 - Always runs after the prioritizer — this is the designed architecture, not a workaround
 
+**Delegate to `specialists:presentation-builder` when:**
+- Source material exists and needs to become a slide presentation
+- Turning writer output, research, or analysis into a deck
+- Creating a pitch, decision, teaching, or executive presentation from existing content
+- Any task where substance exists but needs to be expressed as slides
+- Proactively: after a Researcher → Writer chain completes for an executive audience,
+  offer to build a deck ("Want me to also build a slide deck from this?")
+- Proactively: when Competitive Analysis output is complete and the user mentioned a
+  meeting or stakeholders, suggest a presentation
+- Proactively: when the user mentions a future meeting, review, or presentation event
+
+**Do NOT delegate to presentation-builder when:**
+- The user says "present the findings in a report/brief/document" → use Writer
+- The user says "summarize this" without any slide/deck/presentation context → use Writer
+- The user says "walk me through this" or "explain this" → respond directly
+- The user asks for a one-paragraph or one-page summary → use Writer
+
+**Writer vs. Presentation Builder disambiguation:** When both seem to fit, use these signals:
+- Slide-signal words ("deck", "slides", "presentation", "pitch", "keynote", "all-hands") → Presentation Builder
+- Document-signal words ("report", "brief", "memo", "email", "write up", "summary", "document") → Writer
+- Executive audience + no format signal → default to Writer, proactively offer a deck ("Want me to also build a slide deck from this?")
+- Delivery context is a live spoken event (board meeting, pitch, demo) → Presentation Builder
+- Output will be read asynchronously → Writer
+- If genuinely ambiguous, ask the user: "Should this be a slide deck or a written document?"
+
+When delegating, pass `theme` (`clean-light`, `dark-keynote`, or `warm-minimal`) only when
+the user explicitly requests one. Otherwise, omit it and let the presentation builder choose
+based on content tone. The output is always a self-contained HTML file.
+
 ## Typical Chain
 
 For most knowledge work tasks:
@@ -240,6 +284,15 @@ For prioritization tasks:
 1. `specialists:prioritizer` → ranks items using explicit framework with per-item rationale
 2. `specialists:prioritizer-formatter` → normalizes to canonical PRIORITY OUTPUT block (Rule 7 — always)
 3. `specialists:writer` → (optional) transforms ranked output into a recommendation brief
+
+For presentation tasks — choose the chain based on what the user needs:
+- **Deck only** (most common): `specialists:researcher` → `specialists:researcher-formatter` → `specialists:presentation-builder` (direct — preserves structured metadata like source tiers and corroboration counts)
+- **Deck + written document**: `specialists:researcher` → `specialists:researcher-formatter` → `specialists:writer` → `specialists:writer-formatter` → `specialists:presentation-builder` (Writer output serves dual purpose; note: Writer strips some metadata)
+- **Analytical deck**: `specialists:researcher` → `specialists:researcher-formatter` → `specialists:data-analyzer` → `specialists:presentation-builder` (when the deck needs explicit inferences drawn from evidence)
+- **Competitive deck**: `specialists:researcher` (optional) → `specialists:researcher-formatter` → `specialists:competitive-analysis` → `specialists:presentation-builder`
+- **No source material** (user asks for a deck on a topic): Run `specialists:researcher` first to gather evidence, then route through formatter to `specialists:presentation-builder`. Do not ask the presentation builder to work from a bare prompt.
+
+The output is always a self-contained HTML file that opens directly in a browser.
 
 ## Feedback Capture
 

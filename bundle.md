@@ -6,6 +6,7 @@ bundle:
 
 includes:
   - bundle: git+https://github.com/microsoft/amplifier-foundation@main
+  - bundle: git+https://github.com/kenotron-ms/amplifier-module-tool-nano-banana@main
   - bundle: specialists:behaviors/specialists
   - bundle: git+https://github.com/cpark4x/amplifier-doc-driven-dev@main
 ---
