@@ -31,6 +31,12 @@
 # CHANGELOG
 # =============================================================================
 #
+# v2.0.0 (2026-03-19):
+#   - Redesign: model owns full HTML output, no post-processor
+#     * Step 2: Removed "no <script> tag" instruction — model owns navigation JS
+#     * Step 3: Replaced HTML extraction regex + post-processor with trivial trim
+#     * Removed fix-navigation.py dependency entirely
+#
 # v1.0.0 (2025-07-24):
 #   - Initial recipe: single-scenario deck generation pipeline
 #     * Step 1: Read scenario file (bash, with validation)
@@ -90,8 +96,6 @@ steps:
          `<` (e.g., `<!DOCTYPE html>`) and the last MUST be `>` (e.g.,
          `</html>`). No prose, no explanation, no markdown fences, no
          "Here is the presentation" preamble. Raw HTML only.
-      5. Do NOT include a `<script>` tag — slide navigation is injected
-         by a post-processor after generation.
 
       === SCENARIO FILE ===
       {{scenario_content}}
@@ -99,7 +103,7 @@ steps:
     output: "deck_output"
     timeout: 1800
 
-  # ── Step 3: Save the generated deck to the output directory ────────────────
+  # —— Step 3: Save the generated deck to the output directory ————————————————
   - id: "save-output"
     type: "bash"
     command: |
@@ -116,40 +120,29 @@ steps:
       {{deck_output}}
       _CANVAS_DECK_EOF_7f3a9c
 
-      # Extract just the HTML — the agent wraps output in prose and markdown fences
+      # Trivial trim: strip any prose before the first < and after the last >.
+      # The model should return clean HTML, but occasionally wraps output in
+      # markdown fences or a prose preamble. This is string trimming, not HTML
+      # surgery — no regex parsing, no structural assumptions.
       python3 -c "
-      import sys, re
+      import sys
       with open('${raw_path}', 'r') as f:
           content = f.read()
 
-      # Find the HTML between <!DOCTYPE or <html> and </html>
-      start = None
-      for pattern in [r'<!DOCTYPE\s+html', r'<html']:
-          m = re.search(pattern, content, re.IGNORECASE)
-          if m:
-              start = m.start()
-              break
-
-      if start is None:
-          print('ERROR: No HTML found in agent output', file=sys.stderr)
-          # Save raw for debugging
-          print('Raw output saved to: ${raw_path}', file=sys.stderr)
+      start = content.find('<')
+      end = content.rfind('>') + 1
+      if start < 0 or end <= start:
+          print('ERROR: No HTML tags found in agent output', file=sys.stderr)
           sys.exit(1)
 
-      end = content.rfind('</html>')
-      if end == -1:
-          end = len(content)
-      else:
-          end += len('</html>')
-
-      html = content[start:end].strip()
+      html = content[start:end]
       if len(html) < 1000:
-          print(f'ERROR: Extracted HTML too small ({len(html)} bytes)', file=sys.stderr)
+          print(f'ERROR: HTML too small ({len(html)} bytes)', file=sys.stderr)
           sys.exit(1)
 
       with open('${output_path}', 'w') as f:
           f.write(html)
-      print(f'Extracted {len(html)} bytes of HTML')
+      print(f'Saved {len(html)} bytes of HTML')
       "
 
       # Clean up raw file
@@ -162,16 +155,6 @@ steps:
       else
         echo "ERROR: Write failed or produced empty output" >&2
         exit 1
-      fi
-
-      # Post-process: inject slide navigation, slide engine CSS, speaker notes
-      # CSS, and print support. This is the designed production path — the model
-      # focuses on creative work, the script handles mechanical plumbing.
-      FIX_SCRIPT="tests/presentation-builder/fix-navigation.py"
-      if [ -f "$FIX_SCRIPT" ]; then
-        echo ""
-        echo "Running post-processor (injecting navigation + slide engine)..."
-        python3 "$FIX_SCRIPT" "${output_path}"
       fi
     output: "save_result"
     timeout: 30
