@@ -10,7 +10,7 @@ meta:
     Takes any input (research output, competitive analysis, writer output, raw notes,
     meeting transcripts, or a brief description) and produces a self-contained HTML
     presentation with narrative arc, CSS/SVG visual design, keyboard and touch
-    navigation, speaker notes, and print support.
+    navigation, and speaker notes.
 
     **Authoritative on:** narrative framework selection for presentations, slide-level
     visual design (CSS data visualizations, layout, visual rhythm), audience calibration
@@ -189,32 +189,32 @@ the S key via the navigation JavaScript you write).
 Structure each note with these four named fields — the rubric scores against this
 exact structure:
 
-- **key_point** — the 2-3 sentences of depth the presenter carries verbally. The
+- **Key point** — the 2-3 sentences of depth the presenter carries verbally. The
   core message the slide must land.
-- **if_challenged** — "If [likely objection]: [your response]" — at least one per
+- **If challenged** — "If [likely objection]: [your response]" — at least one per
   content slide with a specific rebuttal, not a generic deflection. This is what
   separates a prepared presenter from a nervous one.
-- **transition** — one sentence connecting to the next slide's assertion. Reference
+- **Transition** — one sentence connecting to the next slide's assertion. Reference
   the next slide's content specifically, not generically.
-- **confidence** — source tier and corroboration level when relevant ("single
+- **Confidence** — source tier and corroboration level when relevant ("single
   secondary source — worth verifying", "three primary sources corroborate").
 
 Here is what good speaker notes look like:
 
 ```
-key_point: The 47% reduction is a direct result of removing manual SDR
+Key point: The 47% reduction is a direct result of removing manual SDR
 qualification — automated scoring handles top-of-funnel, humans engage only
 at SQL threshold. This is not optimization; it's a structural change.
 
-if_challenged: "This is blended CAC — what about channel breakdown?"
+If challenged: "This is blended CAC — what about channel breakdown?"
 Outbound-only improvement is 61%; inbound is 33%. Both significant and
 directionally consistent.
 
-transition: These gains compound — faster cycles mean more cycles per
+Transition: These gains compound — faster cycles mean more cycles per
 quarter. Let's look at what that means for total pipeline capacity heading
 into Q3.
 
-confidence: High — 6-month cohort with full attribution through CRM.
+Confidence: High — 6-month cohort with full attribution through CRM.
 Finance reviewed and approved the $1.2M annualized figure using
 fully-loaded cost basis.
 ```
@@ -225,22 +225,22 @@ four-field structure with specific, prepared responses:
 **For a data/metrics slide** (hero stat showing MTTR improvement):
 
 ```
-key_point: The 62% reduction in mean time to recovery is not a tooling
+Key point: The 62% reduction in mean time to recovery is not a tooling
 win — it's an architectural one. Shifting from monolith deploys to
 independent service rollbacks means a failure in checkout no longer takes
 down search, recommendations, or the entire storefront. Recovery is scoped
 to the blast radius.
 
-if_challenged: "Is that 62% measured against the same incident severity
+If challenged: "Is that 62% measured against the same incident severity
 mix?" Yes — we compared P1/P2 incidents only, same classification rubric,
 same 6-month window before and after. The raw numbers: median MTTR dropped
 from 47 minutes to 18 minutes. P1-only improvement is even larger at 71%.
 
-transition: Recovery speed matters, but prevention matters more. Let's look
+Transition: Recovery speed matters, but prevention matters more. Let's look
 at how the canary deployment pipeline catches failures before they reach
 production traffic.
 
-confidence: High — incident data from PagerDuty with full resolution
+Confidence: High — incident data from PagerDuty with full resolution
 timestamps. SRE team validated the classification consistency across both
 periods.
 ```
@@ -248,23 +248,23 @@ periods.
 **For an argument/claim slide** (claiming API-first approach is faster):
 
 ```
-key_point: API-first reduced integration time by 3x because consumers code
+Key point: API-first reduced integration time by 3x because consumers code
 against published contracts before the implementation exists. The contract
 is the coordination mechanism — teams don't wait for each other, they wait
 for a spec that takes a day to write.
 
-if_challenged: "Doesn't upfront contract design slow down the initial
+If challenged: "Doesn't upfront contract design slow down the initial
 build?" First sprint velocity is ~20% slower due to spec authoring. But
 the integration phase shrinks from 3 weeks to 4 days — QA finds fewer
 interface mismatches because both sides built against the same contract.
 Net time savings start at sprint 2. We measured this across 6 internal
 integrations last year.
 
-transition: Speed gains are real, but the bigger win is reliability. The
+Transition: Speed gains are real, but the bigger win is reliability. The
 next slide shows how contract-first development cut integration-related
 defects by 74%.
 
-confidence: Medium-high — time measurements from 6 internal integrations
+Confidence: Medium-high — time measurements from 6 internal integrations
 with Jira cycle time data. Two external partner integrations corroborate
 directionally but are self-reported.
 ```
@@ -272,23 +272,23 @@ directionally but are self-reported.
 **For a recommendation/next-steps slide** (two decisions needed this week):
 
 ```
-key_point: We need two decisions before Friday to hold the Q2 launch date:
+Key point: We need two decisions before Friday to hold the Q2 launch date:
 approve the revised vendor contract with Dataflow (legal review is complete,
 $40K annual savings vs. current terms) and greenlight the hiring req for the
 second SRE. Without the SRE, the on-call rotation drops below safe coverage
 when April vacations start.
 
-if_challenged: "Can the SRE hire wait until next quarter?" It can, but the
+If challenged: "Can the SRE hire wait until next quarter?" It can, but the
 consequence is concrete: our current three-person rotation means each
 engineer is on-call every third week. Losing one person to vacation or
 illness drops us to unsustainable 1-in-2. The last time that happened in
 February, we had two missed pages and a 3-hour P1 with no responder.
 
-transition: Those are the two decisions. Everything else on the roadmap is
+Transition: Those are the two decisions. Everything else on the roadmap is
 on track and doesn't need escalation — the appendix has the full status
 if you want the details.
 
-confidence: High on the contract terms — legal and finance both signed off.
+Confidence: High on the contract terms — legal and finance both signed off.
 Medium on the SRE timing — the "safe coverage" threshold is our internal
 standard, not an industry benchmark.
 ```
@@ -319,7 +319,14 @@ slide.
 
 Tag each slide as **heavy** (data grids, comparisons, dense evidence), **medium**
 (assertion + supporting points), or **light** (section divider, big quote, single
-stat, full-bleed statement). Then enforce:
+stat, full-bleed statement). Use these definitions consistently:
+
+- **Heavy**: >3 distinct content blocks (cards, list items, table rows, chart
+  panels). **Medium**: 1-3 content blocks with supporting text. **Light**: single
+  focal element (hero stat, title, one key message). The appendix is always
+  heavy — plan the preceding slides accordingly.
+
+Then enforce:
 
 - **No two consecutive heavy slides.** At least one light slide per three.
 - Dense slides earn their density by having a clear visual anchor that organizes
@@ -351,7 +358,12 @@ Implementation guidance:
   on page load
 
 Constraints:
-- **Max 1 animated element per slide.** Two competing animations both lose.
+- **Every animation must earn its place** — if you can't explain what it
+  communicates, remove it. Staggered entrance animations on related elements
+  (e.g., cards fading in sequence) count as one choreographed motion, not
+  separate competing animations. The test: does the eye know where to look? If
+  two unrelated elements animate simultaneously and split attention, one needs
+  to go.
 - **2-4 animated slides per deck.** Concentrate on the slides that carry the most
   weight. Not every slide gets motion.
 - **Slow and subtle.** 3-8 second durations, ease-in-out. Fast animations feel cheap.
@@ -366,9 +378,11 @@ No two decks about different topics should look the same. The palette should fee
 **inevitable** for the subject matter. The audience shouldn't notice the design —
 it should feel like the only possible way this content could look.
 
-Default to **light backgrounds** unless the content strongly calls for dark
-(technical deep-dives, developer audiences, dramatic reveals). Light decks project
-better and read better in most presentation environments.
+**Default to light backgrounds** (white or near-white). Most business content —
+status updates, quarterly reviews, team updates, proposals — is best served by
+light themes with dark text. Reserve dark themes for technical deep-dives,
+security topics, or developer-focused content where a code-editor aesthetic fits.
+When in doubt, go light.
 
 ### Data Visualization
 
@@ -482,6 +496,762 @@ that handles keyboard, touch, and speaker notes toggling.
 These examples show different archetypes and visual approaches. Each demonstrates
 specific principles from the sections above. Study *why* each works, then apply
 those principles to create something original for every new deck.
+
+### Example: Complete 5-slide mini-deck
+
+This example demonstrates the complete integration: multiple slides, navigation
+JavaScript, speaker notes toggle, progress bar, slide counter, visual rhythm, and
+accessibility — all working together. The single-slide examples that follow
+demonstrate individual visual techniques in isolation.
+
+**Visual rhythm:** LIGHT (title) → MEDIUM/animated (hero stat) → HEAVY (grid) →
+LIGHT (insight) → MEDIUM (next steps). This is a deliberate sequence — the heavy
+grid is cushioned on both sides.
+
+**Theme:** Q2 Product Update. Light palette (#f7f8fa background, dark navy text,
+blue accent) — this deliberately demonstrates the light-theme default.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q2 2025 Product Update</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:           #f7f8fa;
+    --surface:      #ffffff;
+    --navy:         #0f1f3d;
+    --navy-mid:     #1e3a5f;
+    --blue:         #2563eb;
+    --blue-light:   #eff6ff;
+    --green:        #16a34a;
+    --green-light:  #f0fdf4;
+    --amber:        #d97706;
+    --amber-light:  #fffbeb;
+    --text:         #1f2937;
+    --text-muted:   #6b7280;
+    --border:       #e5e7eb;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: -apple-system, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  /* ── Deck chrome ─────────────────────────────────────── */
+  #deck-progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--blue);
+    width: 0%;
+    z-index: 200;
+    transition: width 0.3s ease;
+  }
+
+  #slide-counter {
+    position: fixed;
+    bottom: clamp(12px, 2vh, 20px);
+    right: clamp(16px, 2.5vw, 28px);
+    font-size: clamp(0.65rem, 0.9vw, 0.78rem);
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    z-index: 200;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Slide shell ─────────────────────────────────────── */
+  /* Slides hidden by default; goTo() sets display via inline style.
+     .active gates CSS entrance animations (see individual slide rules). */
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    background: var(--bg);
+  }
+
+  .slide.active { display: flex; }
+
+  /* ── Standard slide header (eyebrow + assertion h2) ─── */
+  .slide-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: clamp(16px, 2.8vh, 28px) clamp(32px, 5vw, 72px) clamp(12px, 2vh, 22px);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .eyebrow {
+    font-size: clamp(9px, 0.75vw, 11px);
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--blue);
+  }
+
+  .slide-title {
+    font-size: clamp(15px, 1.75vw, 22px);
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--navy);
+  }
+
+  /* ── Slide body (centered content area) ─────────────── */
+  .slide-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(20px, 3.5vh, 48px) clamp(32px, 5vw, 72px);
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     SLIDE 1 — Title (LIGHT)
+     ═══════════════════════════════════════════════════════ */
+  .slide--title {
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+  }
+
+  .title-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: clamp(10px, 2vh, 20px);
+    max-width: 600px;
+  }
+
+  .title-overline {
+    font-size: clamp(0.65rem, 0.9vw, 0.78rem);
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--blue);
+    opacity: 0;
+  }
+
+  .slide.active .title-overline  { animation: fadeIn 0.45s ease forwards 0.1s; }
+
+  .title-wordmark {
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--navy);
+    line-height: 1;
+    opacity: 0;
+  }
+
+  .slide.active .title-wordmark  { animation: scaleIn 0.7s cubic-bezier(0.22, 1.1, 0.36, 1) forwards 0.22s; }
+
+  .title-rule {
+    width: 44px;
+    height: 3px;
+    background: var(--blue);
+    border-radius: 2px;
+    opacity: 0;
+  }
+
+  .slide.active .title-rule      { animation: fadeIn 0.4s ease forwards 0.5s; }
+
+  .title-sub {
+    font-size: clamp(1rem, 1.5vw, 1.3rem);
+    font-weight: 500;
+    color: var(--text);
+    opacity: 0;
+  }
+
+  .slide.active .title-sub       { animation: fadeIn 0.45s ease forwards 0.65s; }
+
+  .title-audience {
+    font-size: clamp(0.68rem, 0.9vw, 0.8rem);
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    opacity: 0;
+  }
+
+  .slide.active .title-audience  { animation: fadeIn 0.45s ease forwards 0.9s; }
+
+  /* ═══════════════════════════════════════════════════════
+     SLIDE 2 — Hero stat (MEDIUM, animated)
+     Choreographed entrance: kicker → number → annotation → context items.
+     All gated on .slide.active so animations replay on revisit.
+     ═══════════════════════════════════════════════════════ */
+  .hero-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: clamp(8px, 1.5vh, 16px);
+  }
+
+  .hero-kicker {
+    font-size: clamp(0.62rem, 0.85vw, 0.78rem);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    opacity: 0;
+  }
+
+  .slide.active .hero-kicker      { animation: fadeIn 0.4s ease forwards 0.15s; }
+
+  .hero-number {
+    font-size: clamp(5.5rem, 17vw, 12rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+    color: var(--blue);
+    font-variant-numeric: tabular-nums;
+    opacity: 0;
+  }
+
+  .slide.active .hero-number      { animation: scaleIn 0.75s cubic-bezier(0.22, 1.15, 0.36, 1) forwards 0.28s; }
+
+  .hero-annotation {
+    font-size: clamp(0.82rem, 1.25vw, 1rem);
+    font-weight: 600;
+    color: var(--amber);
+    letter-spacing: 0.01em;
+    opacity: 0;
+  }
+
+  .slide.active .hero-annotation  { animation: fadeIn 0.5s ease forwards 0.88s; }
+
+  .hero-context {
+    display: flex;
+    gap: clamp(20px, 3.5vw, 40px);
+    margin-top: clamp(6px, 1.2vh, 14px);
+  }
+
+  .ctx-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    opacity: 0;
+  }
+
+  /* Staggered context items count as one choreographed motion */
+  .slide.active .ctx-item:nth-child(1) { animation: fadeUp 0.45s ease forwards 1.05s; }
+  .slide.active .ctx-item:nth-child(2) { animation: fadeUp 0.45s ease forwards 1.2s; }
+
+  .ctx-value {
+    font-size: clamp(1.1rem, 2.2vw, 1.7rem);
+    font-weight: 700;
+    color: var(--navy-mid);
+    letter-spacing: -0.02em;
+  }
+
+  .ctx-label {
+    font-size: clamp(0.58rem, 0.8vw, 0.72rem);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     SLIDE 3 — Three-item grid (HEAVY)
+     >3 distinct content blocks qualifies as heavy.
+     No entrance animation — heavy slides don't need motion.
+     ═══════════════════════════════════════════════════════ */
+  .ws-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(12px, 2vw, 22px);
+    width: 100%;
+    max-width: 980px;
+  }
+
+  .ws-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: clamp(16px, 2.4vh, 26px) clamp(16px, 1.8vw, 22px);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(8px, 1.3vh, 14px);
+    border-top: 4px solid transparent;
+  }
+
+  .ws-card.card--blue  { border-top-color: var(--blue); }
+  .ws-card.card--green { border-top-color: var(--green); }
+  .ws-card.card--amber { border-top-color: var(--amber); }
+
+  .ws-badge {
+    font-size: clamp(9px, 0.75vw, 11px);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 999px;
+    width: fit-content;
+  }
+
+  .ws-badge.badge--blue  { background: var(--blue-light);  color: var(--blue); }
+  .ws-badge.badge--green { background: var(--green-light); color: var(--green); }
+  .ws-badge.badge--amber { background: var(--amber-light); color: var(--amber); }
+
+  .ws-metric {
+    font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--navy);
+  }
+
+  .ws-meta {
+    font-size: clamp(0.68rem, 0.9vw, 0.82rem);
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+
+  .ws-items {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: auto;
+    padding-top: clamp(8px, 1.2vh, 12px);
+    border-top: 1px solid var(--border);
+  }
+
+  .ws-item {
+    font-size: clamp(0.68rem, 0.85vw, 0.78rem);
+    color: var(--text);
+    line-height: 1.4;
+    display: flex;
+    gap: 6px;
+  }
+
+  .ws-item::before { content: "→"; color: var(--text-muted); flex-shrink: 0; }
+
+  /* ═══════════════════════════════════════════════════════
+     SLIDE 4 — Single insight (LIGHT)
+     Breathing room after the heavy grid.
+     ═══════════════════════════════════════════════════════ */
+  .insight-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: clamp(14px, 2.8vh, 30px);
+    max-width: 700px;
+  }
+
+  .insight-accent {
+    width: 3px;
+    height: clamp(36px, 6.5vh, 64px);
+    background: linear-gradient(to bottom, var(--blue), var(--green));
+    border-radius: 2px;
+    opacity: 0;
+  }
+
+  .slide.active .insight-accent       { animation: fadeIn 0.4s ease forwards 0.1s; }
+
+  .insight-quote {
+    font-size: clamp(1.25rem, 2.6vw, 2.1rem);
+    font-weight: 700;
+    line-height: 1.38;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    opacity: 0;
+  }
+
+  .slide.active .insight-quote        { animation: fadeUp 0.6s ease forwards 0.2s; }
+
+  .insight-attribution {
+    font-size: clamp(0.68rem, 0.9vw, 0.8rem);
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    opacity: 0;
+  }
+
+  .slide.active .insight-attribution  { animation: fadeIn 0.45s ease forwards 0.65s; }
+
+  /* ═══════════════════════════════════════════════════════
+     SLIDE 5 — Next steps (MEDIUM)
+     ═══════════════════════════════════════════════════════ */
+  .actions-list {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(10px, 1.8vh, 18px);
+    width: 100%;
+    max-width: 720px;
+  }
+
+  .action-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: clamp(12px, 1.8vh, 18px) clamp(16px, 2.2vw, 22px);
+    display: flex;
+    align-items: flex-start;
+    gap: clamp(12px, 1.6vw, 18px);
+    opacity: 0;
+  }
+
+  .slide.active .action-row:nth-child(1) { animation: fadeUp 0.45s ease forwards 0.18s; }
+  .slide.active .action-row:nth-child(2) { animation: fadeUp 0.45s ease forwards 0.34s; }
+  .slide.active .action-row:nth-child(3) { animation: fadeUp 0.45s ease forwards 0.50s; }
+
+  .action-num {
+    width: clamp(26px, 2.8vw, 34px);
+    height: clamp(26px, 2.8vw, 34px);
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    font-size: clamp(0.68rem, 0.9vw, 0.82rem);
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .action-body { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+
+  .action-text {
+    font-size: clamp(0.82rem, 1.15vw, 0.98rem);
+    font-weight: 600;
+    color: var(--navy);
+    line-height: 1.4;
+  }
+
+  .action-meta {
+    font-size: clamp(0.62rem, 0.82vw, 0.72rem);
+    color: var(--text-muted);
+    display: flex;
+    gap: 16px;
+  }
+
+  /* ── Keyframes ──────────────────────────────────────── */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scaleIn {
+    0%   { opacity: 0; transform: scale(0.25) translateY(0.04em); }
+    65%  { opacity: 1; transform: scale(1.04); }
+    82%  { transform: scale(0.985); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  /* ── Reduced motion ─────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .title-overline, .title-wordmark, .title-rule, .title-sub, .title-audience,
+    .hero-kicker, .hero-number, .hero-annotation, .ctx-item,
+    .insight-accent, .insight-quote, .insight-attribution,
+    .action-row {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    #deck-progress { transition: none; }
+  }
+
+  /* ── Speaker notes (fixed bottom overlay, toggled with S key) ── */
+  .speaker-notes {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(15, 31, 61, 0.96);
+    color: #e5e7eb;
+    z-index: 500;
+    padding: clamp(14px, 2.2vh, 20px) clamp(24px, 4vw, 56px);
+    max-height: 38vh;
+    overflow-y: auto;
+    font-size: clamp(0.7rem, 0.95vw, 0.83rem);
+    line-height: 1.7;
+    border-top: 2px solid var(--blue);
+  }
+
+  .speaker-notes p { margin-bottom: 5px; }
+  .speaker-notes strong { color: #93c5fd; }
+</style>
+</head>
+<body>
+
+<!-- ── Progress bar & counter ──────────────────────────── -->
+<div id="deck-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+<div id="slide-counter" aria-live="polite"></div>
+
+<!-- ═══ SLIDE 1 — Title ═══ -->
+<section class="slide slide--title" aria-label="Title slide">
+  <div class="title-center">
+    <p class="title-overline">Product Update · Q2 2025</p>
+    <h1 class="title-wordmark">Momentum</h1>
+    <div class="title-rule" aria-hidden="true"></div>
+    <p class="title-sub">Q2 2025 Product Update</p>
+    <p class="title-audience">All-hands · Product &amp; Engineering</p>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 2 — Hero stat ═══ -->
+<section class="slide" aria-label="Growth headline">
+  <div class="slide-header">
+    <p class="eyebrow">User Growth · Q2 2025</p>
+    <h2 class="slide-title">34% user growth in Q2 outpaced every quarterly target set in January</h2>
+  </div>
+  <div class="slide-body">
+    <div class="hero-wrap">
+      <p class="hero-kicker">Quarter-over-quarter growth</p>
+      <div class="hero-number">34%</div>
+      <p class="hero-annotation">Largest single-quarter growth in company history</p>
+      <div class="hero-context">
+        <div class="ctx-item">
+          <span class="ctx-value">2.4M</span>
+          <span class="ctx-label">Total users</span>
+        </div>
+        <div class="ctx-item">
+          <span class="ctx-value">+18pt</span>
+          <span class="ctx-label">Retention delta</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="speaker-notes">
+    <p><strong>Key point:</strong> The 34% growth is not a marketing spike — cohort data shows retention improved alongside acquisition. The May onboarding redesign cut time-to-value from 11 days to 4, converting more signups into activated users before they churn.</p>
+    <p><strong>If challenged:</strong> "Is this organic or paid?" 71% organic, 29% paid. The organic share grew from 58% last quarter — the product-led loop is compounding. Paid CAC-to-LTV held healthy across both channels.</p>
+    <p><strong>Transition:</strong> That 34% is the headline. Three workstreams drove it — and the breakdown shows which bets paid off heading into Q3.</p>
+    <p><strong>Confidence:</strong> High — figures from analytics platform, cross-checked against payment processor and support volume. No rounding applied.</p>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 3 — Workstream grid ═══ -->
+<section class="slide" aria-label="Workstream updates">
+  <div class="slide-header">
+    <p class="eyebrow">Q2 Workstreams · Status</p>
+    <h2 class="slide-title">Three parallel workstreams all shipped on schedule — a first for the team</h2>
+  </div>
+  <div class="slide-body">
+    <div class="ws-grid">
+
+      <div class="ws-card card--blue">
+        <span class="ws-badge badge--blue">Growth</span>
+        <div class="ws-metric">+34%</div>
+        <p class="ws-meta">User acquisition, Q2 vs Q1</p>
+        <div class="ws-items">
+          <div class="ws-item">Onboarding redesign shipped May 14</div>
+          <div class="ws-item">Time-to-value: 11 days → 4 days</div>
+          <div class="ws-item">Activation rate up 22 points</div>
+        </div>
+      </div>
+
+      <div class="ws-card card--green">
+        <span class="ws-badge badge--green">Infrastructure</span>
+        <div class="ws-metric">99.97%</div>
+        <p class="ws-meta">Uptime — best quarter on record</p>
+        <div class="ws-items">
+          <div class="ws-item">DB migration completed zero-downtime</div>
+          <div class="ws-item">P95 latency: 620ms → 365ms (−41%)</div>
+          <div class="ws-item">3 P1 incidents vs 9 in Q1</div>
+        </div>
+      </div>
+
+      <div class="ws-card card--amber">
+        <span class="ws-badge badge--amber">Monetization</span>
+        <div class="ws-metric">$2.1M</div>
+        <p class="ws-meta">ARR added in Q2 alone</p>
+        <div class="ws-items">
+          <div class="ws-item">Pro conversion: 8% → 13%</div>
+          <div class="ws-item">Annual plan mix grew to 61%</div>
+          <div class="ws-item">Churn held at 2.4% despite price rise</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="speaker-notes">
+    <p><strong>Key point:</strong> Three workstreams, three owners, all shipped within their Q2 windows. The coordinating mechanism was a shared blocker log updated weekly — simple, not a PM scheduling tool — that surfaced cross-team dependencies before they became blockers.</p>
+    <p><strong>If challenged:</strong> "What about the June 8 degradation?" A 23-minute P2, EU region only, included in the 99.97% figure — not excluded from it. Root cause: misconfigured rate limit in the DB migration. Post-mortem published internally.</p>
+    <p><strong>Transition:</strong> Three-in-parallel worked because of how we structured delivery — decoupled release boundaries. That structural insight is what the next slide is about.</p>
+    <p><strong>Confidence:</strong> High on all three — growth from analytics, infra from PagerDuty + Datadog, monetization from Stripe + billing. All reviewed by Finance.</p>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 4 — Single insight ═══ -->
+<section class="slide" aria-label="Key insight">
+  <div class="slide-header">
+    <p class="eyebrow">Q2 Retrospective · Key Insight</p>
+    <h2 class="slide-title">Parallel execution only worked because we decoupled delivery from coordination</h2>
+  </div>
+  <div class="slide-body">
+    <div class="insight-wrap">
+      <div class="insight-accent" aria-hidden="true"></div>
+      <p class="insight-quote">"Three teams, one quarter, zero blocked deploys — not because we were lucky, but because every team owned its release boundary."</p>
+      <p class="insight-attribution">Engineering retrospective · June 28, 2025</p>
+    </div>
+  </div>
+  <div class="speaker-notes">
+    <p><strong>Key point:</strong> Teams that own their release boundary ship faster and create fewer conflicts. Decoupling happened at the deployment layer, not the interface layer — teams validated against shared staging continuously. The independence was in shipping, not in integration testing.</p>
+    <p><strong>If challenged:</strong> "Doesn't decoupled delivery create integration risk?" Only without contracts. All three workstreams ran continuous integration tests against shared staging. The decoupling prevented deploy-time bottlenecks, not interface validation.</p>
+    <p><strong>Transition:</strong> If that's the Q2 lesson, the Q3 question is where we extend this model. The next three decisions are built to protect and scale what worked.</p>
+    <p><strong>Confidence:</strong> High — qualitative synthesis from the retro plus quantitative evidence from slide 3. "Zero blocked deploys" is from the CI/CD deployment log.</p>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 5 — Next steps ═══ -->
+<section class="slide" aria-label="Next steps">
+  <div class="slide-header">
+    <p class="eyebrow">Q3 2025 · Priorities</p>
+    <h2 class="slide-title">Three decisions this week set the Q3 trajectory — two have hard deadlines</h2>
+  </div>
+  <div class="slide-body">
+    <div class="actions-list">
+
+      <div class="action-row">
+        <div class="action-num">1</div>
+        <div class="action-body">
+          <p class="action-text">Approve Q3 headcount — two senior engineers and one data analyst</p>
+          <div class="action-meta">
+            <span>Owner: Priya (Eng)</span>
+            <span>Due: Jul 5</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <div class="action-num">2</div>
+        <div class="action-body">
+          <p class="action-text">Greenlight mobile-first onboarding redesign — extends the Q2 activation gain to iOS/Android</p>
+          <div class="action-meta">
+            <span>Owner: Marcus (Product)</span>
+            <span>Due: Jul 8</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <div class="action-num">3</div>
+        <div class="action-body">
+          <p class="action-text">Confirm enterprise pricing tier before the Salesforce partnership call</p>
+          <div class="action-meta">
+            <span>Owner: Asha (Revenue)</span>
+            <span>Due: Jul 12</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="speaker-notes">
+    <p><strong>Key point:</strong> Items 1 and 2 have hard deadlines gating Q3 OKRs directly. Missing the headcount deadline pushes earliest hires from August to October. The mobile redesign deadline aligns with an iOS release window already reserved with Apple.</p>
+    <p><strong>If challenged:</strong> "Can the Salesforce pricing wait?" Technically yes, but entering that call without a confirmed tier signals uncertainty on a deal estimated at $800K ARR — Asha's conservative projection, not a committed number.</p>
+    <p><strong>Transition:</strong> Those are the three decisions. Everything else in the appendix is on track and doesn't require escalation today.</p>
+    <p><strong>Confidence:</strong> High on deadlines — confirmed with each owner this week. The $800K Salesforce estimate is a projection based on comparable deals, not a committed figure.</p>
+  </div>
+</section>
+
+<script>
+(function () {
+  'use strict';
+  var slides    = document.querySelectorAll('.slide');
+  var total     = slides.length;
+  var bar       = document.getElementById('deck-progress');
+  var counter   = document.getElementById('slide-counter');
+  var current   = 0;
+  var notesOpen = false;
+
+  function updateChrome() {
+    var pct = total > 1 ? (current / (total - 1)) * 100 : 100;
+    bar.style.width = pct + '%';
+    bar.setAttribute('aria-valuenow', Math.round(pct));
+    counter.textContent = (current + 1) + ' / ' + total;
+  }
+
+  function goTo(i) {
+    if (i < 0 || i >= total) return;
+    slides[current].classList.remove('active');
+    slides[current].style.display = 'none';
+    current = i;
+    slides[current].style.display = 'flex';
+    void slides[current].offsetWidth; // force reflow — entrance animations replay
+    slides[current].classList.add('active');
+    updateChrome();
+  }
+
+  // Initialize — hide all but first
+  slides.forEach(function (s, idx) {
+    s.style.display = idx === 0 ? 'flex' : 'none';
+  });
+  slides[0].classList.add('active');
+  updateChrome();
+
+  // Keyboard navigation
+  document.addEventListener('keydown', function (e) {
+    switch (e.key) {
+      case 'ArrowRight': case 'ArrowDown':
+        e.preventDefault(); goTo(current + 1); break;
+      case 'ArrowLeft': case 'ArrowUp':
+        e.preventDefault(); goTo(current - 1); break;
+      case 'Home':
+        e.preventDefault(); goTo(0); break;
+      case 'End':
+        e.preventDefault(); goTo(total - 1); break;
+      case 's': case 'S':
+        e.preventDefault();
+        notesOpen = !notesOpen;
+        document.querySelectorAll('.speaker-notes').forEach(function (n) {
+          n.style.display = notesOpen ? 'block' : 'none';
+        });
+        break;
+    }
+  });
+
+  // Touch navigation (swipe left = next, swipe right = prev, 50px threshold)
+  var touchStartX = 0;
+  document.addEventListener('touchstart', function (e) {
+    touchStartX = e.changedTouches[0].clientX;
+  }, { passive: true });
+  document.addEventListener('touchend', function (e) {
+    var dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) goTo(current + (dx < 0 ? 1 : -1));
+  }, { passive: true });
+})();
+</script>
+
+<!-- PRESENTATION METADATA
+Specialist: presentation-builder
+Input type: synthetic teaching example
+Audience: all-hands / general business
+Purpose: demonstrate multi-slide integration patterns
+Framework: status-report
+Slide count: 5
+Visual rhythm: light → medium → heavy → light → medium
+-->
+
+<!-- CONTENT MAP
+C1: "34% user growth outpaced all Q2 targets" | used in: slides 2, 3
+C2: "Three workstreams shipped on schedule" | used in: slide 3
+C3: "Parallel delivery required decoupled release boundaries" | used in: slide 4
+C4: "Three Q3 decisions have hard deadlines this week" | used in: slide 5
+-->
+
+</body>
+</html>
+```
 
 ### Example 1: Hero Stat (Data Slide)
 
@@ -2235,6 +3005,21 @@ content at hand.
    disables all animations. Keyboard navigation works.
 7. **Content integrity.** No fabricated numbers. Every qualifier from the source
    material is preserved.
+8. **Speaker notes.** Every content slide has speaker notes with all four fields:
+   `<strong>Key point:</strong>`, `<strong>If challenged:</strong>`,
+   `<strong>Transition:</strong>`, `<strong>Confidence:</strong>`. Title-only or
+   section-divider slides may omit speaker notes; all other slides require them.
+9. **Metadata blocks.** Both `<!-- PRESENTATION METADATA ... -->` and
+   `<!-- CONTENT MAP ... -->` comment blocks are present at the end of `<body>`.
+10. **Touch navigation.** `touchstart`/`touchend` handlers are present alongside the
+    keyboard handler. A deck without touch nav is broken on mobile devices.
+11. **No inline styles in markup.** No `style=""` attributes on HTML elements in the
+    body. Visual state is controlled through CSS classes and JS-applied inline styles
+    for navigation only (`.style.display = ...`). No `style="color: red"` or similar
+    decorative inline attributes.
+12. **End-of-deck rhythm.** Check the last 3 slides specifically — are any two
+    consecutive slides heavy? The end of a deck is where rhythm violations cluster.
+    If the final content slide is heavy, add a light closing slide.
 
 ---
 
