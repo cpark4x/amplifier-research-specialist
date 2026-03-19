@@ -26,9 +26,49 @@ PRINT=false
 # Write CSV header
 echo "round,date,scenario,overall_score,verdict,D1_narrative,D2_framework,D3_fidelity,D4_density,D5_rhythm,D6_audience,D7_completeness,D8_notes,D9_structure,D10_html,D11_insight,D12_infodesign" > "${CSV}"
 
-# Extract score from either format:
+# ---------------------------------------------------------------------------
+# Score extraction: try structured ```scores block first, fall back to regex.
+#
+# The ```scores block is a fenced YAML block appended by the judge (v3.1+).
+# It's machine-readable by design and avoids the fragility of regex parsing
+# prose output. If the block isn't present (older evals), the regex fallback
+# handles both v1-v2 inline format and v3 header-then-score format.
+# ---------------------------------------------------------------------------
+
+# Extract all scores from the ```scores block into shell variables.
+# Sets: _overall, _verdict, _d1.._d12 (empty if block not found).
+extract_scores_block() {
+  local file="$1"
+  _overall="" _verdict=""
+  _d1="" _d2="" _d3="" _d4="" _d5="" _d6="" _d7="" _d8="" _d9="" _d10="" _d11="" _d12=""
+
+  # Extract content between ```scores and ``` markers
+  local block
+  block=$(awk '/^```scores$/,/^```$/' "$file" 2>/dev/null | grep -v '^```')
+  [ -z "$block" ] && return 1
+
+  _overall=$(echo "$block" | grep '^overall_score:' | awk '{print $2}')
+  _verdict=$(echo "$block" | grep '^verdict:' | awk '{print $2}')
+  _d1=$(echo "$block" | grep 'D1_narrative:' | awk '{print $2}')
+  _d2=$(echo "$block" | grep 'D2_framework:' | awk '{print $2}')
+  _d3=$(echo "$block" | grep 'D3_fidelity:' | awk '{print $2}')
+  _d4=$(echo "$block" | grep 'D4_density:' | awk '{print $2}')
+  _d5=$(echo "$block" | grep 'D5_rhythm:' | awk '{print $2}')
+  _d6=$(echo "$block" | grep 'D6_audience:' | awk '{print $2}')
+  _d7=$(echo "$block" | grep 'D7_completeness:' | awk '{print $2}')
+  _d8=$(echo "$block" | grep 'D8_notes:' | awk '{print $2}')
+  _d9=$(echo "$block" | grep 'D9_structure:' | awk '{print $2}')
+  _d10=$(echo "$block" | grep 'D10_html:' | awk '{print $2}')
+  _d11=$(echo "$block" | grep 'D11_insight:' | awk '{print $2}')
+  _d12=$(echo "$block" | grep 'D12_infodesign:' | awk '{print $2}')
+
+  # Valid if we got at least overall and verdict
+  [ -n "$_overall" ] && [ -n "$_verdict" ]
+}
+
+# Fallback: extract a single dimension score via regex (v1-v3 prose formats).
 #   Old: "D1_narrative_coherence: 3/5 | ..." (v1-v2 evaluations)
-#   New: "Score: 3/5" after "D1: NARRATIVE COHERENCE" header (v3+ evaluations)
+#   New: "Score: 3/5" after "D1: NARRATIVE COHERENCE" header (v3 evaluations)
 extract_dim() {
   local file="$1" dim="$2"
   # Try old format first (inline score)
@@ -53,27 +93,37 @@ for round_dir in $(ls -d "${ROUNDS_DIR}"/round-* 2>/dev/null | sort -V); do
     [ -f "$eval_file" ] || continue
 
     scenario=$(basename "$eval_file" -output-evaluation.md)
-    overall=$(grep -m1 "^overall_score:" "$eval_file" 2>/dev/null | awk '{print $2}')
-    verdict=$(grep -m1 "^verdict:" "$eval_file" 2>/dev/null | awk '{print $2}')
+
+    # Try structured ```scores block first (v3.1+), fall back to regex
+    if extract_scores_block "$eval_file"; then
+      overall="$_overall"
+      verdict="$_verdict"
+      d1="$_d1" d2="$_d2" d3="$_d3" d4="$_d4" d5="$_d5" d6="$_d6"
+      d7="$_d7" d8="$_d8" d9="$_d9" d10="$_d10" d11="$_d11" d12="$_d12"
+    else
+      # Regex fallback for older evaluation formats
+      overall=$(grep -m1 "^overall_score:" "$eval_file" 2>/dev/null | awk '{print $2}')
+      verdict=$(grep -m1 "^verdict:" "$eval_file" 2>/dev/null | awk '{print $2}')
+
+      d1=$(extract_dim "$eval_file" "D1_narrative\|D1: NARRATIVE")
+      d2=$(extract_dim "$eval_file" "D2_framework\|D2: FRAMEWORK")
+      d3=$(extract_dim "$eval_file" "D3_content\|D3: CONTENT")
+      d4=$(extract_dim "$eval_file" "D4_density\|D4: DENSITY")
+      d5=$(extract_dim "$eval_file" "D5_visual\|D5: VISUAL")
+      d6=$(extract_dim "$eval_file" "D6_audience\|D6: AUDIENCE")
+      d7=$(extract_dim "$eval_file" "D7_complete\|D7: COMPLETE")
+      d8=$(extract_dim "$eval_file" "D8_speaker\|D8: SPEAKER")
+      d9=$(extract_dim "$eval_file" "D9_structural\|D9: STRUCTURAL")
+      d10=$(extract_dim "$eval_file" "D10_html\|D10: HTML")
+      d11=$(extract_dim "$eval_file" "D11_insight\|D11: INSIGHT")
+      d12=$(extract_dim "$eval_file" "D12_info\|D12: INFORMATION")
+    fi
 
     # Skip files with no scores (pipeline errors)
     if [ -z "$overall" ] || [ "$overall" = "N/A" ]; then
       echo "${round_name},${round_date},${scenario},,ERROR,,,,,,,,,," >> "${CSV}"
       continue
     fi
-
-    d1=$(extract_dim "$eval_file" "D1_narrative\|D1: NARRATIVE")
-    d2=$(extract_dim "$eval_file" "D2_framework\|D2: FRAMEWORK")
-    d3=$(extract_dim "$eval_file" "D3_content\|D3: CONTENT")
-    d4=$(extract_dim "$eval_file" "D4_density\|D4: DENSITY")
-    d5=$(extract_dim "$eval_file" "D5_visual\|D5: VISUAL")
-    d6=$(extract_dim "$eval_file" "D6_audience\|D6: AUDIENCE")
-    d7=$(extract_dim "$eval_file" "D7_complete\|D7: COMPLETE")
-    d8=$(extract_dim "$eval_file" "D8_speaker\|D8: SPEAKER")
-    d9=$(extract_dim "$eval_file" "D9_structural\|D9: STRUCTURAL")
-    d10=$(extract_dim "$eval_file" "D10_html\|D10: HTML")
-    d11=$(extract_dim "$eval_file" "D11_insight\|D11: INSIGHT")
-    d12=$(extract_dim "$eval_file" "D12_info\|D12: INFORMATION")
 
     echo "${round_name},${round_date},${scenario},${overall},${verdict},${d1},${d2},${d3},${d4},${d5},${d6},${d7},${d8},${d9},${d10},${d11},${d12}" >> "${CSV}"
   done

@@ -125,7 +125,7 @@ steps:
       # markdown fences or a prose preamble. This is string trimming, not HTML
       # surgery — no regex parsing, no structural assumptions.
       python3 -c "
-      import sys
+      import re, sys
       with open('${raw_path}', 'r') as f:
           content = f.read()
 
@@ -136,13 +136,27 @@ steps:
           sys.exit(1)
 
       html = content[start:end]
-      if len(html) < 1000:
-          print(f'ERROR: HTML too small ({len(html)} bytes)', file=sys.stderr)
+
+      # --- Sanity gate: catch broken output before wasting eval time ---
+      errors = []
+      if len(html) < 5000:
+          errors.append(f'HTML too small ({len(html)} bytes, min 5000)')
+      if '</html>' not in html.lower():
+          errors.append('Missing </html> — output likely truncated')
+      if '<script' not in html.lower():
+          errors.append('No <script> tag — model failed to produce navigation JS')
+      if not re.search(r'\bslide\b(?!-)', html):
+          errors.append('No slide elements found (expected class matching \\\bslide\\\b)')
+      if errors:
+          print('SANITY CHECK FAILED:', file=sys.stderr)
+          for e in errors:
+              print(f'  - {e}', file=sys.stderr)
           sys.exit(1)
 
       with open('${output_path}', 'w') as f:
           f.write(html)
       print(f'Saved {len(html)} bytes of HTML')
+      print(f'Sanity check: </html> present, <script> present, slide elements found')
       "
 
       # Clean up raw file

@@ -162,8 +162,8 @@ steps:
     model_role: "vision"
     prompt: |
       You are evaluating the visual quality of a generated HTML presentation deck.
-      Your analysis feeds a judge who scores the deck on a 10-dimension rubric.
-      Three dimensions depend entirely on YOUR visual evidence -- the judge cannot
+      Your analysis feeds a judge who scores the deck on a 12-dimension rubric.
+      Four dimensions depend entirely on YOUR visual evidence -- the judge cannot
       see the slides, only your report. You are the judge's eyes.
 
       ## The Three Dimensions You Feed
@@ -210,6 +210,19 @@ steps:
       - Text that is readable without squinting
       - Clean rendering without visual glitches
 
+      ### D12: Information Design (10% of total score)
+      Is data displayed visually rather than as prose? The rubric criteria:
+      - Are comparisons shown as tables or matrices (not paragraphs)?
+      - Are key metrics displayed as stat cards or callout boxes (not inline text)?
+      - Do data-heavy slides use structured visual elements (grids, charts, tables)?
+      - Is the visual format appropriate for the data structure?
+
+      What to look for visually:
+      - Tables, stat cards, or card grids for structured data vs walls of prose
+      - Metrics displayed with visual emphasis (large numbers, color coding)
+      - Comparison data in side-by-side or matrix layouts
+      - Data slides that reward scanning vs slides that require reading
+
       ## Screenshot Context
 
       {{screenshot_result}}
@@ -226,6 +239,8 @@ steps:
          - Text density: is content scannable or are there walls of text?
          - Layout structure: what type of layout is this slide (title, two-column,
            card grid, full-text, data table, section divider, stat highlight)?
+         - Data display: is structured data (comparisons, metrics, lists) shown
+           visually (tables, stat cards, grids) or as prose paragraphs?
          - Whitespace: is there breathing room or is content cramped?
          - Color contrast: is text readable against the background?
          - Rendering: any overflow, clipping, broken elements, or CSS artifacts?
@@ -266,6 +281,15 @@ steps:
       Text readability: [readable at presentation distance / too small / overflow]
       CSS artifacts: [none / list specific issues with slide numbers]
       Summary: [2-3 sentences on rendering quality]
+
+      === D12 EVIDENCE: INFORMATION DESIGN ===
+      Data display assessment: [1-5]
+      Per-slide observations:
+      - Slide [N]: [table / stat card / card grid / prose / chart] -- [what data is being displayed and how]
+      - ...
+      Data-as-prose offenders: [slide numbers where structured data is displayed as paragraphs, or "none"]
+      Visual format appropriateness: [are comparisons in tables? metrics in stat cards? lists in grids?]
+      Summary: [2-3 sentences on information design effectiveness]
 
       === CROSS-CUTTING OBSERVATIONS ===
       Visual strengths: [top 2-3 with slide references]
@@ -365,6 +389,43 @@ steps:
 
       Produce your evaluation in the EXACT output format specified in the rubric's
       "Output Format" section. Do not add extra sections or change the format.
+
+      ## Machine-Readable Score Block (REQUIRED)
+
+      After your full evaluation, append a fenced YAML block with EXACTLY this
+      structure. This block is parsed by automated tooling -- format matters.
+
+      ```scores
+      overall_score: 4.1
+      verdict: PASS
+      dimensions:
+        D1_narrative: 4
+        D2_framework: 4
+        D3_fidelity: 5
+        D4_density: 4
+        D5_rhythm: 3
+        D6_audience: 5
+        D7_completeness: 4
+        D8_notes: 4
+        D9_structure: 4
+        D10_html: 4
+        D11_insight: 4
+        D12_infodesign: 3
+      nav_test:
+        has_script: true
+        nav_works: true
+        notes_toggle: true
+      ```
+
+      Rules for the scores block:
+      - Use the exact key names shown above (D1_narrative, D2_framework, etc.)
+      - overall_score is a float to one decimal place
+      - Each dimension score is an integer 1-5
+      - verdict is one of: PASS, MARGINAL, FAIL
+      - The nav_test section echoes navigation test results from the screenshot
+        step (look for NAV_RESULT in the visual analysis). If not available,
+        omit the nav_test section entirely.
+      - The fence marker is ```scores (not ```yaml)
 
       {{evaluation_inputs}}
 
