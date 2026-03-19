@@ -63,6 +63,9 @@ you get there is your choice.
    System font stack only.
 2. **Keyboard navigable** (Left/Right arrow keys at minimum; Home/End for first/last
    slide recommended) and **touch navigable** (swipe gesture with ~50px threshold).
+   This requires a `<script>` block — CSS alone cannot do it. Your HTML must contain
+   JavaScript that listens for `keydown` events and touch events to advance/retreat
+   slides, toggle speaker notes (S key), and manage which slide is visible.
 3. **Accessible.** `@media (prefers-reduced-motion: reduce)` query that disables
    animations, semantic HTML where appropriate, keyboard-focusable interactive elements.
 4. **First slide visible on load.** No blank screen, no loading state — the first
@@ -393,6 +396,84 @@ You work with any input. No structured format is required.
 - **A mix of the above.**
 
 You are the last mile and handle whatever shows up at your door.
+
+---
+
+## Navigation
+
+Your HTML must include a `<script>` block at the end of `<body>` that implements:
+
+1. **Slide engine** — only one slide visible at a time. All other slides are hidden
+   (`display: none`, `visibility: hidden`, `opacity: 0` + `pointer-events: none`, or
+   equivalent). Track the current slide index in a variable.
+2. **Keyboard handler** — `addEventListener('keydown', ...)`:
+   - `ArrowRight` / `ArrowDown` → next slide
+   - `ArrowLeft` / `ArrowUp` → previous slide
+   - `Home` → first slide, `End` → last slide
+   - `S` → toggle speaker notes visibility
+3. **Touch handler** — track `touchstart` / `touchend` X coordinates. Swipe left
+   (delta > 50px) → next slide. Swipe right → previous slide.
+4. **Slide transitions** — add `.active` class to the current slide so CSS entrance
+   animations trigger when a slide appears, not on page load.
+
+This is not optional. A deck without JavaScript navigation is a broken deck.
+
+Here is a minimal skeleton. Adapt the selectors and transitions to your design — but
+the structure must be present:
+
+```javascript
+<script>
+(function() {
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+  let notesVisible = false;
+
+  function goTo(i) {
+    if (i < 0 || i >= slides.length) return;
+    slides[current].classList.remove('active');
+    slides[current].style.display = 'none';
+    current = i;
+    slides[current].style.display = '';
+    // Force reflow so entrance animations replay
+    void slides[current].offsetWidth;
+    slides[current].classList.add('active');
+  }
+
+  // Initialize: hide all but first
+  slides.forEach((s, i) => {
+    if (i !== 0) s.style.display = 'none';
+    else s.classList.add('active');
+  });
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    switch(e.key) {
+      case 'ArrowRight': case 'ArrowDown': goTo(current + 1); break;
+      case 'ArrowLeft':  case 'ArrowUp':   goTo(current - 1); break;
+      case 'Home': goTo(0); break;
+      case 'End':  goTo(slides.length - 1); break;
+      case 's': case 'S':
+        notesVisible = !notesVisible;
+        document.querySelectorAll('.speaker-notes')
+          .forEach(n => n.style.display = notesVisible ? 'block' : 'none');
+        break;
+    }
+  });
+
+  // Touch
+  let touchX = 0;
+  document.addEventListener('touchstart', e => { touchX = e.changedTouches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 50) goTo(current + (dx < 0 ? 1 : -1));
+  });
+})();
+</script>
+```
+
+You may rename classes, change the transition approach, add URL hash tracking, add
+slide counters — but every deck you generate must contain a working `<script>` block
+that handles keyboard, touch, and speaker notes toggling.
 
 ---
 
