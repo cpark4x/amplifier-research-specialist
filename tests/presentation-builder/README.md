@@ -77,12 +77,9 @@ scenarios/*.md          Source material + parameters
         |
         v
 generate-decks.yaml     Delegates to presentation-builder specialist
-        |
+        |                (model produces complete HTML with CSS + JS + navigation)
         v
-fix-navigation.py       Deterministic HTML post-processor (nav, notes, print)
-        |
-        v
-outputs/*-output.html   Generated decks
+outputs/*-output.html   Generated decks (open directly in browser)
         |
         v
 screenshot-slides.py    Per-slide PNGs via headless Chromium

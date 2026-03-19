@@ -34,8 +34,8 @@ RENDER_WAIT = 2
 # Seconds to wait after replacing body content before screenshotting
 SWAP_WAIT = 0.5
 
-# JavaScript: detect slides using the same pattern as fix-navigation.py
-# (\bslide\b word boundary, excluding slides-container and slide-wrapper)
+# JavaScript: detect slides using \bslide\b word boundary match
+# (excludes slides-container and slide-wrapper to find actual slide elements)
 # Stores each slide's outerHTML in window.__slides for later retrieval.
 INIT_JS = r"""
 (() => {

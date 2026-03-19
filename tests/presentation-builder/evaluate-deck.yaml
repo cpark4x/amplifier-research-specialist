@@ -4,14 +4,14 @@
 #
 # Evaluates a single generated presentation deck against the evaluation rubric.
 # Reads the original scenario (for source material and expected parameters),
-# the rubric (10-dimension scoring criteria), and the generated deck, then
+# the rubric (12-dimension scoring criteria), and the generated deck, then
 # produces a structured evaluation with per-dimension scores and a verdict.
 #
 # Visual evaluation pipeline (steps 2-3):
 #   Screenshots of each slide are captured via agent-browser, then analyzed
 #   by the nano-banana VLM tool (Gemini vision) for visual quality assessment.
 #   The visual analysis is fed to the judge alongside the HTML source so that
-#   visual dimensions (D5, D4, D10) are scored from rendered output, not CSS.
+#   visual dimensions (D4, D5, D10, D12) are scored from rendered output, not CSS.
 #
 # Requirements:
 #   - foundation bundle (provides zen-architect agent)
