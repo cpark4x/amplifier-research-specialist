@@ -41,6 +41,17 @@
 # CHANGELOG
 # =============================================================================
 #
+# v3.0.0 (2026-03-19):
+#   - Expand rubric from 10 to 12 dimensions:
+#     * D11: Insight Density (10%) — "so what" factor, implication clarity
+#     * D12: Information Design (10%) — visual data display effectiveness
+#   - Reweight existing dimensions: D4 10%→8%, D5 10%→8%, D6 10%→12%,
+#     D7 10%→8%, D8 10%→7%
+#   - Switch to explanation-before-score evaluation method: judge writes
+#     analysis paragraph BEFORE committing to a numeric score per dimension
+#   - Update judge prompt with new critical evaluation rules for D11 and D12
+#   - Bump typical runtime estimate to 8-15 minutes (longer analysis output)
+#
 # v2.0.0 (2026-03-18):
 #   - Add visual evaluation pipeline via screenshot + nano-banana VLM
 #     * Step 2: Generate per-slide screenshots using agent-browser
@@ -58,8 +69,8 @@
 # =============================================================================
 
 name: "evaluate-deck"
-description: "Evaluate a generated presentation deck against the rubric using structured 10-dimension scoring with visual analysis"
-version: "2.0.0"
+description: "Evaluate a generated presentation deck against the rubric using structured 12-dimension scoring with visual analysis and explanation-before-score method"
+version: "3.0.0"
 tags: ["presentation-builder", "testing", "evaluation", "judge", "visual"]
 
 context:
@@ -306,9 +317,12 @@ steps:
 
       ## Your Task
 
-      Follow the rubric EXACTLY. For each of the 10 dimensions (D1-D10):
-      - Score on the 1-5 scale using the rubric's definitions
-      - Provide a one-line rationale grounded in specific evidence
+      Follow the rubric EXACTLY. For each of the 12 dimensions (D1-D12):
+      1. Write a 2-4 sentence ANALYSIS examining specific evidence
+      2. ONLY AFTER completing the analysis, commit to a score on the 1-5 scale
+
+      This order is mandatory. Write analysis FIRST, score SECOND. Do not
+      write the score on the same line as the analysis or before it.
 
       Apply the verdict thresholds as specified:
       - PASS: overall >= 4.0 AND no dimension below 3
@@ -327,12 +341,27 @@ steps:
       3. **Be specific in evidence.** Quote actual slide titles and content
          passages. "Generally good" is not acceptable.
       4. **Speaker notes matter.** Generic notes like "Discuss this slide" are
-         a failure for D8.
+         a failure for D8. The 4-field structure is a hard requirement.
       5. **Use the VISUAL ANALYSIS for visual dimensions.** For D4 (Density
-         Discipline), D5 (Visual Rhythm), and D10 (HTML Quality), incorporate
-         the visual analysis findings. The visual analysis tells you what the
-         slides ACTUALLY LOOK LIKE when rendered -- use this over CSS inference.
-         Reference specific visual observations in your rationale.
+         Discipline), D5 (Visual Rhythm), D10 (HTML Quality), and D12
+         (Information Design), incorporate the visual analysis findings. The
+         visual analysis tells you what the slides ACTUALLY LOOK LIKE when
+         rendered -- use this over CSS inference. Reference specific visual
+         observations in your rationale.
+      6. **Insight density is about interpretation, not repetition.** Showing
+         a number is not insight. Stating what the number means for the audience
+         is insight. Score D11 based on whether data slides include this
+         interpretive layer.
+      7. **Information design rewards visual thinking.** When source material
+         contains comparison data, the correct display is a table or matrix,
+         not prose. Score D12 based on whether the builder chose the right
+         visual format for the data structure.
+      8. **Write analysis BEFORE scoring.** For each dimension, complete your
+         analytical observations before committing to a number. This is the
+         evaluation method, not a suggestion.
+      9. **Weight the overall score correctly.** The 12 dimensions sum to 113%.
+         Divide the weighted sum by 1.13 to normalize to the 1-5 scale.
+         Calculate to one decimal place.
 
       Produce your evaluation in the EXACT output format specified in the rubric's
       "Output Format" section. Do not add extra sections or change the format.
