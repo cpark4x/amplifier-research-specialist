@@ -134,15 +134,22 @@ Choose the document structure for the requested format:
 > | **Inference-sourced** | "The evidence suggests ..." / "Analysis indicates ..." / "Patterns suggest ..." |
 > | **HIGH confidence** | May use definitive language: "X is", "X has achieved" |
 >
-> When in doubt about confidence level, **HEDGE**. Over-hedging is always
-> better than under-hedging. A hedged fact reads as careful; an unhedged
-> medium-confidence claim reads as sloppy.
+> When in doubt about confidence level, **HEDGE**. But match the hedge to
+> the source's rigor. Over-hedging a rigorous academic study ("reportedly"
+> for a peer-reviewed RCT) sounds dismissive and undermines the evidence;
+> under-hedging a vendor survey sounds sloppy. See tier-aware guidance below.
 >
 > WRONG (medium confidence, no hedge):
 >   "Anthropic focuses on building reliable AI models."
-> RIGHT (medium confidence, hedged):
+> RIGHT (medium confidence, tertiary source, hedged):
 >   "According to the company's public documentation, Anthropic focuses
 >    on building reliable AI models."
+> RIGHT (medium confidence, academic source, hedged):
+>   "A University of Pittsburgh study of 54 S&P 500 firms found that
+>    RTO mandates increased abnormal turnover by 13-14%."
+> WRONG (medium confidence, academic source, over-hedged):
+>   "It has been reportedly suggested that mandates may possibly increase
+>    turnover." — "reportedly" implies secondhand info, not a rigorous study
 >
 > WRONG (inference, stated as fact):
 >   "The regulatory approach prioritizes preparation over enforcement."
@@ -159,9 +166,14 @@ You MUST match your language to the confidence level and source type of each cla
   - ✗ Do NOT over-hedge: avoid "reportedly" or "may possibly" for high-confidence facts
 
 - **MEDIUM confidence** (finding-sourced, medium):
-  - ✓ MUST use hedging or source attribution in EVERY sentence:
-    "according to [source]", "reportedly", "appears to", "suggests that",
-    "[source] describes", "[source] states that"
+  - ✓ MUST use hedging or source attribution in EVERY sentence
+  - ✓ **Tier-aware hedging** — match language to source rigor:
+    - Primary/Secondary tier (peer-reviewed, academic working papers, institutional data):
+      "Research indicates...", "A study of [N] [subjects] found...",
+      "[University/institution] analysis shows...", "Based on [methodology]..."
+    - Tertiary tier (surveys, vendor reports, news reporting):
+      "According to [source]...", "survey data suggests...", "[source] states that..."
+  - ✗ Do NOT use "reportedly" for academic research — it implies secondhand information
   - ✗ Do NOT state as established fact: NEVER use bare "X is" without qualification
   - ✗ EVERY medium-confidence sentence needs a visible signal that it's sourced
 
@@ -186,7 +198,7 @@ You MUST match your language to the confidence level and source type of each cla
 | Audience | Voice | Vocabulary | Structural change |
 |---|---|---|---|
 | `technical decision-maker` | Third-person, authoritative | Jargon OK with brief context | Evidence → conclusion → action |
-| `executive` / `c-suite` / `executive stakeholders` | Third-person, outcome-focused | No jargon — translate everything | Bottom line first; evidence condensed |
+| `executive` / `c-suite` / `executive stakeholders` | Third-person, outcome-focused | No jargon — translate everything | Bottom line first; evidence condensed; close with scenario-based decision implications ("If you choose X → expect Y") — concrete expected outcomes per option, not conceptual reframes |
 | `engineer` / `technical` | Direct, precise | Full jargon freely | Implementation details matter; don't simplify |
 | `myself` / `me` | **First-person, direct** | Your own jargon level | Most important insight first; informal prose, personal notes register |
 | `general` / unspecified | → remap to `technical decision-maker` | | |
