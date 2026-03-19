@@ -47,7 +47,7 @@
 
 name: "generate-deck"
 description: "Generate a presentation deck from a test scenario using the presentation-builder specialist"
-version: "1.0.0"
+version: "2.0.0"
 tags: ["presentation-builder", "testing", "evaluation-harness"]
 
 context:

@@ -307,7 +307,7 @@ steps:
   # Uses zen-architect in REVIEW mode as the judge. The reasoning model class
   # is selected for rigorous critique -- evaluation demands careful comparison
   # of claims against source material, framework adherence checks, and
-  # nuanced scoring across 10 dimensions.
+  # nuanced scoring across 12 dimensions.
   #
   # The judge receives BOTH the HTML source (for structural/content dimensions)
   # AND the visual analysis from nano-banana (for visual dimensions D4, D5, D10).
