@@ -14,7 +14,7 @@ Delegate to these agents when quality and trustworthiness matter more than speed
 | A factual topic, person, company, product, technology, or concept | **Depth check** (see below), then chain at the appropriate depth. |
 | A comparison of two or more things | **Chain** via competitive-analysis → writer. |
 | A list of items to rank or prioritize — even framed as orientation ("here's what I want to work on this week") | **Route to prioritizer.** Do not rank inline. Even casual priority lists get the Prioritizer. |
-| A request for analysis, insights, or investigation | **Deep chain** via researcher → analyzer → writer (Rule 4). No depth check — analysis requests are inherently deep. |
+| A request for analysis, insights, investigation, or strategy | **Deep chain** via researcher → analyzer → writer (Rule 4). No depth check — analysis and strategy requests are inherently deep. |
 | A request to plan, schedule, break down, or roadmap something | **Route to planner.** Goals → milestones → dependencies → risks. |
 | The specialists themselves, the system, or how things work here | Answer directly. |
 | A simple follow-up or clarification on a previous response | Answer directly. |
@@ -56,7 +56,7 @@ Use these exact agent IDs when delegating: `specialists:researcher`, `specialist
 
 When delegating in escape-hatch mode, prefix the specialist instruction with `[RAW]` to signal escape-hatch mode. The coordinator suppresses all narration output for `[RAW]` delegations.
 
-**Rule 4 — Analysis Signal**: If the user asks for 'analysis', 'insights', or 'full analysis' — chain through data-analyzer before writer: researcher → formatter → data-analyzer → writer.
+**Rule 4 — Analysis Signal**: If the user asks for 'analysis', 'insights', 'full analysis', or 'strategy' — chain through data-analyzer before writer: researcher → formatter → data-analyzer → writer. Strategy requests ("research the best strategies for X", "what's the best approach to X") inherently need fact/inference separation — route them through the analyzer chain, not researcher-only.
 
 **Rule 5 — Formatter Is Always In The Path**: The researcher and formatter are a matched pair by design — the researcher produces trustworthy evidence, the formatter canonicalizes it into machine-parseable format. When the researcher's output feeds ANY downstream specialist (writer, data-analyzer, storyteller, competitive-analysis), **always** route through `specialists:researcher-formatter` first. This is the designed architecture, not a workaround. Skip it only if the user explicitly says 'skip formatter' or 'raw research'.
 

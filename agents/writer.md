@@ -120,6 +120,10 @@ Choose the document structure for the requested format:
 **Memo:** To/From/Date/Re header → Summary → Detail → Action items
 **Memo word budget:** 300–500 words total
 
+**Concrete examples over frameworks:** When the Stage 1 claim index contains concrete case studies (named companies, specific metrics, real-world outcomes), anchor each key point or strategy section to the strongest concrete example from the claim index. Practitioners trust stories over frameworks — a named example with a number is more persuasive than an abstract principle. If a section has both a framework and a concrete example, lead with the example and let the framework explain why it worked.
+
+**Cross-strategy synthesis:** When the document has 3+ strategies, key points, or recommendations, add a synthesis paragraph (in Implications, or as a "How These Connect" closing before Next Steps) showing how they form a system rather than an isolated list. Name the causal links: "X enables Y", "Y requires Z", "A and B are independent but both feed C." If no causal links exist, say so — "these are independent levers" is a valid synthesis. The reader should leave understanding whether to pursue them in sequence, in parallel, or selectively.
+
 ### Stage 4: Draft
 
 > **#1 RULE — HEDGE BY DEFAULT**
@@ -262,6 +266,10 @@ Before returning output:
    substantially rewrite duplicates to avoid redundancy. Verify the deduped
    document still covers all required points.
 7. **Specificity gate:** Read the conclusion, bottom line, or opening summary. Replace the subject's name with [SUBJECT]. If the sentence could apply unchanged to any comparable entity in this space, it fails — return to Stage 1, surface the most distinctive claim, revise to pull it through. The bottom line must not survive the substitution.
+8. **Medium-claim hedge scan:** Re-read every sentence that draws on a medium-confidence claim (S-numbers marked `medium` in the Stage 1 claim index). For each one, verify a visible hedge is present that matches the source tier:
+   - Primary/secondary medium → "research indicates", "a study found", "[institution] analysis shows"
+   - Tertiary medium → "according to [source]", "survey data suggests", "reportedly"
+   If any medium-confidence sentence lacks a tier-appropriate hedge, add one now. This catches under-hedging that the Stage 4 rules describe but don't enforce via explicit scan — especially when most sources share the same tier and contrast is not visually obvious.
 
 ---
 
