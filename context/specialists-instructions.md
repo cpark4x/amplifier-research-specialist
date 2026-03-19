@@ -76,6 +76,21 @@ When delegating in escape-hatch mode, prefix the specialist instruction with `[R
 
 The formatter is invisible to the user — do not mention it in narration unless the user asks about the pipeline. HANDOFF narration should say "✅ Research complete — normalizing format..." (not "passing to formatter").
 
+**Rule 9 — Two-Path Doctrine**: Rules 5–8 assume both formatter inputs are available. This is always true in **recipe pipelines** (context variables pass handoffs between steps). In **ad-hoc coordinator mode**, re-sending ~15K token research output to formatters defeats delegation's token-conservation purpose. Apply these paths:
+
+| Mode | Formatters | Why |
+|------|-----------|-----|
+| **Recipe pipeline** | Always run (Rules 5–8 in full) | Context variables handle dual inputs between steps. No token cost. |
+| **Ad-hoc coordinator** | Run only for intermediate steps | Re-sending large payloads to formatters at the terminal step wastes tokens. |
+
+**Ad-hoc coordinator rules:**
+- **Researcher-formatter (Rule 5):** Always run. It's single-input (research output only) and lightweight.
+- **Writer-formatter (Rule 6):** Skip when writer output goes directly to the user. The writer produces readable prose with inline `> *Sources:*` attributions — this is sufficient for human consumption. Run only when writer output feeds another specialist downstream.
+- **DA-formatter (Rule 8):** Always run when DA output feeds the writer. The writer needs canonical ANALYSIS OUTPUT to function correctly.
+- **Prioritizer-formatter (Rule 7):** Skip when output goes directly to the user. Run when output feeds the writer.
+
+**The test:** "Does the next consumer need canonical structured format?" If yes → formatter runs. If the next consumer is a human reading prose → formatter is optional.
+
 ## Available Specialists
 
 - **researcher** — Deep research with web search + fetch. Produces trustworthy evidence

@@ -2,6 +2,22 @@
 # CHANGELOG
 # =============================================================================
 #
+# v1.12.0 (2026-03-19):
+#   - FEATURE: Auto-retry on researcher truncation (#41)
+#     * ROOT CAUSE: 4/5 pipeline runs produce truncated metadata summary instead
+#       of full research. validate-research gate catches it but pipeline stops
+#       with GATE_FAIL — no recovery path.
+#     * FIX: Three-step approach:
+#       (1) validate-research is now a SOFT gate — outputs "PASS" or "RETRY"
+#           without exit 1.
+#       (2) New ensure-research step (researcher agent) reads validation result.
+#           On PASS: returns research verbatim (~30s overhead).
+#           On RETRY: runs fresh research from scratch (~15 min).
+#       (3) New validate-research-final HARD gate after retry — exit 1 if
+#           still truncated after second attempt.
+#     * RESULT: Pipeline auto-recovers from truncation. Two attempts before
+#       failing. ~30s overhead on successful first attempts.
+#
 # v1.11.0 (2026-03-19):
 #   - FIX: Removed smart-skip gates for DA-formatter and writer-formatter (#42)
 #     * ROOT CAUSE: Bash heredoc output included trailing whitespace/newlines
@@ -170,7 +186,7 @@
 
 name: "research-chain"
 description: "Full research pipeline with format normalization — Researcher → URL Resolution → Formatter → Data Analyzer → Writer → Writer Formatter → Save"
-version: "1.11.0"
+version: "1.12.0"
 tags: ["research", "analysis", "writing", "chain"]
 
 context:
@@ -204,6 +220,8 @@ steps:
     output: "research_output"
     timeout: 2700
 
+  # validate-research is now a SOFT gate — warns but does not fail.
+  # The ensure-research step handles retry when needed.
   - id: "validate-research"
     type: "bash"
     command: |
@@ -213,19 +231,75 @@ steps:
       __VALIDATE_EOF__
       _bytes=$(wc -c < "$_vr_tmp")
       _has_findings=$(grep -ci -E '(finding|source|confidence|claim|evidence)' "$_vr_tmp" || true)
+      rm -f "$_vr_tmp"
+      if [ "$_bytes" -lt 500 ] || [ "$_has_findings" -lt 3 ]; then
+        echo "RETRY: Research output is ${_bytes} bytes with ${_has_findings} evidence markers — likely truncated."
+      else
+        echo "PASS: Research output is ${_bytes} bytes with ${_has_findings} evidence markers."
+      fi
+    output: "research_validation"
+    timeout: 30
+
+  # Auto-retry: if research was truncated, re-run with fresh researcher session.
+  # On PASS, the researcher reads the validation and returns the original verbatim.
+  # On RETRY, the researcher ignores the truncated output and does fresh research.
+  # Cost: ~30s overhead on PASS runs (agent spinup + pass-through).
+  - id: "ensure-research"
+    agent: "specialists:researcher"
+    prompt: |
+      QUALITY GATE MODE — read the validation result below and follow the
+      matching instruction exactly.
+
+      Validation result: {{research_validation}}
+
+      --- IF the validation starts with "PASS" ---
+      The research output below passed quality checks. Return it EXACTLY as-is.
+      Do not modify, reformat, summarize, add to, or improve it in any way.
+      Your entire output must be a verbatim copy of the research output below,
+      character for character. Do not add any preamble or commentary.
+
+      --- IF the validation starts with "RETRY" ---
+      The previous research attempt was truncated. IGNORE the research output
+      below entirely — it is incomplete and unusable. Run FRESH research on
+      this question, following your full research pipeline from scratch:
+
+      Research question: {{research_question}}
+      Quality threshold: {{quality_threshold}}
+
+      Scope constraints (required — enforce in Stage 1):
+      - Decompose into no more than 5 sub-questions
+      - Cap your source queue at 15 URLs total across all sub-questions
+      - Run no more than 2 Quality Gate cycles before accepting remaining gaps
+      - Target a maximum of 3,000 words and 30 sourced claims in your final output
+
+      --- END INSTRUCTIONS ---
+
+      Previous research output:
+      {{research_output}}
+    output: "research_output"
+    timeout: 2700
+
+  # Final hard gate — catches a second truncation failure after retry.
+  - id: "validate-research-final"
+    type: "bash"
+    command: |
+      _vr_tmp=$(mktemp)
+      cat > "$_vr_tmp" <<'__VALIDATE_FINAL_EOF__'
+      {{research_output}}
+      __VALIDATE_FINAL_EOF__
+      _bytes=$(wc -c < "$_vr_tmp")
+      _has_findings=$(grep -ci -E '(finding|source|confidence|claim|evidence)' "$_vr_tmp" || true)
+      rm -f "$_vr_tmp"
       if [ "$_bytes" -lt 500 ]; then
-        echo "GATE_FAIL: Research output is only ${_bytes} bytes — likely a truncated metadata summary, not full research. Aborting pipeline."
-        rm -f "$_vr_tmp"
+        echo "GATE_FAIL: Research output is only ${_bytes} bytes after retry — aborting pipeline."
         exit 1
       elif [ "$_has_findings" -lt 3 ]; then
-        echo "GATE_FAIL: Research output has fewer than 3 evidence markers (findings/sources/confidence). Likely not substantive research. Aborting pipeline."
-        rm -f "$_vr_tmp"
+        echo "GATE_FAIL: Research output has fewer than 3 evidence markers after retry — aborting pipeline."
         exit 1
       else
         echo "GATE_PASS: Research output is ${_bytes} bytes with ${_has_findings} evidence markers."
-        rm -f "$_vr_tmp"
       fi
-    output: "research_validation"
+    output: "research_validation_final"
     timeout: 30
 
   - id: "resolve-urls"
