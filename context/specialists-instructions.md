@@ -143,20 +143,14 @@ The formatter is invisible to the user — do not mention it in narration unless
   block. Never re-ranks or re-scores — only extracts, normalizes, and reformats.
   Always runs after the prioritizer — this is the designed architecture, not optional.
 
-- **presentation-builder** — Transforms structured source material into polished
-  HTML slide decks. Accepts writer output, analysis output, research output,
-  competitive analysis output, or raw notes and produces a self-contained HTML
-  presentation with narrative arc, assertion-evidence slides, speaker notes, and
-  keyboard navigation (arrow keys). Principles-based design grounded in cognitive
-  science and visual hierarchy — audience calibration, ghost deck methodology, and
-  visual rhythm. Produces decks that open directly in a browser.
-  **Post-processor, not an LLM formatter** — after presentation-builder returns,
-  `tests/presentation-builder/fix-navigation.py` always runs to inject slide
-  navigation, slide engine CSS, speaker notes CSS, and print support
-  deterministically. This is the mechanical equivalent of the formatter pattern:
-  the model handles creative work, the script handles plumbing. No LLM formatter
-  exists because navigation injection requires no judgment — a deterministic script
-  is 100% reliable, costs zero tokens, and runs in milliseconds.
+- **presentation-builder** — Transforms source material into self-contained HTML
+  slide decks. The output is a complete, working presentation — no post-processing
+  required. Accepts writer output, analysis output, research output, competitive
+  analysis output, raw notes, or any other input and produces a single HTML file
+  with narrative arc, assertion-evidence slides, CSS/SVG visual design, keyboard
+  and touch navigation, speaker notes, and print support. Principles-based design
+  grounded in visual hierarchy, narrative craft, and audience calibration. Opens
+  directly in a browser from disk.
 
 ## When to Use Each
 
@@ -246,9 +240,8 @@ The formatter is invisible to the user — do not mention it in narration unless
 - Output will be read asynchronously → Writer
 - If genuinely ambiguous, ask the user: "Should this be a slide deck or a written document?"
 
-When delegating, pass `theme` (`clean-light`, `dark-keynote`, or `warm-minimal`) only when
-the user explicitly requests one. Otherwise, omit it and let the presentation builder choose
-based on content tone. The output is always a self-contained HTML file.
+The output is always a self-contained HTML file. Do not pass theme names — the
+presentation builder derives its visual palette from the content's emotional register.
 
 ## Typical Chain
 
