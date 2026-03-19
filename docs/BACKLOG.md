@@ -2,7 +2,7 @@
 
 **Purpose:** Strategic planning view for canvas-specialists — a library of best-in-class, single-domain AI specialist agents for knowledge worker and consumer scenarios  
 **Owner:** Chris Park  
-**Last Updated:** March 19, 2026 (v4.2)  
+**Last Updated:** March 19, 2026 (v5.0)  
 
 ---
 
@@ -14,7 +14,7 @@ See [**2026-03-05-world-class-roadmap.md**](plans/2026-03-05-world-class-roadmap
 
 ## Current Status Summary
 
-**11 epics tracked:** ✅ 5 complete, 🔄 1 in progress, ⏸️ 0 paused, 5 planned
+**11 epics tracked:** ✅ 6 complete, 🔄 1 in progress, ⏸️ 0 paused, 4 planned
 
 - ✅ Epic 01 — Researcher
 - ✅ Epic 02 — Writer
@@ -24,7 +24,7 @@ See [**2026-03-05-world-class-roadmap.md**](plans/2026-03-05-world-class-roadmap
 - 🆕 Epic 06 — Demo Generator
 - 🆕 Epic 07 — Presentation Builder
 - ✅ Epic 08 — Data Analyzer
-- 🆕 Epic 09 — Planner
+- ✅ Epic 09 — Planner
 - ✅ Epic 10 — Prioritizer
 - 🆕 Epic 11 — Platform Integrations
 
@@ -39,6 +39,8 @@ See [**2026-03-05-world-class-roadmap.md**](plans/2026-03-05-world-class-roadmap
 | Item | Epic | Owner | Completed | Notes |
 |------|------|-------|-----------|-------|
 | DA-formatter specialist (#34) | 08 | Chris | Mar 10, 2026 | `specialists/data-analyzer-formatter/index.md` — fifth formatter, 2-input, 4-stage pipeline, Option A traces_to. Rule 8 in coordinator. `format-analysis` step in research-chain v1.6.0. Spot test PASS. *(test log 2026-03-10-da-formatter-spot-test)* |
+| Writer: tier-aware hedging (#37) | 02 | Chris | Mar 18, 2026 | Shipped in commit `86197c6`. Over-hedging of strong evidence eliminated across all 3 test topics. **Partially validated 2026-03-19:** under-hedging inconsistent on tertiary-heavy topics (Wasm 5/10 vs AI coding 8/10). Enhancement: #39 (medium-claim self-check). *(test logs: 2026-03-18-rto-rerun-writer-fixes-37-38, 2026-03-19-writer-fixes-37-38-cross-topic-validation)* |
+| Writer: exec decision-support (#38) | 02 | Chris | Mar 18, 2026 | Shipped in commit `86197c6`. Scenario-based "If X → Expect Y" framing. **Fully validated 2026-03-19** across RTO, Wasm, AI coding topics. Decision-support 6→9/10 (+3.0). No further changes needed. *(test logs: 2026-03-18-rto-rerun-writer-fixes-37-38, 2026-03-19-writer-fixes-37-38-cross-topic-validation)* |
 | DA Format B hardening (#16) | 08 | Chris | Mar 10, 2026 | Conditional close. Added "Special handling — pure prose inputs" to Format B detection: sentence-by-sentence, min 3 findings/paragraph, compound-sentence splitting. Format B with labels validated. Pure prose (no labels) deferred. *(test log 2026-03-10-da-format-hardening)* |
 | DA code-fence prevention (#17) | 08 | Chris | Mar 10, 2026 | Stage 4 self-check added. ANALYSIS OUTPUT emitted as bare text, no code fences, on second test run. *(test log 2026-03-10-da-format-hardening)* |
 | Writer informal register compliance (#29) | 02 | Chris | Mar 10, 2026 | Closed via formatter architectural fix. Writer-formatter handles `audience=myself` failure mode (no structural blocks) — produces canonical Writer output block regardless. Two previous instruction-based fixes did not hold; formatter is the reliable catch. Validated clean pass. *(test log 2026-03-10-writer-informal-register-verification)* |
@@ -83,11 +85,14 @@ See [**2026-03-05-world-class-roadmap.md**](plans/2026-03-05-world-class-roadmap
 
 ### Immediate Next (This Sprint)
 
-Items ordered by impact. Ship these first — they fix the most-flagged quality gaps.
+Items ordered by impact. Ship these first — they fix the most-flagged quality gaps from the Mar 18–19 testing sprint.
 
 | # | Item | Epic | Owner | Effort | Impact | Why Now |
 |---|------|------|-------|--------|--------|---------|
-| 0 | ~~**Specialist output format compliance — architectural fix**~~ | 01/02 | Chris | — | — | **Partially shipped 2026-03-03.** Researcher-formatter specialist built — two-step approach normalizes any Researcher output to canonical RESEARCH OUTPUT block before DA/Writer. Researcher format compliance resolved architecturally. Writer structural blocks (WRITER METADATA / CITATIONS / CLAIMS TO VERIFY) remain aspirational — revisit when Amplifier provider supports structured output (PR #38 closed upstream as premature; orchestrator layer must propagate response_format first). |
+| 48 | **Coordinator routing: broaden analyzer trigger for strategy requests** | 01/02/08 | Chris | XS | H | **Biggest single quality lever (~0.5 pts).** Rule 4 triggers data-analyzer only on "analysis" or "insights." Strategy requests inherently need fact/inference separation but don't trigger the analyzer chain. One routing change. *(test log 2026-03-19-ai-first-team-collaboration)* |
+| 45 | **Coordinator: two-path doctrine for ad-hoc vs recipe execution** | 01/02 | Chris | S | H | **Architectural prerequisite for ad-hoc reliability.** Rules 5–8 (mandatory formatter gates) assume recipe execution. Writer-formatter broke in ad-hoc mode — two-input contract unsatisfiable outside recipes. Recipe path = formatters always; ad-hoc path = formatters optional. Blocks #44. *(test log 2026-03-19-retirement-research-specialists-vs-direct)* |
+| 41 | **Researcher: auto-retry on truncation (#35 escalation)** | 01 | Chris | S | H | **4/5 pipeline runs fail silently.** Researcher truncation confirmed systemic — produces conversational summary instead of canonical RESEARCH OUTPUT block. validate-research gate catches it but pipeline cannot self-serve without retry logic. *(test logs: 2026-03-18, 2026-03-19 — 4/5 runs)* |
+| 0 | ~~**Specialist output format compliance — architectural fix**~~ | 01/02 | Chris | — | — | **Partially shipped 2026-03-03.** Researcher-formatter specialist built — two-step approach normalizes any Researcher output to canonical RESEARCH OUTPUT block before DA/Writer. Writer structural blocks remain aspirational — revisit when Amplifier provider supports structured output. |
 
 
 
@@ -97,6 +102,8 @@ Ordered by priority tier then impact. Items marked *(consolidated)* absorbed dup
 
 **Priority 2 — Quality polish, moderate impact:**
 
+*Recommended ship order for open items: #49 (S/H, ~0.4 pts quality lever) → #39 (XS/M, closes #37 gap) → #51 (XS/M, quick win) → #52 (XS/M, quick win) → #46 (M/H, breadth for survey questions) → #50 (S/M) → #44 (S/M, depends on #45) → #43 (S/M) → #40 (S/M) → #42 (S/M, recipe bug)*
+
 | # | Item | Epic | Owner | Effort | Impact | Rationale |
 |---|------|------|-------|--------|--------|-----------|
 | ~~29~~ | ~~Writer: OUTPUT CONTRACT compliance for informal registers~~ | 02 | Chris | S | M | **Closed 2026-03-10 via formatter architectural fix.** Writer-formatter handles the informal register failure mode: produces `Parsed:`, `WRITER METADATA`, `CITATIONS`, `CLAIMS TO VERIFY` regardless of Writer output format. Two instruction-based fixes (`0508f95`, OUTPUT CONTRACT block) did not hold; formatter is the reliable architectural catch. Validated: `audience=myself` Writer output → writer-formatter → all structural blocks present, clean pass. *(test log 2026-03-10-writer-informal-register-verification)* |
@@ -105,20 +112,20 @@ Ordered by priority tier then impact. Items marked *(consolidated)* absorbed dup
 | ~~32~~ | ~~Coordinator routing: add Prioritizer trigger for priority list requests~~ | 10 | Chris | XS | M | **VALIDATED 2026-03-09.** Routing fix in `4d56283` confirmed working — coordinator routed automatically on message 1 with no prompting. Input order overridden (dark mode listed first, ranked last). Full chain completed cleanly. *(validated in test log 2026-03-09-routing-validation)* |
 | ~~33~~ | ~~Prioritizer-formatter specialist~~ | 10 | Chris | S | H | **Shipped 2026-03-10.** See Recently Completed. |
 | ~~22~~ | ~~Stabilize Researcher canonical output header/anchor (Stage 0 / "RESEARCH OUTPUT")~~ | 01 | Chris | — | — | **Promoted to Immediate Next and shipped 2026-03-06.** See Immediate Next #22 entry. |
-| 37 | Writer: hedging-to-source-tier mapping | 02 | Chris | S | H | **Shipped 2026-03-18; partially validated 2026-03-19.** Tier-aware hedging mapping implemented in `agents/writer.md` (commit `86197c6`). Over-hedging of strong evidence eliminated across all 3 test topics (RTO, Wasm, AI coding). Under-hedging of medium-confidence tertiary claims inconsistent — works well when tier contrast is visible (AI coding: 8/10) but drops when source base is mostly tertiary (Wasm: 5/10). Enhancement: add medium-claim self-check to Stage 5 (see #39). *(test logs: 2026-03-18-rto-rerun-writer-fixes-37-38, 2026-03-19-writer-fixes-37-38-cross-topic-validation)* |
-| 38 | Writer: decision-support template for executive audiences | 02 | Chris | S | M | **Shipped 2026-03-18; fully validated 2026-03-19.** Scenario-based decision implications added to executive register row in `agents/writer.md` (commit `86197c6`). Produces concrete "If X → expect Y" framing across all 3 test topics. No further changes needed. *(test logs: 2026-03-18-rto-rerun-writer-fixes-37-38, 2026-03-19-writer-fixes-37-38-cross-topic-validation)* |
+| ~~37~~ | ~~Writer: hedging-to-source-tier mapping~~ | 02 | Chris | S | H | **Shipped 2026-03-18; partially validated 2026-03-19.** Moved to Recently Completed. Enhancement: #39 (medium-claim self-check). |
+| ~~38~~ | ~~Writer: decision-support template for executive audiences~~ | 02 | Chris | S | M | **Shipped 2026-03-18; fully validated 2026-03-19.** Moved to Recently Completed. No further changes needed. |
 | 39 | Writer: add medium-claim self-check to Stage 5 | 02 | Chris | XS | M | Enhancement to #37. Before returning, writer should scan every medium-confidence claim to verify it has a visible hedge matching the source tier. Current spec explains the mapping but doesn't enforce a self-check scan. Addresses inconsistent under-hedging when source base is predominantly tertiary (Wasm validation: 5/10 hedging accuracy vs AI coding: 8/10). *(test log 2026-03-19-writer-fixes-37-38-cross-topic-validation)* |
 | 40 | Writer-formatter: upgrade Stage 3.5 to tier-aware hedging | 02 | Chris | S | M | Stage 3.5 currently applies "reportedly" uniformly to all medium-confidence unhedged claims regardless of source tier. Should differentiate: "research indicates" for primary/secondary medium, "according to [source]"/"reportedly" for tertiary medium. The formatter is the safety net — its hedging model should match the writer spec's tier-aware mapping. *(test log 2026-03-19-writer-fixes-37-38-cross-topic-validation)* |
-| 48 | Coordinator routing: broaden analyzer trigger for strategy requests | 01/02/08 | Chris | XS | H | Rule 4 triggers data-analyzer only on "analysis" or "insights." Strategy/research requests ("research the best strategies for X") inherently need fact/inference separation and cross-finding synthesis but don't trigger the analyzer chain. Broaden routing heuristic to include strategy-type requests. Biggest single quality lever in the 9+ gap analysis (~0.5 pts). *(test log 2026-03-19-ai-first-team-collaboration)* |
+| ~~48~~ | ~~Coordinator routing: broaden analyzer trigger for strategy requests~~ | 01/02/08 | Chris | XS | H | **Promoted to Immediate Next.** |
 | 49 | Researcher: iterative deepening for thin sub-questions | 01 | Chris | S | H | When evidence gaps are logged and a sub-question has coverage but lacks practitioner depth (e.g., "no primary sources on internal practices at AI-native companies"), automatically run a second targeted search round (engineering blogs, conference talks, internal practice accounts) before declaring done. Second-biggest quality lever (~0.4 pts). *(test log 2026-03-19-ai-first-team-collaboration)* |
 | 50 | Writer: audience-aware technical depth calibration | 02 | Chris | S | M | When audience is not "AI engineers" or "technical practitioners," the writer should translate mechanism-level details (token windows, compaction, sub-agent architectures) into outcome-level language. Strengthen audience calibration gate in writer spec — add a self-check: "Would this sentence make sense to someone who doesn't build AI systems?" (~0.3 pts). *(test log 2026-03-19-ai-first-team-collaboration)* |
 | 51 | Writer: prioritize concrete examples over frameworks in briefs | 02 | Chris | XS | M | When the source claim index contains concrete case studies (e.g., enterprise examples with specific metrics), the writer should weave them into strategy sections rather than leaving them in unused claims. Practitioners trust stories > frameworks. Add to Stage 3 structure: "For each strategy, identify the strongest concrete example from the claim index." (~0.2 pts). *(test log 2026-03-19-ai-first-team-collaboration)* |
 | 52 | Writer: cross-strategy synthesis for multi-point briefs | 02 | Chris | XS | M | When a brief has 3+ strategies/key points, add a synthesis paragraph (in Implications or a new Connections section) showing how they form a system, not just a list. E.g., "trust enables context sharing → enables orchestration → while coordination practices require people investment." Partly an analyzer gap (#48) and partly a writer instruction gap. (~0.1 pts). *(test log 2026-03-19-ai-first-team-collaboration)* |
-| 41 | Researcher: auto-retry on truncation (#35 escalation) | 01 | Chris | S | H | Promote from monitoring to active work. 4/5 pipeline runs show researcher truncation (conversational summary instead of canonical RESEARCH OUTPUT block). validate-research gate catches it correctly but without auto-retry the pipeline cannot self-serve. Implement retry logic: on GATE_FAIL, resume researcher session and request full structured output. *(test logs: 2026-03-18-rto-rerun-writer-fixes-37-38, 2026-03-19-writer-fixes-37-38-cross-topic-validation)* |
+| ~~41~~ | ~~Researcher: auto-retry on truncation (#35 escalation)~~ | 01 | Chris | S | H | **Promoted to Immediate Next.** |
 | 42 | Recipe engine: investigate conditional branching failure in research-chain v1.10.0 | 01 | Chris | S | M | Smart-skip gates (`check-analysis-format` → `passthrough-analysis` / `format-analysis`) failed — bash step output doesn't match condition syntax (likely trailing whitespace/newline). Both conditions failed, leaving `formatted_analysis` undefined. Wasm validation used linear recipe workaround. *(test log 2026-03-19-writer-fixes-37-38-cross-topic-validation)* |
 | 43 | Writer: add `decision-brief` format with 1,500–3,000 word budget | 02 | Chris | S | M | Current "brief" format has 250–400 word budget — impossible for comparative/survey research (13+ subjects). Writer correctly overrode budget in retirement test. Add `decision-brief` format: 1,500–3,000 words, structured for multi-subject comparison with tables. Alternative: make word budgets per-subject (brief = 250–400 × N subjects, capped at 3,000). *(test log 2026-03-19-retirement-research-specialists-vs-direct)* |
 | 44 | Writer-formatter: graceful degradation when source material unavailable | 02 | Chris | S | M | Writer-formatter broke in ad-hoc mode — requested original RESEARCH OUTPUT as second input, which the coordinator couldn't re-send (~15K tokens). Formatter should degrade gracefully: if source material not provided, format what you have (extract claims from writer's inline `> *Sources: S1, S2*` attributions, produce partial CITATIONS block, skip S-numbered extraction). Don't block the pipeline. *(test log 2026-03-19-retirement-research-specialists-vs-direct)* |
-| 45 | Coordinator: two-path doctrine for ad-hoc vs recipe execution | 01/02 | Chris | S | H | Rules 5–8 (mandatory formatter gates) assume recipe execution where context variables pass dual inputs. In ad-hoc coordinator mode, re-sending ~15K token research output to formatters defeats delegation's token-conservation purpose. Add doctrine: **recipe path** = formatters always (context variables handle handoffs); **ad-hoc path** = formatters optional for human-terminal flows (writer output goes directly to user). Expands #36 lever 5 from "skip-formatters mode" to a first-class coordinator routing concept. *(test log 2026-03-19-retirement-research-specialists-vs-direct)* |
+| ~~45~~ | ~~Coordinator: two-path doctrine for ad-hoc vs recipe execution~~ | 01/02 | Chris | S | H | **Promoted to Immediate Next.** |
 | 46 | Researcher: add `research_mode: breadth` for survey-type questions | 01 | Chris | M | H | Researcher's structured methodology (corroboration requirements, quality gates) prioritizes trustworthiness over breadth. For survey questions ("best places to retire"), breadth matters as much as depth. Direct approach covered 15 destinations vs researcher's 13 because it wasn't constrained by "2+ independent sources per claim." Breadth mode: wider net, lighter corroboration (1 credible source per claim, flag as medium confidence), relaxed quality gate. *(test log 2026-03-19-retirement-research-specialists-vs-direct)* |
 
 **Priority 3 — Important but not urgent:**
@@ -173,8 +180,7 @@ Items merged during prioritization pass (2026-03-06):
 **Epic 06 — Demo Generator Specialist:**
 - Demo generator — reverse-engineers a persuasive arc from a product; identifies wow moments, sequences for impact, generates script and talking points
 
-**Epic 09 — Planner Specialist:**
-- Planner specialist — transforms goals and context into structured plans: milestones, dependencies, timelines, risk flags
+**Epic 09 — Planner Specialist:** ✅ *Shipped 2026-03-13. Planner V1 built (75 lines, lightweight-first). Remaining: quality_threshold:high validation, pipeline integration testing.*
 
 **Epic 10 — Prioritizer Specialist:**
 - Prioritizer specialist — takes a list of items and context, applies a prioritization framework (impact/effort, MoSCoW, RICE, etc.), returns a ranked, justified output
@@ -240,7 +246,7 @@ Synthesis Writer → cross-ecosystem comparative brief
 | 06 — Demo Generator | — | Full specialist implementation | 0% |
 | 07 — Presentation Builder | — | Full specialist implementation | 0% |
 | 08 — Data Analyzer | 4-stage pipeline, AnalysisOutput schema, Writer analysis-output integration, 6 E2E tests | Format B detection hardening, code-fence prevention | 100% |
-| 09 — Planner | — | Full specialist implementation | 0% |
+| 09 — Planner | Planner V1 — structured plans with milestones, dependencies, timelines, risk flags (75 lines, lightweight-first) | quality_threshold:high validation, pipeline integration testing | ~75% |
 | 10 — Prioritizer | Prioritizer V1 — 4-stage pipeline, PrioritizerOutput schema, impact-effort + MoSCoW + RICE + weighted scoring, prioritizer-formatter specialist | quality_threshold:high validation, pipeline integration testing | 95% |
 | 11 — Platform Integrations | — | LangChain wrapper, rendering integrations | 0% |
 
@@ -282,6 +288,7 @@ Synthesis Writer → cross-ecosystem comparative brief
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v5.0 | Mar 19, 2026 | Chris | **Project reset.** Moved #37 (tier-aware hedging, shipped Mar 18, partially validated) and #38 (exec decision-support, shipped Mar 18, fully validated) to Recently Completed. Promoted #48 (XS/H, coordinator analyzer trigger), #45 (S/H, two-path doctrine), #41 (S/H, researcher auto-retry) to Immediate Next based on test evidence. Fixed Epic 09 (Planner) status: 🆕→✅ in summary, 0%→~75% in completion table, Medium-term entry updated. Fixed epic counts: 6 complete, 1 in progress, 4 planned. Added recommended ship order for remaining 10 open P2 items. Updated SCORECARD.md v2.5: Chain Reliability 8→7 (ad-hoc break, conditional branching bug, truncation 4/5), Overall 8→7. |
 | v4.2 | Mar 19, 2026 | Chris | AI-first team collaboration research chain test (researcher → formatter → writer → writer-formatter). Scored 7.5/10; post-run "9+ gap analysis" identified 5 specific improvements mapped to responsible specialists. Added #48 (coordinator analyzer trigger broadening), #49 (researcher iterative deepening), #50 (writer audience-aware depth calibration), #51 (writer concrete examples over frameworks), #52 (writer cross-strategy synthesis). Test log: 2026-03-19-ai-first-team-collaboration. |
 | v4.1 | Mar 19, 2026 | Chris | Retirement A/B test (specialists 4-agent chain vs direct web-research). Writer-formatter broke in ad-hoc mode — two-input contract not satisfiable when coordinator can't re-send ~15K token research output. Added #43 (decision-brief format), #44 (writer-formatter graceful degradation), #45 (two-path doctrine for coordinator), #46 (researcher breadth mode), #47 (researcher contrarian sweep). Updated #36 with lever 5 urgency elevation. Test log: 2026-03-19-retirement-research-specialists-vs-direct. |
 | v4.0 | Mar 19, 2026 | Chris | Cross-topic validation of #37/#38 across Wasm and AI coding topics. #38 fully validated; #37 partially validated (over-hedging fixed, under-hedging inconsistent on tertiary-heavy sources). Added #39 (writer medium-claim self-check), #40 (writer-formatter tier-aware Stage 3.5), #41 (researcher auto-retry escalation from #35), #42 (recipe conditional branching bug). Updated #37/#38 status with validation results. Two test logs added. |
