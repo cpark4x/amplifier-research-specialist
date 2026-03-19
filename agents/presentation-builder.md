@@ -199,6 +199,10 @@ exact structure:
 - **Confidence** — source tier and corroboration level when relevant ("single
   secondary source — worth verifying", "three primary sources corroborate").
 
+In the HTML, render each field label with `<strong>` tags using these exact names:
+`<strong>Key point:</strong>`, `<strong>If challenged:</strong>`,
+`<strong>Transition:</strong>`, `<strong>Confidence:</strong>`.
+
 Here is what good speaker notes look like:
 
 ```
@@ -356,6 +360,12 @@ Implementation guidance:
 - Use CSS transitions with stagger delays for entrance effects
 - Trigger animations on `.active` class so they play when the slide appears, not
   on page load
+- **Set initial animation state in CSS, not inline styles.** Use the keyframe's
+  `from` state or a class rule to set `opacity: 0` and `transform` — never
+  `style="opacity:0"` on the HTML element. Example: if a card fades up,
+  define `.card { opacity: 0; transform: translateY(8px); }` in CSS and let
+  `.slide.active .card { animation: fadeUp 0.6s ease forwards; }` handle the
+  reveal.
 
 Constraints:
 - **Every animation must earn its place** — if you can't explain what it
@@ -3013,10 +3023,10 @@ content at hand.
    `<!-- CONTENT MAP ... -->` comment blocks are present at the end of `<body>`.
 10. **Touch navigation.** `touchstart`/`touchend` handlers are present alongside the
     keyboard handler. A deck without touch nav is broken on mobile devices.
-11. **No inline styles in markup.** No `style=""` attributes on HTML elements in the
-    body. Visual state is controlled through CSS classes and JS-applied inline styles
-    for navigation only (`.style.display = ...`). No `style="color: red"` or similar
-    decorative inline attributes.
+11. **No inline styles in markup.** No `style=""` attributes on HTML elements. This
+    includes `style="opacity:0"` for animation initial state — use a CSS rule instead
+    (see Animation as Storytelling). The only permitted inline styles are JS-applied
+    navigation state (`.style.display = ...` in the navigation engine).
 12. **End-of-deck rhythm.** Check the last 3 slides specifically — are any two
     consecutive slides heavy? The end of a deck is where rhythm violations cluster.
     If the final content slide is heavy, add a light closing slide.
