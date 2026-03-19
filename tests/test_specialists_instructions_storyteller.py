@@ -7,14 +7,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
-INSTRUCTIONS_PATH = (
-    Path(__file__).parent.parent / "context" / "specialists-instructions.md"
+COORDINATOR_ROUTING_PATH = (
+    Path(__file__).parent.parent / "context" / "coordinator-routing.md"
 )
 
 
 def load_content() -> str:
-    assert INSTRUCTIONS_PATH.exists(), f"File not found: {INSTRUCTIONS_PATH}"
-    return INSTRUCTIONS_PATH.read_text(encoding="utf-8")
+    assert COORDINATOR_ROUTING_PATH.exists(), (
+        f"File not found: {COORDINATOR_ROUTING_PATH}"
+    )
+    return COORDINATOR_ROUTING_PATH.read_text(encoding="utf-8")
 
 
 # ---------------------------------------------------------------------------
@@ -86,14 +88,14 @@ def test_delegate_storyteller_mentions_moved_or_persuaded() -> None:
 
 
 def test_delegate_storyteller_appears_after_competitive_analysis_block() -> None:
-    """Delegate-to-storyteller block must appear after the competitive-analysis block."""
+    """Storyteller entry must appear after the competitive-analysis entry."""
     content = load_content()
-    ca_pos = content.find("**Delegate to `specialists:competitive-analysis`")
-    st_pos = content.find("**Delegate to `specialists:storyteller`")
-    assert ca_pos != -1, "competitive-analysis delegate block must exist"
-    assert st_pos != -1, "storyteller delegate block must exist"
+    ca_pos = content.find("**competitive-analysis**")
+    st_pos = content.find("**storyteller**")
+    assert ca_pos != -1, "competitive-analysis entry must exist"
+    assert st_pos != -1, "storyteller entry must exist"
     assert st_pos > ca_pos, (
-        "storyteller delegate block must appear after competitive-analysis block"
+        "storyteller entry must appear after competitive-analysis entry"
     )
 
 

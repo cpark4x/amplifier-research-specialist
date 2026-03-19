@@ -9,14 +9,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
-INSTRUCTIONS_PATH = (
-    Path(__file__).parent.parent / "context" / "specialists-instructions.md"
+COORDINATOR_ROUTING_PATH = (
+    Path(__file__).parent.parent / "context" / "coordinator-routing.md"
 )
 
 
 def load_content() -> str:
-    assert INSTRUCTIONS_PATH.exists(), f"File not found: {INSTRUCTIONS_PATH}"
-    return INSTRUCTIONS_PATH.read_text(encoding="utf-8")
+    assert COORDINATOR_ROUTING_PATH.exists(), (
+        f"File not found: {COORDINATOR_ROUTING_PATH}"
+    )
+    return COORDINATOR_ROUTING_PATH.read_text(encoding="utf-8")
 
 
 def load_section() -> str:

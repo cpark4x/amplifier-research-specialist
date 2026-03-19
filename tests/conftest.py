@@ -2,6 +2,7 @@
 
 Centralizes agent file paths so a rename only requires updating this file.
 """
+
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).parent.parent
@@ -23,4 +24,4 @@ PLANNER = AGENTS_DIR / "planner.md"
 
 # Other key files
 BEHAVIORS_YAML = REPO_ROOT / "behaviors" / "specialists.yaml"
-SPECIALISTS_INSTRUCTIONS = REPO_ROOT / "context" / "specialists-instructions.md"
+COORDINATOR_ROUTING = REPO_ROOT / "context" / "coordinator-routing.md"
