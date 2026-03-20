@@ -1,0 +1,133 @@
+name: "quality-eval"
+description: "Main competitive evaluation orchestrator — loads topics, runs the iteration sub-recipe for each, aggregates cross-topic results, and saves a gap report."
+version: "1.0.0"
+tags: [evaluation, competitive, quality, harness, benchmarking]
+
+context:
+  evaluation_mode: "competitive"   # competitive (vs competitors) or rubric (vs criteria)
+  target_score: 8.0                # target aggregate score (used by Phase 2 loop)
+
+steps:
+  # ===========================================================================
+  # STEP 1: Load competitive-eval topics from test-topics.yaml
+  # ===========================================================================
+  - id: "load-topics"
+    type: "bash"
+    command: |
+      python3 -c "
+      import json, yaml
+      with open('specs/evaluation/test-topics.yaml') as f:
+          data = yaml.safe_load(f)
+      topics = [t for t in data.get('topics', []) if t.get('profile') == 'competitive-eval']
+      print(json.dumps(topics))
+      "
+    output: "topics"
+    parse_json: true
+    timeout: 10
+
+  # ===========================================================================
+  # STEP 2: Run quality-eval-iteration for each topic (sequential)
+  # ===========================================================================
+  - id: "run-topic-iterations"
+    foreach: "{{topics}}"
+    as: "topic"
+    collect: "topic_results"
+    type: "recipe"
+    recipe: "recipes/quality-eval-iteration.yaml"
+    context:
+      research_question: "{{topic.query}}"
+      topic_id: "{{topic.id}}"
+    output: "topic_iteration_result"
+    timeout: 5400
+    on_error: "continue"
+    max_iterations: 10
+
+  # ===========================================================================
+  # STEP 3: Aggregate results across topics — triangulate structural gaps
+  # ===========================================================================
+  - id: "aggregate-results"
+    agent: "self"
+    prompt: |
+      CROSS-TOPIC AGGREGATOR — you are a rigorous quality analyst synthesizing
+      evaluation results across multiple research topics.
+
+      Evaluation mode: {{evaluation_mode}}
+      Target score: {{target_score}}
+
+      =====================================================================
+      PER-TOPIC EVALUATION RESULTS:
+      {{topic_results}}
+      =====================================================================
+
+      Your task: triangulate quality gaps across all topics to distinguish
+      structural weaknesses from topic-specific noise.
+
+      TRIANGULATION RULES:
+      - STRUCTURAL gap: appears in 2 or more topics — these are pipeline weaknesses
+        that must be fixed (they will recur regardless of topic)
+      - TOPIC NOISE: appears in only 1 topic — may be topic-specific difficulty,
+        not a pipeline defect (investigate before acting)
+
+      For each identified gap dimension:
+        1. Count how many topics show this gap
+        2. Classify: STRUCTURAL (2+/N topics) or TOPIC NOISE (1/N topics)
+        3. For structural gaps, rank severity: CRITICAL / MAJOR / MINOR
+        4. Cite specific evidence from the per-topic evaluations
+
+      SCORING:
+      - Compute the pipeline average score across all topics (average of per-topic pipeline scores)
+      - Compute the best competitor average score across all topics
+      - Compute delta (pipeline avg − best competitor avg)
+      - Compute gap to target: {{target_score}} − pipeline avg
+
+      Produce a structured QUALITY EVALUATION GAP REPORT with these sections:
+
+      ## OVERALL SCORES
+      A table: Topic | Pipeline Score | Best Competitor Score | Delta
+
+      ## STRUCTURAL GAPS (2+ topics)
+      For each structural gap:
+        - Dimension: [name]
+        - Severity: CRITICAL / MAJOR / MINOR
+        - Topics affected: [list]
+        - Evidence: [specific quotes/paraphrases from evaluations]
+        - Root cause hypothesis: [concise hypothesis]
+
+      ## TOPIC NOISE (1 topic only)
+      For each single-topic gap:
+        - Dimension: [name]
+        - Topic: [which topic]
+        - Evidence: [brief note]
+        - Verdict: likely noise OR warrants investigation
+
+      ## PIPELINE STRENGTHS
+      Dimensions where the pipeline consistently outperforms competitors, with evidence.
+
+      ## RECOMMENDED ACTIONS
+      Prioritized by impact (CRITICAL structural gaps first):
+        1. [Action] — addresses [gap] — expected impact: [high/medium/low]
+        2. ...
+
+      ## SUMMARY
+      3–4 sentences: overall pipeline quality position, highest-priority structural
+      weakness, gap to target score of {{target_score}}, and single recommended
+      first action.
+    output: "gap_report"
+    timeout: 1800
+
+  # ===========================================================================
+  # STEP 4: Save the gap report to specs/evaluation/reports/
+  # ===========================================================================
+  - id: "save-gap-report"
+    agent: "foundation:file-ops"
+    prompt: |
+      Save the following quality evaluation gap report to disk.
+
+      File path: specs/evaluation/reports/quality-eval-report.md
+      Create the specs/evaluation/reports/ directory if it does not exist.
+      Report the full file path you saved to.
+
+      Content to save:
+      {{gap_report}}
+    output: "report_path"
+    timeout: 300
