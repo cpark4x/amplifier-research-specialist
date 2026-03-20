@@ -229,11 +229,43 @@ steps:
         output: "check_result"
         timeout: 60
 
-      # --- Log Round: placeholder (Task 10) ---
+      # --- Log Round: append structured entry to quality-loop-log.yaml ---
       - id: "log-round"
         type: "bash"
         command: |
-          echo "placeholder" >> specs/evaluation/reports/quality-loop-log.yaml
+          mkdir -p specs/evaluation/reports
+
+          cat <<'__DIAG__' > /tmp/quality-loop-diag-extract.txt
+          {{diagnosis}}
+          __DIAG__
+
+          cat <<'__FIX__' > /tmp/quality-loop-fix-extract.txt
+          {{fix_result}}
+          __FIX__
+
+          # Extract fields from diagnosis and check_result
+          gap_name=$(grep -oP 'gap_name:\s*\K.*' /tmp/quality-loop-diag-extract.txt | head -1 || echo "unknown")
+          target_file=$(grep -oP 'target_file:\s*\K.*' /tmp/quality-loop-diag-extract.txt | head -1 || echo "unknown")
+          edit_plan=$(grep -oP 'edit_plan:\s*\K.*' /tmp/quality-loop-diag-extract.txt | head -1 || echo "unknown")
+          chosen_because=$(grep -oP 'chosen_because:\s*\K.*' /tmp/quality-loop-diag-extract.txt | head -1 || echo "unknown")
+
+          # Write the round log entry (append-only)
+          cat >> specs/evaluation/reports/quality-loop-log.yaml <<ENTRY
+          ---
+          round: {{_loop_iteration}}
+          gap: "${gap_name}"
+          candidates: "see diagnosis output for full list"
+          chosen_because: "${chosen_because}"
+          target: "${target_file}"
+          edit_plan: "${edit_plan}"
+          commit: "{{check_result.fix_commit}}"
+          score_before: {{check_result.score_before}}
+          score_after: {{check_result.score_after}}
+          decision: "{{check_result.decision}}"
+          plateau_counter: {{check_result.plateau_counter}}
+          ENTRY
+
+          echo "Round {{_loop_iteration}} logged to specs/evaluation/reports/quality-loop-log.yaml"
         output: "log_result"
         timeout: 30
 
@@ -243,6 +275,33 @@ steps:
   - id: "termination-summary"
     type: "bash"
     command: |
-      echo "Quality loop terminated. Final score: {{current_score}}, Target: {{target_score}}"
+      echo "============================================================="
+      echo "QUALITY LOOP TERMINATED"
+      echo "============================================================="
+      echo ""
+      echo "Final score:       {{current_score}}"
+      echo "Target score:      {{target_score}}"
+      echo "Plateau counter:   {{plateau_counter}}"
+      echo "Converged:         {{converged}}"
+      echo ""
+
+      # Determine exit reason
+      if [ "{{converged}}" = "true" ]; then
+        echo "Exit reason: CONVERGENCE — score did not improve for 2 consecutive rounds"
+      elif python3 -c "exit(0 if float('{{current_score}}') >= float('{{target_score}}') else 1)" 2>/dev/null; then
+        echo "Exit reason: TARGET REACHED — score >= target"
+      else
+        echo "Exit reason: MAX ITERATIONS — reached 5 iteration cap"
+      fi
+
+      echo ""
+      echo "Round-by-round log:"
+      echo "-------------------------------------------------------------"
+      if [ -f specs/evaluation/reports/quality-loop-log.yaml ]; then
+        cat specs/evaluation/reports/quality-loop-log.yaml
+      else
+        echo "(no rounds logged)"
+      fi
+      echo "-------------------------------------------------------------"
     output: "summary"
     timeout: 30
