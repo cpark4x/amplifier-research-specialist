@@ -1,6 +1,5 @@
 # Score history for eval-harness runs.
 # Each entry is appended by the eval-harness recipe's save-scores step.
-[]
 - topic_id: well-documented
   timestamp: "2026-03-14T08:58:51Z"
   fact_checker_score: 10.00
