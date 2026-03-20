@@ -407,6 +407,22 @@ Choose the right chart type for the story:
 Every chart gets a **one-line annotation** telling the audience what to conclude.
 A chart without an annotation is a chart the audience will misread.
 
+This applies to **all data slides**, not just charts. Any slide that presents a
+number, metric, or finding must state what it means — the implication, not just
+the fact. "Revenue: $45.2B" is data. "A $45.2B market growing at 14.8% signals
+a window for entry before consolidation" is insight. If a slide shows data without
+stating its "so what," add the "so what."
+
+Match the visual format to the data structure:
+
+- **A vs B vs C** (comparison): table or matrix, not prose paragraphs
+- **Key metric + context**: stat card with large number, not a bullet point
+- **Before → After**: split layout with visual contrast
+- **List of items (>4)**: card grid or icon grid, not a long bullet list
+
+If you're writing a sentence that contains three or more numbers, that data
+probably wants to be a table or card layout instead of prose.
+
 ---
 
 ## Input Flexibility
