@@ -117,11 +117,12 @@ def test_context_topic_id_default_empty() -> None:
 
 
 def test_has_required_step_ids() -> None:
-    """Steps must include: load-competitors, run-pipeline, capture-pipeline-output, run-competitors, evaluate."""
+    """Steps must include: load-competitors, mark-pipeline-start, run-pipeline, capture-pipeline-output, run-competitors, evaluate."""
     recipe = load_recipe()
     step_ids = [s["id"] for s in recipe.get("steps", [])]
     required = {
         "load-competitors",
+        "mark-pipeline-start",
         "run-pipeline",
         "capture-pipeline-output",
         "run-competitors",
@@ -171,6 +172,17 @@ def test_load_competitors_before_run_competitors() -> None:
     )
 
 
+def test_mark_pipeline_start_before_run_pipeline() -> None:
+    """mark-pipeline-start must come before run-pipeline."""
+    recipe = load_recipe()
+    mark_idx = _step_index(recipe, "mark-pipeline-start")
+    pipeline_idx = _step_index(recipe, "run-pipeline")
+    assert mark_idx < pipeline_idx, (
+        f"mark-pipeline-start (index {mark_idx}) must come before "
+        f"run-pipeline (index {pipeline_idx})"
+    )
+
+
 def test_run_pipeline_before_evaluate() -> None:
     """run-pipeline must come before evaluate."""
     recipe = load_recipe()
@@ -201,6 +213,38 @@ def test_capture_pipeline_output_between_run_pipeline_and_evaluate() -> None:
     assert pipeline_idx < capture_idx < eval_idx, (
         f"capture-pipeline-output (index {capture_idx}) must be between "
         f"run-pipeline (index {pipeline_idx}) and evaluate (index {eval_idx})"
+    )
+
+
+# ---------------------------------------------------------------------------
+# mark-pipeline-start step
+# ---------------------------------------------------------------------------
+
+
+def test_mark_pipeline_start_is_bash_type() -> None:
+    """mark-pipeline-start must be type: bash."""
+    recipe = load_recipe()
+    step = _get_step(recipe, "mark-pipeline-start")
+    assert step.get("type") == "bash", (
+        f"mark-pipeline-start must be type='bash', got {step.get('type')!r}"
+    )
+
+
+def test_mark_pipeline_start_has_output() -> None:
+    """mark-pipeline-start must declare an output variable."""
+    recipe = load_recipe()
+    step = _get_step(recipe, "mark-pipeline-start")
+    assert "output" in step, "mark-pipeline-start must have an 'output' declaration"
+
+
+def test_mark_pipeline_start_records_marker() -> None:
+    """mark-pipeline-start command must create a marker (touch or timestamp)."""
+    recipe = load_recipe()
+    step = _get_step(recipe, "mark-pipeline-start")
+    command = step.get("command", "")
+    # Must either touch a marker file or record a timestamp
+    assert "touch" in command or "date" in command or "epoch" in command.lower(), (
+        "mark-pipeline-start must create a marker file (touch) or record a timestamp (date)"
     )
 
 
@@ -259,24 +303,21 @@ def test_load_competitors_timeout() -> None:
 
 
 def test_run_pipeline_is_recipe_type() -> None:
-    """run-pipeline must delegate to agent 'self' and reference research-chain in prompt."""
+    """run-pipeline must delegate to agent 'self'."""
     recipe = load_recipe()
     step = _get_step(recipe, "run-pipeline")
     assert step.get("agent") == "self", (
         f"run-pipeline must use agent='self', got {step.get('agent')!r}"
     )
-    assert "research-chain" in step.get("prompt", ""), (
-        "run-pipeline prompt must reference 'research-chain'"
-    )
 
 
-def test_run_pipeline_references_research_chain() -> None:
-    """run-pipeline prompt must reference research-chain.yaml."""
+def test_run_pipeline_references_specialists_researcher() -> None:
+    """run-pipeline prompt must reference 'specialists:researcher' for direct chain orchestration."""
     recipe = load_recipe()
     step = _get_step(recipe, "run-pipeline")
     prompt = step.get("prompt", "")
-    assert "research-chain" in prompt, (
-        f"run-pipeline prompt must reference 'research-chain', got {prompt!r}"
+    assert "specialists:researcher" in prompt, (
+        f"run-pipeline prompt must reference 'specialists:researcher', got {prompt!r}"
     )
 
 
@@ -331,6 +372,24 @@ def test_capture_pipeline_output_handles_missing_file() -> None:
     command = step.get("command", "")
     assert "PIPELINE_ERROR" in command, (
         "capture-pipeline-output must output 'PIPELINE_ERROR' when no file is found"
+    )
+
+
+def test_capture_pipeline_output_detects_stale_output() -> None:
+    """capture-pipeline-output must detect stale output using the pipeline start marker."""
+    recipe = load_recipe()
+    step = _get_step(recipe, "capture-pipeline-output")
+    command = step.get("command", "")
+    # Must reference the marker output from mark-pipeline-start
+    mark_step = _get_step(recipe, "mark-pipeline-start")
+    marker_output_var = mark_step.get("output", "")
+    assert marker_output_var in command, (
+        f"capture-pipeline-output must reference the mark-pipeline-start output "
+        f"variable '{{{{ {marker_output_var} }}}}' to detect stale files, "
+        f"but it was not found in the command"
+    )
+    assert "Stale output" in command or "stale" in command.lower(), (
+        "capture-pipeline-output must output a stale-output error message"
     )
 
 

@@ -25,36 +25,57 @@ steps:
     timeout: 10
 
   # ===========================================================================
-  # STEP 2: Run the specialists pipeline for this topic
+  # STEP 2: Record pipeline start marker (for stale-output detection)
+  # ===========================================================================
+  - id: "mark-pipeline-start"
+    type: "bash"
+    command: |
+      touch /tmp/quality-eval-marker-{{topic_id}}
+      echo "/tmp/quality-eval-marker-{{topic_id}}"
+    output: "pipeline_start_marker"
+    timeout: 10
+
+  # ===========================================================================
+  # STEP 3: Run the specialists pipeline for this topic
   # ===========================================================================
   - id: "run-pipeline"
     agent: "self"
     prompt: |
-      Execute the research-chain recipe on this research question. Use the
-      recipes tool to run it:
-
-      recipes(operation="execute", recipe_path="recipes/research-chain.yaml",
-              context={"research_question": "{{research_question}}"})
-
-      Wait for the recipe to complete. When done, report what happened:
-      - Did the recipe complete successfully?
-      - What was the output file path?
-      - Any errors or warnings?
+      You are running the specialists research pipeline on this question.
 
       Research question: {{research_question}}
+
+      Execute this pipeline by delegating to specialist agents in order:
+
+      1. Delegate to specialists:researcher — research the question thoroughly
+      2. Delegate to specialists:researcher-formatter — pass the researcher's output to normalize format
+      3. Delegate to specialists:data-analyzer — pass the formatted research to draw analytical conclusions
+      4. Delegate to specialists:data-analyzer-formatter — normalize the analysis output
+      5. Delegate to specialists:writer — pass the formatted analysis to write a brief
+      6. Delegate to specialists:writer-formatter — normalize the writer output
+
+      After each step, pass the output of the previous step as input to the next.
+
+      When the chain is complete, save the final formatted document to docs/research-output/ using
+      the write_file tool. Use a filename based on the research question (kebab-case slug + .md).
+
+      Report what happened at each step — success/failure, output size, any issues.
     output: "pipeline_run_result"
     timeout: 3600
     on_error: "continue"
 
   # ===========================================================================
-  # STEP 3: Capture pipeline output from docs/research-output/
+  # STEP 4: Capture pipeline output from docs/research-output/
   # ===========================================================================
   - id: "capture-pipeline-output"
     type: "bash"
     command: |
       latest=$(ls -t docs/research-output/*.md 2>/dev/null | head -1)
+      marker="{{pipeline_start_marker}}"
       if [ -z "$latest" ]; then
         echo "PIPELINE_ERROR: No output file found in docs/research-output/"
+      elif [ -f "$marker" ] && [ "$latest" -ot "$marker" ]; then
+        echo "PIPELINE_ERROR: Stale output detected — file predates this evaluation run. The research-chain pipeline likely failed. Topic: {{topic_id}}"
       else
         cat "$latest"
       fi
