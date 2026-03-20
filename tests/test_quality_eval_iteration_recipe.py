@@ -259,43 +259,44 @@ def test_load_competitors_timeout() -> None:
 
 
 def test_run_pipeline_is_recipe_type() -> None:
-    """run-pipeline must be type: recipe."""
+    """run-pipeline must delegate to agent 'self' and reference research-chain in prompt."""
     recipe = load_recipe()
     step = _get_step(recipe, "run-pipeline")
-    assert step.get("type") == "recipe", (
-        f"run-pipeline must be type='recipe', got {step.get('type')!r}"
+    assert step.get("agent") == "self", (
+        f"run-pipeline must use agent='self', got {step.get('agent')!r}"
+    )
+    assert "research-chain" in step.get("prompt", ""), (
+        "run-pipeline prompt must reference 'research-chain'"
     )
 
 
 def test_run_pipeline_references_research_chain() -> None:
-    """run-pipeline must reference research-chain.yaml."""
+    """run-pipeline prompt must reference research-chain.yaml."""
     recipe = load_recipe()
     step = _get_step(recipe, "run-pipeline")
-    recipe_ref = step.get("recipe", "")
-    assert "research-chain" in recipe_ref, (
-        f"run-pipeline must reference 'research-chain', got {recipe_ref!r}"
+    prompt = step.get("prompt", "")
+    assert "research-chain" in prompt, (
+        f"run-pipeline prompt must reference 'research-chain', got {prompt!r}"
     )
 
 
 def test_run_pipeline_passes_research_question_in_context() -> None:
-    """run-pipeline context must pass research_question."""
+    """run-pipeline prompt must pass {{research_question}} template variable."""
     recipe = load_recipe()
     step = _get_step(recipe, "run-pipeline")
-    context = step.get("context", {})
-    assert "research_question" in context, (
-        "run-pipeline context must include 'research_question'"
+    prompt = step.get("prompt", "")
+    assert "{{research_question}}" in prompt, (
+        "run-pipeline prompt must contain '{{research_question}}'"
     )
 
 
 def test_run_pipeline_research_question_references_template_var() -> None:
-    """run-pipeline must pass {{research_question}} template variable."""
+    """run-pipeline prompt must reference {{research_question}} template variable."""
     recipe = load_recipe()
     step = _get_step(recipe, "run-pipeline")
-    context = step.get("context", {})
-    rq_value = context.get("research_question", "")
-    assert "{{research_question}}" in str(rq_value), (
-        f"run-pipeline research_question must use '{{{{research_question}}}}', "
-        f"got {rq_value!r}"
+    prompt = step.get("prompt", "")
+    assert "{{research_question}}" in prompt, (
+        f"run-pipeline prompt must use '{{{{research_question}}}}', got {prompt!r}"
     )
 
 

@@ -28,10 +28,20 @@ steps:
   # STEP 2: Run the specialists pipeline for this topic
   # ===========================================================================
   - id: "run-pipeline"
-    type: "recipe"
-    recipe: "./research-chain.yaml"
-    context:
-      research_question: "{{research_question}}"
+    agent: "self"
+    prompt: |
+      Execute the research-chain recipe on this research question. Use the
+      recipes tool to run it:
+
+      recipes(operation="execute", recipe_path="recipes/research-chain.yaml",
+              context={"research_question": "{{research_question}}"})
+
+      Wait for the recipe to complete. When done, report what happened:
+      - Did the recipe complete successfully?
+      - What was the output file path?
+      - Any errors or warnings?
+
+      Research question: {{research_question}}
     output: "pipeline_run_result"
     timeout: 3600
     on_error: "continue"
