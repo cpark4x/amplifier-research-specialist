@@ -117,3 +117,31 @@ topics:
       Competitive eval — survey question. Tests breadth coverage and stresses
       the depth-optimized pipeline methodology on a topic that requires wide
       survey-style coverage rather than deep-dive analysis.
+
+  - id: comparison
+    profile: competitive-eval
+    query: "Compare Cursor vs GitHub Copilot Workspace for AI-assisted development"
+    expected_traits:
+      - competitive_analysis
+      - comparison_matrix
+      - multiple_entities
+      - technical_depth
+    purpose: >
+      Competitive eval — head-to-head comparison. Tests structured comparison
+      reasoning, consistent dimension coverage across entities, and balanced
+      technical assessment. Stresses the pipeline's ability to evaluate tools
+      rather than just describe them.
+
+  - id: technical-analysis
+    profile: competitive-eval
+    query: "What are the security implications of WebAssembly outside the browser?"
+    expected_traits:
+      - technical_depth
+      - evidence_gaps_expected
+      - evaluative_inferences
+      - moderate_gaps
+    purpose: >
+      Competitive eval — deep technical analysis. Tests the pipeline's ability
+      to handle a niche technical topic requiring security reasoning and
+      inference from limited sources. Confidence calibration matters when
+      the evidence base is thin.
