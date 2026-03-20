@@ -70,3 +70,50 @@ topics:
       Tests structured comparison across multiple entities with consistent
       dimensions. Source tier assignment is tricky — official docs are primary,
       developer surveys are secondary, blog opinions are tertiary.
+
+  # =========================================================================
+  # Competitive Evaluation Topics
+  # =========================================================================
+  # These topics are used by the quality-eval recipe to benchmark the
+  # specialists pipeline against competitor research agents. Each has
+  # profile: competitive-eval so the recipe can filter to just these.
+  # =========================================================================
+
+  - id: factual-deep-dive
+    profile: competitive-eval
+    query: "What is Jina AI and how does it compare to other embedding providers?"
+    expected_traits:
+      - high_confidence_findings
+      - multiple_primary_sources
+      - competitive_comparison
+      - technical_depth
+    purpose: >
+      Competitive eval baseline — factual deep-dive with abundant sources.
+      Tests source tiering, confidence calibration, and technical accuracy.
+      High source availability means the pipeline should produce strong output.
+
+  - id: strategy
+    profile: competitive-eval
+    query: "What are the best strategies for improving hybrid team productivity?"
+    expected_traits:
+      - evaluative_inferences
+      - actionable_recommendations
+      - multiple_perspectives
+      - secondary_sources_dominant
+    purpose: >
+      Competitive eval — strategy request. Tests the data-analyzer chain's
+      ability to produce genuine analytical lift and fact/inference separation.
+      Stresses inference quality and actionable synthesis over raw sourcing.
+
+  - id: survey
+    profile: competitive-eval
+    query: "What are the best places to retire abroad for US citizens?"
+    expected_traits:
+      - broad_coverage
+      - comparison_matrix
+      - multiple_entities
+      - practical_details
+    purpose: >
+      Competitive eval — survey question. Tests breadth coverage and stresses
+      the depth-optimized pipeline methodology on a topic that requires wide
+      survey-style coverage rather than deep-dive analysis.

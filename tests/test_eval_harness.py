@@ -5,6 +5,7 @@ Tests three artifacts:
 2. recipes/eval-harness.yaml          — recipe structure
 3. specs/evaluation/scoring-rubric.md — rubric content coverage
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -63,6 +64,24 @@ class TestTestTopics:
                 f"got {type(topic['expected_traits']).__name__}"
             )
 
+    def test_has_competitive_eval_topics(self) -> None:
+        """Topics must include factual-deep-dive, strategy, and survey."""
+        ids = [t["id"] for t in self.data["topics"]]
+        required = {"factual-deep-dive", "strategy", "survey"}
+        missing = required - set(ids)
+        assert not missing, f"Missing competitive eval topics: {missing}"
+
+    def test_competitive_eval_topics_have_profile(self) -> None:
+        """Competitive eval topics must have profile: 'competitive-eval'."""
+        comp_ids = {"factual-deep-dive", "strategy", "survey"}
+        for topic in self.data["topics"]:
+            if topic["id"] in comp_ids:
+                assert topic.get("profile") == "competitive-eval", (
+                    f"Topic '{topic['id']}' must have "
+                    f"profile='competitive-eval', "
+                    f"got '{topic.get('profile')}'"
+                )
+
 
 class TestEvalHarnessRecipe:
     """Validates recipes/eval-harness.yaml structure."""
@@ -99,9 +118,7 @@ class TestEvalHarnessRecipe:
 
     def test_has_scoring_step(self) -> None:
         """Step IDs include: compute-scores."""
-        assert "compute-scores" in self.step_ids, (
-            "Recipe missing 'compute-scores' step"
-        )
+        assert "compute-scores" in self.step_ids, "Recipe missing 'compute-scores' step"
 
     def test_has_save_steps(self) -> None:
         """Step IDs include: save-scores and save-report."""
@@ -161,9 +178,7 @@ class TestScoringRubric:
         """Content contains 'Fact-Checker', 'Inference Challenger', 'Consistency Auditor'."""
         content = self._rubric_path().read_text(encoding="utf-8")
         for label in ("Fact-Checker", "Inference Challenger", "Consistency Auditor"):
-            assert label in content, (
-                f"scoring-rubric.md must mention critic: '{label}'"
-            )
+            assert label in content, f"scoring-rubric.md must mention critic: '{label}'"
 
     def test_rubric_documents_composite_formula(self) -> None:
         """Content contains composite formula weights: '0.40', '0.35', '0.25'."""
