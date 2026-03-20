@@ -29,7 +29,7 @@ steps:
   # ===========================================================================
   - id: "run-pipeline"
     type: "recipe"
-    recipe: "recipes/research-chain.yaml"
+    recipe: "./research-chain.yaml"
     context:
       research_question: "{{research_question}}"
     output: "pipeline_run_result"

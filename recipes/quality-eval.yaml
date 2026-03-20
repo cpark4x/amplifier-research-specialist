@@ -33,7 +33,7 @@ steps:
     as: "topic"
     collect: "topic_results"
     type: "recipe"
-    recipe: "recipes/quality-eval-iteration.yaml"
+    recipe: "./quality-eval-iteration.yaml"
     context:
       research_question: "{{topic.query}}"
       topic_id: "{{topic.id}}"
