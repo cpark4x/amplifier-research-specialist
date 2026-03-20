@@ -3,9 +3,8 @@
 screenshot-slides.py -- Capture per-slide screenshots from an HTML presentation.
 
 Uses agent-browser CLI to open the presentation in a headless browser and
-capture a PNG screenshot of each slide. Works by replacing document.body with
-each slide's content in turn, which avoids CSS cascade issues that can cause
-slides to render with zero dimensions in headless mode.
+capture a PNG screenshot of each slide. Navigates the live deck by dispatching
+ArrowRight keyboard events and screenshots after each transition settles.
 
 Requirements:
     - agent-browser CLI installed: npm install -g agent-browser
@@ -19,26 +18,39 @@ Output:
     <output_dir>/slide-02.png
     ...
 
-Prints a machine-readable summary line at the end:
+Prints machine-readable summary lines at the end:
     SCREENSHOTS: <count> slides captured in <output_dir>
+    NAV_RESULT: <json>
 """
 
+import json
 import os
 import re
 import subprocess
 import sys
 import time
 
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
+
 # Seconds to wait for initial page render
 RENDER_WAIT = 2
-# Seconds to wait after replacing body content before screenshotting
-SWAP_WAIT = 0.5
-# Seconds to wait after a navigation action before checking state
+# Seconds to wait after dispatching ArrowRight for transition to settle
+TRANSITION_WAIT = 1
+# Seconds to wait after a navigation action before checking state (nav test)
 NAV_WAIT = 0.3
+# Maximum slides to capture (safety cap against circular navigation)
+MAX_SLIDES = 50
+# Consecutive unchanged attempts before declaring end-of-deck
+END_THRESHOLD = 3
 
-# JavaScript: detect slides using \bslide\b word boundary match
-# (excludes slides-container and slide-wrapper to find actual slide elements)
-# Stores each slide's outerHTML in window.__slides for later retrieval.
+# ---------------------------------------------------------------------------
+# JavaScript snippets
+# ---------------------------------------------------------------------------
+
+# Detect slides using \bslide\b word-boundary match (excludes slides-container
+# and slide-wrapper to find actual slide elements). Stores count for reporting.
 INIT_JS = r"""
 (() => {
     const re = /\bslide\b(?!-)/;
@@ -46,32 +58,46 @@ INIT_JS = r"""
         re.test(el.className)
         && !el.className.includes('slides-container')
         && !el.className.includes('slide-wrapper'));
-    window.__slides = slides.map(s => s.outerHTML);
-    window.__originalBody = document.body.innerHTML;
+    window.__slide_count = slides.length;
     return slides.length;
 })()
 """.strip()
 
-# JavaScript template: replace body with slide N, forced to fill viewport.
-# {idx} is replaced by the 0-based slide index at call time.
-SHOW_SLIDE_JS = """
-(() => {{
-    const html = window.__slides[{idx}];
-    if (!html) return 'MISSING';
-    document.body.innerHTML = html;
-    const s = document.body.firstElementChild;
-    s.style.cssText = 'display:flex !important; flex-direction:column !important; '
-        + 'width:100vw !important; height:100vh !important; '
-        + 'opacity:1 !important; visibility:visible !important; '
-        + 'overflow:hidden !important; box-sizing:border-box !important;';
-    return 'OK';
-}})()
+# Returns the 0-based index of the currently active slide, or -1 if none found.
+# Uses the same \bslide\b filter as INIT_JS / NAV_TEST_JS for consistency.
+# Primary detection: .active class. Fallback: computed opacity/visibility/display.
+ACTIVE_SLIDE_JS = r"""
+(function() {
+    var re = /\bslide\b(?!-)/;
+    var slides = [...document.querySelectorAll('div, section')].filter(function(el) {
+        return re.test(el.className)
+            && !el.className.includes('slides-container')
+            && !el.className.includes('slide-wrapper');
+    });
+    // Primary: .active class
+    for (var i = 0; i < slides.length; i++) {
+        if (slides[i].classList.contains('active')) return i;
+    }
+    // Fallback: computed visibility (opacity:1, not hidden, not display:none)
+    for (var i = 0; i < slides.length; i++) {
+        var style = window.getComputedStyle(slides[i]);
+        if (style.opacity === '1'
+                && style.visibility !== 'hidden'
+                && style.display !== 'none') return i;
+    }
+    return -1;
+})()
 """.strip()
 
+# Dispatch ArrowRight keydown to advance the deck one slide.
+ARROW_RIGHT_JS = (
+    "document.dispatchEvent(new KeyboardEvent('keydown', "
+    "{key: 'ArrowRight', code: 'ArrowRight', keyCode: 39, bubbles: true}));"
+)
 
 # JavaScript: test keyboard navigation by simulating ArrowRight then ArrowLeft.
 # Returns a JSON object with test results. Runs BEFORE screenshot capture
-# (which replaces body content) so the deck's actual navigation JS is exercised.
+# so the deck's actual navigation JS is exercised on the live DOM.
 NAV_TEST_JS = r"""
 (() => {
     const results = {has_script: false, nav_works: false, notes_toggle: false,
@@ -145,43 +171,9 @@ NAV_TEST_JS = r"""
 """.strip()
 
 
-def test_navigation(slide_count):
-    """Test keyboard navigation and speaker notes toggle. Returns dict with results."""
-    if slide_count < 2:
-        return {
-            "has_script": False,
-            "nav_works": False,
-            "notes_toggle": False,
-            "slide_count": slide_count,
-            "details": ["Skipped: <2 slides"],
-        }
-
-    out, ok = ab("eval", NAV_TEST_JS)
-    if not ok or not out:
-        return {
-            "has_script": False,
-            "nav_works": False,
-            "notes_toggle": False,
-            "slide_count": slide_count,
-            "details": [f"eval failed: {out!r}"],
-        }
-
-    # Parse JSON from agent-browser output (may have extra text around it)
-    import json
-
-    try:
-        # Find JSON object in output
-        start = out.index("{")
-        end = out.rindex("}") + 1
-        return json.loads(out[start:end])
-    except (ValueError, json.JSONDecodeError):
-        return {
-            "has_script": False,
-            "nav_works": False,
-            "notes_toggle": False,
-            "slide_count": slide_count,
-            "details": [f"JSON parse failed: {out!r}"],
-        }
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
 
 def ab(*args, timeout=30):
@@ -205,6 +197,57 @@ def ab(*args, timeout=30):
         sys.exit(1)
 
 
+def parse_active_index(output: str) -> int:
+    """Extract the integer active-slide index from agent-browser eval output.
+
+    The JS returns a bare integer (-1, 0, 1, …); agent-browser echoes it as
+    plain text, possibly with surrounding whitespace or a trailing newline.
+    """
+    m = re.search(r"-?\d+", output or "")
+    return int(m.group()) if m else -1
+
+
+def test_navigation(slide_count: int) -> dict:
+    """Test keyboard navigation and speaker notes toggle. Returns dict with results."""
+    if slide_count < 2:
+        return {
+            "has_script": False,
+            "nav_works": False,
+            "notes_toggle": False,
+            "slide_count": slide_count,
+            "details": ["Skipped: <2 slides"],
+        }
+
+    out, ok = ab("eval", NAV_TEST_JS)
+    if not ok or not out:
+        return {
+            "has_script": False,
+            "nav_works": False,
+            "notes_toggle": False,
+            "slide_count": slide_count,
+            "details": [f"eval failed: {out!r}"],
+        }
+
+    # Parse JSON from agent-browser output (may have extra text around it)
+    try:
+        start = out.index("{")
+        end = out.rindex("}") + 1
+        return json.loads(out[start:end])
+    except (ValueError, json.JSONDecodeError):
+        return {
+            "has_script": False,
+            "nav_works": False,
+            "notes_toggle": False,
+            "slide_count": slide_count,
+            "details": [f"JSON parse failed: {out!r}"],
+        }
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+
 def main():
     if len(sys.argv) < 3:
         print("Usage: screenshot-slides.py <html_path> <output_dir>", file=sys.stderr)
@@ -220,12 +263,14 @@ def main():
     os.makedirs(output_dir, exist_ok=True)
     file_url = f"file://{html_path}"
 
+    print(f"SCREENSHOT_DIR: {output_dir}")
+
     # -- Open presentation --
     print(f"Opening: {file_url}")
     ab("open", file_url)
     time.sleep(RENDER_WAIT)
 
-    # -- Detect and cache slides --
+    # -- Count slides --
     count_out, ok = ab("eval", INIT_JS)
     if not ok or not count_out:
         print(
@@ -248,50 +293,99 @@ def main():
         ab("close")
         return 1
 
-    print(f"Found {slide_count} slides")
+    print(f"Found {slide_count} slides (expected)")
 
     # -- Test navigation functionality --
-    # Run BEFORE screenshot capture (which replaces body content).
-    # The deck's actual JS event handlers are exercised here.
+    # Run BEFORE the capture loop while the deck's JS event handlers are live.
+    # NAV_TEST_JS dispatches ArrowRight then ArrowLeft, so we should land back
+    # on slide 1 when it finishes. Give it a moment to settle.
     time.sleep(NAV_WAIT)
     nav = test_navigation(slide_count)
-    print(
-        f"\nNAV_TEST: has_script={nav['has_script']} "
-        f"nav_works={nav['nav_works']} "
-        f"notes_toggle={nav['notes_toggle']}"
-    )
+    nav_json = json.dumps(nav)
+
+    if not nav["nav_works"]:
+        print(
+            "WARNING: Navigation test reports nav_works=false"
+            " — attempting capture anyway (may be a false negative)"
+        )
     for detail in nav.get("details", []):
         print(f"  {detail}")
-    print()
 
-    # -- Screenshot each slide --
-    # For each slide: replace body content with that slide's outerHTML,
-    # force it to fill the viewport, then screenshot.
-    screenshots = []
-    for i in range(slide_count):
-        js = SHOW_SLIDE_JS.format(idx=i)
-        out, ok = ab("eval", js)
-        if not ok or "OK" not in (out or ""):
-            print(
-                f"  WARNING: slide {i + 1} swap failed ({out!r}), skipping",
-                file=sys.stderr,
-            )
+    time.sleep(NAV_WAIT)  # Let any ArrowLeft from nav test finish animating
+
+    # -- Capture loop: arrow-key navigation --
+    #
+    # Strategy:
+    #   1. Screenshot the current (first) slide immediately.
+    #   2. Dispatch ArrowRight, wait TRANSITION_WAIT seconds.
+    #   3. Query which slide is now active.
+    #   4a. If active index changed  → screenshot, repeat from 2.
+    #   4b. If active index unchanged → increment stall counter.
+    #        After END_THRESHOLD consecutive stalls → end of deck, stop.
+    #   Safety cap: never exceed MAX_SLIDES total captures.
+
+    screenshots: list[str] = []
+
+    # Snapshot the active index before we touch anything
+    out, _ = ab("eval", ACTIVE_SLIDE_JS)
+    current_active = parse_active_index(out)
+
+    # Screenshot slide 1 — already visible on load
+    slide_num = 1
+    fname = f"slide-{slide_num:02d}.png"
+    path = os.path.join(output_dir, fname)
+    ab("screenshot", path)
+    screenshots.append(fname)
+    print(f"Captured slide {slide_num}/{slide_count}: {fname}")
+
+    consecutive_unchanged = 0
+
+    while slide_num < MAX_SLIDES:
+        # Advance the deck
+        ab("eval", ARROW_RIGHT_JS)
+        time.sleep(TRANSITION_WAIT)
+
+        # Check whether the active slide index moved
+        out, _ = ab("eval", ACTIVE_SLIDE_JS)
+        new_active = parse_active_index(out)
+
+        if new_active == current_active:
+            # Slide did not change — stall detected
+            consecutive_unchanged += 1
+            if consecutive_unchanged >= END_THRESHOLD:
+                print(
+                    f"  Slide unchanged after {END_THRESHOLD} consecutive"
+                    f" ArrowRight attempts — reached end of deck at slide {slide_num}"
+                )
+                break
+            # Try once more without incrementing slide_num
             continue
 
-        time.sleep(SWAP_WAIT)
-        path = os.path.join(output_dir, f"slide-{i + 1:02d}.png")
+        # Slide changed successfully
+        consecutive_unchanged = 0
+        current_active = new_active
+        slide_num += 1
+        fname = f"slide-{slide_num:02d}.png"
+        path = os.path.join(output_dir, fname)
         ab("screenshot", path)
-        screenshots.append(path)
-        print(f"  [{i + 1}/{slide_count}] {os.path.basename(path)}")
+        screenshots.append(fname)
+        print(f"Captured slide {slide_num}/{slide_count}: {fname}")
+
+    if slide_num >= MAX_SLIDES:
+        print(
+            f"WARNING: Hit safety cap of {MAX_SLIDES} slides — stopping early",
+            file=sys.stderr,
+        )
 
     # -- Cleanup --
     ab("close")
-    print(f"\nSCREENSHOTS: {len(screenshots)} slides captured in {output_dir}")
-    print(
-        f"NAV_RESULT: has_script={nav['has_script']} "
-        f"nav_works={nav['nav_works']} "
-        f"notes_toggle={nav['notes_toggle']}"
-    )
+
+    # Machine-readable summary lines (eval recipe parses these)
+    print(f"FILES: {' '.join(screenshots)}")
+    print(f"NAV_TEST: {nav_json}")
+    print(f"SCREENSHOTS: {len(screenshots)} slides captured in {output_dir}")
+    print(f"NAV_RESULT: {nav_json}")
+
     return 0
 
 
