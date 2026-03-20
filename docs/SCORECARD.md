@@ -64,8 +64,8 @@ when test evidence exists; not updated on spec changes alone.
 - Minor formatting inconsistencies: bracket notation and meta-observation convention not standardized.
 
 **What would move it to 9:**
-- #39 medium-claim self-check (closes #37 under-hedging gap)
-- #41 auto-retry on truncation (4/5 failure rate is untenable without it)
+- #39 medium-claim self-check — **shipped** (commit `0991689`), not yet exercised (24/25 high-confidence sources in validation run). Needs a tertiary-heavy topic test.
+- #41 auto-retry on truncation — **shipped** (research-chain v1.12.0, commit `7a07b66`). Needs pipeline run that hits truncation to validate.
 - Standardize traces_to bracket notation and meta-observation convention
 
 ### Chain Reliability (currently 7/10)
@@ -80,10 +80,10 @@ when test evidence exists; not updated on spec changes alone.
 - All 5 formatter pairs fire correctly in recipe pipelines
 - Recipe timeouts fixed (#11)
 
-**What would move it back to 8:**
-- #45 two-path doctrine (makes ad-hoc mode work — recipe path keeps formatters, ad-hoc path makes them optional)
-- #41 auto-retry on truncation (4/5 failure rate is untenable)
-- #42 conditional branching fix (unblocks smart-skip gates in all recipes)
+**What would move it back to 8 (all three shipped, pending validation):**
+- #45 two-path doctrine — **shipped** (commit `7a07b66`). Makes ad-hoc mode work — recipe path keeps formatters, ad-hoc path makes them optional. Needs live ad-hoc test to validate.
+- #41 auto-retry on truncation — **shipped** (research-chain v1.12.0, commit `7a07b66`). Soft gate → retry step → hard gate. Needs pipeline run that hits truncation to validate.
+- #42 conditional branching fix — **shipped** (research-chain v1.11.0, commit `9c855b2`). Removed smart-skip gates, always run formatters.
 
 ### Format Fidelity (currently 7/10)
 
@@ -169,6 +169,7 @@ when test evidence exists; not updated on spec changes alone.
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v2.6 | 2026-03-19 | **Batch 2 shipped (no score change — pending validation).** Updated "What would move it back to 8" (Chain Reliability) and "What would move it to 9" (Research Trustworthiness) to note #45, #41, #39 all shipped but awaiting live pipeline validation. Scores remain 7/10 overall per Scoring Rule 2 (scores move on test evidence only). |
 | v2.5 | 2026-03-19 | **Mar 18–19 testing sprint re-score.** Added 5 test runs to evidence table and score history. Chain Reliability 8→7: writer-formatter ad-hoc break (#44), conditional branching bug (#42), researcher truncation 4/5 (#41). Research Trustworthiness holds at 8: #37/#38 shipped, hedging improved but partially validated. Overall 8→7. Updated "What Moves Each Dimension" for Research Trustworthiness and Chain Reliability with Mar 18–19 evidence. |
 | v2.4 | 2026-03-13 | **Quality gate validation + truncation gate + planner + specialist trims.** Quality gate NOT MET paths validated: 3/3 tests PASS (storyteller sparse-input, DA high-threshold, storyteller evidence-collapse borderline). Researcher truncation gate shipped (research-chain v1.9.0, narrative-chain v1.3.0). Planner specialist built (Epic 09, 75 lines, lightweight-first). Specialist trims: writer 424→206, storyteller 419→285, researcher 276→237, DA 309→296 — removed format enforcement now handled by formatters. WriterOutput added to types.md v1.3. Backlog hygiene: #31 closed, Epic 10 updated to 95%, 8 test logs promoted. Research Trustworthiness 7→8, Coverage 6→7, Overall 7→8. *(test log 2026-03-13-quality-threshold-not-met-validation)* |
 | v2.3 | 2026-03-11 | **Diverse topic validation + traces_to fix.** Shipped research-chain v1.8.2 (11 steps) with three new fixes: strip-parsed-prefix (DA Format A → real F# traces), strip-formatter-notes v3 (citation-boundary approach strips all artifact variants), fallback guards (prevent empty output on format variation). 6 diverse topics validated across 6 domains. URL recovery 181/182 = 99.5%. F-number traces 52/53 = 98.1%. Hedging consistent. Formatter artifacts eliminated architecturally. Research Trustworthiness 5→7, Overall stays 7 (now exactly 7.0). *(test log 2026-03-11-research-trustworthiness-diverse-validation)* |
