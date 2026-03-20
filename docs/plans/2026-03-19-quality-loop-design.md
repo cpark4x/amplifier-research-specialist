@@ -65,6 +65,53 @@ Three mechanisms prevent the loop from going off the rails:
 
 The loop outputs a **run report**: starting score, ending score, what was fixed, what was reverted, and remaining gaps.
 
+## Observability
+
+Every round writes a structured log entry immediately after the round completes (append-only, not batched at end of run). This survives interruptions — if the loop crashes mid-run, you have logs for every completed round.
+
+### Per-Round Log Entry
+
+Each entry captures the full decision chain for that round:
+
+| Field | Description |
+|-------|-------------|
+| `round` | Round number (1-indexed) |
+| `gap` | The specific gap being addressed this round |
+| `candidates` | All gaps considered as candidates (no cap — list every option) |
+| `chosen_because` | Why this gap was selected over the others. Differentiates "stuck on one unfixable gap" from "cycling through gaps with no working fixes" |
+| `target` | The specialist file being modified |
+| `edit_plan` | What change is being made and why |
+| `commit` | Git commit hash for this fix. Git commits are the snapshot mechanism — no `.bak` files, no cleanup debt |
+| `score_before` | Aggregate score before the fix |
+| `score_after` | Aggregate score after re-evaluation |
+| `decision` | `kept` or `reverted` |
+| `plateau_counter` | How many consecutive non-improving rounds (resets on improvement) |
+
+### Example Log Entry
+
+```yaml
+round: 3
+gap: "factual depth — insufficient claim count for broad surveys"
+candidates: ["factual depth (4/5 topics)", "source diversity (2/5 topics)"]
+chosen_because: "highest severity, structural across 4/5 topics"
+target: "agents/researcher/researcher.md"
+edit_plan: "Add breadth gate scaling claim budget to question scope"
+commit: "a3f2c1b"
+score_before: 7.33
+score_after: 7.85
+decision: kept
+plateau_counter: 0
+```
+
+### Termination Summary
+
+When the loop exits (for any reason), it writes a termination summary:
+
+- Final aggregate score
+- Total rounds completed
+- Which exit condition fired (target reached, max iterations, convergence/plateau)
+- Round-by-round score table showing the trajectory
+
 ## Recipe Inputs
 
 The recipe is parameterized so any project can use it:
@@ -127,10 +174,26 @@ The recipe delegates to generic agents (evaluator, diagnostician, implementer) t
 
 For dev-machine-bundle integration: a cron-like trigger could invoke the recipe periodically, and the run report accumulates into a quality history. The project improves while you sleep.
 
-## Open Questions
+## Decisions
 
-- Exact scoring formula for competitive mode (percentage of dimensions won, weighted scoring, or something else)
-- How to handle competitor runs that fail or timeout (skip that cell, or penalize?)
-- Whether the fix step should have an optional approval gate for high-risk changes
-- How to persist scoring criteria evolution across runs (so the evaluator doesn't forget what it learned)
-- Integration pattern with dev-machine-bundle for continuous improvement
+Resolved during design review. These were originally open questions.
+
+### 1. Scoring Formula
+
+Simple average of the 6 evaluation dimensions. No weighting. Revisit only if data shows certain dimensions consistently dominate or mislead the loop's fix priorities.
+
+### 2. Competitor Timeout Handling
+
+Skip the failed competitor's cell. Require a minimum of 2 out of 3 competitors to succeed for a topic to count in that iteration's scoring. Topics that don't meet the minimum are excluded from the iteration entirely and retried next round. This prevents a lucky timeout from inflating the pipeline's score while handling the practical reality that APIs fail.
+
+### 3. Approval Gate for High-Risk Fixes
+
+No gate. The loop runs fully autonomous. Revert-on-regression is the safety net — bad fixes get undone automatically before the next iteration. The run report provides full visibility after the fact: diagnosis reasoning, diffs, commit hashes, scores. If a run produces concerning diffs, adding a gate later is easy. For extra caution on a specific run, set `max_iterations: 1` for single-fix-then-review.
+
+### 4. Persisting Scoring Criteria Evolution
+
+Don't persist. Each run starts from the static rubric. The evaluator can notice new patterns within a run (across iterations), but those patterns don't carry to the next run. If a run reveals a genuinely new failure pattern, the run report surfaces it. A human decides whether to promote it to a permanent criterion. This keeps the rubric intentional and curated rather than auto-accumulated.
+
+### 5. Dev-Machine-Bundle Integration
+
+Not now. Run manually with `amplifier recipe execute`. The recipe is inherently schedulable — when the need arises, it's just `amplifier recipe execute` on a cron. Build the loop, run it 3–5 times manually, then decide if scheduling adds value. The run report format is the integration surface; any scheduling mechanism reads the same reports.
