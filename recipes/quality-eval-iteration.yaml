@@ -1,0 +1,136 @@
+name: "quality-eval-iteration"
+description: "Competitive evaluation sub-recipe — runs ONE topic through the full pipeline, then benchmarks 3 competitors in parallel, then evaluates all outputs for gaps."
+version: "1.0.0"
+tags: [evaluation, competitive, quality, iteration]
+
+context:
+  research_question: ""   # Required: the topic query to evaluate
+  topic_id: ""            # Required: the topic ID (e.g. factual-deep-dive)
+
+steps:
+  # ===========================================================================
+  # STEP 1: Load competitor definitions from YAML
+  # ===========================================================================
+  - id: "load-competitors"
+    type: "bash"
+    command: |
+      python3 -c "
+      import json, yaml
+      with open('specs/evaluation/competitors.yaml') as f:
+          data = yaml.safe_load(f)
+      print(json.dumps(data['competitors']))
+      "
+    output: "competitors"
+    parse_json: true
+    timeout: 10
+
+  # ===========================================================================
+  # STEP 2: Run the specialists pipeline for this topic
+  # ===========================================================================
+  - id: "run-pipeline"
+    type: "recipe"
+    recipe: "recipes/research-chain.yaml"
+    context:
+      research_question: "{{research_question}}"
+    output: "pipeline_run_result"
+    timeout: 3600
+    on_error: "continue"
+
+  # ===========================================================================
+  # STEP 3: Capture pipeline output from docs/research-output/
+  # ===========================================================================
+  - id: "capture-pipeline-output"
+    type: "bash"
+    command: |
+      latest=$(ls -t docs/research-output/*.md 2>/dev/null | head -1)
+      if [ -z "$latest" ]; then
+        echo "PIPELINE_ERROR: No output file found in docs/research-output/"
+      else
+        cat "$latest"
+      fi
+    output: "pipeline_output"
+    timeout: 30
+
+  # ===========================================================================
+  # STEP 4: Run 3 competitors in parallel on the same question
+  # ===========================================================================
+  - id: "run-competitors"
+    foreach: "{{competitors}}"
+    as: "competitor"
+    parallel: 3
+    collect: "competitor_results"
+    agent: "foundation:web-research"
+    prompt: |
+      You are competing in a research benchmark. Research the following question
+      thoroughly and produce the best possible answer you can.
+
+      Research question: {{research_question}}
+
+      Requirements:
+      - Provide thorough, well-sourced research on the topic
+      - Attribute every factual claim to a specific source with a URL where possible
+      - Include confidence levels for key claims (e.g., HIGH / MEDIUM / LOW)
+      - Provide analytical insight — don't just summarize, draw conclusions
+      - Acknowledge gaps where information was unavailable or uncertain
+      - Structure your response clearly with sections and headers
+
+      Produce a comprehensive research response that a discerning analyst would
+      find credible, well-supported, and analytically valuable.
+    output: "competitor_result"
+    timeout: 2700
+    on_error: "continue"
+
+  # ===========================================================================
+  # STEP 5: Evaluate pipeline vs competitors — produce structured gap list
+  # ===========================================================================
+  - id: "evaluate"
+    agent: "self"
+    prompt: |
+      COMPARATIVE EVALUATOR — you are a rigorous research quality analyst.
+
+      Topic ID: {{topic_id}}
+      Research Question: {{research_question}}
+
+      Your task: score the pipeline output and each competitor output on 6 dimensions,
+      then produce a structured gap analysis.
+
+      SCORING DIMENSIONS (1–10 scale):
+      1. Source quality         — credibility, diversity, and tier of sources cited
+      2. Factual depth          — breadth and accuracy of factual coverage
+      3. Analytical insight     — quality of inferences, conclusions, and synthesis
+      4. Confidence calibration — appropriate hedging, uncertainty acknowledgment
+      5. Structure & readability — organization, clarity, and navigability
+      6. Citation quality       — specificity, verifiability, and URL completeness
+
+      =====================================================================
+      PIPELINE OUTPUT:
+      {{pipeline_output}}
+
+      =====================================================================
+      COMPETITOR RESULTS:
+      {{competitor_results}}
+
+      =====================================================================
+
+      Produce a COMPETITIVE EVALUATION REPORT with the following sections:
+
+      ## DIMENSION SCORES
+      For each output (pipeline + each competitor), provide scores on all 6 dimensions.
+      Use a table format.
+
+      ## GAP LIST
+      List every dimension where the pipeline score is lower than at least one
+      competitor by 2 or more points. For each gap:
+        - Dimension name
+        - Pipeline score vs. best competitor score
+        - Specific evidence from the outputs (quote or paraphrase)
+        - Root cause hypothesis
+
+      ## PIPELINE WINS
+      Dimensions where the pipeline outperforms all competitors, with evidence.
+
+      ## SUMMARY
+      A 2–3 sentence overall assessment: where does the pipeline excel, where
+      does it fall short, and what is the single highest-priority improvement?
+    output: "evaluation_report"
+    timeout: 1800
