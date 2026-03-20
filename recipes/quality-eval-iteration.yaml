@@ -91,6 +91,9 @@ steps:
     parallel: 3
     collect: "competitor_results"
     agent: "foundation:web-research"
+    provider_preferences:
+      provider: "{{competitor.provider}}"
+      model: "{{competitor.model}}"
     prompt: |
       You are competing in a research benchmark. Research the following question
       thoroughly and produce the best possible answer you can.

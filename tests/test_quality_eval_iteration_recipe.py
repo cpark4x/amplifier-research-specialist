@@ -555,3 +555,20 @@ def test_evaluate_prompt_produces_gap_list() -> None:
     assert "gap" in prompt.lower(), (
         "evaluate prompt must reference 'gap' for gap list output"
     )
+
+
+def test_run_competitors_has_provider_preferences() -> None:
+    """run-competitors must have provider_preferences referencing competitor config."""
+    recipe = load_recipe()
+    step = _get_step(recipe, "run-competitors")
+    pp = step.get("provider_preferences", {})
+    assert pp, (
+        "run-competitors must have 'provider_preferences' to route each "
+        "competitor to its configured model provider"
+    )
+    # Must reference the competitor's provider field from the foreach variable
+    pp_str = str(pp)
+    assert "competitor" in pp_str, (
+        "provider_preferences must reference the '{{competitor.*}}' loop "
+        f"variable for dynamic routing, got: {pp}"
+    )
