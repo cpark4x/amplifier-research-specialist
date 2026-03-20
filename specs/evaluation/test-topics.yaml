@@ -118,7 +118,7 @@ topics:
       the depth-optimized pipeline methodology on a topic that requires wide
       survey-style coverage rather than deep-dive analysis.
 
-  - id: comparison
+  - id: competitive-comparison
     profile: competitive-eval
     query: "Compare Cursor vs GitHub Copilot Workspace for AI-assisted development"
     expected_traits:
