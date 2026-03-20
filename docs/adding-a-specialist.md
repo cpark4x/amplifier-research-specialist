@@ -23,20 +23,18 @@ Before writing any files, understand how the pieces connect:
 bundle.md
 └── behaviors/specialists.yaml       ← declares tools, registers agents, injects context
     ├── tools: tool-web              ← web_search + web_fetch for all specialists
-    ├── agents.include:              ← which specialists are loaded and callable
-    │   ├── specialists/researcher
-    │   ├── specialists/writer
-    │   ├── specialists/competitive-analysis
-    │   └── specialists/data-analyzer
-    └── context.include:             ← injected into every session using this bundle
-        └── context/specialists-instructions.md
+    └── agents.include:              ← which specialists are loaded and callable
+        ├── specialists/researcher
+        ├── specialists/writer
+        ├── specialists/competitive-analysis
+        └── specialists/data-analyzer
 ```
 
 **`bundle.md`** — the entry point. Declares the bundle identity and includes the behavior.
 
 **`behaviors/specialists.yaml`** — the wiring layer. Tools are provided here and agents are registered here. A specialist that exists in `specialists/` but isn't in this file is **invisible to callers**.
 
-**`context/specialists-instructions.md`** — the runtime dispatch guide. Injected into every session. Tells the orchestrator which specialists exist and when to route to each. A specialist missing from here **won't be selected automatically**.
+**`context/coordinator-routing.md`** — the runtime dispatch guide. Loaded into the coordinator's context via `bundle.md`. Tells the orchestrator which specialists exist and when to route to each. A specialist missing from here **won't be selected automatically**.
 
 ---
 
@@ -153,16 +151,12 @@ agents:
 
 Without this step, the specialist file exists but is never loaded when the bundle is included.
 
-### 3. Add to `context/specialists-instructions.md`
+### 3. Add to `context/coordinator-routing.md`
 
-Add your specialist to the **Available Specialists** list and the **When to Use Each** section:
+Add your specialist to the **Available Specialists** section using the merged catalog format:
 
 ```markdown
-- **[specialist-name]** — [One sentence: what it does and what it returns.]
-
-**Delegate to `specialists:[specialist-name]` when:**
-- [Trigger condition 1]
-- [Trigger condition 2]
+- **[specialist-name]** — [What it does and what it returns.] **Use when:** [trigger condition 1]; [trigger condition 2].
 ```
 
 Without this step, the orchestrator won't know the specialist exists and won't route to it automatically.
@@ -219,7 +213,7 @@ For research-heavy specialists, run the same question against 2–3 independent 
 - [ ] `shared/interface/types.md` — output type defined (if new) or existing type reused
 - [ ] `README.md` — added to specialists table
 - [ ] `behaviors/specialists.yaml` — added to `agents.include`
-- [ ] `context/specialists-instructions.md` — added to available specialists + when-to-use section
+- [ ] `context/coordinator-routing.md` — added to Available Specialists (merged catalog format)
 - [ ] Local invocation tested
 - [ ] Output contract verified
 - [ ] Boundary case tested
