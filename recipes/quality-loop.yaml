@@ -154,11 +154,77 @@ steps:
         output: "fix_result"
         timeout: 1800
 
-      # --- Check: placeholder (Task 9) ---
+      # --- Check: revert-on-regression + convergence detection ---
       - id: "check"
         type: "bash"
         command: |
-          echo '{"current_score": 0, "plateau_counter": 0, "converged": "false", "score_before": 0, "score_after": 0, "decision": "kept"}'
+          cat <<'__DIAG__' > /dev/null
+          {{diagnosis}}
+          __DIAG__
+
+          cat <<'__FIX__' > /dev/null
+          {{fix_result}}
+          __FIX__
+
+          # --- Extract score_before from diagnosis output ---
+          score_before="{{current_score}}"
+
+          # Parse score_before from the diagnosis (it reports the current aggregate)
+          diag_score=$(cat <<'__EXTRACT__' | grep -oP 'score_before:\s*\K[0-9]+\.?[0-9]*' | head -1
+          {{diagnosis}}
+          __EXTRACT__
+          )
+          if [ -n "$diag_score" ]; then
+            score_before="$diag_score"
+          fi
+
+          # score_after starts equal to score_before (will be updated by next eval)
+          score_after="${score_before}"
+
+          # Current plateau_counter
+          plateau_counter={{plateau_counter}}
+
+          # Get the latest commit (the fix commit)
+          fix_commit=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+
+          # --- Decision logic ---
+          # On round 1, we have no prior score to compare — always keep.
+          # On subsequent rounds, if score hasn't improved, revert and bump plateau.
+          decision="kept"
+          new_plateau=$plateau_counter
+          converged="false"
+
+          if [ "{{_loop_iteration}}" -gt 1 ] && [ "$score_before" != "0" ]; then
+            # Compare: if score hasn't improved from last known score
+            improved=$(python3 -c "print('yes' if float('${score_after}') > float('${score_before}') else 'no')" 2>/dev/null || echo "no")
+
+            if [ "$improved" = "no" ]; then
+              # Revert the fix
+              git revert --no-edit HEAD 2>/dev/null || true
+              decision="reverted"
+              new_plateau=$((plateau_counter + 1))
+
+              # Check convergence: 2 consecutive non-improving rounds
+              if [ $new_plateau -ge 2 ]; then
+                converged="true"
+              fi
+            else
+              new_plateau=0
+            fi
+          fi
+
+          # Output JSON for update_context
+          cat <<EOF
+          {
+            "current_score": ${score_after:-0},
+            "score_before": ${score_before:-0},
+            "score_after": ${score_after:-0},
+            "plateau_counter": ${new_plateau},
+            "converged": "${converged}",
+            "decision": "${decision}",
+            "fix_commit": "${fix_commit}"
+          }
+          EOF
         parse_json: true
         output: "check_result"
         timeout: 60
