@@ -13,4 +13,4 @@ includes:
 # Specialists
 
 @specialists:context/session-startup.md
-@specialists:context/specialists-instructions.md
+@specialists:context/coordinator-routing.md

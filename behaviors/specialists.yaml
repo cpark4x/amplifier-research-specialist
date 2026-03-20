@@ -37,6 +37,3 @@ agents:
 spawn:
   exclude_tools: [write_file, edit_file, apply_patch]
 
-context:
-  include:
-    - specialists:context/specialists-instructions.md
