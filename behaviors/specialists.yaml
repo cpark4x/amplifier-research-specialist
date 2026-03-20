@@ -5,7 +5,7 @@ bundle:
 
 tools:
   - module: tool-web
-    source: git+https://github.com/microsoft/amplifier-module-tool-web@main
+    source: git+https://github.com/microsoft/amplifier-module-tool-web@26b6d9030ed0d6c21a4d3a2f77cf59ce99a7cece
   - module: tool-canvas-renderer
     source: ../modules/tool-canvas-renderer
   - module: tool-skills

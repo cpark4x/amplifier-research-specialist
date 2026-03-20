@@ -2,7 +2,7 @@
 TDD tests for task-1: Add Conversational Chain Behavior Rules to Routing Brain.
 Validates that the new ## Conversational Chain Behavior section is inserted
 between the intro paragraph and ## Available Specialists in
-context/specialists-instructions.md.
+context/coordinator-routing.md.
 """
 
 from __future__ import annotations

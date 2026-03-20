@@ -1,5 +1,5 @@
 """
-TDD tests for task-05: Register storyteller in context/specialists-instructions.md.
+TDD tests for task-05: Register storyteller in context/coordinator-routing.md.
 Validates that all 3 required additions are present in the file.
 """
 
