@@ -109,13 +109,48 @@ steps:
         output: "diagnosis"
         timeout: 1800
 
-      # --- Fix: placeholder (Task 8) ---
+      # --- Fix: implement the targeted change ---
       - id: "fix"
         agent: "self"
         prompt: |
-          PLACEHOLDER — will be replaced in Task 8.
+          PIPELINE FIXER — you implement precisely targeted quality improvements
+          to specialist agent files.
+
+          DIAGNOSIS FROM THIS ROUND:
           {{diagnosis}}
-          Implement the change and commit.
+
+          =====================================================================
+          YOUR TASK:
+          =====================================================================
+
+          1. READ the target file identified in the diagnosis
+          2. UNDERSTAND the current behavior and why it produces the identified gap
+          3. IMPLEMENT the minimal change described in the edit_plan
+             - Change ONLY what the diagnosis specifies
+             - Do NOT refactor, reorganize, or "improve" unrelated sections
+             - Do NOT add features beyond what the edit_plan describes
+          4. VERIFY the change is syntactically valid
+          5. COMMIT with a descriptive message:
+             git commit -am "fix(quality-loop): [gap_name] — [one-line description of change]"
+
+          =====================================================================
+          CONSTRAINTS:
+          =====================================================================
+
+          - ONE file change per round. If the diagnosis mentions multiple files,
+            change only the primary target_file.
+          - The commit message must start with "fix(quality-loop):" so it's
+            identifiable for revert.
+          - Report the git commit hash in your response.
+
+          =====================================================================
+          OUTPUT FORMAT:
+          =====================================================================
+
+          End your response with:
+          - commit_hash: [the actual hash from git commit]
+          - file_changed: [path]
+          - change_summary: [one-line description]
         output: "fix_result"
         timeout: 1800
 
