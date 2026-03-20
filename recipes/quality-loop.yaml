@@ -34,14 +34,78 @@ steps:
         timeout: 21600
         on_error: "continue"
 
-      # --- Aggregate + Diagnose: placeholder (Task 7) ---
+      # --- Aggregate + Diagnose ---
       - id: "aggregate-diagnose"
         agent: "self"
         prompt: |
-          PLACEHOLDER — will be replaced in Task 7.
+          QUALITY GAP DIAGNOSTICIAN — you are an expert at identifying structural
+          weaknesses in AI pipelines and mapping them to precise fixes.
+
+          EVALUATION RESULTS FROM THIS ROUND:
           {{eval_result}}
-          Identify structural gaps (appearing in 2+ topics out of N).
-          Map the top gap to a specific target file and change.
+
+          CURRENT LOOP STATE:
+          - Round: {{_loop_iteration}} of max 5
+          - Current score: {{current_score}}
+          - Target score: {{target_score}}
+          - Plateau counter: {{plateau_counter}}
+
+          =====================================================================
+          STEP 1: TRIANGULATE GAPS
+          =====================================================================
+
+          From the evaluation results, extract all gaps where the pipeline scored
+          lower than competitors. For each gap dimension:
+          1. Count how many topics show this gap (score delta >= 2 points)
+          2. Classify: STRUCTURAL (appears in 2 or more out of N topics) or
+             TOPIC NOISE (appears in only 1 topic)
+          3. For structural gaps, rank by severity (largest average delta first)
+
+          =====================================================================
+          STEP 2: LIST ALL CANDIDATES
+          =====================================================================
+
+          List EVERY gap candidate — structural and noise — with:
+          - Dimension name
+          - Classification (STRUCTURAL / TOPIC NOISE)
+          - Topics affected (list each)
+          - Average score delta vs best competitor
+          - Root cause hypothesis
+
+          Do NOT cap or truncate this list. Include every candidate.
+
+          =====================================================================
+          STEP 3: SELECT TOP GAP AND MAP TO FIX
+          =====================================================================
+
+          Select the single highest-priority STRUCTURAL gap to fix this round.
+
+          Explain your selection reasoning:
+          - Why this gap over others?
+          - What is the expected impact on the aggregate score?
+
+          Map the gap to a SPECIFIC fix:
+          - target_file: The exact file path to modify (e.g., agents/researcher.md,
+            agents/data-analyzer.md, agents/writer.md). Use flat paths — agents
+            are at agents/<name>.md, NOT agents/<name>/<name>.md.
+          - edit_plan: What specific change to make (e.g., "Add a breadth gate
+            that scales claim budget to question scope")
+          - gap_name: Short name for the gap being addressed
+          - all_candidates: The full candidate list from Step 2
+
+          =====================================================================
+          OUTPUT FORMAT (required):
+          =====================================================================
+
+          End your response with a structured block:
+
+          ## DIAGNOSIS
+          - gap_name: [short name]
+          - target_file: [exact path]
+          - edit_plan: [what to change]
+          - chosen_because: [why this gap over others]
+          - all_candidates: [list every candidate considered]
+          - score_before: [current aggregate pipeline score from evaluation]
         output: "diagnosis"
         timeout: 1800
 
