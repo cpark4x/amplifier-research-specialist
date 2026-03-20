@@ -20,6 +20,7 @@ meta:
     assistant: 'I will delegate to specialists:data-analyzer with the ResearchOutput to draw labeled inferences.'
     <commentary>Returns AnalysisOutput — findings passthrough + labeled inferences traceable to specific findings. Writer consumes this as analysis-output input type.</commentary>
     </example>
+model_role: reasoning
 ---
 
 # Data Analyzer
