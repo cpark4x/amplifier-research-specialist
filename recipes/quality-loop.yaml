@@ -1,0 +1,83 @@
+name: "quality-loop"
+description: "Autonomous quality improvement loop — evaluates the specialists pipeline against competitors, diagnoses structural gaps, fixes them, and re-evaluates until target score is reached."
+version: "1.0.0"
+tags: [quality, loop, evaluation, competitive, autonomous]
+
+context:
+  target_score: 8.0
+  current_score: 0
+  plateau_counter: 0
+  converged: "false"
+  evaluation_mode: "competitive"
+
+steps:
+  # ===========================================================================
+  # QUALITY IMPROVEMENT LOOP
+  # ===========================================================================
+  - id: "improvement-loop"
+    while_condition: "{{current_score}} < {{target_score}}"
+    break_when: "{{converged}} == 'true'"
+    max_while_iterations: 5
+    update_context:
+      current_score: "{{check_result.current_score}}"
+      plateau_counter: "{{check_result.plateau_counter}}"
+      converged: "{{check_result.converged}}"
+    steps:
+      # --- Evaluate: invoke the competitive eval sub-recipe ---
+      - id: "evaluate"
+        type: "recipe"
+        recipe: "./quality-eval.yaml"
+        context:
+          evaluation_mode: "{{evaluation_mode}}"
+          target_score: "{{target_score}}"
+        output: "eval_result"
+        timeout: 21600
+        on_error: "continue"
+
+      # --- Aggregate + Diagnose: placeholder (Task 7) ---
+      - id: "aggregate-diagnose"
+        agent: "self"
+        prompt: |
+          PLACEHOLDER — will be replaced in Task 7.
+          {{eval_result}}
+          Identify structural gaps (appearing in 2+ topics out of N).
+          Map the top gap to a specific target file and change.
+        output: "diagnosis"
+        timeout: 1800
+
+      # --- Fix: placeholder (Task 8) ---
+      - id: "fix"
+        agent: "self"
+        prompt: |
+          PLACEHOLDER — will be replaced in Task 8.
+          {{diagnosis}}
+          Implement the change and commit.
+        output: "fix_result"
+        timeout: 1800
+
+      # --- Check: placeholder (Task 9) ---
+      - id: "check"
+        type: "bash"
+        command: |
+          echo '{"current_score": 0, "plateau_counter": 0, "converged": "false", "score_before": 0, "score_after": 0, "decision": "kept"}'
+        parse_json: true
+        output: "check_result"
+        timeout: 60
+
+      # --- Log Round: placeholder (Task 10) ---
+      - id: "log-round"
+        type: "bash"
+        command: |
+          echo "placeholder" >> specs/evaluation/reports/quality-loop-log.yaml
+        output: "log_result"
+        timeout: 30
+
+  # ===========================================================================
+  # TERMINATION SUMMARY (runs after loop exits)
+  # ===========================================================================
+  - id: "termination-summary"
+    type: "bash"
+    command: |
+      echo "Quality loop terminated. Final score: {{current_score}}, Target: {{target_score}}"
+    output: "summary"
+    timeout: 30
