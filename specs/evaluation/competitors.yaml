@@ -1,0 +1,36 @@
+# Competitor configuration for quality eval harness
+#
+# Defines the three AI tools benchmarked against the specialists research pipeline
+# in the quality evaluation recipe. Each competitor uses the foundation:web-research
+# agent to perform the same research tasks as the specialists pipeline, enabling
+# apples-to-apples comparison.
+#
+# Used by: recipes/quality-eval-iteration.yaml
+
+competitors:
+  - name: anthropic-claude
+    agent: foundation:web-research
+    provider: anthropic
+    model: claude-sonnet-4-5-*
+    description: >
+      Anthropic Claude Sonnet — a leading general-purpose AI assistant.
+      Represents Anthropic's best balance of capability and speed for
+      research and synthesis tasks.
+
+  - name: google-gemini
+    agent: foundation:web-research
+    provider: google
+    model: gemini-2.5-pro
+    description: >
+      Google Gemini 2.5 Pro — Google's most capable multimodal model.
+      Represents Google's state-of-the-art research and reasoning ability
+      for long-context synthesis tasks.
+
+  - name: openai-gpt4o
+    agent: foundation:web-research
+    provider: openai
+    model: gpt-4o
+    description: >
+      OpenAI GPT-4o — OpenAI's flagship omni model for text and reasoning.
+      Represents OpenAI's best general-purpose model for research and
+      structured information extraction.
