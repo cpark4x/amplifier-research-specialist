@@ -13,11 +13,16 @@ Test scenarios and LLM-as-judge evaluation for the presentation builder speciali
 | 05 | Project Retrospective | raw-notes | team | reflect | Retrospective |
 | 07 | Startup Pitch (Investors) | raw-notes (founder) | external | persuade | 5-Element Narrative |
 | 08 | Technical Intro (LLMs) | raw-notes (speaker outline) | teaching | teach | Discovery |
+| 09 | Fabrication Guardrail | raw-notes (vague email) | executive | decide | SCQA->Pyramid |
+| 10 | Data Overload | raw-notes (metrics dump) | executive | inform | Answer-first |
 
 Coverage: 4 input types (writer-output, competitive-analysis, researcher-output, raw-notes),
-4 audience types (team, executive, external, teaching), 5 purposes (update, decide, persuade,
-teach, reflect), 5 frameworks. Raw-notes scenarios (05, 07, 08) test the builder's ability to
-impose structure on unstructured input without a prior specialist pipeline.
+4 audience types (team, executive, external, teaching), 6 purposes (update, decide, persuade,
+teach, reflect, inform), 5 frameworks. Raw-notes scenarios (05, 07, 08) test the builder's
+ability to impose structure on unstructured input without a prior specialist pipeline.
+Guardrail scenarios (09, 10) test edge cases: 09 tests fabrication resistance with
+deliberately vague input containing no hard numbers; 10 tests D11/D12 with a raw metrics
+dump containing no prose or interpretation.
 
 ## Quick Start
 

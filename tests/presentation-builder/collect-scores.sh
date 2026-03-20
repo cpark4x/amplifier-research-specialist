@@ -10,6 +10,7 @@
 # Usage:
 #   ./tests/presentation-builder/collect-scores.sh           # regenerate full CSV
 #   ./tests/presentation-builder/collect-scores.sh --print   # also pretty-print
+#   ./tests/presentation-builder/collect-scores.sh --check   # regression check (exit 1 if regressions)
 #
 # Output: tests/presentation-builder/rounds/scorecard.csv
 #
@@ -21,7 +22,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROUNDS_DIR="${SCRIPT_DIR}/rounds"
 CSV="${ROUNDS_DIR}/scorecard.csv"
 PRINT=false
-[[ "${1:-}" == "--print" ]] && PRINT=true
+CHECK=false
+for arg in "$@"; do
+  case "$arg" in
+    --print) PRINT=true ;;
+    --check) CHECK=true ;;
+  esac
+done
 
 # Write CSV header
 echo "round,date,scenario,overall_score,verdict,D1_narrative,D2_framework,D3_fidelity,D4_density,D5_rhythm,D6_audience,D7_completeness,D8_notes,D9_structure,D10_html,D11_insight,D12_infodesign" > "${CSV}"
@@ -197,4 +204,133 @@ if [ "$PRINT" = true ]; then
   done
 
   echo ""
+fi
+
+# ---------------------------------------------------------------------------
+# Regression check: compare the two most recent rounds and flag score drops.
+#
+# Thresholds:
+#   REGRESSION — overall dropped > 0.3, or any dimension dropped > 0.5
+#   NEW FAIL   — verdict went to FAIL, or any dimension hit 1
+#   WARNING    — overall dropped any amount (but within regression threshold)
+#
+# Exit code: 1 if any REGRESSION or NEW FAIL found, 0 otherwise.
+# ---------------------------------------------------------------------------
+if [ "$CHECK" = true ]; then
+  echo ""
+  echo "=== REGRESSION CHECK ==="
+  echo ""
+
+  # Find the two most recent rounds with valid (non-ERROR) scores
+  recent_rounds=$(awk -F, '
+    NR > 1 && $5 != "ERROR" && $4 != "" { rounds[$1] = 1 }
+    END { for (r in rounds) print r }
+  ' "${CSV}" | sort -V | tail -2)
+
+  n_rounds=$(echo "$recent_rounds" | wc -l | tr -d ' ')
+
+  if [ "$n_rounds" -lt 2 ]; then
+    echo "  Need at least 2 rounds with valid scores to compare. Found ${n_rounds}."
+    echo ""
+    exit 0
+  fi
+
+  prev_round=$(echo "$recent_rounds" | head -1)
+  curr_round=$(echo "$recent_rounds" | tail -1)
+  echo "  Comparing: ${curr_round} vs ${prev_round}"
+  echo ""
+
+  # Thresholds
+  OVERALL_THRESH="0.3"
+  DIM_THRESH="0.5"
+
+  # Build comparison using awk. For each scenario present in both rounds,
+  # compare overall and per-dimension scores.
+  regression_found=false
+
+  awk -F, -v prev="$prev_round" -v curr="$curr_round" \
+            -v othresh="$OVERALL_THRESH" -v dthresh="$DIM_THRESH" '
+    BEGIN {
+      dim_names[6]="D1"; dim_names[7]="D2"; dim_names[8]="D3"; dim_names[9]="D4"
+      dim_names[10]="D5"; dim_names[11]="D6"; dim_names[12]="D7"; dim_names[13]="D8"
+      dim_names[14]="D9"; dim_names[15]="D10"; dim_names[16]="D11"; dim_names[17]="D12"
+      regressions = 0
+      warnings = 0
+      ok = 0
+    }
+    NR > 1 && $5 != "ERROR" && $4 != "" {
+      if ($1 == prev) {
+        prev_overall[$3] = $4
+        prev_verdict[$3] = $5
+        for (i=6; i<=17; i++) prev_dim[$3, i] = $i
+      }
+      if ($1 == curr) {
+        curr_overall[$3] = $4
+        curr_verdict[$3] = $5
+        for (i=6; i<=17; i++) curr_dim[$3, i] = $i
+      }
+    }
+    END {
+      # Process scenarios present in both rounds
+      for (s in curr_overall) {
+        if (!(s in prev_overall)) continue
+
+        level = "OK"
+        details = ""
+
+        # Check for NEW FAIL
+        if (curr_verdict[s] == "FAIL" && prev_verdict[s] != "FAIL") {
+          level = "NEW FAIL"
+          details = details "  verdict: " prev_verdict[s] " -> FAIL\n"
+        }
+
+        # Check per-dimension drops and dimension=1
+        for (i=6; i<=17; i++) {
+          p = prev_dim[s, i]
+          c = curr_dim[s, i]
+          if (p == "" || c == "" ) continue
+          if (c+0 == 1 && p+0 > 1) {
+            if (level != "NEW FAIL") level = "NEW FAIL"
+            details = details "  " dim_names[i] ": " p " -> " c " (hit 1)\n"
+          } else if (p - c > dthresh + 0) {
+            if (level == "OK" || level == "WARNING") level = "REGRESSION"
+            details = details "  " dim_names[i] ": " p " -> " c " (-" (p - c) ")\n"
+          }
+        }
+
+        # Check overall drop
+        odrop = prev_overall[s] - curr_overall[s]
+        if (odrop > othresh + 0 && level == "OK") {
+          level = "REGRESSION"
+          details = details "  overall: " prev_overall[s] " -> " curr_overall[s] " (-" odrop ")\n"
+        } else if (odrop > 0 && level == "OK") {
+          level = "WARNING"
+          details = details "  overall: " prev_overall[s] " -> " curr_overall[s] " (-" odrop ")\n"
+        }
+
+        # Print result
+        if (level == "NEW FAIL" || level == "REGRESSION") {
+          regressions++
+          printf "  %-12s  %-35s\n", level, s
+          printf details
+        } else if (level == "WARNING") {
+          warnings++
+          printf "  %-12s  %-35s\n", level, s
+          printf details
+        } else {
+          ok++
+          printf "  %-12s  %-35s  %s -> %s\n", "OK", s, prev_overall[s], curr_overall[s]
+        }
+      }
+
+      # Summary
+      printf "\n  Result: %d regressions, %d warnings, %d ok\n\n", regressions, warnings, ok
+
+      # Exit code: 1 if any regressions or new fails
+      if (regressions > 0) exit 1
+      exit 0
+    }
+  ' "${CSV}"
+
+  exit $?
 fi
