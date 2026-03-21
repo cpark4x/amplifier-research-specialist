@@ -375,6 +375,9 @@ steps:
           score_after: {{check_result.score_after}}
           decision: "{{check_result.decision}}"
           plateau_counter: {{check_result.plateau_counter}}
+          topics_rerun: "{{selected_topics.selected_topic_ids}}"
+          competitors_cached: true
+          cache_dir: "{{cache_info.cache_dir}}"
           ENTRY
 
           echo "Round {{_loop_iteration}} logged to specs/evaluation/reports/quality-loop-log.yaml"
@@ -395,6 +398,10 @@ steps:
       echo "Target score:      {{target_score}}"
       echo "Plateau counter:   {{plateau_counter}}"
       echo "Converged:         {{converged}}"
+      echo ""
+      echo "Cache dir:         {{cache_info.cache_dir}}"
+      echo "Competitors cached: {{cache_info.competitors_cached}}"
+      echo "Topics/iteration:  {{topics_per_iteration}}"
       echo ""
 
       # Determine exit reason
