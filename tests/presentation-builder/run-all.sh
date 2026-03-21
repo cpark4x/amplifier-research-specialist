@@ -109,13 +109,17 @@ if [ "$GENERATE" = true ]; then
   echo ""
 fi
 
-# --- Phase 2: Evaluate decks (all in parallel) ---
+# --- Phase 2: Evaluate decks (sequential) ---
+# NOTE: Evaluations run sequentially because agent-browser uses a singleton
+# browser daemon. Parallel eval jobs would stomp on each other — one instance
+# opens a URL while another is mid-screenshot, causing "No slides found" errors.
+# Generation (Phase 1) stays parallel since it doesn't use agent-browser.
 if [ "$EVALUATE" = true ]; then
-  echo "=== PHASE 2: EVALUATING DECKS (parallel) ==="
+  echo "=== PHASE 2: EVALUATING DECKS (sequential) ==="
   echo ""
 
-  pids=()
-  names=()
+  total=0
+  failures=0
   for scenario in "${scenarios[@]}"; do
     name=$(basename "$scenario" .md)
     deck_path="${OUTPUT_DIR}/${name}-output.html"
@@ -124,34 +128,23 @@ if [ "$EVALUATE" = true ]; then
       continue
     fi
     log="${LOG_DIR}/${name}-evaluate.log"
-    echo "  Starting: ${name} (log: ${log})"
+    total=$((total + 1))
+    echo "  Evaluating: ${name} (${total}/${#scenarios[@]}) ..."
 
-    amplifier tool invoke recipes \
+    if amplifier tool invoke recipes \
       operation=execute \
       recipe_path="${EVALUATE_RECIPE}" \
       context="{\"scenario_path\": \"${scenario}\", \"deck_path\": \"${deck_path}\", \"output_dir\": \"${OUTPUT_DIR}\"}" \
-      > "${log}" 2>&1 &
-
-    pids+=($!)
-    names+=("${name}")
-  done
-
-  echo ""
-  echo "  Waiting for ${#pids[@]} jobs..."
-  echo ""
-
-  failures=0
-  for i in "${!pids[@]}"; do
-    if wait "${pids[$i]}"; then
-      echo "  DONE: ${names[$i]}"
+      > "${log}" 2>&1; then
+      echo "  DONE: ${name}"
     else
-      echo "  FAIL: ${names[$i]} (see ${LOG_DIR}/${names[$i]}-evaluate.log)"
+      echo "  FAIL: ${name} (see ${LOG_DIR}/${name}-evaluate.log)"
       failures=$((failures + 1))
     fi
   done
 
   echo ""
-  echo "Evaluation complete. ${failures} failures out of ${#pids[@]}."
+  echo "Evaluation complete. ${failures} failures out of ${total}."
   echo ""
 fi
 
