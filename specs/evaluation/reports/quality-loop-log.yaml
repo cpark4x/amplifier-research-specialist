@@ -1,0 +1,48 @@
+---
+round: 1
+gap: ""
+candidates: "see diagnosis output for full list"
+chosen_because: ""
+target: ""
+edit_plan: ""
+commit: "ad1d3d8"
+score_before: 0
+score_after: 0
+decision: "kept"
+plateau_counter: 0
+---
+round: 2
+gap: ""
+candidates: "see diagnosis output for full list"
+chosen_because: ""
+target: ""
+edit_plan: ""
+commit: "4586a95"
+score_before: 0
+score_after: 0
+decision: "kept"
+plateau_counter: 0
+---
+round: 1
+gap: "** factual-depth-brief-word-budget"
+candidates: "see diagnosis output for full list"
+chosen_because: "** Universal gap (4/4 producing topics), largest avg delta (-2.75), clear single-file root cause (writer word budget), cascading benefit to Structure gap, and the upstream research data already exists — only the writer's compression is discarding it. Estimated +7 composite points across 4 topics."
+target: "** agents/writer.md"
+edit_plan: "** In Stage 3 (Structure), increase the Brief word budget from "250–400 words" to "800–1,200 words". Add a finding coverage floor rule: "When the input corpus contains 15+ findings, the brief MUST reference at least 60% of findings in the narrative body — use structured tables, comparison matrices, or grouped sub-sections as needed to achieve coverage without padding." Update the Brief structure template from "Summary (3-5 sentences) → Key Points (bullets) → Implications → Next Steps" to "Summary (3-5 sentences) → Key Points (3-6 developed paragraphs, each anchored to specific findings; use comparison tables for survey/ranking and head-to-head inputs) → Implications → Next Steps". Add an input-adaptive scaling note: "When input corpus exceeds 20 findings across 5+ distinct entities or strategies, adopt the Report structure (1,200-1,800 words) regardless of requested format, to prevent coverage loss.""
+commit: "c305f26"
+score_before: 0
+score_after: 0
+decision: "kept"
+plateau_counter: 0
+---
+round: 2
+gap: "** researcher-source-breadth"
+candidates: "see diagnosis output for full list"
+chosen_because: "** Factual Depth is the widest structural gap (average Δ = −2.6, appearing in all 5/5 topics) and shares a root cause with Source Quality (Δ = −2.2, 4/5 topics): the researcher discovers too few diverse sources. Fixing the researcher's source discovery pipeline addresses both CRITICAL structural gaps simultaneously. Every per-topic evaluation report independently identified this as the #1 priority fix. Expected impact: closing Factual Depth from 6.2→~8.0 and Source Quality from 6.4→~8.0 would raise the pipeline average from 7.53 to approximately 8.5, closing ~65% of the gap to the 9.0 target."
+target: "** agents/researcher.md"
+edit_plan: "** Added two structural interventions to the researcher agent:"
+commit: "bab7612"
+score_before: 0
+score_after: 0
+decision: "kept"
+plateau_counter: 0
