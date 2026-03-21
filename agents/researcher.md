@@ -125,6 +125,23 @@ For **Survey / Ranking** and **Head-to-Head Comparison** question types, expand 
 
 Use the query type to generate a canonical source checklist before fetching begins. This ensures the right primary sources are always checked first — not just whatever a search engine surfaces.
 
+#### Minimum Source Diversity Gate (mandatory)
+
+Before proceeding to Stage 3, your source queue MUST include URLs from **at least 4 of the following 6 source categories**:
+
+| Category | Examples | Search tactics |
+|---|---|---|
+| **Official / Primary docs** | Product pages, spec documents, gov sites, vendor blogs | Direct URL navigation |
+| **Peer-reviewed / Academic** | arXiv, USENIX, ACM, IEEE, Springer, .edu domains | `"[topic]" site:arxiv.org`, `"[topic]" site:usenix.org`, `"[topic]" filetype:pdf` |
+| **Authoritative data sources** | Surveys with published methodology (Gallup, Pew), government statistics, benchmark databases (MTEB, SPEC), financial filings (SEC) | `"[topic]" survey OR study OR benchmark site:gallup.com OR site:pewresearch.org` |
+| **Independent evaluations** | Third-party benchmarks, analyst reports (Gartner, Forrester, IDC), head-to-head comparisons by independent reviewers | `"[topic]" benchmark OR comparison OR evaluation -site:[vendor]` |
+| **Industry / practitioner** | Trade press (InfoQ, The New Stack, HBR), practitioner blogs, conference talks | Standard search with domain expertise |
+| **Community / sentiment** | Reddit, HN, Stack Overflow, vendor forums, developer surveys | `"[topic]" site:reddit.com`, `"[topic]" site:news.ycombinator.com` |
+
+**Minimum unique source URLs:** Your source queue must target at least **12 distinct URLs** across at least **8 distinct web domains** before you begin fetching. If your initial search round yields fewer, run 2–3 additional targeted searches using the tactics column above for under-represented categories.
+
+**Academic search is mandatory for Technical Analysis and Factual Deep-Dive question types.** Run at least 2 searches targeting academic sources (arXiv, Google Scholar, USENIX, ACM DL) and include any relevant results in the queue. For other question types, academic search is recommended but not required.
+
 **Person research checklist:**
 - Personal blog / website (highest priority — primary source)
 - X / Twitter direct posts (primary — not journalist descriptions of tweets)
@@ -218,6 +235,9 @@ Before proceeding to synthesis, check:
    - **Domain concentration limit:** No single web domain may contribute more than 25% of total findings. If any domain exceeds this, flag it and execute targeted searches for alternative authoritative sources covering the same claims. The only exception is when the research question is specifically about that domain's own product or organization.
    - **Primary source resolution:** When a finding originates from a survey paper, aggregator site, or blog post that references original research, resolve to and cite the original publication URL. The primary source gets the citation, not the secondary source that led you to it. If the original is inaccessible, cite the secondary but note "via [secondary source] — original at [URL] inaccessible."
    - **Source distribution self-check:** After the initial research pass, explicitly evaluate your source tier distribution. If more than 50% of findings cite blogs, aggregator sites, or commercial content-marketing pages, execute 2–3 additional searches specifically targeting institutional, academic, and primary sources before proceeding.
+
+5. **Unique source count gate.** Count distinct URLs (not findings) across all extracted claims. If fewer than **12 unique URLs** from **8+ distinct domains**, run targeted searches for under-represented source categories from the Stage 2 diversity table. Multiple findings from the same URL count as one source — do not inflate source diversity by assigning separate IDs to claims from the same page.
+6. **Factual breadth gate.** For the detected question type, verify your findings cover at least **80% of the required dimensions** listed in Step B of the Planner. If any required dimension has zero findings, run 1–2 targeted searches specifically for that dimension before proceeding. This is the single most common failure mode: the pipeline produces strong analysis on a narrow evidence base while missing entire topic categories that the audience needs.
 
 **PASS:** All checks clear — proceed to Synthesizer
 **FAIL:** Run another targeted research cycle
