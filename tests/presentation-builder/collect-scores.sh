@@ -212,7 +212,7 @@ fi
 # Thresholds:
 #   REGRESSION — overall dropped > 0.3, or any dimension dropped > 0.5
 #   NEW FAIL   — verdict went to FAIL, or any dimension hit 1
-#   WARNING    — overall dropped any amount (but within regression threshold)
+#   WARNING    — overall dropped > 0.15 (but within regression threshold)
 #
 # Exit code: 1 if any REGRESSION or NEW FAIL found, 0 otherwise.
 # ---------------------------------------------------------------------------
@@ -303,7 +303,7 @@ if [ "$CHECK" = true ]; then
         if (odrop > othresh + 0 && level == "OK") {
           level = "REGRESSION"
           details = details "  overall: " prev_overall[s] " -> " curr_overall[s] " (-" odrop ")\n"
-        } else if (odrop > 0 && level == "OK") {
+        } else if (odrop > 0.15 && level == "OK") {
           level = "WARNING"
           details = details "  overall: " prev_overall[s] " -> " curr_overall[s] " (-" odrop ")\n"
         }

@@ -3,7 +3,7 @@
 # Presentation Builder Evaluation Harness — Full Run (Parallel)
 # =============================================================================
 #
-# Generates all 6 test decks and evaluates each against the rubric.
+# Generates all 9 test decks and evaluates each against the rubric.
 # All scenarios within a phase run in PARALLEL.
 # Results are organized into numbered rounds for comparison over time.
 #

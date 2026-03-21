@@ -89,13 +89,13 @@ Score 1: Multiple slides are walls of text. Titles are sentences. Bullets are pa
 - Are dense data slides using visual elements (cards, tables, charts) rather than prose?
 - Could someone in the back row scan each slide in seconds?
 
-### D5: Visual Rhythm (weight: 8%)
+### D5: Visual Rhythm & Animation (weight: 8%)
 
 Does the presentation vary its visual weight across slides, avoiding consecutive heavy slides and creating breathing room?
 
-Score 5: Intentional pacing — heavy data slides are followed by lighter summary or insight slides. Section dividers create natural pauses. No more than two consecutive heavy slides anywhere. Layout variety (cards, tables, two-column, full-bleed, stat highlights).
-Score 3: Some layout variety but runs of three or more consecutive heavy slides exist. Section dividers present but not always well-placed for pacing.
-Score 1: Monotonous layout — every slide looks the same. No breathing room. Five or more consecutive heavy slides. No section dividers.
+Score 5: Intentional pacing — heavy data slides are followed by lighter summary or insight slides. Section dividers create natural pauses. No more than two consecutive heavy slides anywhere. Layout variety (cards, tables, two-column, full-bleed, stat highlights). Purposeful animations that reinforce content, reduced-motion support present.
+Score 3: Some layout variety but runs of three or more consecutive heavy slides exist. Section dividers present but not always well-placed for pacing. Animations present but some are decorative rather than communicative, or reduced-motion missing.
+Score 1: Monotonous layout — every slide looks the same. No breathing room. Five or more consecutive heavy slides. No section dividers. No animation, or animations that distract/confuse, or animations trigger on page load.
 
 **Check for**:
 - Are there runs of three or more consecutive heavy/dense slides?
@@ -103,6 +103,7 @@ Score 1: Monotonous layout — every slide looks the same. No breathing room. Fi
 - Is there layout variety (card grids, tables, two-column, stat cards, full-bleed quotes)?
 - Are lighter "insight" or "key takeaway" slides interspersed among dense content?
 - Does the visual pacing create a sense of rhythm and momentum?
+- CSS animations are used purposefully to reinforce content (not decoration). 2-4 animated slides per deck. Animations trigger on slide entrance (.active), not page load. @media (prefers-reduced-motion: reduce) is present and functional.
 
 ### D6: Audience Calibration (weight: 12%)
 
@@ -140,15 +141,15 @@ Score 1: Major findings or entire source sections missing with no acknowledgment
 
 Do speaker notes use the structured 4-field format and provide genuine presentation support?
 
-Score 5: Every content slide has structured notes with all four fields: **transition** (connecting sentence from previous slide), **key_point** (core message to convey), **if_challenged** (specific objection and response), **confidence** (source tier and corroboration level). Notes are substantive and presenter-ready.
+Score 5: Every content slide has structured notes with all four fields: **Transition** (connecting sentence from previous slide), **Key point** (core message to convey), **If challenged** (specific objection and response), **Confidence** (source tier and corroboration level). Notes are substantive and presenter-ready.
 Score 3: Notes present on most slides and substantive, but lack the 4-field structure. May be flowing paragraphs with good content but no structured fields. Or structured but thin/generic.
 Score 1: No speaker notes, or generic notes like "Discuss this slide" or "Cover the key points."
 
 **Check for**:
-- Are all four fields present: transition, key_point, if_challenged, confidence?
-- Do transitions connect to the previous slide's content specifically?
-- Do "if_challenged" responses anticipate real objections with specific rebuttals?
-- Do confidence annotations reference source tier or corroboration level?
+- Are all four fields present: Transition, Key point, If challenged, Confidence?
+- Do Transition fields connect to the previous slide's content specifically?
+- Do "If challenged" responses anticipate real objections with specific rebuttals?
+- Do Confidence annotations reference source tier or corroboration level?
 - Are notes substantive enough to actually help a presenter prepare?
 
 ### D9: Structural Mechanics (weight: 5%)
@@ -200,13 +201,13 @@ Score 1: Data is presented without interpretation. Slides show numbers, charts, 
 - Is the conclusion a natural consequence of the evidence presented, or does it feel bolted on?
 - Are "insight" or "implication" statements present on data-heavy slides?
 
-### D12: Information Design (weight: 10%)
+### D12: Information Design & Visual Composition (weight: 10%)
 
 When the source material contains structured data, is it presented visually rather than as prose? This dimension measures whether the builder makes effective use of visual information display.
 
-Score 5: Comparison data is in tables or matrices. Trends and changes use stat cards with directional indicators. Key numbers are given visual prominence (large type, callout boxes, stat highlights). Relationships are shown spatially. Dense data uses cards, grids, or visual groupings rather than bullet lists. The visual format accelerates comprehension.
-Score 3: Some data is visualized effectively but other data that would benefit from tables or visual treatment is presented as prose or bullet points. Mixed execution.
-Score 1: All data is presented as prose or bullet lists regardless of structure. Comparison data that belongs in a table is in paragraphs. Numbers that should be visually prominent are buried in body text. No use of visual data display.
+Score 5: Comparison data is in tables or matrices. Trends and changes use stat cards with directional indicators. Key numbers are given visual prominence (large type, callout boxes, stat highlights). Relationships are shown spatially. Dense data uses cards, grids, or visual groupings rather than bullet lists. The visual format accelerates comprehension. Clear visual anchor on every slide, intentional hierarchy.
+Score 3: Some data is visualized effectively but other data that would benefit from tables or visual treatment is presented as prose or bullet points. Mixed execution. Some slides lack focal point or use default symmetric layouts.
+Score 1: All data is presented as prose or bullet lists regardless of structure. Comparison data that belongs in a table is in paragraphs. Numbers that should be visually prominent are buried in body text. No use of visual data display. No visual hierarchy, competing elements at equal weight.
 
 **Check for**:
 - When source has comparison data (A vs B vs C), is it in a table or matrix?
@@ -215,6 +216,9 @@ Score 1: All data is presented as prose or bullet lists regardless of structure.
 - Does the slide format match the data structure (lists for lists, grids for comparisons, timelines for sequences)?
 - Would a different visual format make any slide's data more immediately comprehensible?
 - Are there slides where prose is doing the job of a table or chart?
+- Does each slide have one clear visual anchor — the dominant element that proves the title's assertion?
+- Are layouts intentionally asymmetric (60/40) rather than symmetric (50/50) where appropriate?
+- Is visual hierarchy intentional — is the eye guided to the most important element first?
 
 ---
 
@@ -246,8 +250,8 @@ D4: DENSITY DISCIPLINE (8%)
 Analysis: [2-4 sentences checking word limits on specific slides. Quote any overlong titles or dense body text. Note visual analysis evidence for scanability.]
 Score: [n]/5
 
-D5: VISUAL RHYTHM (8%)
-Analysis: [2-4 sentences examining slide pacing. Identify runs of consecutive heavy slides. Note layout variety. Reference visual analysis evidence.]
+D5: VISUAL RHYTHM & ANIMATION (8%)
+Analysis: [2-4 sentences examining slide pacing and animation quality. Identify runs of consecutive heavy slides. Note layout variety and whether animations are purposeful. Reference visual analysis evidence.]
 Score: [n]/5
 
 D6: AUDIENCE CALIBRATION (12%)
@@ -274,8 +278,8 @@ D11: INSIGHT DENSITY (10%)
 Analysis: [2-4 sentences examining whether data slides state their implications. Quote examples of "so what" statements or their absence. Assess whether the deck builds to a clear conclusion.]
 Score: [n]/5
 
-D12: INFORMATION DESIGN (10%)
-Analysis: [2-4 sentences examining how structured data is displayed. Identify data presented as prose that should be visual. Note effective use of tables, stat cards, or visual groupings.]
+D12: INFORMATION DESIGN & VISUAL COMPOSITION (10%)
+Analysis: [2-4 sentences examining how structured data is displayed and visual composition. Identify data presented as prose that should be visual. Note effective use of tables, stat cards, or visual groupings. Assess visual hierarchy and focal point presence on key slides.]
 Score: [n]/5
 
 TOP ISSUES (most impactful, max 5)
@@ -305,9 +309,9 @@ SAMPLE EVIDENCE
 1. **Content fidelity is paramount.** Every number in the deck must trace to a number in the source material. Plausible-sounding fabrications are still fabrications. If a statistic appears in the deck but not in the source, score D3 accordingly regardless of how reasonable it seems.
 2. **The Newspaper Test is binary.** Read ONLY the slide titles in sequence. Either they tell a coherent story (assertions, claims, conclusions) or they don't (topic labels, category names). "Executive Summary" is a topic label. "Q3 revenue exceeded target by 12% driven by enterprise expansion" is an assertion. There is no middle ground on individual titles.
 3. **Audience calibration is about framing, not dumbing down.** An executive deck should surface strategic implications and financial impact — not remove technical detail. A technical deck should name specific tools — not add jargon for its own sake. A deck for non-specialists should make complex topics accessible without condescension. The question is: does the framing match what this audience cares about?
-4. **Speaker notes matter.** The 4-field structure (transition, key_point, if_challenged, confidence) is a hard requirement. Substantive flowing paragraphs that cover the same ground but lack explicit fields score a 3, not a 4. Generic notes ("Discuss this slide") are a 1.
+4. **Speaker notes matter.** The 4-field structure (Transition, Key point, If challenged, Confidence) is a hard requirement. Substantive flowing paragraphs that cover the same ground but lack explicit fields score a 3, not a 4. Generic notes ("Discuss this slide") are a 1.
 5. **Be specific with evidence.** Quote actual slide titles, content passages, CSS patterns, and speaker note excerpts. "Generally good" is not evidence. "Slide 5 title 'Uptime & Availability' is a topic label, not an assertion" is evidence.
-6. **Use the visual analysis for visual dimensions.** For D4 (Density Discipline), D5 (Visual Rhythm), D10 (HTML Quality), and D12 (Information Design), incorporate the visual analysis findings. The visual analysis tells you what the slides ACTUALLY LOOK LIKE when rendered — use this over CSS inference. Reference specific visual observations in your rationale.
+6. **Use the visual analysis for visual dimensions.** For D4 (Density Discipline), D5 (Visual Rhythm & Animation), D10 (HTML Quality), and D12 (Information Design & Visual Composition), incorporate the visual analysis findings. The visual analysis tells you what the slides ACTUALLY LOOK LIKE when rendered — use this over CSS inference. Reference specific visual observations in your rationale.
 7. **Insight density is about interpretation, not repetition.** Showing a number is not insight. Stating what the number means for the audience is insight. "Revenue: $45.2B" is data. "A $45.2B market growing at 14.8% signals a window for entry before consolidation" is insight. Score D11 based on whether data slides include this interpretive layer.
 8. **Information design rewards visual thinking.** When source material contains comparison data, the correct display is a table or matrix, not prose. When there are key statistics, they deserve visual prominence. Score D12 based on whether the builder chose the right visual format for the data structure.
 9. **Write analysis BEFORE scoring.** For each dimension, complete your analytical observations before committing to a number. This is not optional — it is the evaluation method. Scores written before analysis are unreliable.

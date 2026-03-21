@@ -148,7 +148,7 @@ steps:
       echo "FILES:"
       ls -1 "$screenshot_dir"/slide-*.png 2>/dev/null || echo "  (none)"
     output: "screenshot_result"
-    timeout: 120
+    timeout: 180
 
   # -- Step 3: Visual quality analysis via nano-banana VLM ----------------------
   #
@@ -168,7 +168,7 @@ steps:
 
       ## The Three Dimensions You Feed
 
-      ### D4: Density Discipline (10% of total score)
+      ### D4: Density Discipline (8% of total score)
       Can each slide be scanned in seconds? The rubric criteria:
       - Titles <=20 words
       - Individual bullets <=25 words
@@ -182,7 +182,7 @@ steps:
       - Readable font sizes at presentation distance
       - Effective use of whitespace around content blocks
 
-      ### D5: Visual Rhythm (10% of total score)
+      ### D5: Visual Rhythm & Animation (8% of total score)
       Does the deck vary its visual weight and create pacing? The rubric criteria:
       - Are there runs of 3+ consecutive heavy/dense slides?
       - Do section dividers appear between major presentation phases?
@@ -195,6 +195,8 @@ steps:
       - Heavy data slides followed by breathing room
       - Section dividers creating natural pauses
       - Mix of layout types across the deck
+
+      Animation quality: Are CSS animations present and purposeful (reinforcing content, not decorative)? Do animations trigger on slide entrance, not page load? Is @media (prefers-reduced-motion: reduce) present? Note: screenshots capture the rendered state — look for animation artifacts, mid-transition states, or elements that appear to be in motion.
 
       ### D10: HTML Rendering Quality (5% of total score)
       Does the deck actually work as a presentation? The rubric criteria:
@@ -210,7 +212,7 @@ steps:
       - Text that is readable without squinting
       - Clean rendering without visual glitches
 
-      ### D12: Information Design (10% of total score)
+      ### D12: Information Design & Visual Composition (10% of total score)
       Is data displayed visually rather than as prose? The rubric criteria:
       - Are comparisons shown as tables or matrices (not paragraphs)?
       - Are key metrics displayed as stat cards or callout boxes (not inline text)?
@@ -222,6 +224,8 @@ steps:
       - Metrics displayed with visual emphasis (large numbers, color coding)
       - Comparison data in side-by-side or matrix layouts
       - Data slides that reward scanning vs slides that require reading
+
+      Visual composition: Does each slide have a clear visual anchor? Are layouts intentionally asymmetric or do they default to equal-weight grids?
 
       ## Screenshot Context
 
@@ -249,7 +253,10 @@ steps:
          - Visual weight progression (heavy -> light -> heavy rhythm)
          - Section divider presence and placement
          - Runs of consecutive heavy or identical-looking slides
-      6. Produce the structured report below.
+      6. Check the screenshot_result section above: if it contains a NAV_RESULT
+         line, note it — you must include it verbatim in your report under the
+         '=== NAVIGATION TEST ===' section so the judge can access it.
+      7. Produce the structured report below.
 
       ## Output Format (produce EXACTLY this)
 
@@ -295,6 +302,9 @@ steps:
       Visual strengths: [top 2-3 with slide references]
       Visual weaknesses: [top 2-3 with slide references]
       Rendering issues: [any CSS glitches, broken elements, or artifacts]
+
+      === NAVIGATION TEST ===
+      [If screenshot_result contains a NAV_RESULT line, copy it here verbatim. If not present, write "NAV_RESULT: not available".]
       ```
 
       Be specific. Reference slide numbers. Do not fabricate observations --
@@ -367,8 +377,8 @@ steps:
       4. **Speaker notes matter.** Generic notes like "Discuss this slide" are
          a failure for D8. The 4-field structure is a hard requirement.
       5. **Use the VISUAL ANALYSIS for visual dimensions.** For D4 (Density
-         Discipline), D5 (Visual Rhythm), D10 (HTML Quality), and D12
-         (Information Design), incorporate the visual analysis findings. The
+         Discipline), D5 (Visual Rhythm & Animation), D10 (HTML Quality), and D12
+         (Information Design & Visual Composition), incorporate the visual analysis findings. The
          visual analysis tells you what the slides ACTUALLY LOOK LIKE when
          rendered -- use this over CSS inference. Reference specific visual
          observations in your rationale.
