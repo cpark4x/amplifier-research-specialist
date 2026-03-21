@@ -1,6 +1,6 @@
 name: "quality-loop"
 description: "Autonomous quality improvement loop — evaluates the specialists pipeline against competitors, diagnoses structural gaps, fixes them, and re-evaluates until target score is reached."
-version: "1.0.0"
+version: "2.0.0"
 tags: [quality, loop, evaluation, competitive, autonomous]
 
 context:
@@ -9,8 +9,22 @@ context:
   plateau_counter: 0
   converged: "false"
   evaluation_mode: "competitive"
+  topics_per_iteration: 3
 
 steps:
+  # ===========================================================================
+  # PHASE A: INITIAL FULL EVALUATION (runs once)
+  # ===========================================================================
+  - id: "initial-eval"
+    type: "recipe"
+    recipe: "./quality-eval.yaml"
+    context:
+      evaluation_mode: "{{evaluation_mode}}"
+      target_score: "{{target_score}}"
+    output: "initial_eval_result"
+    timeout: 21600
+    on_error: "continue"
+
   # ===========================================================================
   # QUALITY IMPROVEMENT LOOP
   # ===========================================================================
@@ -158,38 +172,35 @@ steps:
       - id: "check"
         type: "bash"
         command: |
-          # --- Score extraction using python3 (macOS-compatible, BSD grep lacks -P) ---
           score_before="{{current_score}}"
 
-          # Parse the CURRENT round's score from the diagnosis output
-          score_after=$(cat <<'__EXTRACT__' | python3 -c "
-          import sys, re
-          text = sys.stdin.read()
-          m = re.search(r'score_before:\s*([0-9]+\.?[0-9]*)', text)
-          print(m.group(1) if m else '')
-          "
+          # Write diagnosis to temp file OUTSIDE command substitution to avoid
+          # unmatched parentheses in LLM output breaking $(...) parsing.
+          cat <<'__EXTRACT__' > /tmp/quality-loop-diag.txt
           {{diagnosis}}
           __EXTRACT__
-          )
 
-          # If extraction failed, assume no change
+          # Extract score_before from diagnosis output
+          score_after=$(/usr/bin/python3 -c "
+          import re
+          text = open('/tmp/quality-loop-diag.txt').read()
+          m = re.search(r'score_before:\s*([0-9]+\.?[0-9]*)', text)
+          print(m.group(1) if m else '')
+          " 2>/dev/null)
+
           if [ -z "$score_after" ]; then
             score_after="${score_before}"
           fi
 
-          # Current plateau_counter
           plateau_counter={{plateau_counter}}
-
-          # Get the latest commit (the fix commit)
           fix_commit=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
-          # --- Decision logic ---
           decision="kept"
           new_plateau=$plateau_counter
           converged="false"
 
           if [ "{{_loop_iteration}}" -gt 1 ] && [ "$score_before" != "0" ]; then
-            improved=$(python3 -c "print('yes' if float('${score_after}') > float('${score_before}') else 'no')" 2>/dev/null || echo "no")
+            improved=$(/usr/bin/python3 -c "print('yes' if float('${score_after}') > float('${score_before}') else 'no')" 2>/dev/null || echo "no")
 
             if [ "$improved" = "no" ]; then
               git revert --no-edit HEAD 2>/dev/null || true
@@ -204,7 +215,6 @@ steps:
             fi
           fi
 
-          # Output JSON for update_context
           cat <<EOF
           {
             "current_score": ${score_after:-0},
