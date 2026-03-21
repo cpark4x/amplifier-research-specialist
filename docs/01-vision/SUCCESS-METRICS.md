@@ -245,7 +245,7 @@ There must be at least one thing this specialist does that an adjacent specialis
 
 **Ecosystem adoption:**
 - Orchestrators choose the correct specialist for a task without prompting
-- Context file (`context/specialists-instructions.md`) accurately guides delegation decisions
+- Context file (`context/coordinator-routing.md`) accurately guides delegation decisions
 
 ---
 

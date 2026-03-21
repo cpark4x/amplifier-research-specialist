@@ -71,7 +71,7 @@ when test evidence exists; not updated on spec changes alone.
 ### Chain Reliability (currently 7/10)
 
 **What moved it from 8 to 7 (Mar 18–19):**
-- Writer-formatter breaks in ad-hoc mode (#44) — two-input contract (writer output + original ~15K token research output) is designed for recipe pipelines where context variables pass both inputs. In coordinator-driven ad-hoc mode, re-sending the research corpus defeats delegation's token-conservation purpose. Formatter halted requesting material the coordinator couldn't re-send. *(2026-03-19-retirement-research-specialists-vs-direct)*
+- Writer-formatter breaks in ad-hoc mode (#44) — two-input contract (writer output + original ~15K token research output) is designed for recipe pipelines where context variables pass both inputs. In coordinator-driven ad-hoc mode, re-sending the research corpus defeats delegation's token-conservation purpose. Formatter halted requesting material the coordinator couldn't re-send. **Shipped 2026-03-20:** Stage 0.5 detection + Degraded Mode pass-through (commits `00d2ea8`, `46fd324`). *(2026-03-19-retirement-research-specialists-vs-direct)*
 - Conditional branching bug in research-chain v1.10.0 (#42) — smart-skip gates failed (bash output doesn't match condition syntax, likely trailing whitespace). Both conditions failed, leaving `formatted_analysis` undefined. *(2026-03-19-writer-fixes-37-38-cross-topic-validation)*
 - Researcher truncation confirmed systemic: 4/5 pipeline runs produce conversational summary instead of canonical RESEARCH OUTPUT block (#41). Gate catches it but no auto-retry — pipeline cannot self-serve. *(2026-03-18 and 2026-03-19 test runs)*
 
@@ -80,10 +80,11 @@ when test evidence exists; not updated on spec changes alone.
 - All 5 formatter pairs fire correctly in recipe pipelines
 - Recipe timeouts fixed (#11)
 
-**What would move it back to 8 (all three shipped, pending validation):**
+**What would move it back to 8 (all four shipped, pending validation):**
 - #45 two-path doctrine — **shipped** (commit `7a07b66`). Makes ad-hoc mode work — recipe path keeps formatters, ad-hoc path makes them optional. Needs live ad-hoc test to validate.
 - #41 auto-retry on truncation — **shipped** (research-chain v1.12.0, commit `7a07b66`). Soft gate → retry step → hard gate. Needs pipeline run that hits truncation to validate.
 - #42 conditional branching fix — **shipped** (research-chain v1.11.0, commit `9c855b2`). Removed smart-skip gates, always run formatters.
+- #44 writer-formatter graceful degradation — **shipped** (commits `00d2ea8`, `46fd324`). Stage 0.5 detection + Degraded Mode pass-through with citation notice. Needs live ad-hoc session test to validate.
 
 ### Format Fidelity (currently 7/10)
 
