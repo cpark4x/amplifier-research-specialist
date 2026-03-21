@@ -26,6 +26,45 @@ steps:
     on_error: "continue"
 
   # ===========================================================================
+  # PHASE A: CACHE COMPETITOR BASELINES
+  # ===========================================================================
+  - id: "cache-competitors"
+    type: "bash"
+    command: |
+      RUN_ID=$(date +%Y%m%d_%H%M%S)
+      CACHE_DIR="specs/evaluation/cache/${RUN_ID}"
+      mkdir -p "${CACHE_DIR}/competitors"
+      mkdir -p "${CACHE_DIR}/scores"
+
+      # Save the full initial evaluation result for reference
+      cat <<'__EVAL__' > "${CACHE_DIR}/initial_eval_result.txt"
+      {{initial_eval_result}}
+      __EVAL__
+
+      # Write metadata
+      cat <<EOF > "${CACHE_DIR}/metadata.json"
+      {
+        "run_id": "${RUN_ID}",
+        "cache_dir": "${CACHE_DIR}",
+        "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+        "competitors_cached": true,
+        "topics_per_iteration": {{topics_per_iteration}}
+      }
+      EOF
+
+      # Output cache info for subsequent steps
+      cat <<EOF
+      {
+        "run_id": "${RUN_ID}",
+        "cache_dir": "${CACHE_DIR}",
+        "competitors_cached": true
+      }
+      EOF
+    parse_json: true
+    output: "cache_info"
+    timeout: 60
+
+  # ===========================================================================
   # QUALITY IMPROVEMENT LOOP
   # ===========================================================================
   - id: "improvement-loop"
