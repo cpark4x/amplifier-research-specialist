@@ -18,3 +18,6 @@ docs/research-output/
 # OS
 .DS_Store
 .worktrees/
+
+# Quality loop evaluation cache (per-run, disposable)
+specs/evaluation/cache/
