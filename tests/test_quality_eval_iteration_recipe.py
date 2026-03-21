@@ -572,3 +572,17 @@ def test_run_competitors_has_provider_preferences() -> None:
         "provider_preferences must reference the '{{competitor.*}}' loop "
         f"variable for dynamic routing, got: {pp}"
     )
+
+
+def test_run_competitors_provider_preferences_is_list() -> None:
+    """provider_preferences must be a YAML sequence (list), not a mapping (dict).
+
+    The recipe engine expects a list of provider/model dicts so it can iterate
+    over routing preferences. A bare dict is silently ignored at runtime.
+    """
+    recipe = load_recipe()
+    step = _get_step(recipe, "run-competitors")
+    pp = step.get("provider_preferences")
+    assert isinstance(pp, list), (
+        f"provider_preferences must be a list (YAML sequence), got {type(pp).__name__}: {pp!r}"
+    )
