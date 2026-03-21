@@ -14,7 +14,7 @@ steps:
   - id: "load-topics"
     type: "bash"
     command: |
-      python3 -c "
+      uv run --with pyyaml python -c "
       import json, yaml
       with open('specs/evaluation/test-topics.yaml') as f:
           data = yaml.safe_load(f)
