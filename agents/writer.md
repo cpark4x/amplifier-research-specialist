@@ -105,8 +105,12 @@ Choose the document structure for the requested format:
 **Report:** Executive Summary → Background → Findings (by sub-question) → Conclusions → Recommendations → Appendix (sources)
 **Report word budget:** 1,200–1,800 words total
 
-**Brief:** Summary (3-5 sentences) → Key Points (bullets) → Implications → Next Steps
-**Brief word budget:** 250–400 words total
+**Brief:** Summary (3-5 sentences) → Key Points (3-6 developed paragraphs, each anchored to specific findings; use comparison tables for survey/ranking and head-to-head inputs) → Implications → Next Steps
+**Brief word budget:** 800–1,200 words total
+
+**Brief finding coverage floor:** When the input corpus contains 15+ findings, the brief MUST reference at least 60% of findings in the narrative body — use structured tables, comparison matrices, or grouped sub-sections as needed to achieve coverage without padding.
+
+**Brief-to-Report auto-escalation:** When input corpus exceeds 20 findings across 5+ distinct entities or strategies, adopt the Report structure (1,200–1,800 words) regardless of requested format, to prevent coverage loss.
 
 **Proposal:** Problem → Proposed Solution → Evidence → Expected Outcome → Ask
 **Proposal word budget:** 500–700 words total
