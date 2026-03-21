@@ -137,6 +137,8 @@ steps:
         context:
           evaluation_mode: "{{evaluation_mode}}"
           target_score: "{{target_score}}"
+          cache_dir: "{{cache_info.cache_dir}}"
+          selected_topic_ids: "{{selected_topics.selected_topic_ids}}"
         output: "eval_result"
         timeout: 21600
         on_error: "continue"

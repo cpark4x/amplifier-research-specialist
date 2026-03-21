@@ -6,6 +6,8 @@ tags: [evaluation, competitive, quality, harness, benchmarking]
 context:
   evaluation_mode: "competitive"   # competitive (vs competitors) or rubric (vs criteria)
   target_score: 8.0                # target aggregate score (used by Phase 2 loop)
+  cache_dir: ""                    # optional: path to cached competitor baselines (quality-loop v2)
+  selected_topic_ids: ""           # optional: JSON array of topic IDs to run (quality-loop v2)
 
 steps:
   # ===========================================================================
@@ -16,9 +18,21 @@ steps:
     command: |
       uv run --with pyyaml python -c "
       import json, yaml
+
       with open('specs/evaluation/test-topics.yaml') as f:
           data = yaml.safe_load(f)
       topics = [t for t in data.get('topics', []) if t.get('profile') == 'competitive-eval']
+
+      # Filter to selected topics if provided (quality-loop v2 optimization)
+      selected_raw = '{{selected_topic_ids}}'
+      if selected_raw and selected_raw != '{{' + 'selected_topic_ids}}':
+          try:
+              selected = json.loads(selected_raw) if selected_raw.startswith('[') else []
+              if selected:
+                  topics = [t for t in topics if t['id'] in selected]
+          except (json.JSONDecodeError, TypeError):
+              pass  # Use all topics if parsing fails
+
       print(json.dumps(topics))
       "
     output: "topics"
