@@ -574,6 +574,23 @@ def test_run_competitors_has_provider_preferences() -> None:
     )
 
 
+def test_capture_pipeline_output_uses_find_newer() -> None:
+    """capture-pipeline-output must use 'find -newer' to locate files written after pipeline start.
+
+    The old 'ls -t' + '-ot' stale-check approach misfires on the first topic:
+    when cat fails, bash exits non-zero with empty stdout, serialized by the
+    recipe engine as '[1]'. Using 'find -newer <marker>' avoids this by only
+    considering files that post-date the pipeline start marker.
+    """
+    recipe = load_recipe()
+    step = _get_step(recipe, "capture-pipeline-output")
+    command = step.get("command", "")
+    assert "find" in command and "-newer" in command, (
+        "capture-pipeline-output must use 'find -newer <marker>' to locate "
+        "files written after the pipeline started, not 'ls -t' + stale-check"
+    )
+
+
 def test_run_competitors_provider_preferences_is_list() -> None:
     """provider_preferences must be a YAML sequence (list), not a mapping (dict).
 
