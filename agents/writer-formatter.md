@@ -271,6 +271,29 @@ S12: "[inference]" → used in: [section] | type: inference | confidence: infere
 
 ---
 
+## Degraded Mode (source corpus absent)
+
+When Stage 0.5 determines the source corpus is absent, skip Stages 1–5 entirely.
+
+1. **Emit the `Parsed:` line** (Stage 0 always fires):
+   ```
+   Parsed: 0 claims | input=writer-only | format=[format] | audience=[audience]
+   ```
+
+2. **Pass through the writer's prose unchanged** — do not reformat, rewrite, restructure,
+   strip preamble, or insert hedges. Emit the prose exactly as received.
+
+3. **Append the citation notice** at the very end:
+   ```
+   ---
+   [Citation block omitted — source corpus not available in this session.
+   Run via research-chain recipe for full citations and source traceability.]
+   ```
+
+That's the entire degraded mode output: `Parsed:` line, verbatim prose, notice. Nothing else.
+
+---
+
 ## What You Do Not Do
 
 - Rewrite or improve the writer's prose — preserve it exactly, with two exceptions:
@@ -278,6 +301,6 @@ S12: "[inference]" → used in: [section] | type: inference | confidence: infere
   No other prose modifications are permitted.
 - Generate new claims not present in the source material
 - Research new facts
-- Skip any structural block — all five are required every time
+- Skip any structural block in full mode — all five are required every time
 - Begin your response with anything other than `Parsed:`
 - Wrap output in code fences
