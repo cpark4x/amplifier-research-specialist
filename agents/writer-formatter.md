@@ -185,6 +185,74 @@ If no claims match: `CLAIMS TO VERIFY: none`
 Emit `CLAIMS TO VERIFY` as plain text (no markdown header), immediately after the
 prose body.
 
+### Stage 4.5: Citation Verification Audit
+
+Before generating the final CITATIONS block, audit every S-number for citation
+integrity. This stage catches problems the upstream pipeline missed — it does not
+add information, but it flags issues that would undermine the output's credibility.
+
+Run these five checks on every S-number from Stage 1:
+
+**Check 1 — URL specificity.** For each S-number with a source URL, check whether
+the URL points to a specific document or a generic landing page. Flag as
+`[landing-page]` any URL that:
+- Ends at a bare domain (`https://example.com/`)
+- Points to a section index (`/research`, `/blog`, `/pricing`, `/products`,
+  `/news`, `/topics/...` without an article slug)
+- Points to a search results page or category listing
+
+When flagging, preserve the original URL but append the marker:
+```
+source: https://nbloom.people.stanford.edu/research [landing-page]
+```
+
+**Check 2 — DOI extraction for academic sources.** For each S-number whose URL
+domain is an academic publisher or preprint server, extract or construct the DOI:
+- `arxiv.org/abs/XXXX.XXXXX` → `doi: 10.48550/arXiv.XXXX.XXXXX`
+- `nature.com/articles/XXXXX` → `doi: 10.1038/XXXXX`
+- `doi.org/10.XXXX/...` → extract DOI directly
+- `mdpi.com`, `usenix.org`, `springer.com`, `acm.org`, `ieee.org` → extract DOI
+  from the URL path if present
+
+Append as a field: `| doi: 10.XXXX/...`
+If the DOI cannot be determined from the URL, do not fabricate one — skip this field.
+
+**Check 3 — Citation-claim coherence.** For each S-number, verify the URL domain
+is plausibly related to the claim content. Flag mismatches where:
+- The claim's subject domain doesn't match the URL's content domain (e.g., a
+  claim about "culture-building performance improvement" citing an article about
+  "how meetings have changed")
+- The claim contains a specific number but the URL points to a source known to
+  contain a different number (e.g., claiming "$1B ARR" but citing an article
+  whose headline says "$500M ARR")
+- A legal or compliance claim is sourced from a community forum rather than an
+  official legal document
+
+Annotate flagged items: `[coherence-warning — claim subject does not match URL content]`
+
+**Check 4 — S-number continuity.** Verify S-numbers are sequential (S1, S2, S3...)
+with no gaps. If a gap exists (e.g., S15 → S17 with no S16):
+- If the gap was caused by a removed duplicate, insert a note:
+  `S16: [removed — duplicate of S14]`
+- If the gap has no explanation, renumber to close the gap and update all
+  references in the prose and CITATIONS block
+
+**Check 5 — Single-source concentration.** Count how many S-numbers cite the same
+URL. If 3 or more S-numbers share a single source URL, append a warning after the
+CITATIONS block:
+
+```
+CITATION CONCENTRATION WARNING
+[URL] is cited by [n] claims (S3, S7, S12). Single-source failure would
+affect [n/total]% of the report's evidentiary base. Consider diversifying
+with independent sources for key claims.
+```
+
+**Output of Stage 4.5:** No separate output block — the checks modify the CITATIONS
+entries in Stage 5 by adding markers (`[landing-page]`, `| doi:`,
+`[coherence-warning]`) and appending any concentration warnings. Stage 5 incorporates
+these annotations into its output.
+
 ### Stage 5: Generate WRITER METADATA and CITATIONS
 
 Emit a `---` separator, then WRITER METADATA:
