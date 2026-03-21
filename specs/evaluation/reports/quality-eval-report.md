@@ -1,196 +1,160 @@
 # QUALITY EVALUATION GAP REPORT
 
-**Evaluation Date:** 2026-03-21
-**Topics Evaluated:** 5
-**Target Score:** 9.0
-**Evaluation Mode:** Competitive (all competitor outputs null — absolute scoring only)
+## OVERALL SCORES
+
+| Topic | Topic ID | Pipeline Composite | Best Competitor | Delta |
+|---|---|:---:|:---:|:---:|
+| Jina AI Embedding Provider Comparison | factual-deep-dive | **1.0** ⚠️ | N/A (null) | — |
+| Hybrid Team Productivity Strategies | strategy | **7.7** | N/A (null) | — |
+| Best Places to Retire Abroad | survey | **7.3** | N/A (null) | — |
+| Cursor vs. GitHub Copilot Workspace | competitive-comparison | **6.7** | N/A (null) | — |
+| WebAssembly Security Outside Browser | technical-analysis | **8.2** | N/A (null) | — |
+
+**Pipeline average (all 5 topics):** 6.18
+**Pipeline average (4 scorable topics, excluding infrastructure failure):** 7.48
+**Best competitor average:** N/A — all 15 competitor runs returned `null`
+**Delta:** Not computable (no competitor baselines)
+**Gap to target (scorable only):** 9.0 − 7.48 = **1.52 points**
+**Gap to target (all 5):** 9.0 − 6.18 = **2.82 points**
+
+> ⚠️ **Topic 1 (factual-deep-dive) is an infrastructure failure**, not a content quality result. The pipeline ran all 7 steps successfully (per `pipeline_run_result`), but `pipeline_output` captured the integer `[1]` — a serialization artifact — instead of research content. The evaluator correctly scored this 1/10 on all dimensions since it received no content. All subsequent analysis uses the **4 scorable topics** unless otherwise noted.
+
+> ⚠️ **All 15 competitor runs returned `null`** across all 5 topics. No competitive comparison is possible. Scores below are absolute quality assessments against the 1–10 rubric.
 
 ---
 
-## OVERALL SCORES
+### Per-Dimension Averages (4 Scorable Topics)
 
-| Topic | Pipeline Score | Best Competitor | Delta | Gap to 9.0 |
-|---|:---:|:---:|:---:|:---:|
-| factual-deep-dive (Jina AI) | 7.67 | N/A | — | −1.33 |
-| strategy (Hybrid Teams) | 8.00 | N/A | — | −1.00 |
-| survey (Retire Abroad) | 7.17 | N/A | — | −1.83 |
-| competitive-comparison (Cursor vs Copilot) | 7.00 | N/A | — | −2.00 |
-| technical-analysis (Wasm Security) | 8.17 | N/A | — | −0.83 |
-| **Cross-Topic Average** | **7.60** | **N/A** | **—** | **−1.40** |
-
-> **Note:** All 15 competitor slots (3 per topic × 5 topics) returned `null`. No competitive delta can be computed. All gap analysis is against the absolute rubric ceiling and the 9.0 target. This is itself a structural evaluation infrastructure issue — see Recommended Actions.
-
-### Per-Dimension Cross-Topic Breakdown
-
-| Dimension | factual-deep-dive | strategy | survey | competitive-comparison | technical-analysis | **Avg** | **Gap to 9** |
-|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| Source quality | 7 | 7 | 6 | 6 | 8 | **6.8** | **−2.2** |
-| Factual depth | 8 | 7 | 7 | 7 | 8 | **7.4** | **−1.6** |
-| Analytical insight | 7 | 8 | 7 | 8 | 9 | **7.8** | **−1.2** |
-| Confidence calibration | 8 | 9 | 8 | 8 | 9 | **8.4** | **−0.6** |
-| Structure & readability | 9 | 9 | 8 | 8 | 8 | **8.4** | **−0.6** |
-| Citation quality | 7 | 8 | 7 | 5 | 7 | **6.8** | **−2.2** |
-
-The two largest drags on the pipeline average are **Source quality (6.8)** and **Citation quality (6.8)**, each 2.2 points below target. Together they account for ~52% of the total gap to 9.0.
+| Dimension | Strategy | Survey | Comp. Comparison | Tech Analysis | **Mean** | **Gap to 9.0** |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| 1. Source quality | 7 | 7 | 5 | 8 | **6.75** | **−2.25** |
+| 2. Factual depth | 7 | 6 | 6 | 8 | **6.75** | **−2.25** |
+| 3. Analytical insight | 8 | 7 | 7 | 9 | **7.75** | **−1.25** |
+| 4. Confidence calibration | 7 | 8 | 8 | 7 | **7.50** | **−1.50** |
+| 5. Structure & readability | 9 | 8 | 7 | 9 | **8.25** | **−0.75** |
+| 6. Citation quality | 8 | 8 | 7 | 8 | **7.75** | **−1.25** |
 
 ---
 
 ## STRUCTURAL GAPS (2+ topics)
 
-### 1. Source Quality — CRITICAL
+### CRITICAL-1: Competitor Evaluation Harness Failure
 
-- **Dimension average:** 6.8/10
-- **Topics affected:** 5/5 (scores: 6, 6, 7, 7, 8)
-- **Below 7 in:** survey (6), competitive-comparison (6)
-- **At exactly 7 in:** factual-deep-dive, strategy
+- **Severity:** CRITICAL (INFRASTRUCTURE)
+- **Topics affected:** All 5/5
+- **Evidence:** All 15 competitor slots (`anthropic-claude`, `google-gemini`, `openai-gpt4o`) returned `null` across every topic. Every per-topic evaluator noted: *"All three competitor results returned null"*; *"No comparative conclusions are possible."*
+- **Root cause hypothesis:** The competitor delegate runs were either not configured, not executed, or their results were not captured by the evaluation harness. This is an orchestration/recipe infrastructure defect — the `competitor_results` array is never populated regardless of topic, indicating the failure is in the harness, not in any individual competitor.
+- **Impact:** The entire competitive evaluation mode is non-functional. No gap analysis, no competitive wins, and no delta computation is possible. This renders the "competitive" evaluation mode equivalent to absolute-only scoring.
 
-**Evidence:**
+### CRITICAL-2: Pipeline Output Capture Failure
 
-- **survey:** *"4 of 10 sources are commercial blogs (AIHR, Tango Analytics, Worklytics, Gable.to) with unclear methodology. No meta-analyses, no organizational psychology journals beyond Nature."* Source concentration: 6 of 22 claims from a single site (expatsi.com).
-- **competitive-comparison:** *"Zero references to Gartner, Forrester, IDC, or similar analyst coverage… 10 of 13 sources are blogs or product pages. No developer surveys (Stack Overflow, JetBrains), no academic papers, no conference talks."*
-- **factual-deep-dive:** *"Two claims (S21, S23) are listed as 'unattributed'… competitor benchmark data relies on awesomeagents.ai, a low-tier aggregator rather than primary MTEB leaderboard data."*
-- **strategy:** *"The tail of the source distribution includes commercial blogs of uncertain methodology… missing entirely are longitudinal studies, meta-analyses, and peer-reviewed organizational psychology journals beyond the single Nature paper."*
+- **Severity:** CRITICAL (INFRASTRUCTURE)
+- **Topics affected:** 1/5 (factual-deep-dive), but systemic risk applies to all topics
+- **Evidence:** The `pipeline_run_result` describes a successful 7-step execution (15 turns, 62 findings, 4 inferences, file saved at 10,122 bytes), yet `pipeline_output` contains `[1]` — a bare integer array. The evaluator stated: *"The output is the bare integer 1 — it contains zero research content. The pipeline likely failed silently, returned a status code or step count instead of research content."*
+- **Root cause hypothesis:** The output extraction step captured a return value, step count, or status code rather than the actual research document. The `pipeline_output` field was serialized from a non-content object. This may be an intermittent serialization bug since 4/5 topics captured output correctly.
+- **Impact:** 20% output loss rate. Even one occurrence means the pipeline cannot be trusted to reliably deliver results without a post-capture validation gate.
 
-**Root cause hypothesis:** The research stage prioritizes web-accessible, freely available sources and does not enforce a minimum source-tier diversity gate. Blog and aggregator sources are easier to retrieve than gated academic databases, analyst reports, or government statistical tables. The pipeline lacks a hard constraint like "≥N claims must originate from primary/institutional sources."
+### MAJOR-1: Source Quality (Dimension 1)
 
----
+- **Severity:** MAJOR
+- **Dimension mean:** 6.75 / 10 (gap to 9.0: −2.25)
+- **Topics affected:** 4/4 scorable topics (3/4 below 8, 1/4 at 5)
+- **Evidence:**
+  - **Strategy (7):** *"Total source count (5) is narrow for a comprehensive topic. Absent: major consulting firm research (McKinsey, Deloitte, BCG), academic management journals, technology company workplace research (Microsoft Work Trend Index)."*
+  - **Survey (7):** *"No academic, statistical, or intergovernmental sources (WHO, OECD, Numbeo, World Bank). Cost-of-living claims lean heavily on a single specialist publisher (International Living provides 5 of 23 claims)."*
+  - **Competitive-comparison (5):** *"4 of 16 sources are from aitooldiscovery.com (an SEO aggregator). No analyst reports, no empirical studies, no tier-1 trade press primary reporting. Reddit sentiment is cited via intermediary."*
+  - **Technical-analysis (8):** *"S16 attributed to a personal blog (wingolog.org). S8 cites arXiv preprint. No vendor-neutral industry reports (NIST, CISA, ENISA)."*
+- **Root cause hypothesis:** The researcher stage accepts whatever web search results are ranked by SEO without a source-tier diversity gate. There is no minimum representation requirement for primary sources, peer-reviewed research, or institutional reports. The researcher optimizes for claim volume, not source authority distribution.
 
-### 2. Citation Quality — CRITICAL
+### MAJOR-2: Factual Depth (Dimension 2)
 
-- **Dimension average:** 6.8/10
-- **Topics affected:** 4/5 below 8 (scores: 5, 7, 7, 7, 8)
-- **Below 7 in:** competitive-comparison (5)
+- **Severity:** MAJOR
+- **Dimension mean:** 6.75 / 10 (gap to 9.0: −2.25)
+- **Topics affected:** 4/4 scorable topics (2/4 at 6, 1/4 at 7, 1/4 at 8)
+- **Evidence:**
+  - **Strategy (7):** *"No coverage of technology infrastructure (async tooling, meeting load, platform fatigue), proximity bias and equity/inclusion effects, industry- or function-specific variation."*
+  - **Survey (6):** *"Healthcare quality, safety/crime statistics, climate, language barriers, cultural adjustment, housing markets, banking access absent. Only 3 of 10 ranked countries get visa details."*
+  - **Competitive-comparison (6):** *"No security/compliance features, enterprise deployment models, context window sizes, supported languages, latency metrics, debugging/testing workflow support, offline functionality."*
+  - **Technical-analysis (8):** *"Supply chain security mentioned but zero sourced claims. Comparison with alternative isolation (containers, microVMs) absent. Networking/I/O attack surface not addressed."*
+- **Root cause hypothesis:** The researcher synthesizes from available search results rather than working from a predetermined comparison framework or coverage checklist for the topic type. No "dimensions coverage" gate verifies all material axes are addressed before proceeding to analysis. Good depth within covered scope, but systematically narrow aperture.
 
-**Evidence:**
+### MAJOR-3: Confidence Calibration (Dimension 4)
 
-- **competitive-comparison:** *"The METR study is referenced three times in the body but is absent from the citation table… No inline citations. The body text makes specific factual claims without linking to which of the 13 sources supports each."* Also: *"No access dates… Missing key canonical sources."*
-- **factual-deep-dive:** *"S21 and S23 are 'unattributed' — these make competitive claims without any URL or source… S11's URL appears to be the wrong page… S14 and S15 cite awesomeagents.ai for competitor benchmark numbers rather than vendor documentation."*
-- **survey:** *"S14 cites the FBAR page for a worldwide-taxation claim — the IRS page on citizen taxation obligations would be more precisely aligned… several claims trace to the same source (expatsi.com accounts for 6 of 22 claims), creating concentration risk that isn't flagged."*
-- **technical-analysis:** *"Six claims (S15, S16, S18, S19, S20, S25) all cite the same URL — a secondary survey paper — rather than their original publications. No DOI links for any academic paper."*
+- **Severity:** MAJOR
+- **Dimension mean:** 7.50 / 10 (gap to 9.0: −1.50)
+- **Topics affected:** 4/4 scorable topics (2/4 at 7, 2/4 at 8)
+- **Evidence:**
+  - **Strategy (7):** *"The Nature RCT was conducted at a single company (Trip.com) — the brief presents its findings with high confidence and no generalizability caveat. Gallup claims receive 0.9 but its methodology (online panel surveys) has known limitations."*
+  - **Survey (8):** *"The 0.9 confidence assigned to International Living claims (S1, S2, S7–S9) may be slightly generous — IL is an advocacy publication with commercial interests."*
+  - **Competitive-comparison (8):** *"Some 'high (0.9)' ratings seem generous for sources like the-decoder.com reporting financial figures without SEC filings."*
+  - **Technical-analysis (7):** *"Uniform 0.9 floor regardless of source tier; uniform 0.6 for all inferences despite varying evidence strength. No uncertainty language surfaces in the prose."*
+- **Root cause hypothesis:** The confidence assignment uses a binary heuristic: sourced → 0.9, inference → 0.6. There is no per-claim evaluation of evidence quality, source authority, methodological rigor, or generalizability. The writer stage does not consume confidence metadata to modulate hedging language in prose. This creates a disconnect between the metadata's precision and the brief's rhetorical certainty.
 
-**Root cause hypothesis:** The pipeline treats citation assembly as a post-hoc formatting step rather than tracking source-to-claim linkage during the research phase. The researcher collects findings efficiently (sometimes through survey papers or aggregators) but doesn't resolve back to primary publication URLs. The writer-formatter catches structural issues but cannot retroactively inject missing URLs or inline references. The pipeline has no citation-completeness gate between the research and analysis stages.
+### MINOR-1: Analytical Insight — Quantification Weakness (Dimension 3)
 
----
-
-### 3. Factual Depth — MAJOR
-
-- **Dimension average:** 7.4/10
-- **Topics affected:** 3/5 at exactly 7 (strategy, survey, competitive-comparison)
-
-**Evidence:**
-
-- **strategy:** *"Several important dimensions are absent: technology and tooling, cultural and geographic variation, industry-specific evidence, and financial ROI modeling."*
-- **survey:** *"63 of 81 source findings went unused — a 22% utilization rate. Major topical gaps self-identified: healthcare quality/access; effective tax-rate modeling; cost-of-living trend data; visa processing timelines."*
-- **competitive-comparison:** *"No benchmark data (HumanEval, SWE-bench, MBPP), no completion accuracy comparisons, no latency measurements… Developer adoption metrics missing."*
-
-**Root cause hypothesis:** The research stage achieves adequate breadth on the primary question but does not probe adjacent literatures or secondary dimensions systematically. The pipeline likely issues searches derived directly from the research question surface rather than expanding into adjacent domains (e.g., "distributed team tooling" for hybrid work, "SWE-bench cursor" for the coding comparison). The brief format's word budget (~400 words) then forces heavy triage, but the upstream finding set is already missing key dimensions before triage occurs.
-
----
-
-### 4. Analytical Insight — MINOR
-
-- **Dimension average:** 7.8/10
-- **Topics affected:** 2/5 at 7 (factual-deep-dive, survey)
-
-**Evidence:**
-
-- **factual-deep-dive:** *"The analysis stays close to Jina's own framing. There is no adversarial analysis (e.g., what happens if OpenAI or Google releases a similarly efficient model? What are the risks of the Elastic acquisition for existing API users?)."*
-- **survey:** *"S22 (trend acceleration) is weakly supported — extrapolating from an 8-year growth trend to predict 3–5 year acceleration requires more evidence… The analysis would benefit from scenario modeling and explicit decision matrices."*
-
-**Root cause hypothesis:** The data-analyzer stage draws inferences from available findings but does not systematically generate adversarial or counterfactual questions. The inference protocol rewards well-supported pattern recognition but doesn't prompt for "what could undermine this conclusion?" or "what would a skeptic ask?" This produces sound but non-adversarial analysis.
+- **Severity:** MINOR
+- **Dimension mean:** 7.75 / 10 (gap to 9.0: −1.25)
+- **Topics affected:** 2/4 topics below 8 (survey: 7, competitive-comparison: 7)
+- **Evidence:**
+  - **Survey (7):** *"I1 asserts costs are 'materially understated' but provides no estimate of the understatement. Private health insurance (~€200–€400/month) and tax prep fees (~$500–$2,000/year) are readily estimable."*
+  - **Competitive-comparison (7):** *"The analysis doesn't model scenarios (what if Cursor adds JetBrains support?), doesn't address team/org-level adoption dynamics, and the Implications section is only one paragraph."*
+  - **Strategy (8) and Technical-analysis (9):** Both scored well; qualitative synthesis is strong.
+- **Root cause hypothesis:** The data-analyzer stage synthesizes themes but does not perform second-order research to quantify the gaps it identifies. It detects the *existence* of patterns but stops short of *sizing* them. The pipeline reliably produces "what" insights but inconsistently produces "how much" insights.
 
 ---
 
 ## TOPIC NOISE (1 topic only)
 
-### 1. Citation Quality = 5 in competitive-comparison
+### Structure & Readability Below 8 — Competitive-Comparison Only
 
-- **Dimension:** Citation quality
-- **Topic:** competitive-comparison (Cursor vs Copilot)
-- **Evidence:** The METR randomized controlled trial — the output's most distinctive independent evidence — was cited three times in the body but entirely absent from the citation table. Zero inline source-to-claim linkage existed anywhere in the document. This dropped citation quality 2 points below the structural baseline (~7).
-- **Verdict:** **Warrants investigation, but partially structural.** The 5 is an amplification of the structural citation weakness, not pure noise. The specific trigger was that the writer stage produced a longer-than-typical document (~1,800 words vs ~400) which exposed the lack of inline citation tracking more severely. The pipeline's citation weakness is structural (see above); the severity at 5 is topic-specific due to document length and the METR omission.
+- **Dimension:** Structure & readability (scored 7 in competitive-comparison; 8–9 in all others)
+- **Topic:** competitive-comparison
+- **Evidence:** *"No structured feature-comparison table (the most expected artifact in a product comparison). The 'Key Points' section mixes factual claims with sentiment and financial data without sub-grouping."*
+- **Verdict:** **Warrants investigation.** Product comparisons have a genre-specific structural expectation (comparison matrix/table) that the writer template doesn't accommodate. This may indicate the pipeline needs topic-type-aware output formatting, or it may resolve if factual depth improves (more data → natural tabular structure).
 
-### 2. Source Quality = 8 in technical-analysis (outlier high)
+### Citation Quality Below 8 — Competitive-Comparison Only
 
-- **Dimension:** Source quality
-- **Topic:** technical-analysis (WebAssembly security)
-- **Evidence:** This was the only topic to score 8, driven by "official specifications (webassembly.org), primary runtime documentation and security advisories (Wasmtime, Node.js), peer-reviewed academic research including a USENIX Security Distinguished Paper, and a comprehensive 121-paper survey."
-- **Verdict:** **Likely topic-specific advantage, not generalizable.** The WebAssembly security domain has an unusually concentrated, high-quality primary source ecosystem (CVE advisories, spec documents, peer-reviewed security papers). The research stage performed well when authoritative sources were readily web-accessible. This confirms the root cause hypothesis for the structural source-quality gap: the pipeline succeeds when primary sources are freely available online and struggles when they are gated or require domain-specific search strategies.
+- **Dimension:** Citation quality (scored 7 in competitive-comparison; 8 in all others)
+- **Topic:** competitive-comparison
+- **Evidence:** *"Several URLs point to aggregator intermediaries rather than primary sources. Gap between '45 sourced findings' claimed and 21 citations shown in the table suggests findings were consolidated — mapping not fully transparent."*
+- **Verdict:** **Likely noise, downstream of source quality.** If source quality improves (MAJOR-1), citation quality will improve as a consequence. The finding-to-citation consolidation transparency issue is minor and topic-specific.
+
+### Source Quality at 5 — Competitive-Comparison Only (Severity Outlier)
+
+- **Dimension:** Source quality (scored 5; nearest other topic scored 7)
+- **Topic:** competitive-comparison
+- **Evidence:** *"4 of 16 sources from aitooldiscovery.com (an SEO aggregator). No analyst reports, no empirical studies, no tier-1 trade press."*
+- **Verdict:** **Warrants investigation.** The 2-point gap below the next-worst topic (7) suggests competitive-comparison topics are particularly vulnerable to SEO-optimized aggregator content dominating search results. The source-tier diversity gate (MAJOR-1 fix) should address this, but competitive-comparison may need an additional heuristic to de-weight aggregator sources.
 
 ---
 
 ## PIPELINE STRENGTHS
 
-### 1. Confidence Calibration — Consistently Excellent
-
-- **Scores:** 8, 9, 8, 8, 9 → **Average: 8.4**
-- **Gap to 9.0:** only −0.6
-- **Appears in 5/5 topics as a top-2 dimension**
-
-**Evidence:**
-
-- **strategy (9):** *"The 18-row claims-to-verify table is an extraordinary accountability mechanism rarely seen in research briefs. Per-citation confidence scoring (0.6–0.9), explicit inference labeling with traces_to provenance, and calibrated hedging language create a multi-layered epistemic honesty system."*
-- **technical-analysis (9):** *"Every claim carries an explicit confidence tag (high/medium/inference) — this is rare and valuable. The three inferences are clearly labeled as such and include traces_to fields linking back to supporting evidence."*
-- **competitive-comparison (8):** *"Inclusion of the METR study — which actively undermines the value proposition of both tools — signals intellectual honesty over advocacy."*
-
-This is the pipeline's most distinctive capability. No evaluator across any topic questioned the calibration methodology itself — only edge cases of specific ratings.
-
-### 2. Structure & Readability — Consistently Strong
-
-- **Scores:** 9, 9, 8, 8, 8 → **Average: 8.4**
-- **Gap to 9.0:** only −0.6
-
-**Evidence:**
-
-- **factual-deep-dive (9):** *"Summary → Key Points → Implications → Next Steps → Claims to Verify → Citations → Writer Metadata. Each section serves a distinct function."*
-- **strategy (9):** *"Purpose-built for a 'technical decision-maker' audience. Bold lead sentences, inline S# references, and blockquote source summaries enable both scanning and deep reading."*
-- **competitive-comparison (8):** *"The BLUF → Architecture → Capabilities → Pricing → Enterprise → Risks → Decision → Limitations flow is logical and complete. Four comparison tables enable rapid scanning."*
-
-The pipeline's output format and information architecture are production-ready. The 8s (vs 9s) in three topics correlate with minor structural suggestions (missing threat model framing, long back-matter, missing visual summaries) rather than fundamental format problems.
+| Dimension | Mean | Evidence |
+|---|:---:|---|
+| **Structure & readability** | **8.25** | Consistently the highest-scoring dimension. Two topics scored 9/10. The Summary→Key Points→Implications→Next Steps flow, inline citation tags, bold scanning aids, and per-section source attribution blocks were praised across all evaluations. *"Matches executive audience specification precisely"* (strategy). *"The metadata block enables downstream automation"* (tech-analysis). |
+| **Analytical insight (qualitative)** | **7.75** | The pipeline's inferences are consistently rated as genuinely additive and non-obvious. Tech-analysis's "security inversion" concept scored 9/10: *"a genuinely original synthesis — it reframes Wasm security as a tradeoff rather than a binary safe/unsafe assessment"*. Strategy's "leader bottleneck paradox" and "coordination hierarchy" were called *"original analytical contributions not found in any single source."* |
+| **Citation quality** | **7.75** | S-numbered claim inventories, per-claim confidence scores, section-placement mapping, `traces_to` inference traceability, and "Claims to Verify" sections were praised in every evaluation. *"This level of citation metadata is uncommon even in professional research outputs"* (strategy). *"Systematic ID scheme with inference traceability"* (competitive-comparison). |
+| **Inference traceability** | **N/A (unscored)** | Noted as a distinguishing capability across all 4 topics. Every inference includes explicit `traces_to` chains mapping to supporting claims. *"Rare in research outputs"* (tech-analysis). This is a unique pipeline differentiator that competitors would struggle to match. |
 
 ---
 
 ## RECOMMENDED ACTIONS
 
-Prioritized by impact on closing the 1.40-point gap to target 9.0:
+Prioritized by impact (critical infrastructure first, then structural content gaps):
 
-### 1. Add a Source-Tier Diversity Gate to the Research Stage — CRITICAL
-
-**Addresses:** Source quality (−2.2 gap), cascading improvement to Citation quality and Factual depth
-**Expected impact:** HIGH (+1.0 to +1.5 points on Source quality; +0.5 cascade to Citation quality)
-
-Implement a hard constraint in the researcher specialist: before research is declared complete, enforce a minimum distribution such as ≥3 claims from government/institutional primary sources, ≥2 from peer-reviewed or analyst sources, and flag any single source contributing >25% of total claims. This forces the research stage to diversify beyond web blogs without requiring access to gated databases — it simply requires the researcher to search more specifically for authoritative sources.
-
-### 2. Implement Source-to-Claim Linkage During Research (not post-hoc) — CRITICAL
-
-**Addresses:** Citation quality (−2.2 gap)
-**Expected impact:** HIGH (+1.5 to +2.0 points on Citation quality for worst-case topics)
-
-Require the researcher to produce inline claim→URL mappings at collection time. The writer-formatter currently assembles citations after the fact, which means unreferenced sources (like the METR study) and misaligned URLs (like the FBAR page) propagate uncaught. Adding a citation-completeness validation step between research-formatter and data-analyzer — checking that every finding has a resolvable, claim-aligned URL and that no body reference lacks a citation table entry — would catch the most damaging citation failures.
-
-### 3. Add Adjacent-Domain Search Expansion to the Research Stage — MAJOR
-
-**Addresses:** Factual depth (−1.6 gap)
-**Expected impact:** MEDIUM (+0.5 to +1.0 on Factual depth)
-
-After the initial research pass, add a structured "what dimensions are missing?" self-check that generates 2–3 adjacent-domain search queries. For example: the hybrid-work topic would trigger "distributed team tooling productivity" and "remote work ROI meta-analysis"; the Cursor comparison would trigger "SWE-bench cursor copilot" and "AI coding tools developer survey 2025." This addresses the root cause of the depth gap: the pipeline explores the question surface but not its periphery.
-
-### 4. Add Adversarial Inference Prompting to the Analysis Stage — MINOR
-
-**Addresses:** Analytical insight (−1.2 gap)
-**Expected impact:** LOW-MEDIUM (+0.5 on Analytical insight)
-
-After the data-analyzer draws its inferences, add a mandatory adversarial pass: "For each inference, state the strongest counterargument or the condition under which it would be false." This would have caught the Jina evaluator's complaint about missing competitive risk analysis and the survey evaluator's concern about unsupported trend extrapolation. Low implementation cost, moderate quality uplift.
-
-### 5. Fix Competitor Evaluation Infrastructure — OPERATIONAL
-
-**Addresses:** Inability to compute competitive delta (all 15 competitor slots returned null)
-**Expected impact:** HIGH for evaluation validity (no score impact, but enables the competitive evaluation mode to function)
-
-The entire competitive evaluation layer produced no data. Every competitor result across all 5 topics was `null`. This means the "competitive" evaluation mode operated as absolute-only scoring, and no gap analysis against actual competitor outputs was possible. Diagnose and fix the competitor agent dispatch mechanism before the next evaluation cycle — without it, the evaluation cannot validate whether pipeline scores reflect genuine quality or merely the absence of a baseline.
+| # | Action | Addresses | Expected Impact |
+|---|---|---|:---:|
+| **1** | **Fix competitor evaluation harness** — debug why all 15 competitor delegate runs return `null`. Validate competitor agent/provider/model configuration, ensure results are captured and serialized. Add a pre-evaluation gate that aborts scoring if <1 competitor produces output. | CRITICAL-1 | **HIGH** — Restores the entire competitive evaluation mode. Without this, the "competitive" recipe is absolute-only scoring disguised as comparative. |
+| **2** | **Add pipeline output validation gate** — before the evaluate step, verify `pipeline_output` is non-empty well-formed text (not a status code, integer, or empty array). Reject and re-extract if validation fails. | CRITICAL-2 | **HIGH** — Prevents 20% output loss. Simple guard, high reliability payoff. |
+| **3** | **Implement source-tier diversity gate in researcher** — require minimum representation: ≥1 primary/institutional source, ≥1 peer-reviewed or empirical source, and reject or down-weight SEO aggregator intermediaries. The recent commit `ad1d3d8` ("add source-tier diversity gate") may already address this; verify it is active and enforced. | MAJOR-1 (Source quality, mean 6.75) | **HIGH** — Directly lifts the weakest content dimension. Evaluators across 3/4 topics named this as their #1 improvement. Expected lift: +1.0–1.5 points on source quality, with cascading improvements to factual depth and confidence calibration. |
+| **4** | **Add topic-type coverage checklist to researcher** — for each research type (survey, comparison, technical-analysis, strategy), define required coverage dimensions (e.g., "comparison" requires: features, pricing, security, enterprise, ecosystem). Gate research output against the checklist before proceeding to analysis. | MAJOR-2 (Factual depth, mean 6.75) | **HIGH** — Prevents the "deep but narrow" pattern. Expected lift: +1.0–1.5 points on factual depth. |
+| **5** | **Implement source-tier-aware confidence scoring** — replace the binary heuristic (sourced→0.9, inference→0.6) with a graduated model: peer-reviewed→0.9, government/institutional→0.85, established press→0.75, blog/aggregator→0.6, inference→variable by chain strength. Have the writer stage surface hedging language for claims below 0.8. | MAJOR-3 (Confidence calibration, mean 7.50) | **MEDIUM** — Closes the gap between metadata precision and rhetorical certainty. Expected lift: +0.5–1.0 points on confidence calibration. |
+| **6** | **Add quantification pass to data-analyzer** — when an inference identifies a gap or hidden cost, attempt to size it (even as a range) using available evidence or flagging it as "quantification needed" in the evidence gaps. | MINOR-1 (Analytical insight quantification) | **MEDIUM** — Transforms "what" insights into "how much" insights. Expected lift: +0.5 points on analytical insight in weaker topics. |
+| **7** | **Add topic-type-aware output templates** — for "comparison" research types, the writer should produce a structured comparison matrix alongside the narrative brief. | Topic noise (structure in comparisons) | **LOW** — Addresses a genre-specific expectation. Only affects comparison-type topics. |
 
 ---
 
 ## SUMMARY
 
-The pipeline produces well-structured, epistemically honest research briefs (confidence calibration: 8.4, structure: 8.4) but is held back by two critical structural weaknesses: **source-tier diversity (6.8 avg)** and **citation completeness (6.8 avg)**, which together account for over half the 1.40-point gap to the 9.0 target. These weaknesses appeared in 4–5 of 5 topics, confirming they are pipeline-level defects rather than topic-specific noise. The single highest-priority action is **adding a source-tier diversity gate to the research stage** — enforcing minimum primary/institutional source counts before research is declared complete — which would lift Source quality, cascade improvements into Citation quality and Factual depth, and is estimated to close 0.5–0.7 points of the overall 1.40-point gap with a single intervention.
+The pipeline produces analytically strong, well-structured research briefs (content composite: **7.48/10** across 4 scorable topics) with standout capabilities in structure & readability (8.25), analytical inference (7.75), and citation traceability. However, **two critical infrastructure failures prevent the evaluation from functioning as designed**: the competitor harness returned `null` for all 15 competitor runs (making competitive comparison impossible), and one topic's output was lost to a serialization bug. The **gap to the 9.0 target is 1.52 points** on content quality alone, driven primarily by two co-equal structural weaknesses: **source quality (6.75)** and **factual depth (6.75)** — both stemming from the researcher's reliance on unfiltered web search results without diversity gates or coverage checklists. The single highest-priority first action is **fixing the competitor evaluation harness** (without competitive baselines, the quality loop cannot measure progress), followed immediately by **enforcing the source-tier diversity gate** already committed at `ad1d3d8` — if functional, this one change is expected to lift the composite by 0.5–0.75 points through cascading improvements across source quality, factual depth, and confidence calibration.

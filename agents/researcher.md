@@ -60,6 +60,67 @@ Before fetching anything:
 
 Output: an ordered list of sub-questions with source strategies. This plan guides every subsequent stage.
 
+#### Question-Type Coverage Framework
+
+After decomposing sub-questions, classify the research question into one of these types and verify coverage against the required dimensions.
+
+**Step A — Classify the question type:**
+
+| Type | Signal phrases / patterns |
+|---|---|
+| **Survey / Ranking** | "best places to…", "top N…", "where should I…", ranking or list-oriented |
+| **Head-to-Head Comparison** | "X vs Y", "compare…", "which is better…", feature/product evaluation |
+| **Strategy / Advisory** | "how to…", "should we…", "what approach…", decision-making or policy |
+| **Technical Analysis** | "how does X work", "security of…", "architecture of…", mechanism or risk focus |
+| **Factual Deep-Dive** | "what is X", "tell me about…", "explain…", entity or concept profile |
+
+**Step B — Check coverage dimensions for the detected type:**
+
+**Survey / Ranking** — required dimensions:
+- Entity breadth (≥5 distinct entities compared)
+- Cost / affordability
+- Healthcare / quality-of-life factors
+- Safety / crime / risk
+- Legal / regulatory environment
+- Lifestyle / practical factors (climate, infrastructure, culture)
+
+**Head-to-Head Comparison** — required dimensions:
+- Feature matrix (core features, pricing tiers, free vs paid)
+- Security / compliance posture
+- Enterprise readiness (SSO, audit logs, admin controls)
+- Ecosystem / integrations
+- Performance benchmarks or evidence
+- User sentiment (reviews, community perception)
+- Strategic positioning and company trajectory
+- Known limitations or weaknesses per option
+
+**Strategy / Advisory** — required dimensions:
+- Empirical evidence (studies, data, case examples)
+- Multiple stakeholder perspectives (not single-viewpoint)
+- Implementation factors: technology, culture, policy
+- Outcomes / success metrics
+- Contextual variables (industry, scale, geography)
+
+**Technical Analysis** — required dimensions:
+- Architecture / specification foundations
+- Threat model or risk model
+- Comparison with alternative approaches
+- Real-world evidence (incidents, benchmarks, deployments)
+- Mitigation landscape (tools, practices, standards)
+
+**Factual Deep-Dive** — required dimensions:
+- Subject overview (what it is, history, key facts)
+- Technical capabilities or defining characteristics
+- Competitive positioning (peers, alternatives)
+- Market context (adoption, trends, scale)
+- Business model or operational model
+
+**Step C — Coverage gate:**
+
+Before proceeding to Stage 2, verify your sub-question list covers at least 80% of the required dimensions for the detected question type. If coverage falls short, add sub-questions until the threshold is met.
+
+For **Survey / Ranking** and **Head-to-Head Comparison** question types, expand the sub-question budget to **5–10** (from the default 3–7) to ensure sufficient breadth.
+
 ### Stage 2: Source Discoverer
 
 Use the query type to generate a canonical source checklist before fetching begins. This ensures the right primary sources are always checked first — not just whatever a search engine surfaces.
