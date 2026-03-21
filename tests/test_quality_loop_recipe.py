@@ -157,9 +157,7 @@ def test_break_when_checks_converged() -> None:
     recipe = load_recipe()
     loop_step = [s for s in recipe["steps"] if "while_condition" in s][0]
     bw = loop_step.get("break_when", "")
-    assert "converged" in bw, (
-        f"break_when must reference 'converged', got: {bw}"
-    )
+    assert "converged" in bw, f"break_when must reference 'converged', got: {bw}"
 
 
 def test_max_while_iterations_is_5() -> None:
@@ -229,13 +227,17 @@ def test_all_loop_steps_have_output() -> None:
 def test_evaluate_before_aggregate_diagnose() -> None:
     """evaluate must come before aggregate-diagnose."""
     recipe = load_recipe()
-    assert _loop_step_index(recipe, "evaluate") < _loop_step_index(recipe, "aggregate-diagnose")
+    assert _loop_step_index(recipe, "evaluate") < _loop_step_index(
+        recipe, "aggregate-diagnose"
+    )
 
 
 def test_aggregate_diagnose_before_fix() -> None:
     """aggregate-diagnose must come before fix."""
     recipe = load_recipe()
-    assert _loop_step_index(recipe, "aggregate-diagnose") < _loop_step_index(recipe, "fix")
+    assert _loop_step_index(recipe, "aggregate-diagnose") < _loop_step_index(
+        recipe, "fix"
+    )
 
 
 def test_fix_before_check() -> None:
@@ -325,9 +327,7 @@ def test_fix_references_diagnosis() -> None:
     recipe = load_recipe()
     step = _get_loop_step(recipe, "fix")
     prompt = step.get("prompt", "")
-    assert "{{diagnosis}}" in prompt, (
-        "fix prompt must reference '{{diagnosis}}'"
-    )
+    assert "{{diagnosis}}" in prompt, "fix prompt must reference '{{diagnosis}}'"
 
 
 def test_fix_requires_git_commit() -> None:
@@ -335,9 +335,7 @@ def test_fix_requires_git_commit() -> None:
     recipe = load_recipe()
     step = _get_loop_step(recipe, "fix")
     prompt = step.get("prompt", "")
-    assert "commit" in prompt.lower(), (
-        "fix prompt must require a git commit"
-    )
+    assert "commit" in prompt.lower(), "fix prompt must require a git commit"
 
 
 # ---------------------------------------------------------------------------
@@ -387,11 +385,34 @@ def test_check_command_handles_plateau() -> None:
     recipe = load_recipe()
     step = _get_loop_step(recipe, "check")
     command = step.get("command", "")
-    assert "plateau" in command.lower(), (
-        "check must reference plateau counter"
+    assert "plateau" in command.lower(), "check must reference plateau counter"
+    assert "converged" in command.lower(), "check must set converged flag"
+
+
+def test_check_command_does_not_use_grep_oP() -> None:
+    """check command must not use 'grep -oP' (Perl regex — unavailable on macOS BSD grep).
+
+    All score extractions must use python3 for cross-platform compatibility.
+    """
+    recipe = load_recipe()
+    step = _get_loop_step(recipe, "check")
+    command = step.get("command", "")
+    assert "grep -oP" not in command, (
+        "check command uses 'grep -oP' which fails silently on macOS BSD grep. "
+        "Use python3 -c with re module instead."
     )
-    assert "converged" in command.lower(), (
-        "check must set converged flag"
+
+
+def test_check_command_uses_python3_for_score_extraction() -> None:
+    """check command must use python3 to extract score_after from diagnosis output.
+
+    BSD grep lacks -P (Perl regex), so python3 must be used for portable extraction.
+    """
+    recipe = load_recipe()
+    step = _get_loop_step(recipe, "check")
+    command = step.get("command", "")
+    assert "python3" in command, (
+        "check command must use python3 for score extraction (macOS-compatible)"
     )
 
 
@@ -424,8 +445,20 @@ def test_log_round_appends_not_overwrites() -> None:
     recipe = load_recipe()
     step = _get_loop_step(recipe, "log-round")
     command = step.get("command", "")
-    assert ">>" in command, (
-        "log-round must use append (>>) not overwrite"
+    assert ">>" in command, "log-round must use append (>>) not overwrite"
+
+
+def test_log_round_does_not_use_grep_oP() -> None:
+    """log-round command must not use 'grep -oP' (Perl regex — unavailable on macOS BSD grep).
+
+    Field extraction must use python3 for cross-platform compatibility.
+    """
+    recipe = load_recipe()
+    step = _get_loop_step(recipe, "log-round")
+    command = step.get("command", "")
+    assert "grep -oP" not in command, (
+        "log-round command uses 'grep -oP' which fails silently on macOS BSD grep. "
+        "Use python3 -c with re module instead."
     )
 
 

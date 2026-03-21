@@ -158,28 +158,24 @@ steps:
       - id: "check"
         type: "bash"
         command: |
-          cat <<'__DIAG__' > /dev/null
-          {{diagnosis}}
-          __DIAG__
-
-          cat <<'__FIX__' > /dev/null
-          {{fix_result}}
-          __FIX__
-
-          # --- Extract score_before from diagnosis output ---
+          # --- Score extraction using python3 (macOS-compatible, BSD grep lacks -P) ---
           score_before="{{current_score}}"
 
-          # Parse score_before from the diagnosis (it reports the current aggregate)
-          diag_score=$(cat <<'__EXTRACT__' | grep -oP 'score_before:\s*\K[0-9]+\.?[0-9]*' | head -1
+          # Parse the CURRENT round's score from the diagnosis output
+          score_after=$(cat <<'__EXTRACT__' | python3 -c "
+          import sys, re
+          text = sys.stdin.read()
+          m = re.search(r'score_before:\s*([0-9]+\.?[0-9]*)', text)
+          print(m.group(1) if m else '')
+          "
           {{diagnosis}}
           __EXTRACT__
           )
-          if [ -n "$diag_score" ]; then
-            score_before="$diag_score"
-          fi
 
-          # score_after starts equal to score_before (will be updated by next eval)
-          score_after="${score_before}"
+          # If extraction failed, assume no change
+          if [ -z "$score_after" ]; then
+            score_after="${score_before}"
+          fi
 
           # Current plateau_counter
           plateau_counter={{plateau_counter}}
@@ -188,23 +184,18 @@ steps:
           fix_commit=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
           # --- Decision logic ---
-          # On round 1, we have no prior score to compare — always keep.
-          # On subsequent rounds, if score hasn't improved, revert and bump plateau.
           decision="kept"
           new_plateau=$plateau_counter
           converged="false"
 
           if [ "{{_loop_iteration}}" -gt 1 ] && [ "$score_before" != "0" ]; then
-            # Compare: if score hasn't improved from last known score
             improved=$(python3 -c "print('yes' if float('${score_after}') > float('${score_before}') else 'no')" 2>/dev/null || echo "no")
 
             if [ "$improved" = "no" ]; then
-              # Revert the fix
               git revert --no-edit HEAD 2>/dev/null || true
               decision="reverted"
               new_plateau=$((plateau_counter + 1))
 
-              # Check convergence: 2 consecutive non-improving rounds
               if [ $new_plateau -ge 2 ]; then
                 converged="true"
               fi
@@ -239,15 +230,31 @@ steps:
           {{diagnosis}}
           __DIAG__
 
-          cat <<'__FIX__' > /tmp/quality-loop-fix-extract.txt
-          {{fix_result}}
-          __FIX__
-
-          # Extract fields from diagnosis and check_result
-          gap_name=$(grep -oP 'gap_name:\s*\K.*' /tmp/quality-loop-diag-extract.txt | head -1 || echo "unknown")
-          target_file=$(grep -oP 'target_file:\s*\K.*' /tmp/quality-loop-diag-extract.txt | head -1 || echo "unknown")
-          edit_plan=$(grep -oP 'edit_plan:\s*\K.*' /tmp/quality-loop-diag-extract.txt | head -1 || echo "unknown")
-          chosen_because=$(grep -oP 'chosen_because:\s*\K.*' /tmp/quality-loop-diag-extract.txt | head -1 || echo "unknown")
+          # Extract fields using python3 (macOS-compatible — BSD grep lacks -oP)
+          gap_name=$(python3 -c "
+          import re
+          with open('/tmp/quality-loop-diag-extract.txt') as f: text = f.read()
+          m = re.search(r'gap_name:\s*(.*)', text)
+          print(m.group(1).strip() if m else 'unknown')
+          ")
+          target_file=$(python3 -c "
+          import re
+          with open('/tmp/quality-loop-diag-extract.txt') as f: text = f.read()
+          m = re.search(r'target_file:\s*(.*)', text)
+          print(m.group(1).strip() if m else 'unknown')
+          ")
+          edit_plan=$(python3 -c "
+          import re
+          with open('/tmp/quality-loop-diag-extract.txt') as f: text = f.read()
+          m = re.search(r'edit_plan:\s*(.*)', text)
+          print(m.group(1).strip() if m else 'unknown')
+          ")
+          chosen_because=$(python3 -c "
+          import re
+          with open('/tmp/quality-loop-diag-extract.txt') as f: text = f.read()
+          m = re.search(r'chosen_because:\s*(.*)', text)
+          print(m.group(1).strip() if m else 'unknown')
+          ")
 
           # Write the round log entry (append-only)
           cat >> specs/evaluation/reports/quality-loop-log.yaml <<ENTRY
