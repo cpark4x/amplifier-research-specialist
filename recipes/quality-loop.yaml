@@ -76,6 +76,60 @@ steps:
       plateau_counter: "{{check_result.plateau_counter}}"
       converged: "{{check_result.converged}}"
     steps:
+      # --- Select Topics: pick 2 worst + 1 regression check ---
+      - id: "select-topics"
+        type: "bash"
+        command: |
+          cat <<'__EVAL_DATA__' > /tmp/quality-loop-eval-data.txt
+          {{initial_eval_result}}
+          {{eval_result}}
+          __EVAL_DATA__
+
+          # Extract per-topic pipeline scores and select topics for this iteration
+          python3 <<'__PYTHON__'
+          import json, re
+
+          with open("/tmp/quality-loop-eval-data.txt") as f:
+              text = f.read()
+
+          # Parse topic IDs and their scores from evaluation output
+          # Look for patterns like "topic_id: X" with "pipeline_score: Y" or score tables
+          topic_ids = ["factual-deep-dive", "strategy", "survey", "competitive-comparison", "technical-analysis"]
+          scores = {}
+
+          for tid in topic_ids:
+              # Search for score patterns near each topic ID
+              pattern = rf'{tid}.*?(?:pipeline[_ ]score|score)[:\s]*(\d+\.?\d*)'
+              m = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
+              if m:
+                  scores[tid] = float(m.group(1))
+              else:
+                  # Default to 5.0 (neutral) if score not found
+                  scores[tid] = 5.0
+
+          # Sort by score ascending (worst first)
+          sorted_topics = sorted(scores.items(), key=lambda x: x[1])
+
+          # Select 2 worst + 1 best (regression check)
+          topics_per_iteration = {{topics_per_iteration}}
+          worst = [t[0] for t in sorted_topics[:2]]
+          best = [t[0] for t in sorted_topics if t[0] not in worst][-1:]
+          selected = worst + best
+
+          # Ensure we have exactly topics_per_iteration topics
+          selected = selected[:topics_per_iteration]
+
+          result = {
+              "selected_topic_ids": selected,
+              "topic_scores": {t: s for t, s in sorted_topics},
+              "selection_reason": f"2 worst: {worst}, 1 regression check: {best}"
+          }
+          print(json.dumps(result))
+          __PYTHON__
+        parse_json: true
+        output: "selected_topics"
+        timeout: 30
+
       # --- Evaluate: invoke the competitive eval sub-recipe ---
       - id: "evaluate"
         type: "recipe"
