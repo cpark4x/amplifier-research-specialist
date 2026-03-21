@@ -52,10 +52,10 @@ def test_recipe_has_required_fields() -> None:
 
 
 def test_recipe_version() -> None:
-    """Recipe version must be '1.0.0'."""
+    """Recipe version must be '2.0.0'."""
     recipe = load_recipe()
-    assert recipe["version"] == "1.0.0", (
-        f"Expected version='1.0.0', got {recipe.get('version')!r}"
+    assert recipe["version"] == "2.0.0", (
+        f"Expected version='2.0.0', got {recipe.get('version')!r}"
     )
 
 
@@ -122,6 +122,147 @@ def test_context_has_evaluation_mode() -> None:
     assert "evaluation_mode" in context, "Context must have 'evaluation_mode'"
     assert context["evaluation_mode"] == "competitive", (
         f"evaluation_mode must default to 'competitive', got {context['evaluation_mode']!r}"
+    )
+
+
+def test_context_has_topics_per_iteration() -> None:
+    """Context must have 'topics_per_iteration' defaulting to 3."""
+    recipe = load_recipe()
+    context = recipe.get("context", {})
+    assert "topics_per_iteration" in context, "Context must have 'topics_per_iteration'"
+    assert context["topics_per_iteration"] == 3, (
+        f"topics_per_iteration must default to 3, got {context['topics_per_iteration']!r}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Top-level step helpers
+# ---------------------------------------------------------------------------
+
+
+def _get_top_level_step(recipe: dict, step_id: str) -> dict:
+    """Get a top-level step by ID."""
+    for step in recipe.get("steps", []):
+        if step.get("id") == step_id:
+            return step
+    raise AssertionError(f"Top-level step '{step_id}' not found")
+
+
+def _top_level_step_index(recipe: dict, step_id: str) -> int:
+    """Get the index of a top-level step by ID."""
+    step_ids = [s.get("id") for s in recipe.get("steps", [])]
+    assert step_id in step_ids, (
+        f"Step '{step_id}' not found in top-level steps, got: {step_ids}"
+    )
+    return step_ids.index(step_id)
+
+
+# ---------------------------------------------------------------------------
+# initial-eval step (top-level, before loop)
+# ---------------------------------------------------------------------------
+
+
+def test_has_initial_eval_step() -> None:
+    """Recipe must have an 'initial-eval' top-level step."""
+    recipe = load_recipe()
+    step_ids = [s.get("id") for s in recipe.get("steps", [])]
+    assert "initial-eval" in step_ids, (
+        f"Recipe must have 'initial-eval' top-level step, got: {step_ids}"
+    )
+
+
+def test_initial_eval_invokes_quality_eval() -> None:
+    """initial-eval must invoke quality-eval.yaml as a sub-recipe."""
+    recipe = load_recipe()
+    step = _get_top_level_step(recipe, "initial-eval")
+    assert step.get("type") == "recipe", (
+        f"initial-eval must be type='recipe', got {step.get('type')!r}"
+    )
+    recipe_ref = step.get("recipe", "")
+    assert "quality-eval" in recipe_ref, (
+        f"initial-eval must reference 'quality-eval', got {recipe_ref!r}"
+    )
+
+
+def test_initial_eval_passes_context() -> None:
+    """initial-eval must pass evaluation_mode and target_score in context."""
+    recipe = load_recipe()
+    step = _get_top_level_step(recipe, "initial-eval")
+    ctx = step.get("context", {})
+    assert "evaluation_mode" in ctx, (
+        "initial-eval context must include 'evaluation_mode'"
+    )
+    assert "target_score" in ctx, "initial-eval context must include 'target_score'"
+
+
+def test_initial_eval_has_output() -> None:
+    """initial-eval must declare an output variable."""
+    recipe = load_recipe()
+    step = _get_top_level_step(recipe, "initial-eval")
+    assert "output" in step, "initial-eval must have an 'output' declaration"
+
+
+def test_initial_eval_before_improvement_loop() -> None:
+    """initial-eval must come before improvement-loop."""
+    recipe = load_recipe()
+    assert _top_level_step_index(recipe, "initial-eval") < _top_level_step_index(
+        recipe, "improvement-loop"
+    )
+
+
+# ---------------------------------------------------------------------------
+# cache-competitors step (top-level, between initial-eval and loop)
+# ---------------------------------------------------------------------------
+
+
+def test_has_cache_competitors_step() -> None:
+    """Recipe must have a 'cache-competitors' top-level step."""
+    recipe = load_recipe()
+    step_ids = [s.get("id") for s in recipe.get("steps", [])]
+    assert "cache-competitors" in step_ids, (
+        f"Recipe must have 'cache-competitors' top-level step, got: {step_ids}"
+    )
+
+
+def test_cache_competitors_is_bash() -> None:
+    """cache-competitors must be type: bash."""
+    recipe = load_recipe()
+    step = _get_top_level_step(recipe, "cache-competitors")
+    assert step.get("type") == "bash", (
+        f"cache-competitors must be type='bash', got {step.get('type')!r}"
+    )
+
+
+def test_cache_competitors_writes_to_cache_dir() -> None:
+    """cache-competitors command must reference specs/evaluation/cache/."""
+    recipe = load_recipe()
+    step = _get_top_level_step(recipe, "cache-competitors")
+    command = step.get("command", "")
+    assert "specs/evaluation/cache" in command, (
+        "cache-competitors must write to 'specs/evaluation/cache/'"
+    )
+
+
+def test_cache_competitors_has_output() -> None:
+    """cache-competitors must declare an output variable."""
+    recipe = load_recipe()
+    step = _get_top_level_step(recipe, "cache-competitors")
+    assert "output" in step, "cache-competitors must have an 'output' declaration"
+
+
+def test_cache_competitors_after_initial_eval() -> None:
+    """cache-competitors must come after initial-eval."""
+    recipe = load_recipe()
+    assert _top_level_step_index(recipe, "initial-eval") < _top_level_step_index(
+        recipe, "cache-competitors"
+    )
+
+
+def test_cache_competitors_before_improvement_loop() -> None:
+    """cache-competitors must come before improvement-loop."""
+    recipe = load_recipe()
+    assert _top_level_step_index(recipe, "cache-competitors") < _top_level_step_index(
+        recipe, "improvement-loop"
     )
 
 
@@ -193,10 +334,17 @@ def _loop_step_index(recipe: dict, step_id: str) -> int:
 
 
 def test_loop_has_required_step_ids() -> None:
-    """Loop body must include: evaluate, aggregate-diagnose, fix, check, log-round."""
+    """Loop body must include: select-topics, evaluate, aggregate-diagnose, fix, check, log-round."""
     recipe = load_recipe()
     step_ids = [s["id"] for s in _get_loop_steps(recipe)]
-    required = {"evaluate", "aggregate-diagnose", "fix", "check", "log-round"}
+    required = {
+        "select-topics",
+        "evaluate",
+        "aggregate-diagnose",
+        "fix",
+        "check",
+        "log-round",
+    }
     missing = required - set(step_ids)
     assert not missing, f"Loop body missing required step IDs: {missing}"
 
@@ -253,6 +401,46 @@ def test_check_before_log_round() -> None:
 
 
 # ---------------------------------------------------------------------------
+# select-topics step (inside loop body, before evaluate)
+# ---------------------------------------------------------------------------
+
+
+def test_loop_has_select_topics_step() -> None:
+    """Loop body must include a 'select-topics' step."""
+    recipe = load_recipe()
+    step_ids = [s["id"] for s in _get_loop_steps(recipe)]
+    assert "select-topics" in step_ids, (
+        f"Loop body must include 'select-topics', got: {step_ids}"
+    )
+
+
+def test_select_topics_is_bash() -> None:
+    """select-topics must be type: bash."""
+    recipe = load_recipe()
+    step = _get_loop_step(recipe, "select-topics")
+    assert step.get("type") == "bash", (
+        f"select-topics must be type='bash', got {step.get('type')!r}"
+    )
+
+
+def test_select_topics_has_parse_json() -> None:
+    """select-topics must have parse_json: true."""
+    recipe = load_recipe()
+    step = _get_loop_step(recipe, "select-topics")
+    assert step.get("parse_json") is True, (
+        f"select-topics must have parse_json=true, got {step.get('parse_json')!r}"
+    )
+
+
+def test_select_topics_before_evaluate() -> None:
+    """select-topics must come before evaluate in the loop body."""
+    recipe = load_recipe()
+    assert _loop_step_index(recipe, "select-topics") < _loop_step_index(
+        recipe, "evaluate"
+    )
+
+
+# ---------------------------------------------------------------------------
 # evaluate step
 # ---------------------------------------------------------------------------
 
@@ -277,6 +465,17 @@ def test_evaluate_passes_context() -> None:
     ctx = step.get("context", {})
     assert "evaluation_mode" in ctx, "evaluate context must include 'evaluation_mode'"
     assert "target_score" in ctx, "evaluate context must include 'target_score'"
+
+
+def test_evaluate_passes_cache_context() -> None:
+    """evaluate must pass cache_dir and selected_topic_ids in context."""
+    recipe = load_recipe()
+    step = _get_loop_step(recipe, "evaluate")
+    ctx = step.get("context", {})
+    assert "cache_dir" in ctx, "evaluate context must include 'cache_dir'"
+    assert "selected_topic_ids" in ctx, (
+        "evaluate context must include 'selected_topic_ids'"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -459,6 +658,17 @@ def test_log_round_does_not_use_grep_oP() -> None:
     assert "grep -oP" not in command, (
         "log-round command uses 'grep -oP' which fails silently on macOS BSD grep. "
         "Use python3 -c with re module instead."
+    )
+
+
+def test_log_round_includes_cache_fields() -> None:
+    """log-round command must include cache-related fields."""
+    recipe = load_recipe()
+    step = _get_loop_step(recipe, "log-round")
+    command = step.get("command", "")
+    assert "topics_rerun" in command, "log-round must include 'topics_rerun' field"
+    assert "competitors_cached" in command, (
+        "log-round must include 'competitors_cached' field"
     )
 
 
