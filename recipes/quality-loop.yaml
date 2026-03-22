@@ -24,6 +24,11 @@ steps:
       target_score: "{{target_score}}"
     output: "initial_eval_result"
     timeout: 21600
+    retry:
+      max_attempts: 3
+      backoff: "exponential"
+      initial_delay: 15
+      max_delay: 300
     on_error: "continue"
 
   # ===========================================================================
@@ -142,6 +147,11 @@ steps:
           selected_topic_ids: "{{selected_topics.selected_topic_ids}}"
         output: "eval_result"
         timeout: 21600
+        retry:
+          max_attempts: 3
+          backoff: "exponential"
+          initial_delay: 15
+          max_delay: 300
         on_error: "continue"
 
       # --- Aggregate + Diagnose ---
@@ -217,6 +227,11 @@ steps:
           - all_candidates: [list every candidate considered]
           - score_before: [current aggregate pipeline score from evaluation]
         output: "diagnosis"
+        retry:
+          max_attempts: 3
+          backoff: "exponential"
+          initial_delay: 15
+          max_delay: 300
         timeout: 1800
 
       # --- Fix: implement the targeted change ---
@@ -262,6 +277,11 @@ steps:
           - file_changed: [path]
           - change_summary: [one-line description]
         output: "fix_result"
+        retry:
+          max_attempts: 3
+          backoff: "exponential"
+          initial_delay: 15
+          max_delay: 300
         timeout: 1800
 
       # --- Check: revert-on-regression + convergence detection ---

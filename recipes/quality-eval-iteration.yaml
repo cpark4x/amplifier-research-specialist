@@ -62,6 +62,11 @@ steps:
       Report what happened at each step — success/failure, output size, any issues.
     output: "pipeline_run_result"
     timeout: 3600
+    retry:
+      max_attempts: 3
+      backoff: "exponential"
+      initial_delay: 15
+      max_delay: 300
     on_error: "continue"
 
   # ===========================================================================
@@ -126,6 +131,11 @@ steps:
       find credible, well-supported, and analytically valuable.
     output: "competitor_result"
     timeout: 2700
+    retry:
+      max_attempts: 3
+      backoff: "exponential"
+      initial_delay: 15
+      max_delay: 300
     on_error: "continue"
 
   # ===========================================================================
@@ -181,4 +191,9 @@ steps:
       A 2–3 sentence overall assessment: where does the pipeline excel, where
       does it fall short, and what is the single highest-priority improvement?
     output: "evaluation_report"
+    retry:
+      max_attempts: 3
+      backoff: "exponential"
+      initial_delay: 15
+      max_delay: 300
     timeout: 1800

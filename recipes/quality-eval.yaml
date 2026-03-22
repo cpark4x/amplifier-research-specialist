@@ -127,6 +127,11 @@ steps:
       weakness, gap to target score of {{target_score}}, and single recommended
       first action.
     output: "gap_report"
+    retry:
+      max_attempts: 3
+      backoff: "exponential"
+      initial_delay: 15
+      max_delay: 300
     timeout: 1800
 
   # ===========================================================================
