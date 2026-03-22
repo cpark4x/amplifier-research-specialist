@@ -10,6 +10,7 @@ context:
   converged: "false"
   evaluation_mode: "competitive"
   topics_per_iteration: 3
+  eval_result: ""
 
 steps:
   # ===========================================================================
