@@ -76,18 +76,41 @@ steps:
     type: "bash"
     command: |
       marker="{{pipeline_start_marker}}"
+      topic_id="{{topic_id}}"
+      research_question="{{research_question}}"
 
-      # Find files written after the pipeline started (newer than the start marker)
-      latest=$(find docs/research-output -name "*.md" -newer "$marker" -maxdepth 1 2>/dev/null | head -1)
+      # Generate search keywords from the research question (first 3 significant words)
+      keywords=$(echo "$research_question" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9 ]//g' | tr -s ' ' | cut -d' ' -f1-5)
 
+      # First: find files newer than marker that contain topic-relevant keywords in filename
+      latest=""
+      for f in $(find docs/research-output -name "*.md" -newer "$marker" -maxdepth 1 2>/dev/null); do
+        fname=$(basename "$f" | tr '[:upper:]' '[:lower:]')
+        match=0
+        for kw in $keywords; do
+          if echo "$fname" | grep -q "$kw"; then
+            match=$((match + 1))
+          fi
+        done
+        if [ $match -ge 2 ]; then
+          latest="$f"
+          break
+        fi
+      done
+
+      # Fallback 1: any file newer than marker (less safe but better than nothing)
       if [ -z "$latest" ]; then
-        # Fallback: check if ANY .md file exists
+        latest=$(find docs/research-output -name "*.md" -newer "$marker" -maxdepth 1 2>/dev/null | head -1)
+      fi
+
+      # Fallback 2: stale fallback — most recent file overall (may be from a different topic)
+      if [ -z "$latest" ]; then
         latest=$(ls -t docs/research-output/*.md 2>/dev/null | head -1)
         if [ -z "$latest" ]; then
-          echo "PIPELINE_ERROR: No output file found in docs/research-output/ for topic: {{topic_id}}"
+          echo "PIPELINE_ERROR: No output file found in docs/research-output/ for topic: ${topic_id}"
           exit 0
         fi
-        echo "PIPELINE_WARNING: Possible stale output — using most recent file (no new file found after pipeline started). Topic: {{topic_id}}. File: $latest"
+        echo "PIPELINE_WARNING: Stale output risk — using most recent file (no topic-matched or newer file found). Topic: ${topic_id}. File: $latest"
       fi
 
       # Read and validate content

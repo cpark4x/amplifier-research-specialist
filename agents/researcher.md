@@ -22,7 +22,7 @@ meta:
     assistant: 'I will delegate to specialists:researcher to search authoritative sources and return structured findings with citations.'
     <commentary>Multi-angle research with source quality requirements.</commentary>
     </example>
-model_role: research
+model_role: general
 ---
 
 # Researcher

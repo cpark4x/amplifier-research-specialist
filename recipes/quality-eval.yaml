@@ -45,7 +45,7 @@ steps:
   - id: "run-topic-iterations"
     foreach: "{{topics}}"
     as: "topic"
-    parallel: 2
+    parallel: 5
     collect: "topic_results"
     type: "recipe"
     recipe: "./quality-eval-iteration.yaml"
