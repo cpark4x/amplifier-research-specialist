@@ -310,7 +310,7 @@ steps:
       Be specific. Reference slide numbers. Do not fabricate observations --
       report only what you see in the actual screenshots.
     output: "visual_analysis"
-    timeout: 600
+    timeout: 1200
 
   # -- Step 4: Judge the deck against the rubric --------------------------------
   #
@@ -443,7 +443,7 @@ steps:
       {{visual_analysis}}
       === END OF VISUAL ANALYSIS ===
     output: "evaluation_result"
-    timeout: 1800
+    timeout: 2400
 
   # -- Step 5: Save the evaluation result ---------------------------------------
   - id: "save-evaluation"
