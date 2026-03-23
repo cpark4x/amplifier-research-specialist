@@ -343,6 +343,10 @@ Then enforce:
   items** (metric cards, list items, timeline steps, comparison cards). If the
   source material requires more, split across two slides. Two clean slides always
   beat one dense slide.
+- **No vertical accent bars.** A thin vertical bar (3px wide, 40–60px tall) renders
+  as a text-cursor artifact. Always use a short **horizontal** rule for decorative
+  accents (see `.insight-accent` and `.title-rule` in the example). This applies to
+  all slide types — insight, takeaway, decision, and closing slides alike.
 
 ### Animation as Storytelling
 
@@ -880,9 +884,9 @@ blue accent) — this deliberately demonstrates the light-theme default.
   }
 
   .insight-accent {
-    width: 3px;
-    height: clamp(36px, 6.5vh, 64px);
-    background: linear-gradient(to bottom, var(--blue), var(--green));
+    width: clamp(32px, 5vw, 56px);
+    height: 3px;
+    background: linear-gradient(90deg, var(--blue), var(--green));
     border-radius: 2px;
     opacity: 0;
   }
