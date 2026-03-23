@@ -156,12 +156,11 @@ scoped to inserting hedge qualifiers — no other prose modifications are permit
    `according to`, `reported`, `unconfirmed`, `may`, `could`, `potentially`,
    `evidence suggests`, `points to`
 4. If already hedged → no change.
-5. If **not** hedged, insert a minimal qualifier by confidence tier:
-   - `medium` → Prepend `reportedly` before the specific value, or insert `(reported)`
-     immediately after it.
-   - `low` → Prepend `According to unconfirmed reports,` before the sentence.
-   - `inference` → Ensure inferential framing — if absent, prepend `Evidence suggests`
-     to the sentence.
+5. If **not** hedged, check the claim's **source tier** from Stage 1 before inserting a hedge:
+   - **Primary or Secondary source** (academic, institutional, established press): **Do not insert "reportedly" or similar weak hedges.** The writer's tier-appropriate language should already be present ("research indicates," "a study found," etc.). If it's missing, leave the prose as-is — over-hedging strong evidence with "reportedly" undermines credibility. The writer is responsible for tier-appropriate hedging; the formatter should not override with weaker language.
+   - **Tertiary source** (blogs, aggregators, vendor content, community posts): Insert a hedge as usual. "Reportedly," "according to [source]," "some sources suggest" are appropriate for these sources.
+   - **Inference claims** (any source tier): Unchanged — insert analytical qualifying language ("analysis suggests," "the evidence points to," "patterns suggest") regardless of source tier. Current behavior preserved.
+   - **Unknown or missing tier**: Fall back to current behavior — insert "reportedly" as a safe default.
 6. Do not move, merge, split, or restructure sentences. Insert the qualifier and move on.
 7. If a claim's content does not appear in the prose, skip it.
 
