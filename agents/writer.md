@@ -251,6 +251,21 @@ After drafting each section, immediately append a source attribution line:
   - The footer is the last line of the document, before CLAIMS TO VERIFY and CITATIONS blocks
   - Do not explain the footer or draw attention to it — it is a quiet confidence signal for the reader
 
+**Audience depth self-check (non-technical audiences only):**
+
+This self-check runs when the audience detected in Stage 2 is NOT one of: "AI engineers," "technical practitioners," "developers," "software engineers," or similar technical roles. For technical audiences, skip this check — mechanism-level detail is appropriate and expected.
+
+For non-technical audiences (executives, general readers, business stakeholders):
+1. **Scan each key point for mechanism-level language:** architecture internals, API names, model parameter counts, embedding dimensions, training methodology specifics, code-level concepts, protocol details, internal system names.
+2. **Translate to outcome-level language:** what it does for the reader, not how it works internally.
+   - Mechanism: "uses a 768-dimensional dense vector space with late interaction scoring"
+   - Outcome: "produces highly accurate search results by comparing meaning rather than keywords"
+   - Mechanism: "the WASI capability-based security model restricts file system access through pre-opened file descriptors"
+   - Outcome: "prevents programs from accessing files they weren't explicitly given permission to read"
+3. **Self-check question:** For each sentence containing a technical term, ask: "Would this sentence make sense to someone who doesn't build AI systems?" If no, translate or add a brief plain-language explanation.
+
+Do NOT remove technical detail entirely — translate it. The goal is accessibility, not dumbing down. Specific numbers and concrete outcomes are still valuable; jargon and mechanism descriptions are not.
+
 ### Stage 5: Verify
 
 Before returning output:
