@@ -46,3 +46,33 @@ score_before: 0
 score_after: 0
 decision: "kept"
 plateau_counter: 0
+---
+round: 1
+gap: "** citation-quality-inline-urls"
+candidates: "see diagnosis output for full list"
+chosen_because: "** Citation quality is the single largest structural gap across all valid topics — averaging −3.75 points vs best competitor, appearing in 100% of topics (4/4), and accounting for 68% of the total aggregate deficit. Three separate evaluators independently confirmed this is the #1 priority fix, and two stated it would also improve source quality and factual depth as secondary effects. The root cause is precisely locatable: the writer's Stage 4 instruction tells it to use opaque S-code labels (`S1 (3–6 word label)`) instead of URLs, making the final document unverifiable. Competitors all provide per-claim inline hyperlinks — a practice the pipeline's upstream research stage already supports (it collects URLs) but the writer stage discards."
+target: "** agents/writer.md"
+edit_plan: "** Replace the opaque S-code blockquote attribution format in Stage 4 (lines 235–243) with inline citation instructions that embed source URLs directly in the prose. Specifically: (1) After each factual claim or claim cluster, the writer must insert an inline parenthetical citation with the source URL from the upstream research, e.g., `([Source Name](URL))` — not just `S1 (label)`. (2) Add a "Sources" appendix section requirement at document end (before the provenance footer) that lists every cited source with S-number, label, URL, and tier in a table. (3) Preserve S-code numbering internally for traceability to the writer-formatter, but require the prose body to be self-contained with clickable URLs so the final document is independently verifiable without needing the CITATIONS structural block."
+commit: "4dac5e9"
+score_before: 0
+score_after: 0
+decision: "kept"
+plateau_counter: 0
+topics_rerun: "["factual-deep-dive", "strategy", "technical-analysis"]"
+competitors_cached: true
+cache_dir: "specs/evaluation/cache/20260322_224151"
+---
+round: 2
+gap: "factual-depth-breadth-gate"
+candidates: "see diagnosis output for full list"
+chosen_because: "Factual depth is the most broadly-affecting structural gap (4/5 topics, avg Δ=-1.60 vs best competitor). Citation quality (the only higher-severity gap) was already addressed in Round 1 and is pending validation. All four topic evaluators independently identified the same root cause: researcher anchoring on initial clusters without a breadth sweep. The fix cascades — broader coverage improves source quality, analytical insight, and citation quality secondarily."
+target: "agents/researcher.md"
+edit_plan: "Add a coverage breadth gate after the deep-research phase. The researcher must (1) generate a topic-dimension inventory listing all distinct facets the question could cover, (2) self-audit which dimensions have findings and which are uncovered, (3) launch targeted gap-filling search rounds for uncovered dimensions, and (4) scale the expected dimension count to question type (survey/comparison: 8-12 dimensions, technical: 5-8, strategy: 6-10). This prevents the researcher from anchoring on an initial source cluster and missing 3-5 topic dimensions that competitors consistently find."
+commit: "69a6d53"
+score_before: 0
+score_after: 7.6
+decision: "kept"
+plateau_counter: 0
+topics_rerun: "["factual-deep-dive", "strategy", "technical-analysis"]"
+competitors_cached: true
+cache_dir: "specs/evaluation/cache/20260322_224151"

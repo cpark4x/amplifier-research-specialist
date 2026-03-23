@@ -1,32 +1,17 @@
-The report is complete and rendered to `quality-evaluation-gap-report.docx`. Here's the executive summary:
+The report is complete. Here are the key takeaways:
 
----
+**Pipeline position:** 6.70/10 average — **2.30 points below the 9.0 target**, trailing best competitors by 1.77 points across 5 topics.
 
-## Key Findings
+**Three CRITICAL structural gaps** (each appearing in 4–5 of 5 topics):
 
-**Pipeline average: 7.60** | **Target: 9.0** | **Gap: −1.40**
+| Gap | Pipeline Avg | Best Competitor Avg | Root Cause |
+|---|:---:|:---:|---|
+| **Factual Depth** | 5.80 | 9.00 | Researcher finds 4–6 sources; competitors find 12–18 |
+| **Citation Quality** | 5.20 | 8.40 | Writer-formatter strips URLs from body text |
+| **Source Quality** | 5.60 | 8.00 | Researcher terminates search too early, narrow source categories |
 
-### Two Structural Gaps (recurring across topics)
+**The pipeline's hidden strength** is its analytical engine: when given sufficient evidence (technical-analysis topic), it produced the highest-quality output of *any* system in the evaluation (8.00 vs. best competitor 7.83). Confidence calibration averages 8.20 — near parity with competitors at 8.40.
 
-| Gap | Severity | Topics Affected | Pipeline Avg | Competitor Avg | Δ |
-|-----|----------|:-:|:-:|:-:|:-:|
-| **Citation Quality** | CRITICAL | 3/5 | 5.80 | 8.40 | −2.60 |
-| **Factual Depth** | MAJOR | 4/5 | 7.20 | 8.80 | −1.60 |
-
-**Citation Quality** is the #1 problem: in 3 topics the pipeline produced zero URLs in the final document despite claiming 29–43 sourced findings. The pipeline *can* do this correctly (strategy scored 9, technical-analysis scored 8) — the failure is intermittent, likely in the writer → writer-formatter handoff during format escalation.
-
-**Factual Depth** is the most consistent deficit: 4/5 evaluators independently identified the same pattern — strong depth on 5–7 themes but missing 3–5 additional themes that competitors found through wider search strategies. The researcher anchors on an initial source cluster and doesn't perform a breadth sweep.
-
-### Three Pipeline Strengths (consistent advantages)
-
-| Dimension | Pipeline Avg | Competitor Avg | Δ |
-|-----------|:-:|:-:|:-:|
-| **Analytical Insight** | 8.40 | 8.00 | +0.40 |
-| **Confidence Calibration** | 8.60 | 8.00 | +0.60 |
-| **Structure & Readability** | 8.40 | 7.80 | +0.60 |
-
-The pipeline's system-level causal synthesis, epistemic discipline, and thesis-driven structure are its clearest competitive advantages — it never loses on structure and wins on insight in 3/5 topics.
-
-### First Action
-
-**Fix URL propagation through the writer stage.** It's the highest-severity gap, the largest per-dimension deficit, and a solvable engineering fix. Closing it would raise the pipeline average from 7.60 to ~8.12, eliminating 37% of the gap to target.
+**Two actions would close ~70% of the gap:**
+1. **Expand the researcher's search loop** to require 10+ sources across 4+ source categories before terminating
+2. **Fix the writer-formatter** to preserve inline citation URLs rather than stripping them to generic labels
