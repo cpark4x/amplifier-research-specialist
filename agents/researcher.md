@@ -224,6 +224,15 @@ Do not synthesize at this stage. Only extract.
 
 ### Stage 5: Corroborator
 
+**Breadth mode corroboration (when `research_mode: breadth` is active):**
+
+In breadth mode, apply selective corroboration to maximize entity coverage:
+
+- **Numeric/financial claims** (dollar amounts, percentages, statistics, dates, rankings, index scores, population figures) → **full corroboration** (same as depth mode). These claims are most likely to be wrong and most damaging if inaccurate.
+- **Qualitative claims** (descriptions, lifestyle observations, cultural assessments, general characterizations, subjective evaluations, climate descriptions) → **accept at medium confidence from a single credible source.** Skip corroboration. Flag each as `single-source, medium confidence, breadth-mode` in the findings.
+
+In depth mode (the default), corroborate all claims as described below.
+
 For every Low or Medium confidence claim:
 
 1. Search for a second independent source that confirms or contradicts it

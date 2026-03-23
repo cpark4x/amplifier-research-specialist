@@ -112,12 +112,12 @@ class TestKeptContent:
 
 
 class TestFileLength:
-    """File should be ~280–350 lines. Hard fail if >350 or <200."""
+    """File should be ~300–370 lines. Hard fail if >370 or <200."""
 
     def test_not_too_long(self, line_count: int) -> None:
-        """File must be under 350 lines (grew from ~237 to ~322 after quality loop additions)."""
-        assert line_count < 350, (
-            f"File is {line_count} lines — above 350. "
+        """File must be under 370 lines (grew from ~342 to ~351 after breadth mode corroboration)."""
+        assert line_count < 370, (
+            f"File is {line_count} lines — above 370. "
             f"Check whether unexpected content was added."
         )
 
@@ -129,15 +129,15 @@ class TestFileLength:
         )
 
     def test_approximate_target(self, line_count: int) -> None:
-        """File should be approximately 280–350 lines after quality loop additions.
+        """File should be approximately 300–370 lines after breadth mode additions.
 
-        The file legitimately grew from ~237 to ~322 lines because it gained
-        coverage checklists and diversity gates.  We use a wider band (280–350)
+        The file legitimately grew from ~342 to ~351 lines because it gained
+        breadth mode corroboration logic in Stage 5.  We use a wider band (300–370)
         to allow minor variation while still catching major drift.
         """
-        assert 280 <= line_count <= 350, (
-            f"File is {line_count} lines — outside the 280–350 target band. "
-            f"Expected approximately 280–350 after quality loop additions."
+        assert 300 <= line_count <= 370, (
+            f"File is {line_count} lines — outside the 300–370 target band. "
+            f"Expected approximately 300–370 after breadth mode additions."
         )
 
 
