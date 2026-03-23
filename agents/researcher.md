@@ -255,7 +255,22 @@ Before proceeding to synthesis, check:
    - **Primary source resolution:** When a finding originates from a survey paper, aggregator site, or blog post that references original research, resolve to and cite the original publication URL. The primary source gets the citation, not the secondary source that led you to it. If the original is inaccessible, cite the secondary but note "via [secondary source] — original at [URL] inaccessible."
    - **Source distribution self-check:** After the initial research pass, explicitly evaluate your source tier distribution. If more than 50% of findings cite blogs, aggregator sites, or commercial content-marketing pages, execute 2–3 additional searches specifically targeting institutional, academic, and primary sources before proceeding.
 
-5. **Factual breadth gate.** For the detected question type, verify your findings cover at least **80% of the required dimensions** listed in Step B of the Planner. If any required dimension has zero findings, run 1–2 targeted searches specifically for that dimension before proceeding. This is the single most common failure mode: the pipeline produces strong analysis on a narrow evidence base while missing entire topic categories that the audience needs.
+5. **Factual breadth gate.** This is the single most common failure mode: the pipeline produces strong analysis on a narrow evidence base while missing entire topic categories that the audience needs. Execute these sub-steps in order:
+
+   **5a. Check required dimensions.** For the detected question type, verify your findings cover at least **80% of the required dimensions** listed in Step B of the Planner. If any required dimension has zero findings, run 1–2 targeted searches specifically for that dimension.
+
+   **5b. Generate a question-specific dimension inventory.** The Step B dimensions are a minimum floor, not a ceiling. Generate a comprehensive list of all distinct facets the *specific* research question could plausibly cover — not generic categories, but dimensions tailored to this exact question. For example, if the question is "compare Slack vs Teams," the inventory might include: core messaging features, video/audio capabilities, pricing tiers, enterprise security, integrations ecosystem, mobile experience, admin controls, AI/automation features, market share data, developer platform, compliance certifications, user sentiment, migration complexity.
+
+   **5c. Scale expected dimension count to question type:**
+   - **Survey / Ranking** and **Head-to-Head Comparison**: target **8–12** dimensions in the inventory
+   - **Strategy / Advisory**: target **6–10** dimensions
+   - **Technical Analysis** and **Factual Deep-Dive**: target **5–8** dimensions
+
+   If your inventory has fewer dimensions than the target range minimum, brainstorm additional facets until you reach it.
+
+   **5d. Self-audit coverage.** For each dimension in the inventory, check whether your current findings address it. Classify each dimension as: **covered** (2+ findings), **thin** (1 finding), or **uncovered** (0 findings).
+
+   **5e. Launch targeted gap-filling rounds.** For each **uncovered** dimension and each **thin** dimension, run 1–2 focused searches specifically targeting that facet. Use search queries that name the dimension explicitly (e.g., `"Slack vs Teams" mobile experience`, `"Slack vs Teams" compliance certifications`). New findings go through Stage 4 (extract) → Stage 5 (corroborate) before re-evaluation. Maximum 2 gap-filling passes per Quality Gate cycle.
 
 6. **Depth check for thin sub-questions.** For each sub-question from the Planner (Stage 1), evaluate evidence depth:
    - **Count findings per sub-question.** Tally how many distinct findings address each sub-question.
