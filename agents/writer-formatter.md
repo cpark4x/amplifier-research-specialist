@@ -130,20 +130,34 @@ Extract the document body from the writer output. Apply these cleaning rules:
   part of the document (e.g. "So, Jina AI — here's what I found..." → remove it)
 - **Preserve all document content** — every sentence that is part of the actual
   document stays exactly as written
-- **Strip any structural blocks the writer may have partially produced** — if the
-  writer happened to produce a `Parsed:` line or WRITER METADATA, remove them
-  (you will produce canonical versions)
+- **Preserve inline citations** — the writer produces inline parenthetical citations
+  in the format `([Source Name](URL))`. These are document content, NOT structural
+  blocks. Preserve them exactly as written. Do not strip, reformat, or replace them
+  with S-code references.
+- **Preserve the Sources appendix** — the writer produces a `## Sources` section
+  containing a table of cited sources with URLs. This is document content. Preserve
+  it exactly as written. If the writer did not produce a Sources appendix, construct
+  one from Stage 1 data:
+
+  ```
+  ## Sources
+  | # | Source | URL | Tier |
+  |---|--------|-----|------|
+  | S1 | [source name from claim] | [URL from claim] | [tier if known, else "unknown"] |
+  ```
+
+  Include only S-numbers whose content appears in the prose.
+- **Preserve the provenance footer** — if the writer produced a `> *Based on [N]
+  sourced findings...` line, preserve it.
+- **Strip only formatter structural blocks** — remove these if the writer partially
+  produced them: `Parsed:` lines, `WRITER METADATA` blocks, `CITATIONS` blocks,
+  `CLAIMS TO VERIFY` blocks. You will produce canonical versions of these. Do NOT
+  strip the `## Sources` appendix, inline citations, or provenance footer — those
+  are document content owned by the writer.
 - **Preserve section headers** if present
 
-Emit the cleaned prose directly after the S-numbered claims list.
-
-After the prose body, append a source attribution line:
-```
-> *Sources: S1, S2, S3 [list all S-numbers whose content appears in the prose]*
-```
-
-If you can identify per-section attributions, use them. If not, one attribution line
-after the full document is acceptable.
+Emit the cleaned prose (with inline citations intact), followed by the Sources
+appendix and provenance footer, directly after the S-numbered claims list.
 
 ### Stage 3.5: Confidence-Hedge Audit
 
@@ -309,9 +323,15 @@ S2: "[claim]" | confidence: medium | source: [URL or "unattributed"]
 S12: "[inference claim]" | confidence: inference | traces_to: [F3, F7]
 ...
 
-[document prose — cleaned]
+[document prose — with inline ([Source Name](URL)) citations preserved]
 
-> *Sources: S1, S2, ...*
+## Sources
+| # | Source | URL | Tier |
+|---|--------|-----|------|
+| S1 | [Source Name] | [URL] | [tier] |
+| S2 | [Source Name] | [URL] | [tier] |
+
+> *Based on [N] sourced findings from [M] sources. [K] analytical inferences drawn from cross-finding synthesis.*
 
 CLAIMS TO VERIFY
 Sn: "[specific value]" | type: [type]
@@ -367,6 +387,14 @@ That's the entire degraded mode output: `Parsed:` line, verbatim prose, notice. 
 - Rewrite or improve the writer's prose — preserve it exactly, with two exceptions:
   (1) preamble stripping (Stage 3) and (2) confidence-hedge insertions (Stage 3.5).
   No other prose modifications are permitted.
+- Strip inline citations — `([Source Name](URL))` parentheticals in the prose body
+  are document content produced by the writer. Never remove, reformat, or replace
+  them with S-code references.
+- Strip the Sources appendix — the `## Sources` table with URLs is document content.
+  Never remove it. If the writer omitted it, construct it from Stage 1 data.
+- Replace inline citations with `> *Sources: S1, S2, ...*` — that was the old
+  attribution format. The current format is inline `([Source Name](URL))` citations
+  plus a `## Sources` appendix table.
 - Generate new claims not present in the source material
 - Research new facts
 - Skip any structural block in full mode — all five are required every time
