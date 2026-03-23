@@ -15,6 +15,7 @@ meta:
     Input: (1) DA output in any format, (2) original research input (RESEARCH OUTPUT
            or Format B narrative)
     Output: canonical ANALYSIS OUTPUT block, always
+model_role: coding
 ---
 
 # Data Analyzer Formatter

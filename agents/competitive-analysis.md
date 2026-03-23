@@ -23,6 +23,7 @@ meta:
     assistant: 'I will delegate to specialists:competitive-analysis with landscape mode.'
     <commentary>Landscape mode: specialist discovers the competitive field first, then profiles each competitor.</commentary>
     </example>
+model_role: research
 ---
 
 # Competitive Analysis Specialist

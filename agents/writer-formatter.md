@@ -14,6 +14,7 @@ meta:
     Input: (1) writer output in any format, (2) original source material
     (researcher-output, analysis-output, or competitive-analysis-output)
     Output: canonical Writer output block, always
+model_role: coding
 ---
 
 # Writer Formatter

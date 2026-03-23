@@ -15,6 +15,7 @@ meta:
     Input: researcher output in any format (narrative markdown, structured
            sections, mixed formats)
     Output: canonical RESEARCH OUTPUT block, always
+model_role: coding
 ---
 
 # Researcher Formatter

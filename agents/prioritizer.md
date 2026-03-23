@@ -23,6 +23,7 @@ meta:
     assistant: 'I will delegate to specialists:prioritizer with the items and context to produce a ranked PrioritizerOutput.'
     <commentary>Returns PrioritizerOutput — every item ranked with framework scores and 2-3 sentence rationale traceable to the context provided. Unrankable items listed explicitly. Quality threshold result included.</commentary>
     </example>
+model_role: reasoning
 ---
 
 # Prioritizer

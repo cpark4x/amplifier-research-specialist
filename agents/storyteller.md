@@ -28,6 +28,7 @@ meta:
     assistant: 'I will delegate to specialists:storyteller with the competitive-analysis-output to perform cognitive mode translation and produce a board-ready narrative.'
     <commentary>Returns StoryOutput — NARRATIVE SELECTION record documenting every included/omitted finding with rationale, plus clean story prose using the framework chosen for a board audience (trustworthy tone, SCQA or three-act). The Writer consumes StoryOutput as a narrative deliverable.</commentary>
     </example>
+model_role: writing
 ---
 
 # Storyteller

@@ -23,6 +23,7 @@ meta:
     assistant: 'I will pass the researcher output to specialists:writer with format=brief and let it produce the document.'
     <commentary>Writer takes researcher output as input — do not write prose directly from research findings.</commentary>
     </example>
+model_role: writing
 ---
 
 # Writer
