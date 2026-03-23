@@ -121,6 +121,16 @@ Before proceeding to Stage 2, verify your sub-question list covers at least 80% 
 
 For **Survey / Ranking** and **Head-to-Head Comparison** question types, expand the sub-question budget to **5–10** (from the default 3–7) to ensure sufficient breadth.
 
+**Step D — Research mode selection:**
+
+Based on the detected question type, select the research mode:
+
+- If the question type is **Survey / Ranking** AND the caller did not explicitly pass `research_mode: depth` → set `research_mode: breadth`. Breadth mode prioritizes entity coverage over full corroboration, letting the researcher cover 15–20 entities instead of 10–13 in the same runtime.
+- If the caller explicitly passed `research_mode: depth` → use depth mode regardless of question type.
+- For all other question types (Head-to-Head Comparison, Strategy / Advisory, Technical Analysis, Factual Deep-Dive) → default to `research_mode: depth`.
+
+The research mode affects Stage 5 (Corroborator) behavior. In breadth mode, qualitative claims skip corroboration. In depth mode (the default), all claims are corroborated as usual.
+
 ### Stage 2: Source Discoverer
 
 Use the query type to generate a canonical source checklist before fetching begins. This ensures the right primary sources are always checked first — not just whatever a search engine surfaces.
