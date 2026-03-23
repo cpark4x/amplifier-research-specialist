@@ -45,7 +45,7 @@ steps:
   - id: "run-topic-iterations"
     foreach: "{{topics}}"
     as: "topic"
-    parallel: 5
+    # parallel: 5  # Disabled — parallel execution caused quality regression (6.17 vs 8.30 sequential). Re-enable after validating topic-matched capture fix.
     collect: "topic_results"
     type: "recipe"
     recipe: "./quality-eval-iteration.yaml"

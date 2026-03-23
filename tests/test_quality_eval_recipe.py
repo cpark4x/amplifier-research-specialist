@@ -312,14 +312,15 @@ def test_run_topic_iterations_passes_topic_id_in_context() -> None:
     assert "topic_id" in context, "run-topic-iterations context must include 'topic_id'"
 
 
-def test_run_topic_iterations_supports_parallel() -> None:
-    """run-topic-iterations should run topics in parallel for speed (topics are independent)."""
+def test_run_topic_iterations_is_sequential() -> None:
+    """run-topic-iterations must be sequential (parallel disabled pending validation)."""
     recipe = load_recipe()
     step = _get_step(recipe, "run-topic-iterations")
     parallel = step.get("parallel")
-    assert parallel is not None and parallel >= 2, (
-        f"run-topic-iterations should have parallel >= 2 for speed "
-        f"(topics are independent, no shared state), got parallel={parallel!r}"
+    # Sequential means: no parallel key, or parallel=1, or parallel=False, or commented out
+    assert parallel is None or parallel is False or parallel == 1, (
+        f"run-topic-iterations must be sequential (parallel disabled pending validation), "
+        f"got parallel={parallel!r}"
     )
 
 
