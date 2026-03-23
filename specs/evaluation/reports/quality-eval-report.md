@@ -1,20 +1,31 @@
-The cross-topic quality evaluation gap report is complete and saved to `specs/evaluation/reports/quality-eval-report.md`.
+The **Cross-Topic Quality Evaluation Gap Report** has been rendered and saved as a document. Here is the executive summary:
 
-Here's the executive summary:
+---
 
-**Pipeline score: 7.53 / 9.0 target (gap: −1.47)**
+## Key Findings
 
-The pipeline has a sharply lopsided quality profile:
+### Pipeline Position
+- **Pipeline average: 7.25/10** (excluding the infrastructure failure) vs. **best competitor average: 8.17/10**
+- **Gap to target (9.0): −1.75 points**
 
-| Dimension | Pipeline | vs. Best Competitor | Verdict |
-|---|:---:|:---:|---|
-| Confidence Calibration | **9.0** | +1.2 | At target — signature strength |
-| Analytical Insight | 8.2 | −0.2 | Competitive |
-| Structure & Readability | 8.0 | −0.6 | Minor structural gap |
-| Citation Quality | 7.4 | −0.6 | Minor structural gap |
-| Source Quality | **6.4** | **−2.2** | **CRITICAL** — all 5 topics |
-| Factual Depth | **6.2** | **−2.6** | **CRITICAL** — all 5 topics |
+### Two CRITICAL Structural Gaps
 
-**Two CRITICAL structural gaps** — Source Quality and Factual Depth — appear in every single topic and account for ~80% of the total deficit. The root cause is the same in both: the researcher phase discovers too few sources (8–14 unique URLs vs. competitors' 12–19), over-indexes on a small number of readily available pages, and inflates citation counts by assigning separate IDs to claims from the same URL.
+| # | Gap | Severity | Frequency | Avg Point Gap |
+|---|-----|----------|-----------|:---:|
+| 1 | **Citation quality** | CRITICAL | 4/4 topics (100%) | **−3.75** |
+| 2 | **Stale output routing** | CRITICAL | 1 catastrophic + 5 warnings | systemic |
 
-**The #1 recommended action:** Expand the researcher's source discovery to mandate minimum source-type diversity (academic, official docs, independent benchmarks, industry analysis) and add an explicit academic literature search step. This was independently identified as the top-priority fix in 4 of 5 per-topic evaluations.
+### Two MAJOR Structural Gaps
+
+| # | Gap | Severity | Frequency | Avg Point Gap |
+|---|-----|----------|-----------|:---:|
+| 3 | **Source quality** | MAJOR | 4/4 topics (100%) | −1.00 |
+| 4 | **Factual depth** | MAJOR | 3/4 topics (75%) | −1.25 |
+
+### Pipeline's Decisive Strength
+**Analytical insight** (avg 8.50 vs. competitors' 7.75) — the pipeline consistently outperforms Claude, Gemini, and GPT-4o on cross-finding synthesis, causal chain reasoning, and actionable recommendations. This was confirmed across all four valid topics.
+
+### The Single Highest-Impact Fix
+**Implement claim-level inline citation passthrough** in the writer and writer-formatter stages. This one change addresses the largest gap (−3.75 points), accounts for over half the total deficit to target, and three evaluations confirm it would also improve factual depth and source quality as secondary effects. Projected lift: **7.25 → ~7.88** from this single action.
+
+The document is saved at: `/var/folders/5m/71z9hc697r9b9gwgdfs3l_cm0000gn/T/cross-topic-quality-evaluation-gap-report.docx`

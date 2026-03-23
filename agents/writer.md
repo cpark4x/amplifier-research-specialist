@@ -68,8 +68,8 @@ Run every writing task through these stages in order. Do not skip stages.
 5. Number each discrete factual claim in the source material: S1, S2, S3, etc.
    Write out the numbered list — this is output, not internal state:
 
-   S1: [claim text] | confidence: [high|medium|low|unrated|inference]
-   S2: [claim text] | confidence: [high|medium|low|unrated|inference]
+   S1: [claim text] | confidence: [high|medium|low|unrated|inference] | source: [source name] | url: [URL or "none"]
+   S2: [claim text] | confidence: [high|medium|low|unrated|inference] | source: [source name] | url: [URL or "none"]
    ...
 
    - If input type is `researcher-output`: read the `confidence` field from the corresponding Finding
@@ -232,17 +232,36 @@ Write the document. For each claim:
   - Every factual statement in your document must trace to an S-numbered INCLUDED FINDING.
     If you can't trace it, cut it — even if it sounds good.
 
-After drafting each section, immediately append a source attribution line:
+**Inline citations (per-claim URLs):**
 
-  > *Sources: S1 (3–6 word label), S2 (3–6 word label)*
+After each factual claim or tightly related claim cluster, insert an inline
+parenthetical citation linking to the source URL from the Stage 1 claim index:
 
-  - The label is a short phrase from that source claim identifying it at a glance
-  - Include every Sn drawn on in that section
-  - If more than 4 claims, group by theme: `> *Sources: S1–S3 (pipeline), S5 (quality gate)*`
-  - Sections with no factual claims (transitions, headings only) do not get an attribution line
-  - Write the section first, then append the attribution — never interrupt prose
+  The company raised $500 million at a $3 billion valuation ([Bloomberg](https://bloomberg.com/...)).
 
-**Provenance footer:** After the final section (including any Next Steps or Coverage Gaps), append a single italicized line summarizing how the document was built:
+  - Format: `([Source Name](URL))` — placed at the natural sentence or clause boundary
+  - If a sentence draws on multiple sources, combine: `([Bloomberg](URL1); [TechCrunch](URL2))`
+  - If the claim index has `url: "none"` for a source, fall back to the source name without a link: `(Bloomberg)`
+  - Do not cluster citations at the end of a paragraph — attach each to the specific claim it supports
+  - Sections with no factual claims (transitions, headings only) need no citations
+  - S-code numbers (S1, S2…) remain in the internal claim index for traceability to the writer-formatter but do NOT appear in the prose body
+
+**Sources appendix:** Immediately after the final prose section (including any Next Steps or Coverage Gaps), add a `## Sources` section containing a table of every source cited in the document:
+
+  | # | Source | URL | Tier |
+  |---|--------|-----|------|
+  | S1 | Bloomberg | https://bloomberg.com/... | primary |
+  | S2 | TechCrunch | https://techcrunch.com/... | secondary |
+
+  - One row per S-code used in the document
+  - **#** = S-number from the claim index (for traceability to the writer-formatter)
+  - **Source** = source name as it appeared in inline citations
+  - **URL** = full URL (or "not available" if `url: "none"` in claim index)
+  - **Tier** = source tier from upstream research (primary/secondary/tertiary/unknown)
+  - Omit S-codes that were indexed in Stage 1 but never cited in the document
+  - This appendix makes the document independently verifiable — a reader can check every inline link against the table
+
+**Provenance footer:** After the Sources appendix, append a single italicized line summarizing how the document was built:
 
   > *Based on [N] sourced findings from [M] sources. [K] analytical inferences drawn from cross-finding synthesis.*
 
@@ -277,9 +296,10 @@ Before returning output:
    - `executive`: any unexplained jargon? Translate or remove.
    - `engineer`: oversimplified for a non-technical reader? Restore technical depth.
    If a neutral reader could not identify the target audience from the document alone, calibration has failed.
-5. Attribution completeness: every section with factual content has a
-   `> *Sources: ...*` line. If any factual section is missing one, add it
-   before returning.
+5. Citation completeness: every factual claim or claim cluster in the document
+   has an inline `([Source Name](URL))` citation. If any factual sentence lacks
+   one, add it before returning. Verify the Sources appendix table includes
+   every S-code cited in the body.
 6. **Deduplication check:** Scan the document for repeated claims or phrasing.
    Consolidate repeated material into a single clear statement. Remove or
    substantially rewrite duplicates to avoid redundancy. Verify the deduped
