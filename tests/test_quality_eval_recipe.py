@@ -317,7 +317,7 @@ def test_run_topic_iterations_supports_parallel() -> None:
     recipe = load_recipe()
     step = _get_step(recipe, "run-topic-iterations")
     parallel = step.get("parallel")
-    assert parallel is not None and parallel > 1, (
+    assert parallel is not None and parallel >= 2, (
         f"run-topic-iterations should have parallel >= 2 for speed "
         f"(topics are independent, no shared state), got parallel={parallel!r}"
     )
