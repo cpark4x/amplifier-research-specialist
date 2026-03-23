@@ -45,7 +45,7 @@ steps:
   - id: "run-topic-iterations"
     foreach: "{{topics}}"
     as: "topic"
-    # parallel: 5  # Disabled — parallel execution caused quality regression (6.17 vs 8.30 sequential). Re-enable after validating topic-matched capture fix.
+    # parallel disabled — two experiments (parallel: 5 → 6.17/10, parallel: 2 → 6.70/10) both degraded quality vs sequential (8.30/10). Root cause is likely web search rate limiting, not output capture. Keep sequential until rate limiting is resolved.
     collect: "topic_results"
     type: "recipe"
     recipe: "./quality-eval-iteration.yaml"
