@@ -1,3 +1,4 @@
 bundle:
+  active: specialists
   added:
     specialists: file://.
