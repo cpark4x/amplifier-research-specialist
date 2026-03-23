@@ -238,6 +238,16 @@ Before proceeding to synthesis, check:
 
 5. **Factual breadth gate.** For the detected question type, verify your findings cover at least **80% of the required dimensions** listed in Step B of the Planner. If any required dimension has zero findings, run 1–2 targeted searches specifically for that dimension before proceeding. This is the single most common failure mode: the pipeline produces strong analysis on a narrow evidence base while missing entire topic categories that the audience needs.
 
+6. **Depth check for thin sub-questions.** For each sub-question from the Planner (Stage 1), evaluate evidence depth:
+   - **Count findings per sub-question.** Tally how many distinct findings address each sub-question.
+   - **Check source tiers per sub-question.** For each sub-question, check whether at least one finding comes from a primary or academic source.
+   - **Flag thin sub-questions.** A sub-question is "thin" if it has fewer than 3 findings OR has no primary or academic sources (all tertiary/blog). Both triggers apply — a sub-question with 2 blog posts is thin even with adequate count, and one with 5 tertiary sources but no authoritative ones is thin in quality.
+   - **Run a targeted deepening pass for each thin sub-question.** Search specifically for whatever source type is missing:
+     - No academic sources → search arxiv, Google Scholar, conference proceedings for the sub-question topic
+     - No official/primary sources → search official docs, gov sites (.gov), vendor pages, specification documents
+     - No practitioner depth → search engineering blogs, case studies, conference talks with specific metrics and named examples
+   - **Max 1 deepening pass per Quality Gate cycle.** New sources from the deepening pass go through the normal Stage 4 (extract) → Stage 5 (corroborate) flow before the Quality Gate re-evaluates.
+
 **PASS:** All checks clear — proceed to Synthesizer
 **FAIL:** Run another targeted research cycle
 
