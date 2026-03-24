@@ -1,5 +1,5 @@
 """
-TDD tests for the Routing Signal section in specialists/data-analyzer/index.md
+TDD tests for the Routing Signal section in agents/data-analyzer.md
 Validates acceptance criteria for task-5: Add Routing Hint to Data Analyzer.
 """
 

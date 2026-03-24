@@ -1,5 +1,5 @@
 """
-TDD tests for the Routing Signal section in specialists/researcher-formatter/index.md
+TDD tests for the Routing Signal section in agents/researcher-formatter.md
 Validates acceptance criteria for task-6: Add Routing Hint to Researcher Formatter.
 """
 

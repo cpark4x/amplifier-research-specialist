@@ -1,4 +1,4 @@
-"""Test that Stage 4 extractor has been simplified in researcher/index.md.
+"""Test that Stage 4 extractor has been simplified in agents/researcher.md.
 
 Task-4: Remove the rigid format template from Stage 4, keep data quality rules.
 The format template pre-committed the model to a specific output structure at

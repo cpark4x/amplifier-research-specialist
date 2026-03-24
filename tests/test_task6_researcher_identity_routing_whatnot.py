@@ -1,6 +1,6 @@
 """
 Tests for Task 6: Update identity paragraph, routing signal, and
-'What You Do Not Do' sections in researcher/index.md.
+'What You Do Not Do' sections in agents/researcher.md.
 
 Acceptance criteria:
 - Identity paragraph mentions 'downstream formatter specialist handles output formatting'

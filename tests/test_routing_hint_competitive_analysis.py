@@ -1,5 +1,5 @@
 """
-TDD tests for the Routing Signal section in specialists/competitive-analysis/index.md
+TDD tests for the Routing Signal section in agents/competitive-analysis.md
 Validates acceptance criteria for task-4: Add Routing Hint to Competitive Analysis.
 """
 

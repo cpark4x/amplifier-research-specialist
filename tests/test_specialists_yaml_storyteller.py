@@ -1,7 +1,6 @@
 """
 TDD tests for task-04: Register storyteller in behaviors/specialists.yaml.
-Validates that specialists:specialists/storyteller is present as the last entry
-in agents.include.
+Validates that specialists:storyteller is present in agents.include.
 """
 
 from __future__ import annotations

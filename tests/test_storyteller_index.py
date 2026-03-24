@@ -1,5 +1,5 @@
 """
-TDD tests for specialists/storyteller/index.md
+TDD tests for agents/storyteller.md
 Validates all acceptance criteria from the spec (task-02).
 """
 

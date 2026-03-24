@@ -1,5 +1,5 @@
 """
-Static tests for specialists/prioritizer/index.md
+Static tests for agents/prioritizer.md
 Validates that the Prioritizer specialist spec follows all required patterns.
 """
 
@@ -312,7 +312,7 @@ def test_routing_signal_says_orchestrator_routing_only() -> None:
 
 
 def test_prioritizer_registered_in_specialists_yaml() -> None:
-    """30. `specialists:specialists/prioritizer` is in `behaviors/specialists.yaml`."""
+    """30. `specialists:prioritizer` is in `behaviors/specialists.yaml`."""
     yaml_path = Path(__file__).parent.parent / "behaviors" / "specialists.yaml"
     assert yaml_path.exists(), f"behaviors/specialists.yaml not found: {yaml_path}"
     yaml_content = yaml_path.read_text(encoding="utf-8")

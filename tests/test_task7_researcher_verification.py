@@ -1,5 +1,5 @@
 """
-Task 7: Verify researcher refactoring — grep checks, file length, and content integrity.
+Task 7: Verify agents/researcher.md — grep checks, file length, and content integrity.
 
 Acceptance criteria:
 - All grep checks for removed content return 0 matches.

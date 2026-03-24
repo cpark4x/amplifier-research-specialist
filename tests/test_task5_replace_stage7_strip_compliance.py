@@ -1,5 +1,5 @@
 """
-Tests for Task 5: Replace Stage 7 and strip all compliance enforcement sections.
+Tests for Task 5: Replace Stage 7 and strip all compliance enforcement sections in agents/researcher.md.
 
 Acceptance criteria (from spec):
 - grep -c 'COMPLIANCE NOTE' returns 0
