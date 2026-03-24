@@ -33,8 +33,8 @@ def test_status_summary_shows_one_in_progress():
     assert "🔄 0 in progress" not in content, "Old '🔄 0 in progress' still present"
 
 
-def test_status_summary_shows_five_planned():
-    """Status summary should say '5 planned', not '6 planned'."""
+def test_status_summary_shows_four_planned():
+    """Status summary should say '4 planned', not '5 planned'."""
     content = read_backlog()
     lines = content.splitlines()
     summary_line = next(
@@ -42,11 +42,11 @@ def test_status_summary_shows_five_planned():
         None,
     )
     assert summary_line is not None, "Could not find status summary line"
-    assert "5 planned" in summary_line, (
-        f"Expected '5 planned' in summary line, got: {summary_line}"
+    assert "4 planned" in summary_line, (
+        f"Expected '4 planned' in summary line, got: {summary_line}"
     )
-    assert "6 planned" not in summary_line, (
-        f"Old '6 planned' still present in summary line: {summary_line}"
+    assert "5 planned" not in summary_line, (
+        f"Old '5 planned' still present in summary line: {summary_line}"
     )
 
 

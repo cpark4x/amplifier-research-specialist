@@ -24,15 +24,15 @@ bundle.md
 └── behaviors/specialists.yaml       ← declares tools, registers agents, injects context
     ├── tools: tool-web              ← web_search + web_fetch for all specialists
     └── agents.include:              ← which specialists are loaded and callable
-        ├── specialists/researcher
-        ├── specialists/writer
-        ├── specialists/competitive-analysis
-        └── specialists/data-analyzer
+        ├── specialists:researcher
+        ├── specialists:writer
+        ├── specialists:competitive-analysis
+        └── specialists:data-analyzer
 ```
 
 **`bundle.md`** — the entry point. Declares the bundle identity and includes the behavior.
 
-**`behaviors/specialists.yaml`** — the wiring layer. Tools are provided here and agents are registered here. A specialist that exists in `specialists/` but isn't in this file is **invisible to callers**.
+**`behaviors/specialists.yaml`** — the wiring layer. Tools are provided here and agents are registered here. A specialist that exists in `agents/` but isn't in this file is **invisible to callers**.
 
 **`context/coordinator-routing.md`** — the runtime dispatch guide. Loaded into the coordinator's context via `bundle.md`. Tells the orchestrator which specialists exist and when to route to each. A specialist missing from here **won't be selected automatically**.
 
@@ -40,19 +40,22 @@ bundle.md
 
 ## Structure
 
-Create a folder under `specialists/[name]/`:
+Each specialist is a single markdown file under `agents/`:
 
 ```
-specialists/
-└── [specialist-name]/
-    ├── index.md      # Amplifier agent bundle — persona + deep instructions
-    ├── README.md     # Interface contract — what it accepts, returns, can do
-    └── tools/        # Specialist-specific tools (if any)
+agents/
+├── researcher.md
+├── writer.md
+├── competitive-analysis.md
+├── data-analyzer.md
+└── [your-specialist].md      # ← add your file here
 ```
+
+Each `.md` file is a self-contained Amplifier agent bundle — persona, instructions, and interface contract in one file.
 
 ---
 
-## index.md Format
+## Agent File Format
 
 ```markdown
 ---
@@ -86,20 +89,6 @@ meta:
 
 ---
 
-## README.md Format
-
-The README is the **interface contract** — what callers need to know. It does not contain instructions for the specialist. It documents the boundary.
-
-Sections:
-- One-line description of the specialist's job
-- **Accepts** — table of input fields, types, required/optional, defaults, descriptions
-- **Returns** — the output type from `shared/interface/types.md`, with key fields called out
-- **Can Do** — tool capabilities
-- **Cannot Do** — explicit boundaries (important for orchestrators choosing specialists)
-- **Design Notes** — any behavior a caller should be aware of (e.g., "takes longer by design")
-
----
-
 ## Shared Interface Types
 
 If your specialist introduces a new output type, define it in `shared/interface/types.md` first. The schema is the stable contract — define it carefully before writing instructions, because it's harder to change later.
@@ -127,14 +116,14 @@ Every specialist in this repo follows these:
 
 ## Adding to the Registry
 
-Once your specialist files are complete, register it in **three places**. Missing any one means the specialist won't work.
+Once your specialist file is complete, register it in **three places**. Missing any one means the specialist won't work.
 
 ### 1. Add to `README.md`
 
 Add a row to the Specialists table:
 
 ```markdown
-| [specialist-name](specialists/specialist-name/) | [one-line domain description] | v1 |
+| [specialist-name] | [one-line domain description] | v1 |
 ```
 
 ### 2. Wire into `behaviors/specialists.yaml`
@@ -208,8 +197,7 @@ For research-heavy specialists, run the same question against 2–3 independent 
 
 ## Pre-Merge Checklist
 
-- [ ] `specialists/[name]/index.md` — persona + pipeline instructions complete
-- [ ] `specialists/[name]/README.md` — interface contract documented (accepts, returns, can do, cannot do)
+- [ ] `agents/[name].md` — persona + pipeline instructions complete
 - [ ] `shared/interface/types.md` — output type defined (if new) or existing type reused
 - [ ] `README.md` — added to specialists table
 - [ ] `behaviors/specialists.yaml` — added to `agents.include`
