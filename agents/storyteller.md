@@ -123,6 +123,23 @@ metadata. Default inference rules when not specified:
 - `technical` → `trustworthy`
 - `sales` → `persuasive`
 
+**Compound tones.** Tones may be single (`trustworthy`) or compound (`trustworthy but
+urgent`, `confident yet cautious`, `dramatic with restraint`). Compound tones combine
+a primary register with a secondary modifier that creates emotional texture:
+
+| Compound Tone | Primary Register | Secondary Modifier | Effect |
+|---|---|---|---|
+| trustworthy but urgent | evidence-forward | deadline pressure | Board facing a time-sensitive decision |
+| confident yet cautious | strong conviction | explicit risk acknowledgment | Exec briefing with known unknowns |
+| dramatic with restraint | amplified stakes | measured claims | General audience, serious topic |
+| persuasive but honest | loss aversion | counterarguments acknowledged | Sales audience, mature buyer |
+| urgently optimistic | opportunity emphasis | time sensitivity | Change communication |
+
+When detecting compound tones: parse both components. The primary register governs
+sentence structure and evidence presentation. The secondary modifier governs qualifying
+language, risk acknowledgment, and emotional coloring. Both flow into the Emotional
+Register field in Stage 3 (decision 6).
+
 Override defaults only when the requester explicitly specifies a different tone.
 
 **Detect quality_threshold.** Look for explicit `quality_threshold: high` or `threshold: high` in the caller's request. Default: `standard`.

@@ -283,6 +283,23 @@ Before proceeding to synthesis, check:
      - No practitioner depth → search engineering blogs, case studies, conference talks with specific metrics and named examples
    - **Max 1 deepening pass per Quality Gate cycle.** New sources from the deepening pass go through the normal Stage 4 (extract) → Stage 5 (corroborate) flow before the Quality Gate re-evaluates.
 
+7. **Contrarian sweep.** Research sources are positively framed by default — guides,
+   vendor pages, and promotional content emphasize benefits and downplay risks. After
+   completing the main research loop, run **one targeted search** to surface risks,
+   downsides, and deteriorating conditions that positive-framing sources miss:
+
+   - Search for: `"risks of [subject]"`, `"problems with [subject]"`, or
+     `"downsides of [subject]"` — using the core subject from the research question.
+   - If the question involves a location, product, or strategy: also search for
+     `"[subject] complaints"`, `"[subject] criticism"`, or `"[subject] safety concerns"`.
+   - Extract findings through the normal Stage 4 → Stage 5 flow. Tag contrarian
+     findings with `Note: contrarian-sweep` so they are visually distinct in the output.
+   - **Do not run more than 2 contrarian searches.** This is a balance check, not a
+     second research pass.
+   - If contrarian findings corroborate existing findings (risks already surfaced),
+     note the corroboration. If they reveal NEW risks not previously covered, include
+     them as new findings with appropriate confidence ratings.
+
 **PASS:** All checks clear — proceed to Synthesizer
 **FAIL:** Run another targeted research cycle
 
