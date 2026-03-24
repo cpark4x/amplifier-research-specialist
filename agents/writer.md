@@ -299,14 +299,21 @@ Before returning output:
    If a neutral reader could not identify the target audience from the document alone, calibration has failed.
 5. Citation completeness: every factual claim or claim cluster in the document
    has an inline `([Source Name](URL))` citation. If any factual sentence lacks
-   one, add it before returning. Verify the Sources appendix table includes
-   every S-code cited in the body.
-6. **Deduplication check:** Scan the document for repeated claims or phrasing.
+   one, add it before returning.
+6. **Sources appendix completeness:** Verify a `## Sources` section exists after
+   the final prose section. If it is missing entirely, construct it now from the
+   Stage 1 claim index — one row per S-code cited in the body, with columns:
+   `#`, `Source`, `URL`, `Tier`. This is not optional. The Sources appendix MUST
+   appear in every output. Verify the table includes every S-code cited in the body.
+   **Do NOT produce the old `> *Sources: S1, S2, ...*` blockquote format** — that
+   pattern is deprecated. The current citation format is inline `([Source Name](URL))`
+   citations plus the `## Sources` appendix table.
+7. **Deduplication check:** Scan the document for repeated claims or phrasing.
    Consolidate repeated material into a single clear statement. Remove or
    substantially rewrite duplicates to avoid redundancy. Verify the deduped
    document still covers all required points.
-7. **Specificity gate:** Read the conclusion, bottom line, or opening summary. Replace the subject's name with [SUBJECT]. If the sentence could apply unchanged to any comparable entity in this space, it fails — return to Stage 1, surface the most distinctive claim, revise to pull it through. The bottom line must not survive the substitution.
-8. **Medium-claim hedge scan:** Re-read every sentence that draws on a medium-confidence claim (S-numbers marked `medium` in the Stage 1 claim index). For each one, verify a visible hedge is present that matches the source tier:
+8. **Specificity gate:** Read the conclusion, bottom line, or opening summary. Replace the subject's name with [SUBJECT]. If the sentence could apply unchanged to any comparable entity in this space, it fails — return to Stage 1, surface the most distinctive claim, revise to pull it through. The bottom line must not survive the substitution.
+9. **Medium-claim hedge scan:** Re-read every sentence that draws on a medium-confidence claim (S-numbers marked `medium` in the Stage 1 claim index). For each one, verify a visible hedge is present that matches the source tier:
    - Primary/secondary medium → "research indicates", "a study found", "[institution] analysis shows"
    - Tertiary medium → "according to [source]", "survey data suggests", "reportedly"
    If any medium-confidence sentence lacks a tier-appropriate hedge, add one now. This catches under-hedging that the Stage 4 rules describe but don't enforce via explicit scan — especially when most sources share the same tier and contrast is not visually obvious.

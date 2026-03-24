@@ -149,12 +149,30 @@ Extract the document body from the writer output. Apply these cleaning rules:
   Include only S-numbers whose content appears in the prose.
 - **Preserve the provenance footer** — if the writer produced a `> *Based on [N]
   sourced findings...` line, preserve it.
+- **Strip deprecated attribution format** — if the prose contains a line matching
+  `> *Sources: S1, S2, ...*` (the old blockquote S-code attribution), remove it.
+  This is a deprecated format artifact. The current format is inline
+  `([Source Name](URL))` citations plus a `## Sources` appendix table.
 - **Strip only formatter structural blocks** — remove these if the writer partially
   produced them: `Parsed:` lines, `WRITER METADATA` blocks, `CITATIONS` blocks,
   `CLAIMS TO VERIFY` blocks. You will produce canonical versions of these. Do NOT
   strip the `## Sources` appendix, inline citations, or provenance footer — those
   are document content owned by the writer.
 - **Preserve section headers** if present
+
+**Sources appendix verification (mandatory):** After cleaning, check whether the
+prose includes a `## Sources` section with a table. If it does, preserve it. If it
+does NOT, you MUST construct one from Stage 1 data before emitting the prose:
+
+```
+## Sources
+| # | Source | URL | Tier |
+|---|--------|-----|------|
+| S1 | [source name from claim] | [URL from claim] | [tier if known, else "unknown"] |
+```
+
+Include only S-numbers whose content appears in the prose. This is not optional —
+every output must include the Sources appendix.
 
 Emit the cleaned prose (with inline citations intact), followed by the Sources
 appendix and provenance footer, directly after the S-numbered claims list.

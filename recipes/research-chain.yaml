@@ -469,6 +469,13 @@ steps:
       cat > "$_fn_tmp" <<'__STRIP_NOTES_EOF__'
       {{formatted_document}}
       __STRIP_NOTES_EOF__
+      # Strip deprecated "> *Sources..." blockquote attribution lines (all variants).
+      # Model priors produce this old format despite instruction-level prohibition
+      # in both writer and writer-formatter. Variants include:
+      #   > *Sources: S1, S2, S3...*
+      #   > *Sources — Summary: S1, S4...*
+      # Mechanical removal is required.
+      sed -i '' '/^> \*Sources[: —]/d' "$_fn_tmp"
       _start=$(grep -n '^Parsed:' "$_fn_tmp" | head -1 | cut -d: -f1)
       _end=$(grep -n '^S[0-9]\{1,\}:' "$_fn_tmp" | tail -1 | cut -d: -f1)
       if [ -n "$_start" ] && [ -n "$_end" ]; then
