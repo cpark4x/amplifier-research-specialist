@@ -308,12 +308,33 @@ Before returning output:
    **Do NOT produce the old `> *Sources: S1, S2, ...*` blockquote format** — that
    pattern is deprecated. The current citation format is inline `([Source Name](URL))`
    citations plus the `## Sources` appendix table.
-7. **Deduplication check:** Scan the document for repeated claims or phrasing.
-   Consolidate repeated material into a single clear statement. Remove or
-   substantially rewrite duplicates to avoid redundancy. Verify the deduped
-   document still covers all required points.
+7. **Deduplication check.** Scan the document for cross-section repetition — this
+   is the single most common quality flaw in pipeline output. Check specifically for:
+   - Same factual claim appearing in multiple sections (e.g., a pricing number
+     in both a summary and a detailed breakdown — keep the detailed version, cut
+     the summary repeat or reduce it to a brief reference)
+   - Same statistic cited in both a table and prose — keep the table, trim the
+     prose to reference it without restating the numbers
+   - Conclusion restated from the introduction — if the intro states the bottom
+     line and the conclusion repeats it verbatim, rewrite the conclusion to add
+     synthesis or forward-looking implications
+   - Near-identical sentences or paraphrases across sections
+   For each duplicate found: consolidate into one authoritative statement. Remove
+   or substantially rewrite the copy. Verify the deduped document still covers all
+   required points.
 8. **Specificity gate:** Read the conclusion, bottom line, or opening summary. Replace the subject's name with [SUBJECT]. If the sentence could apply unchanged to any comparable entity in this space, it fails — return to Stage 1, surface the most distinctive claim, revise to pull it through. The bottom line must not survive the substitution.
-9. **Medium-claim hedge scan:** Re-read every sentence that draws on a medium-confidence claim (S-numbers marked `medium` in the Stage 1 claim index). For each one, verify a visible hedge is present that matches the source tier:
+9. **Analysis-output inference integrity** (skip if input is not `analysis-output`):
+   When the source material is `analysis-output`, verify inference handling:
+   - Every inference claim (marked `confidence: inference` in Stage 1) must appear
+     in the document with analytical framing ("evidence suggests", "analysis points
+     to", "patterns indicate") — never as established fact.
+   - Every inference must preserve its `traces_to` field in your claim index so the
+     writer-formatter can carry it to the CITATIONS block.
+   - If an inference contains a specific number, percentage, or derived statistic,
+     verify it also appears in the CLAIMS TO VERIFY section with a note that it is
+     inference-derived (e.g., `type: derived percentage — inference, verify arithmetic`).
+   - If ANY inference claim in your document lacks analytical framing, add it now.
+10. **Medium-claim hedge scan:** Re-read every sentence that draws on a medium-confidence claim (S-numbers marked `medium` in the Stage 1 claim index). For each one, verify a visible hedge is present that matches the source tier:
    - Primary/secondary medium → "research indicates", "a study found", "[institution] analysis shows"
    - Tertiary medium → "according to [source]", "survey data suggests", "reportedly"
    If any medium-confidence sentence lacks a tier-appropriate hedge, add one now. This catches under-hedging that the Stage 4 rules describe but don't enforce via explicit scan — especially when most sources share the same tier and contrast is not visually obvious.
