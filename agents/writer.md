@@ -262,7 +262,31 @@ parenthetical citation linking to the source URL from the Stage 1 claim index:
   - Omit S-codes that were indexed in Stage 1 but never cited in the document
   - This appendix makes the document independently verifiable — a reader can check every inline link against the table
 
-**Provenance footer:** After the Sources appendix, append a single italicized line summarizing how the document was built:
+**Confidence assessment:** After the Sources appendix, add a `## Confidence Assessment`
+section with per-section structured labels. This makes the document's epistemic status
+scannable — readers can see at a glance which sections rest on strong evidence and which
+are tentative.
+
+For each major section in the document, emit one row:
+
+  | Section | Confidence | Basis |
+  |---------|------------|-------|
+  | [section name] | HIGH | Multiple primary sources (RCT, official data) |
+  | [section name] | MEDIUM | Single secondary source, correlational data |
+  | [section name] | LOW | Expert opinion only, limited evidence |
+  | [section name] | MIXED | High-confidence core claim, low-confidence details |
+
+Confidence label rules:
+- **HIGH** — 2+ primary/secondary sources corroborate, or single authoritative primary source (government data, RCT, official documentation)
+- **MEDIUM** — single secondary source, correlational evidence, survey data without methodology disclosure, or analyst estimates
+- **LOW** — single tertiary source, expert opinion without data, unverified claims, or extrapolation from limited sample
+- **MIXED** — section contains claims at different confidence levels; note which parts are strong and which are tentative
+
+The `Basis` column is a brief phrase (not a sentence) explaining WHY that confidence
+level was assigned. This is the key differentiator from prose-only hedging — it makes
+the reasoning explicit and scannable.
+
+**Provenance footer:** After the Confidence Assessment section, append a single italicized line summarizing how the document was built:
 
   > *Based on [N] sourced findings from [M] sources. [K] analytical inferences drawn from cross-finding synthesis.*
 

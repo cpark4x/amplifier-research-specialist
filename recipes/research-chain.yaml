@@ -422,6 +422,61 @@ steps:
     output: "formatted_analysis"
     timeout: 600
 
+  # Coverage-audit step: prevents the writer from compressing away findings the
+  # researcher found. The writer aggressively condenses 40-63 upstream findings
+  # into ~1,800 words, sacrificing factual breadth for executive conciseness.
+  # This step produces a "minimum coverage manifest" that the writer must honor.
+  # Added 2026-03-24 — addresses CRITICAL factual depth gap (-1.0 vs competitors,
+  # 4/5 topics affected in Mar 23 eval).
+  - id: "coverage-audit"
+    agent: "self"
+    prompt: |
+      COVERAGE AUDITOR — you compare research findings against analysis output to
+      catch fact categories that would be lost in the writing stage.
+
+      RESEARCH FINDINGS (full evidence base):
+      {{formatted_research_clean}}
+
+      ANALYSIS OUTPUT (what the writer will receive):
+      {{formatted_analysis}}
+
+      OUTPUT FORMAT: {{output_format}}
+
+      TASK:
+      1. Extract every distinct FACT CATEGORY from the research findings. A fact
+         category is a topic cluster — e.g., "pricing tiers", "benchmark data",
+         "funding history", "security vulnerabilities", "product lines", "market
+         share statistics", "regulatory requirements". List them all.
+
+      2. For each fact category, check whether the analysis output preserves at
+         least one finding from that category. Mark as COVERED or MISSING.
+
+      3. For MISSING categories, extract the 1-2 most important findings from the
+         research that the writer MUST include — these are findings that competitors
+         would cover and readers would expect.
+
+      4. Output a COVERAGE MANIFEST in this exact format:
+
+      COVERAGE MANIFEST
+      Total research categories: [n]
+      Covered in analysis: [n]
+      Missing from analysis: [n]
+
+      MUST-INCLUDE FINDINGS (writer: incorporate these even if the analysis omitted them)
+      - [category]: [specific finding with source] — why it matters: [1 sentence]
+      - [category]: [specific finding with source] — why it matters: [1 sentence]
+      ...
+
+      END COVERAGE MANIFEST
+
+      Rules:
+      - Maximum 8 MUST-INCLUDE findings — prioritize what competitors would cover
+      - If nothing is missing, output "MUST-INCLUDE FINDINGS: none"
+      - Do not rewrite findings — extract them verbatim from the research
+      - Do not analyze or draw inferences — just identify coverage gaps
+    output: "coverage_manifest"
+    timeout: 600
+
   - id: "write"
     agent: "specialists:writer"
     prompt: |
@@ -431,6 +486,9 @@ steps:
 
       Analysis:
       {{formatted_analysis}}
+
+      COVERAGE MANIFEST (from upstream audit — incorporate MUST-INCLUDE findings):
+      {{coverage_manifest}}
 
       SOURCE URL MAP (verified URLs for sources — use these in CITATIONS):
       {{source_url_map}}
@@ -443,6 +501,12 @@ steps:
       When building your CITATIONS block, match source names to the URL map above
       and use the verified https:// URLs. This ensures source provenance survives
       the analysis step.
+
+      IMPORTANT: The coverage manifest lists findings that the analysis stage
+      omitted but that readers expect. Incorporate the MUST-INCLUDE findings into
+      the appropriate sections of your document. If the output format budget is
+      tight, prefer including these as brief factual statements over expanding
+      existing sections.
     output: "final_document"
     timeout: 1800
 

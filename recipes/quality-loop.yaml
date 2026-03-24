@@ -205,9 +205,16 @@ steps:
           - What is the expected impact on the aggregate score?
 
           Map the gap to a SPECIFIC fix:
-          - target_file: The exact file path to modify (e.g., agents/researcher.md,
+          - target_file: The primary file to modify (e.g., agents/researcher.md,
             agents/data-analyzer.md, agents/writer.md). Use flat paths — agents
             are at agents/<name>.md, NOT agents/<name>/<name>.md.
+          - downstream_files: Any downstream agent files that consume the target
+            agent's output and may need contract synchronization. The pipeline
+            flows: researcher → researcher-formatter → data-analyzer →
+            da-formatter → writer → writer-formatter → strip-formatter-notes.
+            If your fix changes what the target agent PRODUCES, list the next
+            agent(s) in the pipeline that would need to be updated to preserve
+            the change. If none, write "none".
           - edit_plan: What specific change to make (e.g., "Add a breadth gate
             that scales claim budget to question scope")
           - gap_name: Short name for the gap being addressed
@@ -222,6 +229,7 @@ steps:
           ## DIAGNOSIS
           - gap_name: [short name]
           - target_file: [exact path]
+          - downstream_files: [list of downstream agent files that may need sync, or "none"]
           - edit_plan: [what to change]
           - chosen_because: [why this gap over others]
           - all_candidates: [list every candidate considered]
@@ -249,9 +257,18 @@ steps:
           =====================================================================
 
           1. READ the target file identified in the diagnosis
-          2. UNDERSTAND the current behavior and why it produces the identified gap
-          3. IMPLEMENT the minimal change described in the edit_plan
-             - Change ONLY what the diagnosis specifies
+          2. TRACE THE DATA FLOW. Before making any change, ask: "What happens
+             to this agent's output in the next pipeline stage?" Read the
+             downstream agent(s) that consume this agent's output. The pipeline
+             flows: researcher → researcher-formatter → data-analyzer →
+             da-formatter → writer → writer-formatter → strip-formatter-notes.
+             If your change modifies what the target agent PRODUCES, check
+             whether the downstream agent will PRESERVE or STRIP that change.
+          3. IMPLEMENT the change in the target file. If the downstream agent
+             would strip or conflict with your change, fix BOTH files — the
+             producer AND the consumer. Do not leave a contract mismatch.
+             - Change ONLY what the diagnosis specifies plus any downstream
+               contract synchronization required
              - Do NOT refactor, reorganize, or "improve" unrelated sections
              - Do NOT add features beyond what the edit_plan describes
           4. VERIFY the change is syntactically valid
@@ -262,11 +279,11 @@ steps:
           CONSTRAINTS:
           =====================================================================
 
-          - ONE file change per round. If the diagnosis mentions multiple files,
-            change only the primary target_file.
+          - Maximum 3 files per round. Most fixes are 1 file. Cross-agent
+            contract fixes may need 2-3 files (producer + consumer + recipe).
           - The commit message must start with "fix(quality-loop):" so it's
             identifiable for revert.
-          - Report the git commit hash in your response.
+          - Report the git commit hash and ALL files changed in your response.
 
           =====================================================================
           OUTPUT FORMAT:
