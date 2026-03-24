@@ -16,7 +16,7 @@ Canvas Specialists is a library of best-in-class, single-domain AI specialist ag
 
 ### New specialists
 
-The main contribution type. Each specialist gets its own folder under `specialists/`, its own pipeline, and its own interface contract. The backlog at [docs/BACKLOG.md](docs/BACKLOG.md) shows what's planned — pick one or propose a new one.
+The main contribution type. Each specialist gets its own file under `agents/`, its own pipeline, and its own interface contract. The backlog at [docs/BACKLOG.md](docs/BACKLOG.md) shows what's planned — pick one or propose a new one.
 
 **Full guide:** [docs/adding-a-specialist.md](docs/adding-a-specialist.md)
 
