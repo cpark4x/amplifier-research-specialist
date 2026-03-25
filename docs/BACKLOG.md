@@ -2,7 +2,7 @@
 
 **Purpose:** Strategic planning view for canvas-specialists — a library of best-in-class, single-domain AI specialist agents for knowledge worker and consumer scenarios  
 **Owner:** Chris Park  
-**Last Updated:** March 22, 2026 (v5.4)  
+**Last Updated:** March 24, 2026 (v5.5)  
 
 ---
 
@@ -14,11 +14,11 @@ See [**2026-03-05-world-class-roadmap.md**](plans/2026-03-05-world-class-roadmap
 
 ## Current Status Summary
 
-**11 epics tracked:** ✅ 6 complete, 🔄 1 in progress, ⏸️ 0 paused, 4 planned
+**11 epics tracked:** ✅ 7 complete, 🔄 0 in progress, ⏸️ 0 paused, 4 planned
 
 - ✅ Epic 01 — Researcher
 - ✅ Epic 02 — Writer
-- 🔄 Epic 03 — Storyteller
+- ✅ Epic 03 — Storyteller
 - ✅ Epic 04 — Competitive Analysis
 - 🆕 Epic 05 — Design
 - 🆕 Epic 06 — Demo Generator
@@ -30,9 +30,7 @@ See [**2026-03-05-world-class-roadmap.md**](plans/2026-03-05-world-class-roadmap
 
 ### Active Work
 
-| Item | Epic | Owner | Status | Branch | Purpose |
-|------|------|-------|--------|--------|---------|
-| Storyteller specialist | 03 | Chris | 🔄 In Progress | main | Cognitive mode translation — transforms research/analysis into compelling narrative |
+*No items currently in progress. Next sprint: push quality score from 8.17 → 8.5.*
 
 ### Recently Completed
 
@@ -54,6 +52,10 @@ See [**2026-03-05-world-class-roadmap.md**](plans/2026-03-05-world-class-roadmap
 | Researcher: breadth mode (#46) | 01 | Chris | Mar 22, 2026 | Step D (mode selection) added to Stage 1 — auto-selects `research_mode: breadth` for Survey/Ranking questions with depth override. Stage 5 breadth corroboration: numeric/financial claims fully corroborated, qualitative claims accepted at medium confidence from single source. 8 structural tests. Commits `320aae0`, `205af27`. |
 | Writer-formatter: tier-aware hedging (#40) | 02 | Chris | Mar 22, 2026 | Stage 3.5 upgraded with source-tier check before inserting hedges. Primary/secondary claims protected from "reportedly." Tertiary claims hedged as before. Inference unchanged. 5 structural tests. Commit `50be666`. |
 | Writer: audience-aware technical depth (#50) | 02 | Chris | Mar 22, 2026 | Audience depth self-check added to Stage 4. Non-technical audiences get mechanism-to-outcome translation. Technical audiences excluded. Self-check: "Would this sentence make sense to someone who doesn't build AI systems?" 5 structural tests. Commit `6ebd7ee`. |
+| Writer: confidence labels + coverage-audit pipeline step + quality loop v3 (infrastructure) | 01/02 | Chris | Mar 24, 2026 | `agents/writer.md` +26 lines: confidence label display. `recipes/research-chain.yaml` +64 lines: `coverage-audit` as explicit pipeline step. `recipes/quality-loop.yaml` +31 lines: cross-agent awareness. Quality loop score: **8.17** → targeting **8.5**. Commit `9d33e15`. |
+| specialists→agents directory refactor (infrastructure) | — | Chris | Mar 24, 2026 | Renamed `specialists/{name}/index.md` → `agents/{name}.md` across entire codebase. Updated all path references in live recipes, skills, docs, tests. Removed prototype HTML story docs (~3,177 lines), `slide-review.yaml` dev recipe, orphaned test scripts. Added architecture diagrams. 563 tests passing. Commits `ec7a226`–`655a917`. |
+| coordinator-routing: move to context.include (infrastructure) | — | Chris | Mar 24, 2026 | Root cause: markdown body entries get REPLACED during bundle composition; `context.include` entries ACCUMULATE. `coordinator-routing.md` was in the body → silently overwritten when composed after another app bundle. Fix: moved to `context.include` in `behaviors/specialists.yaml`. Commit `1ae9e67`. |
+| Storyteller: compound tones (#47 partial) | 03 | Chris | Mar 23, 2026 | Compound tone support shipped. Epic 03 complete. Commit `7cdef76`. |
 | Recipe: fix conditional branching bug (#42) | 01 | Chris | Mar 19, 2026 | Removed smart-skip gates for DA-formatter and writer-formatter in research-chain. Root cause: bash heredoc output with trailing whitespace didn't match condition strings. Reverted to always running formatters — ~6 min slower but 100% reliable. research-chain v1.11.0. Commit `9c855b2`. |
 | DA Format B hardening (#16) | 08 | Chris | Mar 10, 2026 | Conditional close. Added "Special handling — pure prose inputs" to Format B detection: sentence-by-sentence, min 3 findings/paragraph, compound-sentence splitting. Format B with labels validated. Pure prose (no labels) deferred. *(test log 2026-03-10-da-format-hardening)* |
 | DA code-fence prevention (#17) | 08 | Chris | Mar 10, 2026 | Stage 4 self-check added. ANALYSIS OUTPUT emitted as bare text, no code fences, on second test run. *(test log 2026-03-10-da-format-hardening)* |
@@ -252,9 +254,9 @@ Synthesis Writer → cross-ecosystem comparative brief
 
 | Epic | Implemented | Future | % Complete |
 |------|-------------|--------|------------|
-| 01 — Researcher | Researcher V1, source tiering, quality gate, ResearchOutput v1.0, researcher-formatter, research-chain recipe | Source confidence threshold | 95% |
-| 02 — Writer | Writer V1, coverage audit, citations + attribution, WRITER METADATA, citation confidence, rendering (pandoc) | Brand voice config, audit severity, source confidence threshold | 80% |
-| 03 — Storyteller | StoryOutput schema, 5-stage pipeline, NARRATIVE SELECTION, narrative-chain recipe | Compound tones, structured NARRATIVE SELECTION format | 90% |
+| 01 — Researcher | Researcher V1, source tiering, quality gate, ResearchOutput v1.0, researcher-formatter, research-chain recipe, coverage-audit pipeline step | Source confidence threshold | 97% |
+| 02 — Writer | Writer V1, coverage audit, citations + attribution, WRITER METADATA, citation confidence, rendering (pandoc), confidence label display | Brand voice config, audit severity, source confidence threshold | 83% |
+| 03 — Storyteller | StoryOutput schema, 5-stage pipeline, NARRATIVE SELECTION, narrative-chain recipe, compound tones | — | 100% |
 | 04 — Competitive Analysis | 6-stage pipeline, head-to-head + landscape modes, CompetitiveAnalysisOutput schema, 2-step + 3-step recipes, researcher-first default, CLAIMS TO VERIFY block | — | 100% |
 | 05 — Design | — | Full specialist implementation | 0% |
 | 06 — Demo Generator | — | Full specialist implementation | 0% |
@@ -302,6 +304,7 @@ Synthesis Writer → cross-ecosystem comparative brief
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v5.5 | Mar 24, 2026 | Chris | **Epic 03 complete + infrastructure hardening.** Storyteller compound tones shipped (commit `7cdef76`) — Epic 03 now ✅. Writer confidence labels + `coverage-audit` pipeline step in research-chain + cross-agent awareness in quality loop (commit `9d33e15`). Quality loop score **8.17 → targeting 8.5**. `specialists/` → `agents/` directory refactor across entire codebase — renamed paths, updated recipes/skills/docs/tests, removed prototype HTML (~3,177 lines) and dev recipes, added architecture diagrams, 563 tests passing (commits `ec7a226`–`655a917`). coordinator-routing moved from `bundle.md` body to `context.include` to survive bundle composition overwrite (commit `1ae9e67`). Epic counts: 7 complete, 0 in progress, 4 planned. |
 | v5.4 | Mar 22, 2026 | Chris | **Five backlog items shipped in one session.** #49 (iterative deepening), #46 (breadth mode), #40 (tier-aware hedging), #50 (audience-aware depth) all implemented with structural tests. #43 (decision-brief format) resolved by v1 loop's brief word budget increase + auto-escalation. Bundle context fix applied (`active: specialists` in settings). Quality loop v2 running with retry logic. P2 ship order: all items shipped or resolved. 25+ structural tests added. |
 | v5.3 | Mar 20, 2026 | Chris | #44 shipped (writer-formatter graceful degradation). Quality improvement loop recipe built (10 tasks, 39 tests). Rule 9 (#45) restored after being lost in context refactor. Competitor model routing wired. 2 test topics added. Score-history.yaml bug fixed. P2 ship order updated to 5 open items: #49 → #46 → #50 → #43 → #40. |
 | v5.2 | Mar 19, 2026 | Chris | **Batch 2 shipped + context refactor.** Moved #45 (two-path doctrine, commit `7a07b66`) and #41 (researcher auto-retry, research-chain v1.12.0, commit `7a07b66`) to Recently Completed. #44 (writer-formatter graceful degradation) now unblocked by #45. Updated P2 recommended ship order to 6 open items: #49 → #46 → #50 → #44 → #43 → #40. Context refactor: split `specialists-instructions.md` into `coordinator-routing.md` (~2,750 tokens, saves ~2,200 tokens coordinator context), removed `context.include` from behavior YAML (~59K tokens/pipeline savings), pinned 3 external deps to HEAD SHAs, added `model_role: reasoning` to data-analyzer, updated `adding-a-specialist.md` guide. 5 commits: `946a329`–`0bbd839`. Neither Batch 2 nor context refactor validated with live pipeline run yet. |
