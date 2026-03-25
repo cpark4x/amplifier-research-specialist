@@ -2,7 +2,7 @@
 
 **Purpose:** Strategic planning view for canvas-specialists — a library of best-in-class, single-domain AI specialist agents for knowledge worker and consumer scenarios  
 **Owner:** Chris Park  
-**Last Updated:** March 25, 2026 (v5.6)  
+**Last Updated:** March 25, 2026 (v5.7)  
 
 ---
 
@@ -30,7 +30,7 @@ See [**2026-03-05-world-class-roadmap.md**](plans/2026-03-05-world-class-roadmap
 
 ### Active Work
 
-*No items currently in progress. Next sprint: push quality score from 8.17 → 8.5.*
+*Sprint goal: push quality score from 8.17 → 8.5. Ship order: #55 → #56 → #57 → #3 → #58.*
 
 ### Recently Completed
 
@@ -118,10 +118,15 @@ Ordered by priority tier then impact. Items marked *(consolidated)* absorbed dup
 
 **Priority 2 — Quality polish, moderate impact:**
 
-**Recommended ship order for open items:** All Priority 2 items have been shipped or resolved. See Priority 3 for remaining work.
+**Recommended ship order for open items:** #55 → #56 → #57 → #3 → #58. First three target the two lagging quality dimensions (confidence calibration −0.6, factual depth −1.0). Combined estimated lift: +0.35 to +0.56 (gap is 0.33). #3 makes the coverage-audit infrastructure operational. #58 fixes the quality loop's regression detection.
 
 | # | Item | Epic | Owner | Effort | Impact | Rationale |
 |---|------|------|-------|--------|--------|-----------|
+| 55 | **Writer: per-section structured confidence labels + consolidated confidence table** | 02 | Chris | S | H | Confidence calibration is −0.6 avg vs competitors across 3/5 topics. Eval report: "a formatting gap, not an epistemic one." Competitors use explicit per-section labels like `[Confidence: HIGH — 3 RCTs]` plus a consolidated table. Current writer confidence code (commit `9d33e15`) only tags inference-level confidence, not the structured section-level labels evaluators score on. Fix: add `**[Confidence: HIGH/MEDIUM/LOW — evidence basis]**` per major section + consolidated confidence assessment table at end. **Estimated lift: +0.20 to +0.36 aggregate.** |
+| 56 | **Writer: make coverage-manifest MUST-INCLUDE items mandatory** | 02 | Chris | XS | H | Factual depth is −1.0 avg vs competitors across 4/5 topics — the single widest gap. The `coverage-audit` pipeline step (commit `9d33e15`) generates a MUST-INCLUDE manifest, but the writer treats it as advisory context. Fix: add explicit enforcement in `agents/writer.md` — if the manifest contains entries, the writer is required to incorporate them even if they weren't in the analyzer's output. ~3-sentence addition. **Estimated lift: +0.15 to +0.20 aggregate.** |
+| 57 | **Coverage-audit: raise manifest cap from 8 → 12–15 items** | 02 | Chris | XS | M | The current cap of 8 MUST-INCLUDE items was appropriate for early testing but the Wasm Security and Jina AI topics both had 10+ missing fact categories. Raising the cap costs nothing and reduces truncation of the manifest on research-heavy topics. Minimal risk, incremental lift. |
+| 3 | **Coverage audit severity levels (`gap_policy` input)** | 02 | Chris | S | M | Lets orchestrators decide what coverage gap severity blocks vs. warns vs. passes. Becomes operational once #56 makes the manifest mandatory — `gap_policy` controls how aggressively the pipeline reacts to missing coverage. *(Promoted from P3.)* |
+| 58 | **Quality loop: fix score-extraction regex in check step** | — | Chris | S | M | The `check` step's score extraction regex looks for `score_before: (\\d+\\.?\\d*)` in LLM-generated diagnosis text, which isn't reliably present — `quality-loop-log.yaml` shows `score_before: 0 / score_after: 0` for most rounds. Without reliable score extraction, the regression-detection revert logic can't function. Fix: read `eval_result` output directly and parse pipeline score from the structured evaluation table, or mandate a parseable `score_before: X.XX` line in `aggregate-diagnose` output. |
 | ~~29~~ | ~~Writer: OUTPUT CONTRACT compliance for informal registers~~ | 02 | Chris | S | M | **Closed 2026-03-10 via formatter architectural fix.** Writer-formatter handles the informal register failure mode: produces `Parsed:`, `WRITER METADATA`, `CITATIONS`, `CLAIMS TO VERIFY` regardless of Writer output format. Two instruction-based fixes (`0508f95`, OUTPUT CONTRACT block) did not hold; formatter is the reliable architectural catch. Validated: `audience=myself` Writer output → writer-formatter → all structural blocks present, clean pass. *(test log 2026-03-10-writer-informal-register-verification)* |
 | ~~30~~ | ~~Storyteller: OUTPUT CONTRACT compliance (STORY OUTPUT header + NARRATIVE SELECTION block)~~ | 03 | Chris | S | H | **Closed 2026-03-10 via formatter architectural fix.** Story-formatter handles the document failure mode: produces `STORY OUTPUT` header, all metadata, `NARRATIVE SELECTION` block regardless of Storyteller output format. Storyteller produced a full markdown document with `##` headers and no STORY OUTPUT structure; story-formatter normalized to canonical block, all 9 findings/inferences classified. Clean pass. *(test log 2026-03-10-storyteller-format-compliance-verification)* |
 | ~~31~~ | ~~Prioritizer: add structured output block (`PRIORITY OUTPUT` header)~~ | 10 | Chris | S | M | **Resolved by #33 (prioritizer-formatter)** — Shipped 2026-03-10. Architectural fix applied: prioritizer-formatter specialist handles both block format (pass-through) and prose format (extracts rankings, infers priority labels). Handles the prose failure mode that spec-based fixes could not resolve. *(See Recently Completed entry for #33)* |
@@ -148,7 +153,7 @@ Ordered by priority tier then impact. Items marked *(consolidated)* absorbed dup
 
 | # | Item | Epic | Owner | Effort | Impact | Rationale |
 |---|------|------|-------|--------|--------|-----------|
-| 3 | Coverage audit severity levels | 02 | Chris | S | M | `gap_policy` input lets orchestrators decide what gap severity blocks vs. warns vs. passes |
+| ~~3~~ | ~~Coverage audit severity levels~~ | 02 | Chris | S | M | **Promoted to P2** for the 8.5 quality push. See P2 ship order. |
 | ~~47~~ | ~~Researcher: add contrarian sweep step for risk/downside coverage~~ | 01 | Chris | S | M | **Shipped in commit `7cdef76` (Mar 23, 2026).** Contrarian sweep added to researcher Quality Gate. Validated in Mar 24 weight-loss A/B test: dedicated contrarian sweep surfaced 50% regain rate, adherence gaps in RCTs, depression as moderator, Volumetrics fat restriction, IF clinical significance threshold. *(test log 2026-03-24-weight-loss-recipes-specialists-vs-direct)* |
 | 53 | Writer: skip claim index and confidence tables for human-terminal ad-hoc flows | 02 | Chris | S | M | Reduce overhead for end-user consumption. In ad-hoc coordinator mode, the claim index (S1–S26), confidence assessment table, and CITATIONS block add ~200 words that a human reader won't use. Consider skipping when the next consumer is a human, not a downstream agent. *(test log 2026-03-24-weight-loss-recipes-specialists-vs-direct)* |
 | 54 | Researcher: include practitioner-sourced content for practical/advisory questions | 01 | Chris | S | M | When the question is practical/advisory (recipes, how-to, step-by-step) rather than analytical, include practitioner-sourced content (recipe blogs, how-to guides) even without peer-reviewed corroboration. The corroboration requirement causes the researcher to skip useful practitioner content — the direct approach found Real Food Dietitians per-serving macros that the specialist missed. *(test log 2026-03-24-weight-loss-recipes-specialists-vs-direct)* |
@@ -306,6 +311,7 @@ Synthesis Writer → cross-ecosystem comparative brief
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v5.7 | Mar 25, 2026 | Chris | **8.5 quality sprint decomposition.** Added 4 new P2 items from quality-eval-report gap analysis: #55 (writer per-section confidence labels, S/H, confidence calibration gap −0.6), #56 (writer make coverage-manifest mandatory, XS/H, factual depth gap −1.0), #57 (coverage-audit raise manifest cap 8→12–15, XS/M), #58 (quality loop fix score-extraction regex, S/M). Promoted #3 (coverage audit severity levels) from P3 to P2 as follow-on to #56. Ship order: #55 → #56 → #57 → #3 → #58. Combined estimated lift: +0.35 to +0.56 (gap is 0.33). Updated Active Work with sprint goal and ship order. |
 | v5.6 | Mar 25, 2026 | Chris | **Housekeeping.** Closed #47 (researcher contrarian sweep — shipped in `7cdef76`, validated in Mar 24 weight-loss A/B test). Promoted #53 (writer skip claim index for human-terminal flows) and #54 (researcher practitioner content for practical questions) to P3 from Mar 24 test log. Committed untracked test log. |
 | v5.5 | Mar 24, 2026 | Chris | **Epic 03 complete + infrastructure hardening.** Storyteller compound tones shipped (commit `7cdef76`) — Epic 03 now ✅. Writer confidence labels + `coverage-audit` pipeline step in research-chain + cross-agent awareness in quality loop (commit `9d33e15`). Quality loop score **8.17 → targeting 8.5**. `specialists/` → `agents/` directory refactor across entire codebase — renamed paths, updated recipes/skills/docs/tests, removed prototype HTML (~3,177 lines) and dev recipes, added architecture diagrams, 563 tests passing (commits `ec7a226`–`655a917`). coordinator-routing moved from `bundle.md` body to `context.include` to survive bundle composition overwrite (commit `1ae9e67`). Epic counts: 7 complete, 0 in progress, 4 planned. |
 | v5.4 | Mar 22, 2026 | Chris | **Five backlog items shipped in one session.** #49 (iterative deepening), #46 (breadth mode), #40 (tier-aware hedging), #50 (audience-aware depth) all implemented with structural tests. #43 (decision-brief format) resolved by v1 loop's brief word budget increase + auto-escalation. Bundle context fix applied (`active: specialists` in settings). Quality loop v2 running with retry logic. P2 ship order: all items shipped or resolved. 25+ structural tests added. |
