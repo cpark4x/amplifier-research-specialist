@@ -96,7 +96,11 @@ Before writing a single word:
 2. For each section you need to write: does the source material support it?
 3. Record any gaps — sections or claims the source material cannot support
 4. If gaps are critical (the document cannot be written without them): stop and surface this to the caller before proceeding
-5. **Coverage manifest check:** If the input context includes a COVERAGE MANIFEST with MUST-INCLUDE findings, these findings are **mandatory, not advisory**. Add each MUST-INCLUDE finding to your coverage map now — it must appear in the final document even if the analysis stage omitted it. If the word budget is tight, incorporate MUST-INCLUDE findings as brief factual statements or table rows rather than omitting them. A MUST-INCLUDE finding absent from the final document is a verification failure.
+5. **Coverage manifest check:** If the input context includes a COVERAGE MANIFEST with MUST-INCLUDE findings, apply the gap policy to determine which findings are mandatory:
+   - **strict** (default): ALL MUST-INCLUDE findings are mandatory regardless of severity
+   - **balanced**: CRITICAL and HIGH severity findings are mandatory; MEDIUM is advisory (include if word budget allows)
+   - **relaxed**: only CRITICAL severity findings are mandatory; HIGH and MEDIUM are advisory
+   If no gap policy is specified, default to `strict`. Add each mandatory finding to your coverage map now — it must appear in the final document even if the analysis stage omitted it. If the word budget is tight, incorporate mandatory findings as brief factual statements or table rows rather than omitting them. A mandatory MUST-INCLUDE finding absent from the final document is a verification failure.
 
 **A gap is not a reason to invent content. It is a reason to flag and proceed with what you have.**
 
@@ -383,7 +387,7 @@ Before returning output:
    - **Consistency:** Every section's inline label must match the corresponding row in the table. If they disagree, resolve the discrepancy — the inline label (written closer to the evidence) wins.
    - **Basis column:** Every row has a non-empty `Basis` entry. Blank basis is a verification failure.
    This is the primary confidence calibration mechanism. Competitors score +0.6 on this dimension by using explicit structured labels — prose-only hedging is not sufficient.
-12. **Coverage manifest enforcement** (skip if no COVERAGE MANIFEST in input): Re-read the MUST-INCLUDE findings from the input context. For each one, verify it appears in the document body — as a direct statement, a table row, or a cited fact. If any MUST-INCLUDE finding is absent, add it now as a brief factual statement in the most relevant section with proper inline citation. This is not optional — the coverage-audit step identified these as findings readers expect. A missing MUST-INCLUDE finding is the primary driver of the factual depth gap versus competitors.
+12. **Coverage manifest enforcement** (skip if no COVERAGE MANIFEST in input): Re-read the MUST-INCLUDE findings from the input context. For each finding that is **mandatory** under the active gap policy (see Stage 2 step 5), verify it appears in the document body — as a direct statement, a table row, or a cited fact. If any mandatory finding is absent, add it now as a brief factual statement in the most relevant section with proper inline citation. This is not optional — the coverage-audit step identified these as findings readers expect. A missing mandatory MUST-INCLUDE finding is the primary driver of the factual depth gap versus competitors.
 
 ---
 

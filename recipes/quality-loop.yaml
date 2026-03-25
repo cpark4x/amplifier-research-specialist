@@ -234,6 +234,23 @@ steps:
           - chosen_because: [why this gap over others]
           - all_candidates: [list every candidate considered]
           - score_before: [current aggregate pipeline score from evaluation]
+
+          =====================================================================
+          CRITICAL — SCORE COMPUTATION (the loop depends on this):
+          =====================================================================
+
+          You MUST compute the aggregate pipeline score from the evaluation
+          results. For each topic evaluated, find the pipeline's 6-dimension
+          scores, average them to get the topic score. Then average across all
+          topics to get the aggregate. Output this on its OWN LINE with no
+          other text:
+
+            AGGREGATE_PIPELINE_SCORE: X.XX
+
+          This MUST be a decimal number (e.g., 8.17, 7.60). If you cannot
+          compute it from the evaluation data, output:
+
+            AGGREGATE_PIPELINE_SCORE: 0
         output: "diagnosis"
         retry:
           max_attempts: 3
@@ -313,12 +330,23 @@ steps:
           {{diagnosis}}
           __EXTRACT__
 
-          # Extract score_before from diagnosis output
+          # Extract aggregate pipeline score from diagnosis output.
+          # Try AGGREGATE_PIPELINE_SCORE first (reliable), fall back to
+          # score_before (legacy), fall back to current_score (no change).
           score_after=$(/usr/bin/python3 -c "
           import re
           text = open('/tmp/quality-loop-diag.txt').read()
-          m = re.search(r'score_before:\s*([0-9]+\.?[0-9]*)', text)
-          print(m.group(1) if m else '')
+          # Priority 1: explicit AGGREGATE_PIPELINE_SCORE line
+          m = re.search(r'AGGREGATE_PIPELINE_SCORE:\s*([0-9]+\.?[0-9]*)', text)
+          if m and float(m.group(1)) > 0:
+              print(m.group(1))
+          else:
+              # Priority 2: score_before field in DIAGNOSIS block
+              m2 = re.search(r'score_before:\s*([0-9]+\.?[0-9]*)', text)
+              if m2 and float(m2.group(1)) > 0:
+                  print(m2.group(1))
+              else:
+                  print('')
           " 2>/dev/null)
 
           if [ -z "$score_after" ]; then

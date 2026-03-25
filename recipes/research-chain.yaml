@@ -195,6 +195,7 @@ context:
   audience: ""               # Optional: target audience for the final document
   voice: "executive"         # Optional: writing voice/tone (e.g. executive, academic, casual)
   quality_threshold: "medium" # Optional: quality bar for the run (low, medium, high)
+  gap_policy: "strict"       # Optional: coverage gap enforcement (strict=all mandatory, balanced=CRITICAL+HIGH mandatory, relaxed=CRITICAL only)
 
 steps:
   - id: "research"
@@ -455,16 +456,26 @@ steps:
          research that the writer MUST include — these are findings that competitors
          would cover and readers would expect.
 
-      4. Output a COVERAGE MANIFEST in this exact format:
+      4. Classify each MUST-INCLUDE finding by severity:
+         - CRITICAL — readers will immediately notice its absence; core to the topic
+           (e.g., pricing for a product comparison, safety data for a health topic)
+         - HIGH — competitive expectation; most competent analyses would include it
+           (e.g., benchmark data, funding history, key statistics)
+         - MEDIUM — enriches the document but absence is not glaring
+           (e.g., historical context, secondary examples, supplementary data)
+
+      5. Output a COVERAGE MANIFEST in this exact format:
 
       COVERAGE MANIFEST
       Total research categories: [n]
       Covered in analysis: [n]
       Missing from analysis: [n]
+      Gap policy: {{gap_policy}}
 
       MUST-INCLUDE FINDINGS (writer: incorporate these even if the analysis omitted them)
-      - [category]: [specific finding with source] — why it matters: [1 sentence]
-      - [category]: [specific finding with source] — why it matters: [1 sentence]
+      - [CRITICAL] [category]: [specific finding with source] — why it matters: [1 sentence]
+      - [HIGH] [category]: [specific finding with source] — why it matters: [1 sentence]
+      - [MEDIUM] [category]: [specific finding with source] — why it matters: [1 sentence]
       ...
 
       END COVERAGE MANIFEST
@@ -474,6 +485,7 @@ steps:
       - If nothing is missing, output "MUST-INCLUDE FINDINGS: none"
       - Do not rewrite findings — extract them verbatim from the research
       - Do not analyze or draw inferences — just identify coverage gaps
+      - Order findings by severity: CRITICAL first, then HIGH, then MEDIUM
     output: "coverage_manifest"
     timeout: 600
 
@@ -487,8 +499,11 @@ steps:
       Analysis:
       {{formatted_analysis}}
 
-      COVERAGE MANIFEST (from upstream audit — incorporate MUST-INCLUDE findings):
+      COVERAGE MANIFEST (from upstream audit — incorporate MUST-INCLUDE findings per gap_policy):
       {{coverage_manifest}}
+
+      GAP POLICY: {{gap_policy}}
+      (strict=all MUST-INCLUDE items mandatory | balanced=CRITICAL+HIGH mandatory, MEDIUM advisory | relaxed=CRITICAL only mandatory)
 
       SOURCE URL MAP (verified URLs for sources — use these in CITATIONS):
       {{source_url_map}}
