@@ -96,6 +96,7 @@ Before writing a single word:
 2. For each section you need to write: does the source material support it?
 3. Record any gaps — sections or claims the source material cannot support
 4. If gaps are critical (the document cannot be written without them): stop and surface this to the caller before proceeding
+5. **Coverage manifest check:** If the input context includes a COVERAGE MANIFEST with MUST-INCLUDE findings, these findings are **mandatory, not advisory**. Add each MUST-INCLUDE finding to your coverage map now — it must appear in the final document even if the analysis stage omitted it. If the word budget is tight, incorporate MUST-INCLUDE findings as brief factual statements or table rows rather than omitting them. A MUST-INCLUDE finding absent from the final document is a verification failure.
 
 **A gap is not a reason to invent content. It is a reason to flag and proceed with what you have.**
 
@@ -213,6 +214,20 @@ You MUST match your language to the confidence level and source type of each cla
 | `general` / unspecified | → remap to `technical decision-maker` | | |
 
 **The test:** If swapping the audience label would produce an identical document, calibration has failed.
+
+**Per-section inline confidence labels:** At the start of each major section's first
+paragraph, include a bold inline confidence label:
+
+  ## Key Findings
+  **[Confidence: HIGH — multiple primary sources]** The evidence consistently shows...
+
+  ## Risks and Limitations
+  **[Confidence: MEDIUM — single secondary source, survey data]** According to...
+
+Use the same label rules as the consolidated Confidence Assessment table (see below).
+These inline labels give readers an immediate epistemic signal before they invest time
+reading the section. The inline label and the Confidence Assessment table MUST agree —
+resolve any discrepancy in the verify stage before returning output.
 
 Write the document. For each claim:
 - Draw directly from the RESEARCH BRIEF or FINDINGS in the source material
@@ -362,6 +377,13 @@ Before returning output:
    - Primary/secondary medium → "research indicates", "a study found", "[institution] analysis shows"
    - Tertiary medium → "according to [source]", "survey data suggests", "reportedly"
    If any medium-confidence sentence lacks a tier-appropriate hedge, add one now. This catches under-hedging that the Stage 4 rules describe but don't enforce via explicit scan — especially when most sources share the same tier and contrast is not visually obvious.
+11. **Confidence assessment completeness:** Verify both confidence signal layers:
+   - **Inline labels:** Every major section has a `**[Confidence: HIGH/MEDIUM/LOW/MIXED — basis]**` label at the start of its first paragraph. If any section is missing one, add it now.
+   - **Consolidated table:** A `## Confidence Assessment` section exists after `## Sources` with one row per major section. If the table is missing, construct it now from the inline labels.
+   - **Consistency:** Every section's inline label must match the corresponding row in the table. If they disagree, resolve the discrepancy — the inline label (written closer to the evidence) wins.
+   - **Basis column:** Every row has a non-empty `Basis` entry. Blank basis is a verification failure.
+   This is the primary confidence calibration mechanism. Competitors score +0.6 on this dimension by using explicit structured labels — prose-only hedging is not sufficient.
+12. **Coverage manifest enforcement** (skip if no COVERAGE MANIFEST in input): Re-read the MUST-INCLUDE findings from the input context. For each one, verify it appears in the document body — as a direct statement, a table row, or a cited fact. If any MUST-INCLUDE finding is absent, add it now as a brief factual statement in the most relevant section with proper inline citation. This is not optional — the coverage-audit step identified these as findings readers expect. A missing MUST-INCLUDE finding is the primary driver of the factual depth gap versus competitors.
 
 ---
 

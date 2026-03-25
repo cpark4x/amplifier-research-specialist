@@ -470,7 +470,7 @@ steps:
       END COVERAGE MANIFEST
 
       Rules:
-      - Maximum 8 MUST-INCLUDE findings — prioritize what competitors would cover
+      - Maximum 15 MUST-INCLUDE findings — prioritize what competitors would cover
       - If nothing is missing, output "MUST-INCLUDE FINDINGS: none"
       - Do not rewrite findings — extract them verbatim from the research
       - Do not analyze or draw inferences — just identify coverage gaps
