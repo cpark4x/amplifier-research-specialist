@@ -13,6 +13,10 @@ tools:
       skills:
         - "@doc-driven-dev:skills"
 
+context:
+  include:
+    - specialists:context/coordinator-routing.md
+
 agents:
   include:
     - specialists:researcher
