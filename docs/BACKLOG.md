@@ -2,7 +2,7 @@
 
 **Purpose:** Strategic planning view for canvas-specialists — a library of best-in-class, single-domain AI specialist agents for knowledge worker and consumer scenarios  
 **Owner:** Chris Park  
-**Last Updated:** March 25, 2026 (v5.8)  
+**Last Updated:** March 26, 2026 (v5.9)  
 
 ---
 
@@ -30,7 +30,7 @@ See [**2026-03-05-world-class-roadmap.md**](plans/2026-03-05-world-class-roadmap
 
 ### Active Work
 
-*Sprint goal: push quality score from 8.17 → 8.5. All 5 items shipped (#55, #56, #57, #3, #58). Running eval loop to validate.*
+*Next sprint: researcher source diversity via mechanical enforcement (validate-sources recipe step). See #59.*
 
 ### Recently Completed
 
@@ -105,6 +105,7 @@ Items ordered by impact. Ship these first — they fix the most-flagged quality 
 
 | # | Item | Epic | Owner | Effort | Impact | Why Now |
 |---|------|------|-------|--------|--------|---------|
+| 59 | **Researcher: mechanical source diversity enforcement (validate-sources recipe step)** | 01 | Chris | M | H | **Source quality (5-6/10) is the binding constraint on pipeline score.** Adding instructions to researcher.md doesn't work — LLM compliance degrades with prompt complexity (tested and reverted Mar 26). Fix must be mechanical: a `validate-sources` recipe step (like `validate-research`) that runs AFTER the researcher, counts distinct domains and source categories, and returns PASS/RETRY with specific search directives for under-represented categories. Design questions: (1) what does validation count and what thresholds? (2) what specific search directives on RETRY? (`"[topic] site:hbr.org"`, `"[topic] site:reuters.com"`, etc.) (3) how many retry cycles? (4) does retry append or replace? Follows the proven `validate-research` → `ensure-research` pattern from #41. |
 | ~~48~~ | ~~**Coordinator routing: broaden analyzer trigger for strategy requests**~~ | 01/02/08 | Chris | XS | H | **Shipped 2026-03-19 (Batch 1).** Routing heuristic + Rule 4 updated. Commit `0991689`. |
 | ~~45~~ | ~~**Coordinator: two-path doctrine for ad-hoc vs recipe execution**~~ | 01/02 | Chris | S | H | **Shipped 2026-03-19 (Batch 2).** Rule 9 added to coordinator. Recipe path: formatters always run. Ad-hoc path: researcher-formatter and DA-formatter always; writer-formatter and prioritizer-formatter skipped when output goes directly to user. Unblocks #44. Commit `7a07b66`. |
 | ~~41~~ | ~~**Researcher: auto-retry on truncation (#35 escalation)**~~ | 01 | Chris | S | H | **Shipped 2026-03-19 (Batch 2).** Soft gate (validate-research → PASS/RETRY) + ensure-research retry step + hard gate (validate-research-final). Pipeline auto-recovers from truncation. research-chain v1.12.0. Commit `7a07b66`. |
@@ -311,6 +312,7 @@ Synthesis Writer → cross-ecosystem comparative brief
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v5.9 | Mar 26, 2026 | Chris | **Post-sprint analysis + eval infrastructure hardening.** Fixed citation quality regression root cause: quality-eval-iteration.yaml was bypassing research-chain.yaml (missing resolve-urls step crashed citation quality 8.2→4.0). Wired eval to use research-chain recipe (commit `5270bcd`). Added safety gate to quality-loop fix step preventing auto-fix regressions. Spot-checked strategy + competitive-comparison topics — citation quality and confidence calibration confirmed working; source quality (5-6/10) identified as binding constraint. Tested and reverted researcher instruction additions (LLM compliance degrades with prompt complexity). Added #59 (validate-sources recipe step) as P1 for next sprint — mechanical enforcement via PASS/RETRY pattern, not instruction-based. |
 | v5.8 | Mar 25, 2026 | Chris | **8.5 quality sprint complete — all 5 items shipped.** #55 (writer per-section confidence labels, Stage 4 + Stage 5 item 11), #56 (writer make coverage-manifest mandatory, Stage 2 step 5 + Stage 5 item 12), #57 (coverage-audit cap 8→15) shipped in commit `07f99c3`. #3 (coverage audit severity levels — CRITICAL/HIGH/MEDIUM classification, `gap_policy` context variable strict/balanced/relaxed, writer honors gap_policy in Stage 2 and Stage 5) shipped same session. #58 (quality loop score-extraction fix — `AGGREGATE_PIPELINE_SCORE:` reliable extraction in aggregate-diagnose + check step 3-tier fallback) shipped same session. 553 tests passing. |
 | v5.7 | Mar 25, 2026 | Chris | **8.5 quality sprint decomposition.** Added 4 new P2 items from quality-eval-report gap analysis: #55 (writer per-section confidence labels, S/H, confidence calibration gap −0.6), #56 (writer make coverage-manifest mandatory, XS/H, factual depth gap −1.0), #57 (coverage-audit raise manifest cap 8→12–15, XS/M), #58 (quality loop fix score-extraction regex, S/M). Promoted #3 (coverage audit severity levels) from P3 to P2 as follow-on to #56. Ship order: #55 → #56 → #57 → #3 → #58. Combined estimated lift: +0.35 to +0.56 (gap is 0.33). Updated Active Work with sprint goal and ship order. |
 | v5.6 | Mar 25, 2026 | Chris | **Housekeeping.** Closed #47 (researcher contrarian sweep — shipped in `7cdef76`, validated in Mar 24 weight-loss A/B test). Promoted #53 (writer skip claim index for human-terminal flows) and #54 (researcher practitioner content for practical questions) to P3 from Mar 24 test log. Committed untracked test log. |
