@@ -24,17 +24,17 @@ A library of best-in-class, single-domain AI specialist agents for knowledge wor
 |---|------|--------|-------------|
 | 01 | [Research Specialist](02-requirements/epics/01-research-specialist.md) | Complete | Structured, source-tiered research output with confidence scoring, evidence gaps, and a typed `ResearchOutput` contract |
 | 02 | [Writer Specialist](02-requirements/epics/02-writer-specialist.md) | Complete | Transforms source material into polished prose with inline citations, coverage audit, and machine-readable metadata |
-| 03 | Storyteller | Planned | Transforms research/analysis into compelling narratives |
-| 04 | [Competitive Analysis](02-requirements/epics/04-competitive-analysis.md) | In Progress | Structured competitive intelligence with comparison matrices, positioning gaps, and win conditions — head-to-head and landscape modes |
+| 03 | Storyteller | Complete | Cognitive mode translation — transforms research/analysis into compelling narratives with NARRATIVE SELECTION editorial record |
+| 04 | [Competitive Analysis](02-requirements/epics/04-competitive-analysis.md) | Complete | Structured competitive intelligence with comparison matrices, positioning gaps, and win conditions — head-to-head and landscape modes |
 | 05 | Design | Planned | Translates briefs and research into structured design direction |
 | 06 | Demo Generator | Planned | Reverse-engineers a persuasive arc from a product; sequences wow moments, generates script |
 | 07 | Presentation Builder | Planned | Slide-by-slide deck outlines with speaker notes from any specialist output |
-| 08 | Data Analyzer | Planned | Transforms research/data into structured analysis with facts vs. inferences explicitly labeled |
-| 09 | Planner | Planned | Transforms goals and context into structured plans with milestones, dependencies, timelines |
-| 10 | Prioritizer | Planned | Ranks items using prioritization frameworks (impact/effort, MoSCoW, RICE); returns justified output |
+| 08 | Data Analyzer | Complete | Labeled inferences from research evidence with explicit fact/inference separation and full traceability |
+| 09 | Planner | Complete | Transforms goals and context into structured plans with milestones, dependencies, timelines, and risk flags |
+| 10 | Prioritizer | Complete | Ranks items using prioritization frameworks (impact/effort, MoSCoW, RICE) with per-item rationale |
 | 11 | Platform Integrations | Planned | LangChain/LangGraph wrappers, rendering integrations |
 
-**Status Legend:** `Planning` · `In Progress` · `Complete` · `Planned`
+**Status:** 7 complete · 4 planned
 
 ---
 
