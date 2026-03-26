@@ -316,7 +316,7 @@ the reasoning explicit and scannable.
 
 **Audience depth self-check (non-technical audiences only):**
 
-This self-check runs when the audience detected in Stage 2 is NOT one of: "AI engineers," "technical practitioners," "developers," "software engineers," or similar technical roles. For technical audiences, skip this check — mechanism-level detail is appropriate and expected.
+This self-check runs when the audience detected in Stage 1 is NOT one of: "AI engineers," "technical practitioners," "developers," "software engineers," or similar technical roles. For technical audiences, skip this check — mechanism-level detail is appropriate and expected.
 
 For non-technical audiences (executives, general readers, business stakeholders):
 1. **Scan each key point for mechanism-level language:** architecture internals, API names, model parameter counts, embedding dimensions, training methodology specifics, code-level concepts, protocol details, internal system names.

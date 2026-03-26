@@ -98,7 +98,7 @@ steps:
     timeout: 30
 
   # ===========================================================================
-  # STEP 4: Run 3 competitors in parallel on the same question
+  # STEP 5: Run 3 competitors in parallel on the same question
   # ===========================================================================
   - id: "run-competitors"
     foreach: "{{competitors}}"
@@ -135,7 +135,7 @@ steps:
     on_error: "continue"
 
   # ===========================================================================
-  # STEP 5: Evaluate pipeline vs competitors — produce structured gap list
+  # STEP 6: Evaluate pipeline vs competitors — produce structured gap list
   # ===========================================================================
   - id: "evaluate"
     agent: "self"
