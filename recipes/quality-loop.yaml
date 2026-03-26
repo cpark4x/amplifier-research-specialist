@@ -303,6 +303,29 @@ steps:
           - Report the git commit hash and ALL files changed in your response.
 
           =====================================================================
+          SAFETY GATE — REGRESSION PREVENTION (mandatory):
+          =====================================================================
+
+          Before committing, verify your change will not regress other
+          dimensions. Ask yourself:
+
+          1. Does this change modify what an agent PRODUCES (output format,
+             content structure, citation format)? If yes, read the downstream
+             agent that CONSUMES that output and verify it will preserve your
+             change — not strip or conflict with it.
+          2. Could this change reduce performance on any dimension that is
+             currently a pipeline STRENGTH? The pipeline's confirmed strengths
+             are: confidence calibration (8.8/10), analytical insight (7.2/10),
+             structure (7.6/10). If your change touches ANY agent instruction
+             related to these dimensions, explain why it won't degrade them.
+          3. Run `python3 -m pytest tests/ -q` before committing. If any tests
+             fail that were not already failing, revert your change.
+
+          If you cannot confirm all three checks pass, DO NOT COMMIT.
+          Instead, report the concern and let the loop revert to the
+          pre-change state.
+
+          =====================================================================
           OUTPUT FORMAT:
           =====================================================================
 

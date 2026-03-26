@@ -36,30 +36,24 @@ steps:
     timeout: 10
 
   # ===========================================================================
-  # STEP 3: Run the specialists pipeline for this topic
+  # STEP 3: Run the specialists pipeline via research-chain recipe
   # ===========================================================================
+  # Uses the full research-chain recipe instead of manual agent chaining.
+  # This ensures the eval exercises the same pipeline users run, including:
+  # - resolve-urls (URL verification — fixes citation quality)
+  # - coverage-audit (MUST-INCLUDE manifest — fixes factual depth)
+  # - gap_policy (severity levels)
+  # - validate-research (truncation retry)
+  # Changed 2026-03-26: manual chaining bypassed resolve-urls, causing
+  # citation quality to crash from 8.2→4.0 (eval scored "zero URLs").
   - id: "run-pipeline"
-    agent: "self"
-    prompt: |
-      You are running the specialists research pipeline on this question.
-
-      Research question: {{research_question}}
-
-      Execute this pipeline by delegating to specialist agents in order:
-
-      1. Delegate to specialists:researcher — research the question thoroughly
-      2. Delegate to specialists:researcher-formatter — pass the researcher's output to normalize format
-      3. Delegate to specialists:data-analyzer — pass the formatted research to draw analytical conclusions
-      4. Delegate to specialists:data-analyzer-formatter — normalize the analysis output
-      5. Delegate to specialists:writer — pass the formatted analysis to write a brief
-      6. Delegate to specialists:writer-formatter — normalize the writer output
-
-      After each step, pass the output of the previous step as input to the next.
-
-      When the chain is complete, save the final formatted document to docs/research-output/ using
-      the write_file tool. Use a filename based on the research question (kebab-case slug + .md).
-
-      Report what happened at each step — success/failure, output size, any issues.
+    type: "recipe"
+    recipe: "./research-chain.yaml"
+    context:
+      research_question: "{{research_question}}"
+      output_format: "brief"
+      audience: "technical decision-maker"
+      gap_policy: "strict"
     output: "pipeline_run_result"
     timeout: 3600
     retry:
@@ -70,47 +64,26 @@ steps:
     on_error: "continue"
 
   # ===========================================================================
-  # STEP 4: Capture pipeline output from docs/research-output/
+  # STEP 4: Capture pipeline output from the saved file
   # ===========================================================================
+  # research-chain saves its output to docs/research-output/[slug].md and
+  # returns the path as output_path. Read the file directly.
   - id: "capture-pipeline-output"
     type: "bash"
     command: |
       marker="{{pipeline_start_marker}}"
       topic_id="{{topic_id}}"
-      research_question="{{research_question}}"
 
-      # Generate search keywords from the research question (first 3 significant words)
-      keywords=$(echo "$research_question" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9 ]//g' | tr -s ' ' | cut -d' ' -f1-5)
+      # Find the most recent file newer than the start marker
+      latest=$(find docs/research-output -name "*.md" -newer "$marker" -maxdepth 1 2>/dev/null | xargs ls -t 2>/dev/null | head -1)
 
-      # First: find files newer than marker that contain topic-relevant keywords in filename
-      latest=""
-      for f in $(find docs/research-output -name "*.md" -newer "$marker" -maxdepth 1 2>/dev/null); do
-        fname=$(basename "$f" | tr '[:upper:]' '[:lower:]')
-        match=0
-        for kw in $keywords; do
-          if echo "$fname" | grep -q "$kw"; then
-            match=$((match + 1))
-          fi
-        done
-        if [ $match -ge 2 ]; then
-          latest="$f"
-          break
-        fi
-      done
-
-      # Fallback 1: any file newer than marker (less safe but better than nothing)
-      if [ -z "$latest" ]; then
-        latest=$(find docs/research-output -name "*.md" -newer "$marker" -maxdepth 1 2>/dev/null | head -1)
-      fi
-
-      # Fallback 2: stale fallback — most recent file overall (may be from a different topic)
+      # Fallback: most recent file overall
       if [ -z "$latest" ]; then
         latest=$(ls -t docs/research-output/*.md 2>/dev/null | head -1)
         if [ -z "$latest" ]; then
           echo "PIPELINE_ERROR: No output file found in docs/research-output/ for topic: ${topic_id}"
           exit 0
         fi
-        echo "PIPELINE_WARNING: Stale output risk — using most recent file (no topic-matched or newer file found). Topic: ${topic_id}. File: $latest"
       fi
 
       # Read and validate content

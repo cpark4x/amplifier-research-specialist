@@ -1,160 +1,208 @@
 # QUALITY EVALUATION GAP REPORT
 
+**Cross-Topic Aggregation — 5 Topics, 6 Dimensions, 3 Competitors per Topic**
+**Evaluation Mode:** Competitive | **Target Score:** 8.5/10
+
+---
+
 ## OVERALL SCORES
 
 | Topic | Pipeline Score | Best Competitor Score | Delta |
 |---|:---:|:---:|:---:|
-| factual-deep-dive (Jina AI) | 7.67 | 8.50 | **−0.83** |
-| strategy (Hybrid Teams) | 8.00 | 8.50 | **−0.50** |
-| survey (Retiring Abroad) | 8.33 | 7.67 | **+0.67** |
-| competitive-comparison (Cursor vs Copilot) | 8.33 | 7.67 | **+0.67** |
-| technical-analysis (Wasm Security) | 8.50 | 8.50 | **0.00** |
-| **GRAND MEAN** | **8.17** | **8.17** | **0.00** |
+| factual-deep-dive (Jina AI) | 6.83 | 8.50 | **−1.67** |
+| strategy (Hybrid Teams) | 6.00 | 8.17 | **−2.17** |
+| survey (Retire Abroad) | 5.50 | 8.17 | **−2.67** |
+| competitive-comparison (Cursor vs Copilot) | 5.83 | 7.83 | **−2.00** |
+| technical-analysis (Wasm Security) | 7.67 | 8.67 | **−1.00** |
+| **AVERAGE** | **6.37** | **8.27** | **−1.90** |
 
-**Gap to target (8.5):** −0.33 points
+**Gap to target (8.5):** **2.13 points** — the pipeline must close a 33% gap on its current average.
 
-**Score distribution note:** The pipeline is volatile — it loses badly on 2 topics (factual-deep-dive, strategy) and wins convincingly on 2 others (survey, competitive-comparison), producing a net-zero delta against best competitors that masks structural weaknesses in specific dimensions.
+### Per-Dimension Averages
 
----
-
-## PER-DIMENSION PIPELINE AVERAGES
-
-| Dimension | Pipeline Avg | Best Comp Avg | Delta | Topics w/ Deficit |
-|---|:---:|:---:|:---:|:---:|
-| Analytical insight | **9.0** | 8.4 | **+0.6** | 0/5 |
-| Structure & readability | **8.4** | 8.0 | **+0.4** | 0/5 |
-| Citation quality | **8.2** | 7.8 | **+0.4** | 1/5 |
-| Confidence calibration | 8.0 | 8.6 | **−0.6** | 3/5 |
-| Factual depth | 7.8 | **8.8** | **−1.0** | 4/5 |
-| Source quality | 7.6 | 7.6 | 0.0 | 2/5 |
+| Dimension | Pipeline Avg | Best Competitor Avg | Delta | Classification |
+|---|:---:|:---:|:---:|---|
+| Citation quality | **4.0** | 8.6 | **−4.6** | STRUCTURAL — CRITICAL |
+| Factual depth | **5.2** | 9.0 | **−3.8** | STRUCTURAL — CRITICAL |
+| Source quality | **5.4** | 8.2 | **−2.8** | STRUCTURAL — MAJOR |
+| Analytical insight | 7.2 | 8.2 | −1.0 | Minor / context-dependent |
+| Structure & readability | 7.6 | 8.2 | −0.6 | Acceptable |
+| Confidence calibration | **8.8** | 7.8 | **+1.0** | PIPELINE STRENGTH |
 
 ---
 
 ## STRUCTURAL GAPS (2+ topics)
 
-### Gap 1: Factual Depth
+### 1. Citation Quality — CRITICAL
 
-- **Dimension:** Factual depth
-- **Severity:** **CRITICAL** — largest per-dimension deficit (−1.0), affects 4 of 5 topics, and is the single biggest contributor to the gap-to-target
-- **Topics affected:** factual-deep-dive (7 vs 9), strategy (8 vs 9), survey (8 vs 9), technical-analysis (8 vs 9)
-- **Evidence:**
-  - **factual-deep-dive:** *"Pipeline omits significant factual territory all three competitors cover: Jina's Reader and Reranker product lines, the 9.3T tokens/month scale metric, v1/v2 model history, API latency data, and funding ($39M)."* Pipeline also missed the MTEB benchmark version distinction (v1 vs v2) that Competitor 3 flagged as **"Gap: SIGNIFICANT."**
-  - **strategy:** *"Comp A covers 8 strategy areas including topics the pipeline omits entirely: AI/technology adoption (Slack 233% daily usage increase), salary-equivalence of flexibility (8% per Stanford/SIEPR), and specific manager training statistics (only 21% of workers trained, 44% globally)."*
-  - **survey:** *"Competitor A provides a healthcare procedure-cost comparison table (GP visit $15–$300, MRI $150–$3,000, knee replacement $8,000–$50,000) that the pipeline lacks entirely."* Also missing: three-index cross-reference (IL, Global Citizen Solutions, Forbes) and France healthcare detail.
-  - **technical-analysis:** *"All three competitors treat Lehmann et al. USENIX 2020 as the foundational paper. The pipeline mentions 64.2% of Wasm binaries come from memory-unsafe languages but frames this purely as a supply chain risk, missing the critical insight that exploitation is easier than native due to absent in-sandbox mitigations."* Also omitted: offensive Wasm uses, Cloudflare's 5-layer Spectre defense, V8 Heap Sandbox.
-- **Root cause hypothesis:** The 6-stage pipeline chain (researcher → formatter → analyzer → formatter → writer → formatter) optimizes for analytical distillation. The writer stage aggressively compresses 40–63 upstream findings into ~1,800 words, sacrificing factual breadth for executive conciseness. No coverage-audit step exists between analysis and writing to flag when major fact categories present in the research are absent from the final output.
+- **Pipeline average:** 4.0/10
+- **Best competitor average:** 8.6/10
+- **Average delta:** −4.6 (largest gap of any dimension)
+- **Topics affected:** 5/5 (universal)
+
+| Topic | Pipeline | Best Competitor | Gap |
+|---|:---:|:---:|:---:|
+| survey | 2 | 9 | −7 |
+| strategy | 3 | 8 | −5 |
+| factual-deep-dive | 4 | 9 | −5 |
+| competitive-comparison | 4 | 8 | −4 |
+| technical-analysis | 7 | 9 | −2 |
+
+**Evidence:**
+
+- **survey:** "Pipeline provides zero URLs. Its source table lists only institution names: 'IRS (FATCA/FBAR regulations)', 'Multiple secondary sources (country data)'. Pipeline metadata confirms: 'no URLs available from upstream research; 36% of claims rest on aggregated secondary attribution.'"
+- **strategy:** "Of 4 listed sources, 2 have no URL and are labeled 'unattributed.' The Gallup URL (gallup.com/workplace/hybrid-work) points to a generic landing page, not the specific July 2024 article (article ID 646949)."
+- **factual-deep-dive:** "The pipeline's source table lists only domain-level URLs (e.g., https://jina.ai, https://arxiv.org). In contrast, Competitor 2 provides https://jina.ai/models/jina-embeddings-v4/, https://arxiv.org/abs/2409.10173. The pipeline also uses 'unattributed source' five times."
+- **competitive-comparison:** "Most inline citations point to domain-level URLs (e.g., cursor.com, cursor.com/features). The METR citation is metr.org/research — not the specific study URL."
+- **technical-analysis:** "The pipeline source table lists S1 and S12 as the same source (duplicate entry). The pipeline cites 'Lehmann et al.' linking to arxiv.org/html/2408.11456v3 — which is actually the 'Cage' paper (CGO 2025), not the foundational 'Everything Old is New Again' paper that the 70-75% statistic originates from."
+
+**Root cause hypothesis:** The researcher stage either does not capture full URL paths during evidence gathering, or the researcher-formatter stage strips URL specificity down to domain roots during canonical block construction. The "unattributed source" and "Multiple secondary sources" patterns suggest the researcher sometimes aggregates findings without preserving per-claim source linkage. This is a **pipeline architecture issue** — the citation chain loses fidelity at the researcher → formatter handoff.
 
 ---
 
-### Gap 2: Confidence Calibration
+### 2. Factual Depth — CRITICAL
 
-- **Dimension:** Confidence calibration
-- **Severity:** **MAJOR** — affects 3 of 5 topics, −0.6 average deficit, but self-corrects on technical/specialized topics
-- **Topics affected:** factual-deep-dive (8 vs 9), strategy (7 vs 9), survey (7 vs 8)
-- **Evidence:**
-  - **strategy:** *"All three competitors provide explicit per-section confidence labels tied to evidence type: Comp A: 'Confidence: HIGH' on RCT findings, 'Confidence: MEDIUM — this is correlational, not causal' on McKinsey data. The pipeline uses consistent hedging language but provides no formal per-claim or per-section confidence rating."*
-  - **survey:** *"All three competitors use explicit per-section confidence labels and provide a consolidated confidence assessment table mapping claim categories to confidence levels with rationale. The pipeline uses sophisticated hedging language but never labels confidence explicitly."*
-  - **factual-deep-dive:** *"Competitor 3 edges ahead with gap severity classification (SIGNIFICANT/MODERATE/MINOR), a standalone caveat about MTEB self-reported scores, and the observation that v5's benchmark version differs from the legacy leaderboard — a methodological subtlety the pipeline doesn't flag."*
-- **Self-correction pattern:** On competitive-comparison (9) and technical-analysis (9), the pipeline's confidence calibration was top-tier — these topics naturally demand more technical precision, and the pipeline's prose-native hedging excels there. The gap manifests on softer topics (strategy, survey) where readers expect explicit structured labels.
-- **Root cause hypothesis:** The pipeline's writer stage produces prose-native uncertainty markers ("evidence suggests," "analysis indicates") rather than structured confidence metadata (HIGH / MEDIUM / LOW labels with rationale). This is a formatting gap, not an epistemic one — the pipeline's hedging is often more precise in context but less scannable.
+- **Pipeline average:** 5.2/10
+- **Best competitor average:** 9.0/10
+- **Average delta:** −3.8
+- **Topics affected:** 5/5 (universal)
+
+| Topic | Pipeline | Best Competitor | Gap |
+|---|:---:|:---:|:---:|
+| survey | 3 | 9 | −6 |
+| strategy | 5 | 9 | −4 |
+| competitive-comparison | 5 | 9 | −4 |
+| factual-deep-dive | 6 | 9 | −3 |
+| technical-analysis | 7 | 9 | −2 |
+
+**Evidence:**
+
+- **survey:** "The research question asks 'best places to retire abroad.' The pipeline names zero specific countries with actionable data. It acknowledges: 'Per-country comparisons: While 15+ countries were identified as viable destinations, specific cost-of-living figures, visa program names, and residency requirements were not retrieved at country level.'" Meanwhile all competitors provide 8+ country profiles with monthly costs, visa thresholds, and tax treatment.
+- **strategy:** "Pipeline omits the 2.2× collaboration likelihood, 66% engagement lift, 84% collaboration improvement from feedback loops, the detailed 6-practice adoption table, SHRM proximity bias statistics, and the well-being paradox."
+- **competitive-comparison:** "The pipeline treats Copilot Workspace as a current, standalone product rather than recognizing its evolution into Agent Mode and the Copilot Coding Agent — the single largest factual blind spot." Also missing: Cursor's credit-based pricing transition, Background Agent cloud infrastructure details, BugBot, and the 1.0 milestone.
+- **factual-deep-dive:** "Missing founder identity (Han Xiao), v5 specifics (677M small, 239M nano, EuroBERT backbone), detailed product portfolio (Reader, DeepSearch, Classifier), independent benchmark data, and prepaid pricing specifics ($0.045–$0.050/MTok)."
+- **technical-analysis:** "Missing Spectre/side-channel attacks, blockchain smart contract security, multi-runtime CVEs (Wasmer CVE-2023-51661), and deployment-specific risk matrices."
+
+**Root cause hypothesis:** Two compounding factors: (1) The researcher stage terminates its search loop too early, producing breadth in topic coverage but insufficient depth within each topic. The pipeline typically retrieves 10–20 findings where competitors retrieve 30–50. (2) The delegate mechanism returns summaries, not full transcripts — the survey topic's pipeline report explicitly identifies "information attenuation" where "the researcher's full 72-finding corpus was compressed to 8 key claims during handoff." The researcher gathers evidence but the pipeline's inter-stage handoff loses granular facts.
 
 ---
 
-### Gap 3: Source Quality
+### 3. Source Quality — MAJOR
 
-- **Dimension:** Source quality
-- **Severity:** **MINOR** — affects 2 of 5 topics, averages tie overall (7.6 vs 7.6), but creates vulnerability in specific runs
-- **Topics affected:** factual-deep-dive (7 vs 8), strategy (7 vs 8)
-- **Evidence:**
-  - **factual-deep-dive:** *"Pipeline relies on weaker aggregators (cloudprice.net, awesomeagents.ai) for pricing-critical findings."*
-  - **strategy:** *"The pipeline draws from 9 sources concentrated in academic/institutional channels. Comp A adds HBR, SHRM Labs, and Microsoft Research — increasing practitioner and cross-sector diversity. The pipeline has no HBR, no SHRM, no Microsoft, and no McKinsey data."*
-- **Root cause hypothesis:** The researcher stage sometimes finds aggregator sites before primary sources and stops when finding density is sufficient. When the topic domain has well-known canonical sources (HBR for management, official provider pages for pricing), competitors who navigate to those sources directly earn higher source-quality marks.
+- **Pipeline average:** 5.4/10
+- **Best competitor average:** 8.2/10
+- **Average delta:** −2.8
+- **Topics affected:** 5/5 (universal)
+
+| Topic | Pipeline | Best Competitor | Gap |
+|---|:---:|:---:|:---:|
+| strategy | 4 | 8 | −4 |
+| survey | 5 | 8 | −3 |
+| competitive-comparison | 5 | 8 | −3 |
+| factual-deep-dive | 6 | 8 | −2 |
+| technical-analysis | 7 | 9 | −2 |
+
+**Evidence:**
+
+- **strategy:** "Only 4 sources total; 2 are explicitly labeled 'unattributed.' The entire analysis rests on 2 verifiable sources (Nature, Gallup). Competitors draw on 8–13 sources spanning academic journals, management consultancies, practitioner media, and industry surveys."
+- **survey:** "Pipeline cites 4 named primary sources (IRS, Medicare.gov, APA, Natixis) and 3 unnamed secondary aggregates. No tax advisory firms, no retirement industry indices (International Living), no journalism, no expat-focused CPA guides."
+- **competitive-comparison:** "All 12 of the pipeline's primary sources are vendor-controlled (cursor.com, github.com). Zero independent journalism, zero hands-on reviews, zero analyst reports."
+- **factual-deep-dive:** "The pipeline lists 10 sources, all either vendor primary pages or well-known aggregators (arXiv, HuggingFace, MTEB). It includes zero independent benchmark sources, zero news/media sources."
+- **technical-analysis:** "The pipeline relies heavily on a single academic paper (Lehmann et al., cited 5 times). Competitor 2 cites 6+ distinct academic works. The pipeline includes no platform operator documentation (e.g., Cloudflare Workers Security Model)."
+
+**Root cause hypothesis:** The researcher stage prioritizes primary vendor documentation and known authoritative sources over independent third-party sources. This produces a credible but narrow evidence base that lacks the diversity needed to challenge vendor narratives and provide corroboration. The researcher does not appear to have a systematic source-diversity requirement — it does not deliberately seek independent journalism, analyst reports, practitioner reviews, or competing perspectives as a research category.
 
 ---
 
 ## TOPIC NOISE (1 topic only)
 
-### Citation Quality Deficit — factual-deep-dive
+### 1. Analytical Insight — competitive-comparison topic
 
-- **Dimension:** Citation quality
-- **Topic:** factual-deep-dive (Pipeline 7 vs best competitor 9)
-- **Evidence:** *"The pipeline header claims '23 sources' but the visible sources table maps only ~12 unique URLs across findings F1–F10. The traceability from claim to URL is incomplete."* Also: *"Two pricing-critical findings (F7, F8) cite only third-party aggregators rather than primary provider pricing pages."*
-- **Verdict:** **Likely noise** — the pipeline leads or ties on citation quality in all other 4 topics (scores: 9, 9, 8, 8). This appears to be a URL-loss artifact from the researcher → analysis handoff in this specific run, exacerbated by the topic's reliance on frequently-paywalled pricing data. The pipeline run report itself noted: *"Source URL loss: the formatter flagged that source URLs were lost between the research → analysis pipeline stages."* This is a known, already-identified issue — not a structural gap.
+- **Dimension:** Analytical insight
+- **Topic:** competitive-comparison (Pipeline 6, Best competitor 8, gap −2)
+- **Evidence:** "Failing to recognize the Workspace product evolution undercuts the entire comparative framing — the pipeline compares a live product against a product surface that no longer exists as described." In all other topics, the pipeline scored 7–8 on analytical insight (gap ≤1).
+- **Verdict:** **Likely downstream of the factual depth gap, not an independent analytical weakness.** The pipeline's analytical machinery (systemic synthesis, compound-risk framing, interconnected-system reasoning) is consistently praised across other topics. This single instance stems from a factual blind spot (Workspace sunset), not weak analysis. **Does not warrant separate treatment** — fixing the factual depth gap would likely resolve this.
+
+### 2. Structure & Readability — survey topic
+
+- **Dimension:** Structure & readability
+- **Topic:** survey (Pipeline 7, Best competitor 8, gap −1)
+- **Evidence:** "The pipeline's structure is clean but limited in scope; competitors benefit from tables, matrices, and tier-based organization that serve the comparison-heavy nature of the question."
+- **Verdict:** **Noise.** Gap is only 1 point and reflects the pipeline's limited factual content (no countries = no comparison tables) rather than a structural failing. Addressing factual depth would resolve this.
 
 ---
 
 ## PIPELINE STRENGTHS
 
-### Analytical Insight — Dominant (9.0 avg vs 8.4 best competitor, +0.6)
+### 1. Confidence Calibration — Consistent Winner (5/5 topics)
 
-The pipeline scored **9 on all 5 topics** — the only dimension with zero variance and universal outperformance. This is the pipeline's defining competitive advantage.
+| Topic | Pipeline | Best Competitor | Delta |
+|---|:---:|:---:|:---:|
+| factual-deep-dive | **9** | 8 | +1 |
+| strategy | **9** | 8 | +1 |
+| survey | **9** | 7 | +2 |
+| competitive-comparison | **8** | 8 | 0 |
+| technical-analysis | **9** | 8 | +1 |
+| **Average** | **8.8** | **7.8** | **+1.0** |
 
-**Evidence pattern — systemic synthesis absent from all competitors:**
-- **factual-deep-dive:** *"The pipeline is the only output that builds a systemic model... 'These dynamics form a system: architectural efficiency reduces cost at multiple levels, but platform lock-in constrains switching, while licensing determines whether that efficiency is even accessible.'"*
-- **strategy:** *"The 'How These Strategies Connect' section provides a causal sequencing model absent from all competitors: 'Manager capability is the engine... The practical sequence: start with manager upskilling, then team-level design, then norms and equity monitoring.'"*
-- **survey:** *"Three interconnected insights form a genuine decision system... 'Filter by tax regime first, assess the dollar-denominated options, and act before thresholds rise.'"*
-- **competitive-comparison:** *"'Structurally intractable' benchmark thesis... 'reinforcing bets' framework... the only output to cite the .NET team's 10-month Coding Agent study and integrate it as an evidence anchor."*
-- **technical-analysis:** *"'How These Connect' section — showing that supply chain opacity compounds the implementation gap, Spectre adds a hardware dimension, and WASI fragmentation erodes even secure runtime choices."*
+**Evidence:**
 
-**Mechanism:** The data-analyzer stage draws labeled inferences with cross-finding traceability, and the writer stage constructs interconnection sections that convert parallel findings into causal systems. No single-agent competitor replicates this two-stage analysis-then-synthesis architecture.
+- **survey:** "The pipeline is the clear leader on epistemic rigor. Every section carries an explicit confidence label (HIGH, MIXED, MEDIUM) with a stated evidentiary basis." It "flags claims it cannot source rather than silently presenting them as established facts. No competitor exhibits this discipline."
+- **strategy:** "The pipeline's confidence apparatus is the most rigorous of all four outputs. Systematic labeling, inference/finding separation (24 high, 10 medium, 0 low, 4 inference), and systemic hedging."
+- **factual-deep-dive:** "Pipeline metadata explicitly counts '24 high, 10 medium, 0 low, 4 inference' — making the epistemological status of every claim trackable."
+- **technical-analysis:** "The pipeline provides a formal confidence assessment table mapping every section to a confidence level with a stated basis. No competitor provides this level of systematic traceability."
 
----
+This is a **genuine architectural strength** of the multi-stage pipeline — the researcher → analyzer → writer chain preserves uncertainty signals through each handoff rather than flattening them into false confidence. This is the pipeline's single most defensible competitive advantage.
 
-### Structure & Readability — Consistent Lead (8.4 avg vs 8.0, +0.4)
+### 2. Systemic Analytical Synthesis — Qualitatively Distinct (4/5 topics)
 
-The pipeline scored 8 or 9 on all topics — never below any competitor.
+While the analytical insight *scores* trail competitors by 1 point on average, evaluators consistently note that the pipeline's analytical contributions are **qualitatively distinct**:
 
-- **survey (9):** *"The pipeline is the most concise and executive-ready output, with unique F/I traceability system, pipeline metadata header, and actionable 'Next Steps.'"*
-- **technical-analysis (9):** *"The pipeline is the only output that builds a narrative argument rather than a reference document."*
-- **competitive-comparison (8):** Tied, but pipeline was the shortest while maintaining information density.
+- **factual-deep-dive:** "The 'How these connect' paragraph linking all four insights into a causal system (convergence → unsustainable standalone businesses → licensing-for-acquisition → benchmark transience) is qualitatively superior. No competitor produces this kind of systemic-loop reasoning."
+- **strategy:** "The 'plan → prioritize → train' sequencing recommendation is a genuine synthesis not found in any competitor."
+- **survey:** "The 'compounding risk profile' synthesis — where tax obligations, Medicare exclusion, long-term care scarcity, and social isolation form a mutually reinforcing system — is the most original conceptual contribution across all outputs."
+- **technical-analysis:** "The pipeline's core framing — 'these four dimensions form a compound risk, not an independent checklist' — is original and structurally superior to the competitors' more conventional section-by-section conclusions."
 
----
-
-### Citation Quality — Net Positive (8.2 avg vs 7.8, +0.4)
-
-Despite one topic-specific deficit, the pipeline outperforms on source-to-claim traceability across the board.
-
-- **strategy (9):** *"The pipeline has the strongest citation infrastructure of all four outputs... Finding-to-source traceability: The Sources table maps 39 individual finding IDs to specific URLs and tier labels."*
-- **survey (9):** *"The pipeline provides a 20-source numbered table with URL, explicit tier classification (Primary / Secondary / Tertiary), and inline citations."*
+The pipeline consistently produces **system-level reasoning** (how risks/findings interact as a system) while competitors produce **list-level reasoning** (enumerated insights treated independently). This is a valuable intellectual contribution, but it cannot compensate for the factual thinness that constrains the analytical surface area.
 
 ---
 
 ## RECOMMENDED ACTIONS
 
-### 1. Add coverage-audit step between analyzer and writer
-**Addresses:** Factual depth (CRITICAL)
-**Expected impact:** HIGH
+Prioritized by impact, addressing structural gaps first:
 
-Insert a lightweight coverage-audit agent between the data-analyzer and writer stages. This agent reads the full research findings, the analysis output, and the intended output format, then flags when major categories present in the research (product lines, pricing tables, benchmark data, scale metrics) are absent from the analysis passthrough. The writer receives a "minimum coverage manifest" alongside the analysis.
+### 1. Fix the researcher → formatter citation chain — addresses Citation Quality (CRITICAL)
 
-**Evidence for design:** Evaluators repeatedly identified the same root cause — *"The writer stage aggressively condenses upstream findings to maintain executive conciseness, but this compression sacrifices factual breadth"* (factual-deep-dive), *"the pipeline's framing may have narrowed the researcher's scope"* (factual-deep-dive), *"The pipeline's analytical depth-first approach traded breadth for synthesis"* (technical-analysis).
+**Action:** Ensure the researcher stage captures and preserves full, specific URLs for every claim, and that the researcher-formatter does not collapse them to domain-level roots. Implement a URL-specificity validation step: reject any citation where the URL path is "/" or empty. Replace "unattributed source" and "Multiple secondary sources" patterns with either specific citations or explicit drops of the claim.
 
-### 2. Add structured confidence labels to writer output
-**Addresses:** Confidence calibration (MAJOR)
-**Expected impact:** HIGH
+**Expected impact:** HIGH — Citation quality is the worst dimension (avg 4.0) and the fix directly addresses the root cause identified in all 5 evaluations. Would likely lift citation quality by 3–4 points, closing the gap from −4.6 to approximately −1.
 
-Modify the writer's instructions to emit per-section confidence labels (HIGH / MEDIUM / LOW) calibrated to evidence type (RCT → HIGH, large-survey correlational → MEDIUM-HIGH, expert opinion → MEDIUM), plus a consolidated confidence assessment table. This is a formatting change, not an analytical one — the pipeline already hedges correctly in prose.
+### 2. Increase researcher search breadth and source diversity — addresses Source Quality (MAJOR) and Factual Depth (CRITICAL)
 
-**Evidence for design:** *"The single highest-priority improvement is adding inline confidence ratings to each strategy section or major claim"* (strategy evaluator), *"adding a structured confidence assessment table and per-section confidence labels"* (survey evaluator). This recommendation appears verbatim in 3 of 5 evaluation reports.
+**Action:** Add an explicit source-diversity requirement to the researcher's instructions: for each topic, the researcher must retrieve evidence from at least 3 source categories (e.g., vendor documentation, independent journalism, academic papers, practitioner reviews, analyst reports). Increase the researcher's search budget to pursue at least 3 search rounds minimum, with a mandatory "breadth pass" that targets source types not yet represented.
 
-### 3. Add source-diversity check to researcher stage
-**Addresses:** Source quality (MINOR)
-**Expected impact:** MEDIUM
+**Expected impact:** HIGH — Source quality and factual depth are the two other critical/major gaps. The evaluations repeatedly note that the researcher "terminates its search loop too early" and "prioritizes primary vendor documentation over independent third-party sources." Diversifying the source set would cascade into improvements across source quality (+2–3 points), factual depth (+2–3 points), and citation quality (+1 point).
 
-After the researcher completes its search rounds, add a self-check: "For the top entities in this research, have I cited at least one primary/official source? Are more than 25% of findings sourced from aggregator domains?" This prompts the researcher to replace aggregator citations with primary sources when available.
+### 3. Fix inter-stage information attenuation — addresses Factual Depth (CRITICAL)
 
-### 4. Increase writer word budget for high-finding-count research
-**Addresses:** Factual depth (CRITICAL, secondary mechanism)
-**Expected impact:** MEDIUM
+**Action:** The survey topic's pipeline report explicitly identifies the core mechanism: "the researcher's full 72-finding corpus was compressed to 8 key claims during handoff." Investigate the delegate return mechanism to ensure the researcher-formatter receives the full finding set rather than a summary. If the delegate mechanism structurally truncates, consider having the researcher write findings to a file that the formatter reads directly.
 
-When the upstream research produces >40 findings, auto-escalate the writer's target length from brief (~1,800 words) to report (~3,000 words). The writer already has auto-escalation logic (the strategy run triggered it), but the threshold may be too high for topics where 40+ findings span multiple product categories.
+**Expected impact:** MEDIUM-HIGH — Even with broader search, the pipeline loses granular facts at the researcher → formatter handoff. Fixing this preserves the specific statistics, data points, and per-entity details that competitors surface but the pipeline drops (e.g., specific pricing tiers, adoption figures, per-country visa thresholds, per-CVE severity scores).
+
+### 4. Add a "question-intent alignment" check to the researcher — addresses Factual Depth
+
+**Action:** The survey topic scored 3/10 on factual depth because "the pipeline produced an excellent answer to 'What should US citizens watch out for?' but a poor answer to 'What are the best places to retire abroad?'" Add a pre-research validation step where the researcher confirms its sub-questions will answer the user's *actual* question, not a related but different question.
+
+**Expected impact:** MEDIUM — Prevents the worst-case failure mode where the pipeline produces a well-structured, well-calibrated document that simply doesn't answer the question asked.
+
+### 5. Preserve and protect the confidence calibration advantage
+
+**Action:** No change needed — but ensure that fixes to citation quality and factual depth do not degrade the pipeline's confidence calibration discipline. The per-section confidence table, MIXED ratings, and explicit coverage gaps are the pipeline's most defensible competitive advantage and should be treated as inviolable.
+
+**Expected impact:** DEFENSIVE — Maintaining the pipeline's only consistently winning dimension.
 
 ---
 
 ## SUMMARY
 
-The pipeline averages **8.17/10** across 5 topics against a target of **8.5**, with a **0.33-point gap to close**. It ties with best competitors on aggregate (Δ = 0.00) but with high topic variance — losing by 0.83 on factual-deep-dive and winning by 0.67 on survey and competitive-comparison. The pipeline's **analytical insight (9.0 avg) is its dominant, unmatched strength** — every evaluator independently identified its systemic synthesis as the single strongest differentiator across all outputs.
-
-The **highest-priority structural weakness is factual depth** (−1.0 avg deficit, 4/5 topics affected): the writer's compression algorithm consistently drops product lines, pricing tables, benchmark details, and scale metrics that competitors include. The second structural weakness — **confidence calibration** (−0.6, 3/5 topics) — is a low-cost formatting fix that 3 of 5 evaluators independently recommended in identical terms.
-
-**Recommended first action:** Add a coverage-audit step between analyzer and writer that produces a "minimum coverage manifest" — this directly addresses the critical factual-depth gap while preserving the pipeline's analytical synthesis advantage that no competitor matches.
+The pipeline scores **6.37/10 on average** against a target of **8.5**, a gap of **2.13 points** driven by three structural weaknesses that appear in all five evaluated topics: **citation quality** (avg 4.0 vs. competitor 8.6), **factual depth** (avg 5.2 vs. 9.0), and **source quality** (avg 5.4 vs. 8.2). These three dimensions account for virtually the entire deficit. The pipeline's **confidence calibration** (avg 8.8) is its sole consistently winning dimension and represents a genuine architectural strength, but it cannot compensate for thin, poorly-cited evidence. **The single highest-priority action is fixing the citation chain** — ensuring the researcher captures specific URLs and the formatter preserves them — because citation quality is the worst-scoring dimension (4.0), the fix is mechanistic rather than requiring behavioral change, and evaluators in 3 of 5 topics identified it as the intervention most likely to cascade into improvements across multiple gap dimensions simultaneously.

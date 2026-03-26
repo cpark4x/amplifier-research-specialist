@@ -303,41 +303,42 @@ def test_load_competitors_timeout() -> None:
 
 
 def test_run_pipeline_is_recipe_type() -> None:
-    """run-pipeline must delegate to agent 'self'."""
+    """run-pipeline must be type 'recipe' delegating to research-chain.yaml."""
     recipe = load_recipe()
     step = _get_step(recipe, "run-pipeline")
-    assert step.get("agent") == "self", (
-        f"run-pipeline must use agent='self', got {step.get('agent')!r}"
+    assert step.get("type") == "recipe", (
+        f"run-pipeline must use type='recipe', got {step.get('type')!r}"
     )
 
 
-def test_run_pipeline_references_specialists_researcher() -> None:
-    """run-pipeline prompt must reference 'specialists:researcher' for direct chain orchestration."""
+def test_run_pipeline_references_research_chain() -> None:
+    """run-pipeline must reference research-chain.yaml recipe."""
     recipe = load_recipe()
     step = _get_step(recipe, "run-pipeline")
-    prompt = step.get("prompt", "")
-    assert "specialists:researcher" in prompt, (
-        f"run-pipeline prompt must reference 'specialists:researcher', got {prompt!r}"
+    recipe_ref = step.get("recipe", "")
+    assert "research-chain" in recipe_ref, (
+        f"run-pipeline must reference 'research-chain' recipe, got {recipe_ref!r}"
     )
 
 
 def test_run_pipeline_passes_research_question_in_context() -> None:
-    """run-pipeline prompt must pass {{research_question}} template variable."""
+    """run-pipeline context must pass research_question."""
     recipe = load_recipe()
     step = _get_step(recipe, "run-pipeline")
-    prompt = step.get("prompt", "")
-    assert "{{research_question}}" in prompt, (
-        "run-pipeline prompt must contain '{{research_question}}'"
+    context = step.get("context", {})
+    assert "research_question" in context, (
+        "run-pipeline context must contain 'research_question'"
     )
 
 
 def test_run_pipeline_research_question_references_template_var() -> None:
-    """run-pipeline prompt must reference {{research_question}} template variable."""
+    """run-pipeline context must reference {{research_question}} template variable."""
     recipe = load_recipe()
     step = _get_step(recipe, "run-pipeline")
-    prompt = step.get("prompt", "")
-    assert "{{research_question}}" in prompt, (
-        f"run-pipeline prompt must use '{{{{research_question}}}}', got {prompt!r}"
+    context = step.get("context", {})
+    rq_val = context.get("research_question", "")
+    assert "{{research_question}}" in rq_val, (
+        f"run-pipeline context research_question must use '{{{{research_question}}}}', got {rq_val!r}"
     )
 
 
@@ -376,7 +377,7 @@ def test_capture_pipeline_output_handles_missing_file() -> None:
 
 
 def test_capture_pipeline_output_detects_stale_output() -> None:
-    """capture-pipeline-output must detect stale output using the pipeline start marker."""
+    """capture-pipeline-output must use the pipeline start marker to find recent files."""
     recipe = load_recipe()
     step = _get_step(recipe, "capture-pipeline-output")
     command = step.get("command", "")
@@ -388,8 +389,8 @@ def test_capture_pipeline_output_detects_stale_output() -> None:
         f"variable '{{{{ {marker_output_var} }}}}' to detect stale files, "
         f"but it was not found in the command"
     )
-    assert "Stale output" in command or "stale" in command.lower(), (
-        "capture-pipeline-output must output a stale-output error message"
+    assert "-newer" in command, (
+        "capture-pipeline-output must use '-newer' to find files newer than the marker"
     )
 
 
