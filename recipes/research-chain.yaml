@@ -2,6 +2,26 @@
 # CHANGELOG
 # =============================================================================
 #
+# v1.13.0 (2026-03-26):
+#   - FEATURE: Source diversity enforcement (#59)
+#     * ROOT CAUSE: Researcher consistently produces vendor-heavy sources with
+#       narrow category coverage (5.4/10 on competitive eval). Adding diversity
+#       instructions to researcher.md doesn't work — LLM compliance degrades
+#       with prompt complexity.
+#     * FIX: Three-step mechanical enforcement (same pattern as truncation):
+#       (1) validate-sources bash gate counts distinct domains and classifies
+#           into 6 source categories. Outputs PASS/RETRY.
+#       (2) ensure-sources agent step: on PASS returns verbatim; on RETRY does
+#           targeted supplementary searches for missing categories and APPENDS
+#           findings (does not replace existing research).
+#       (3) validate-sources-final hard gate after retry (warn-only for initial
+#           rollout — exit 0 not exit 1, change once retry is proven reliable).
+#     * KEY DIFFERENCE FROM TRUNCATION: Uses append, not replace. Existing
+#       research is valid but narrow — supplementary pass broadens it.
+#     * Thresholds: ≥6 distinct domains AND ≥3/6 source categories.
+#     * Tested against 6 real research outputs: correctly caught 2 with poor
+#       diversity (Cursor vs Copilot: 2/6 cats, Retire Abroad: 1/6 cats).
+#
 # v1.12.0 (2026-03-19):
 #   - FEATURE: Auto-retry on researcher truncation (#41)
 #     * ROOT CAUSE: 4/5 pipeline runs produce truncated metadata summary instead
@@ -303,10 +323,9 @@ steps:
     output: "research_validation_final"
     timeout: 30
 
-  # Source diversity diagnostic — soft gate, no retry yet.
-  # Counts distinct domains and source category coverage.
-  # Outputs PASS/RETRY to source_validation for observability.
-  # TODO(#59): Add ensure-sources retry step + hard gate once thresholds are tuned.
+  # Source diversity — soft gate + retry + hard gate (#59).
+  # Same three-step pattern as validate-research/ensure-research.
+  # Key difference: RETRY appends supplementary findings, not full replace.
   - id: "validate-sources"
     type: "bash"
     command: |
@@ -348,6 +367,93 @@ steps:
         echo "Domains found: $(echo $_domains | tr '\n' ' ')"
       fi
     output: "source_validation"
+    timeout: 30
+
+  # Auto-retry: if sources lack diversity, do a targeted supplementary pass.
+  # On PASS, the researcher reads the validation and returns the original verbatim.
+  # On RETRY, the researcher keeps the existing research and appends findings
+  # from the missing source categories — targeted searches only.
+  # Cost: ~30s overhead on PASS runs (agent spinup + pass-through).
+  - id: "ensure-sources"
+    agent: "specialists:researcher"
+    prompt: |
+      SOURCE DIVERSITY GATE — read the validation result below and follow the
+      matching instruction exactly.
+
+      Source validation: {{source_validation}}
+
+      --- IF the validation starts with "PASS" ---
+      The research output below passed source diversity checks. Return it
+      EXACTLY as-is. Do not modify, reformat, summarize, add to, or improve
+      it in any way. Your entire output must be a verbatim copy of the
+      research output below, character for character. Do not add any preamble
+      or commentary.
+
+      --- IF the validation starts with "RETRY" ---
+      The research below is COMPLETE AND VALID but has NARROW SOURCE DIVERSITY.
+      The validation tells you which source categories are missing.
+
+      Your job — supplementary research only:
+      1. Read the existing research output below. It is good work. Do NOT
+         discard, rewrite, or reorganize it.
+      2. Note which categories are missing from the validation result above.
+      3. Do TARGETED searches for the missing categories only. Search guidance:
+         - academic: search scholar.google.com, arxiv.org for relevant papers
+         - data: search for statistics, surveys, government data, benchmark reports
+         - independent: search for third-party reviews, analyst reports, independent benchmarks
+         - practitioner: search for industry journalism (Reuters, Bloomberg, Ars Technica, HBR, Wired)
+         - community: search reddit.com, Hacker News, Stack Overflow for real-world discussion
+      4. For each new source, write 1-2 findings in the same format as the
+         existing research (with confidence level, source citation, and tier).
+      5. Return the COMPLETE output: the original research first (verbatim),
+         then append a "## Supplementary Sources" section with your new findings.
+
+      Do NOT rewrite the existing research. Do NOT reorganize it. Append only.
+      Cap supplementary searches at 8 URLs total. Target 3-5 new findings.
+
+      Research question: {{research_question}}
+
+      --- END INSTRUCTIONS ---
+
+      Existing research output:
+      {{research_output}}
+    output: "research_output"
+    timeout: 1800
+
+  # Final hard gate — fails pipeline if source diversity still insufficient after retry.
+  - id: "validate-sources-final"
+    type: "bash"
+    command: |
+      _vs_tmp=$(mktemp)
+      cat > "$_vs_tmp" <<'__VS_FINAL_EOF__'
+      {{research_output}}
+      __VS_FINAL_EOF__
+      _domains=$(grep -oE 'https?://[^[:space:]")>|]+' "$_vs_tmp" | \
+        sed -E 's|https?://||; s|/.*||; s|^www\.||' | \
+        sort -u)
+      _domain_count=$(echo "$_domains" | grep -c '.' 2>/dev/null || true)
+      _cat_academic=$(echo "$_domains" | { grep -cE '(arxiv\.org|scholar\.google|acm\.org|ieee\.org|usenix\.org|nature\.com|sciencedirect|ncbi\.nlm|pubmed|pmc\.|springer\.com|wiley\.com|thelancet|journals\.|bmj\.com)' || true; })
+      _cat_data=$(echo "$_domains" | { grep -cE '(statista\.com|pewresearch|gallup\.com|sec\.gov|data\.gov|census\.gov|bls\.gov|worldbank\.org|imf\.org|oecd\.org|who\.int)' || true; })
+      _cat_independent=$(echo "$_domains" | { grep -cE '(gartner\.com|forrester\.com|g2\.com|trustpilot|consumerreports|wirecutter|techradar|pcmag\.com|tomshardware|anandtech|theregister)' || true; })
+      _cat_practitioner=$(echo "$_domains" | { grep -cE '(hbr\.org|infoq\.com|thenewstack|martinfowler|arstechnica|wired\.com|theverge\.com|techcrunch|reuters\.com|bloomberg\.com|nytimes\.com|washingtonpost|bbc\.com|cnn\.com|fortune\.com|scientificamerican|healthpolicy)' || true; })
+      _cat_community=$(echo "$_domains" | { grep -cE '(reddit\.com|news\.ycombinator|stackoverflow|stackexchange|lobste\.rs|dev\.to|hackernoon|dzone\.com|github\.com)' || true; })
+      _cats=0
+      [ "$_cat_academic" -gt 0 ] && _cats=$((_cats + 1))
+      [ "$_cat_data" -gt 0 ] && _cats=$((_cats + 1))
+      [ "$_cat_independent" -gt 0 ] && _cats=$((_cats + 1))
+      [ "$_cat_practitioner" -gt 0 ] && _cats=$((_cats + 1))
+      [ "$_cat_community" -gt 0 ] && _cats=$((_cats + 1))
+      _cat_official=$(echo "$_domains" | { grep -cvE '(arxiv\.org|scholar\.google|acm\.org|ieee\.org|usenix\.org|nature\.com|sciencedirect|ncbi\.nlm|pubmed|pmc\.|springer|wiley|thelancet|journals\.|bmj\.com|statista|pewresearch|gallup|sec\.gov|data\.gov|census|bls\.gov|worldbank|imf\.org|oecd|who\.int|gartner|forrester|g2\.com|trustpilot|consumerreports|wirecutter|techradar|pcmag|tomshardware|anandtech|theregister|hbr\.org|infoq|thenewstack|martinfowler|arstechnica|wired\.com|theverge|techcrunch|reuters|bloomberg|nytimes|washingtonpost|bbc\.com|cnn\.com|fortune\.com|scientificamerican|healthpolicy|reddit|ycombinator|stackoverflow|stackexchange|lobste|dev\.to|hackernoon|dzone|github\.com)' || true; })
+      [ "$_cat_official" -gt 0 ] && _cats=$((_cats + 1))
+      rm -f "$_vs_tmp"
+      if [ "$_domain_count" -lt 6 ] || [ "$_cats" -lt 3 ]; then
+        echo "GATE_FAIL: Source diversity insufficient after retry — ${_domain_count} domains, ${_cats}/6 categories. Pipeline continues with available sources."
+        # NOTE: Using exit 0 (warn) not exit 1 (fail) for initial rollout.
+        # Change to exit 1 once we confirm retry reliably improves diversity.
+      else
+        echo "GATE_PASS: ${_domain_count} distinct domains across ${_cats}/6 source categories."
+      fi
+    output: "source_validation_final"
     timeout: 30
 
   - id: "resolve-urls"
