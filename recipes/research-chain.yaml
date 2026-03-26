@@ -303,6 +303,53 @@ steps:
     output: "research_validation_final"
     timeout: 30
 
+  # Source diversity diagnostic — soft gate, no retry yet.
+  # Counts distinct domains and source category coverage.
+  # Outputs PASS/RETRY to source_validation for observability.
+  # TODO(#59): Add ensure-sources retry step + hard gate once thresholds are tuned.
+  - id: "validate-sources"
+    type: "bash"
+    command: |
+      _vs_tmp=$(mktemp)
+      cat > "$_vs_tmp" <<'__VS_EOF__'
+      {{research_output}}
+      __VS_EOF__
+      _domains=$(grep -oE 'https?://[^[:space:]")>|]+' "$_vs_tmp" | \
+        sed -E 's|https?://||; s|/.*||; s|^www\.||' | \
+        sort -u)
+      _domain_count=$(echo "$_domains" | grep -c '.' 2>/dev/null || true)
+      _cat_academic=$(echo "$_domains" | { grep -cE '(arxiv\.org|scholar\.google|acm\.org|ieee\.org|usenix\.org|nature\.com|sciencedirect|ncbi\.nlm|pubmed|pmc\.|springer\.com|wiley\.com|thelancet|journals\.|bmj\.com)' || true; })
+      _cat_data=$(echo "$_domains" | { grep -cE '(statista\.com|pewresearch|gallup\.com|sec\.gov|data\.gov|census\.gov|bls\.gov|worldbank\.org|imf\.org|oecd\.org|who\.int)' || true; })
+      _cat_independent=$(echo "$_domains" | { grep -cE '(gartner\.com|forrester\.com|g2\.com|trustpilot|consumerreports|wirecutter|techradar|pcmag\.com|tomshardware|anandtech|theregister)' || true; })
+      _cat_practitioner=$(echo "$_domains" | { grep -cE '(hbr\.org|infoq\.com|thenewstack|martinfowler|arstechnica|wired\.com|theverge\.com|techcrunch|reuters\.com|bloomberg\.com|nytimes\.com|washingtonpost|bbc\.com|cnn\.com|fortune\.com|scientificamerican|healthpolicy)' || true; })
+      _cat_community=$(echo "$_domains" | { grep -cE '(reddit\.com|news\.ycombinator|stackoverflow|stackexchange|lobste\.rs|dev\.to|hackernoon|dzone\.com|github\.com)' || true; })
+      _cats=0
+      [ "$_cat_academic" -gt 0 ] && _cats=$((_cats + 1))
+      [ "$_cat_data" -gt 0 ] && _cats=$((_cats + 1))
+      [ "$_cat_independent" -gt 0 ] && _cats=$((_cats + 1))
+      [ "$_cat_practitioner" -gt 0 ] && _cats=$((_cats + 1))
+      [ "$_cat_community" -gt 0 ] && _cats=$((_cats + 1))
+      _cat_official=$(echo "$_domains" | { grep -cvE '(arxiv\.org|scholar\.google|acm\.org|ieee\.org|usenix\.org|nature\.com|sciencedirect|ncbi\.nlm|pubmed|pmc\.|springer|wiley|thelancet|journals\.|bmj\.com|statista|pewresearch|gallup|sec\.gov|data\.gov|census|bls\.gov|worldbank|imf\.org|oecd|who\.int|gartner|forrester|g2\.com|trustpilot|consumerreports|wirecutter|techradar|pcmag|tomshardware|anandtech|theregister|hbr\.org|infoq|thenewstack|martinfowler|arstechnica|wired\.com|theverge|techcrunch|reuters|bloomberg|nytimes|washingtonpost|bbc\.com|cnn\.com|fortune\.com|scientificamerican|healthpolicy|reddit|ycombinator|stackoverflow|stackexchange|lobste|dev\.to|hackernoon|dzone|github\.com)' || true; })
+      [ "$_cat_official" -gt 0 ] && _cats=$((_cats + 1))
+      _missing=""
+      [ "$_cat_official" -eq 0 ] && _missing="${_missing}official, "
+      [ "$_cat_academic" -eq 0 ] && _missing="${_missing}academic, "
+      [ "$_cat_data" -eq 0 ] && _missing="${_missing}data, "
+      [ "$_cat_independent" -eq 0 ] && _missing="${_missing}independent, "
+      [ "$_cat_practitioner" -eq 0 ] && _missing="${_missing}practitioner, "
+      [ "$_cat_community" -eq 0 ] && _missing="${_missing}community, "
+      _missing=$(echo "$_missing" | sed 's/, $//')
+      rm -f "$_vs_tmp"
+      if [ "$_domain_count" -ge 6 ] && [ "$_cats" -ge 3 ]; then
+        echo "PASS: ${_domain_count} distinct domains across ${_cats}/6 source categories."
+      else
+        echo "RETRY: ${_domain_count} distinct domains across ${_cats}/6 source categories."
+        [ -n "$_missing" ] && echo "Missing categories: ${_missing}"
+        echo "Domains found: $(echo $_domains | tr '\n' ' ')"
+      fi
+    output: "source_validation"
+    timeout: 30
+
   - id: "resolve-urls"
     agent: "foundation:web-research"
     prompt: |
