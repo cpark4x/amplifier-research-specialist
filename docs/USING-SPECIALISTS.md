@@ -1,10 +1,10 @@
 ---
-title: Using Canvas Specialists
+title: Using Amplifier Research Specialist
 audience: new users, orchestrator authors, AI agents
 last_updated: 2026-03-14
 ---
 
-# Using Canvas Specialists
+# Using Amplifier Research Specialist
 
 A practical guide to getting research done with specialists.
 

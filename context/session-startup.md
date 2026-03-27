@@ -1,4 +1,4 @@
-# Session Startup — Canvas Specialists
+# Session Startup — Amplifier Research Specialist
 
 > **For AI agents:** Read this at the start of every session, before any other work.
 

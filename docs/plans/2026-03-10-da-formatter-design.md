@@ -8,7 +8,7 @@
 
 ## Context
 
-The Data Analyzer (DA) is the inference specialist in the Canvas Specialists pipeline. It draws labeled, traceable conclusions from ResearchOutput and produces a canonical `ANALYSIS OUTPUT` block. Like every other specialist, its format compliance is instruction-based — meaning it fails under certain input conditions.
+The Data Analyzer (DA) is the inference specialist in the Amplifier Research Specialist pipeline. It draws labeled, traceable conclusions from ResearchOutput and produces a canonical `ANALYSIS OUTPUT` block. Like every other specialist, its format compliance is instruction-based — meaning it fails under certain input conditions.
 
 **Failure mode (2026-03-10 test log):** When input is framed as a raw question rather than "here is research output," the DA falls into narrative analysis mode — producing a competitive essay with `## Section` headers, emoji status indicators, and summary matrices. No `ANALYSIS OUTPUT` block. No `traces_to` fields. No canonical structure.
 

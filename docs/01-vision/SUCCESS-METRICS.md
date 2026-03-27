@@ -1,6 +1,6 @@
-# Canvas Specialists: Success Metrics
+# Amplifier Research Specialist: Success Metrics
 
-**How we measure if Canvas Specialists is achieving its vision**
+**How we measure if Amplifier Research Specialist is achieving its vision**
 
 **Owner:** Chris Park  
 **Last Updated:** 2026-03-04  
@@ -23,7 +23,7 @@
 
 ## Summary
 
-Success for Canvas Specialists is measured by one thing: does delegating to a specialist produce better output than an orchestrator doing the work inline? Metrics are organized by phase (V1/V2/V3) and distinguish leading indicators (things that predict quality) from lagging ones (things that confirm it). We optimize for trustworthiness and composability, not speed or volume.
+Success for Amplifier Research Specialist is measured by one thing: does delegating to a specialist produce better output than an orchestrator doing the work inline? Metrics are organized by phase (V1/V2/V3) and distinguish leading indicators (things that predict quality) from lagging ones (things that confirm it). We optimize for trustworthiness and composability, not speed or volume.
 
 ---
 

@@ -9,7 +9,7 @@
 
 ## Summary
 
-Canvas Specialists is a library of best-in-class, single-domain AI specialist agents for knowledge worker and consumer scenarios. Each specialist runs a rigorous multi-stage pipeline with explicit quality gates and returns structured, machine-parseable output — filling the gap between shallow generalist tools and custom one-off agents.
+Amplifier Research Specialist is a library of best-in-class, single-domain AI specialist agents for knowledge worker and consumer scenarios. Each specialist runs a rigorous multi-stage pipeline with explicit quality gates and returns structured, machine-parseable output — filling the gap between shallow generalist tools and custom one-off agents.
 
 The goal is output a user can **stake their reputation on**: output that is defensible, auditable, and honest about its limits. Every finding traces to a source. Every inference traces to a finding. Every limitation is named. Nothing is papered over.
 

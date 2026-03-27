@@ -6,7 +6,7 @@ Fix the two UX problems that affect all conversational specialist invocations: r
 
 ## Background
 
-When a user asks the Canvas Specialists platform something like "run a competitive analysis on X vs Y", the orchestrator delegates to the appropriate specialist — but then surfaces the raw structured block (`COMPETITIVE ANALYSIS BRIEF`, `RESEARCH OUTPUT`, etc.) directly to the user. These blocks are machine-readable intermediate formats designed for downstream specialists, not human consumption.
+When a user asks the Amplifier Research Specialist platform something like "run a competitive analysis on X vs Y", the orchestrator delegates to the appropriate specialist — but then surfaces the raw structured block (`COMPETITIVE ANALYSIS BRIEF`, `RESEARCH OUTPUT`, etc.) directly to the user. These blocks are machine-readable intermediate formats designed for downstream specialists, not human consumption.
 
 At the same time, the user has no idea what happened behind the scenes. They don't know which specialists ran, in what order, or whether the chain completed. The result feels like a black box that returns an ugly format.
 

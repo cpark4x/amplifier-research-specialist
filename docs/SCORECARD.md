@@ -1,4 +1,4 @@
-# Canvas Specialists — Quality Scorecard
+# Amplifier Research Specialist — Quality Scorecard
 
 **Purpose:** Tracks validated quality scores across key dimensions. Scores are updated
 when test evidence exists; not updated on spec changes alone.
