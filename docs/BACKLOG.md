@@ -2,7 +2,7 @@
 
 **Purpose:** Strategic planning view for canvas-specialists — a library of best-in-class, single-domain AI specialist agents for knowledge worker and consumer scenarios  
 **Owner:** Chris Park  
-**Last Updated:** March 26, 2026 (v5.9)  
+**Last Updated:** March 26, 2026 (v6.1)  
 
 ---
 
@@ -14,19 +14,15 @@ See [**2026-03-05-world-class-roadmap.md**](plans/2026-03-05-world-class-roadmap
 
 ## Current Status Summary
 
-**11 epics tracked:** ✅ 7 complete, 🔄 0 in progress, ⏸️ 0 paused, 4 planned
+**7 epics tracked:** ✅ 7 complete
 
 - ✅ Epic 01 — Researcher
 - ✅ Epic 02 — Writer
 - ✅ Epic 03 — Storyteller
 - ✅ Epic 04 — Competitive Analysis
-- 🆕 Epic 05 — Design
-- 🆕 Epic 06 — Demo Generator
-- 🆕 Epic 07 — Presentation Builder
 - ✅ Epic 08 — Data Analyzer
 - ✅ Epic 09 — Planner
 - ✅ Epic 10 — Prioritizer
-- 🆕 Epic 11 — Platform Integrations
 
 ### Active Work
 
@@ -173,7 +169,6 @@ Ordered by priority tier then impact. Items marked *(consolidated)* absorbed dup
 
 | # | Item | Epic | Owner | Effort | Impact | Rationale |
 |---|------|------|-------|--------|--------|-----------|
-| 2 | Presentation Builder specialist | 07 | Gurkaran Singh | L | H | Closes the research → write → present chain; slide deck output is a top knowledge worker use case |
 | 25 | Package common comparison flows as recipes | 04 | Chris | S | M | Product comparisons repeatedly benefit from a consistent multi-step pipeline; encode as a single invokable recipe to reduce manual chaining and variance. *(from mining report 2026-03-05)* |
 | 8 | Recipe display: filter internal scaffolding from summary | 01/02/04 | Chris | S | M | Raw claim IDs (S1–S45) from the Analyzer's internal pipeline appeared in the `final_output` recipe summary field. Internal scaffolding should not be user-facing. Display/recipe layer issue. *(from test log 2026-03-04)* |
 | 36 | Pipeline token/cost optimization | 01/02/03/08 | — | M | H | Deep chain spawns 5+ agent sessions sequentially; formatters add 3–4 sessions that may not need heavy models. Five levers: (1) **Formatter consolidation** — run formatting as tool call within preceding specialist's session instead of spawning new agent, cutting 3–4 sessions from deep chain; (2) **Model routing** — route formatters to `fast` tier (Haiku-class) since they extract/reformat, not reason; (3) **Smart depth detection** — reduce accidental deep-chain triggers via better UX routing; (4) **Research caching** — cache ResearchOutput with TTL to cut repeat queries to near-zero cost; (5) **Skip-formatters mode** — for human-terminal workflows where no downstream agent consumes output, offer `depth=quick` path (researcher → writer, skip formatters and analyzer), cutting latency roughly in half. Levers 1–2 are low-hanging fruit; 3 is UX; 4–5 are higher effort/higher payoff. **Update 2026-03-19:** Lever 5 urgency elevated — retirement A/B test demonstrated writer-formatter breaking in ad-hoc mode (two-input contract not satisfiable when coordinator can't re-send ~15K token research output). See #45 for two-path doctrine design. *(from pitch discussion 2026-03-16; lever 5 from A/B tests 2026-03-18 and 2026-03-19)* |
@@ -199,31 +194,9 @@ Items merged during prioritization pass (2026-03-06):
 
 ### Medium-term (Next Quarter)
 
-**Epic 05 — Design Specialist:**
-- Design specialist — translates briefs and research into structured design direction: principles, visual language, component guidance, constraints
-
-**Epic 06 — Demo Generator Specialist:**
-- Demo generator — reverse-engineers a persuasive arc from a product; identifies wow moments, sequences for impact, generates script and talking points
-
-**Epic 09 — Planner Specialist:** ✅ *Shipped 2026-03-13. Planner V1 built (75 lines, lightweight-first). Remaining: quality_threshold:high validation, pipeline integration testing.*
-
-**Epic 10 — Prioritizer Specialist:**
-- Prioritizer specialist — takes a list of items and context, applies a prioritization framework (impact/effort, MoSCoW, RICE, etc.), returns a ranked, justified output
-
 **Epic 02 — Writer Enhancements:**
 - Brand voice / style configuration (`voice_config` input: prohibited terms, tone directives, required terminology)
 - Source confidence threshold (`min_source_confidence` filter; claims below threshold flagged in coverage audit)
-
-### Long-term (Future Quarters)
-
-**Epic 11 — Platform Integrations:**
-- LangChain / LangGraph wrapper package (thin wrapper for Writer; closes ecosystem presence gap)
-- Additional platform integrations TBD
-
-**Future Specialists:**
-- Fact-checker specialist
-- Editor specialist
-- Additional domain specialists TBD
 
 ---
 
@@ -267,15 +240,11 @@ Synthesis Writer → cross-ecosystem comparative brief
 | 02 — Writer | Writer V1, coverage audit, citations + attribution, WRITER METADATA, citation confidence, rendering (pandoc), confidence label display | Brand voice config, audit severity, source confidence threshold | 83% |
 | 03 — Storyteller | StoryOutput schema, 5-stage pipeline, NARRATIVE SELECTION, narrative-chain recipe, compound tones | — | 100% |
 | 04 — Competitive Analysis | 6-stage pipeline, head-to-head + landscape modes, CompetitiveAnalysisOutput schema, 2-step + 3-step recipes, researcher-first default, CLAIMS TO VERIFY block | — | 100% |
-| 05 — Design | — | Full specialist implementation | 0% |
-| 06 — Demo Generator | — | Full specialist implementation | 0% |
-| 07 — Presentation Builder | — | Full specialist implementation | 0% |
 | 08 — Data Analyzer | 4-stage pipeline, AnalysisOutput schema, Writer analysis-output integration, 6 E2E tests | Format B detection hardening, code-fence prevention | 100% |
 | 09 — Planner | Planner V1 — structured plans with milestones, dependencies, timelines, risk flags (75 lines, lightweight-first) | quality_threshold:high validation, pipeline integration testing | ~75% |
 | 10 — Prioritizer | Prioritizer V1 — 4-stage pipeline, PrioritizerOutput schema, impact-effort + MoSCoW + RICE + weighted scoring, prioritizer-formatter specialist | quality_threshold:high validation, pipeline integration testing | 95% |
-| 11 — Platform Integrations | — | LangChain wrapper, rendering integrations | 0% |
 
-**Overall: 4 specialists shipped, 6 planned, 1 integrations epic**
+**Overall: 7 epics, all shipped. Epics 05 (Design), 06 (Demo Generator), 07 (Presentation Builder), and 11 (Platform Integrations) removed — out of scope per project focus pivot.**
 
 ---
 
@@ -313,6 +282,7 @@ Synthesis Writer → cross-ecosystem comparative brief
 
 | Version | Date | Person | Changes |
 |---------|------|--------|---------|
+| v6.1 | Mar 26, 2026 | Chris | **Scope pivot + CI + test coverage.** Removed Epics 05 (Design), 06 (Demo Generator), 07 (Presentation Builder), 11 (Platform Integrations) — out of scope per project focus decision. Added GitHub Actions CI workflow (pytest on push/PR to main). Added structural tests for 4 untested agents: planner, story-formatter, prioritizer-formatter, data-analyzer-formatter (89 new tests, 642 total). |
 | v6.0 | Mar 26, 2026 | Chris | **#59 shipped + repo cleanup.** Source diversity enforcement gate live in research-chain v1.13.0 (validate-sources → ensure-sources → validate-sources-final). Tested offline (6 outputs, 2 correctly flagged) + live (Cursor vs Copilot, PASS on first attempt). Hard gate warn-only for initial rollout. Also: removed stale Epic 03 test file (553 tests green), deleted 9 stale branches (4 local, 5 remote), updated README epic table (5 epics corrected to Complete). Commits `ea4b305`–`a639a26`. |
 | v5.9 | Mar 26, 2026 | Chris | **Post-sprint analysis + eval infrastructure hardening.** Fixed citation quality regression root cause: quality-eval-iteration.yaml was bypassing research-chain.yaml (missing resolve-urls step crashed citation quality 8.2→4.0). Wired eval to use research-chain recipe (commit `5270bcd`). Added safety gate to quality-loop fix step preventing auto-fix regressions. Spot-checked strategy + competitive-comparison topics — citation quality and confidence calibration confirmed working; source quality (5-6/10) identified as binding constraint. Tested and reverted researcher instruction additions (LLM compliance degrades with prompt complexity). Added #59 (validate-sources recipe step) as P1 for next sprint — mechanical enforcement via PASS/RETRY pattern, not instruction-based. |
 | v5.8 | Mar 25, 2026 | Chris | **8.5 quality sprint complete — all 5 items shipped.** #55 (writer per-section confidence labels, Stage 4 + Stage 5 item 11), #56 (writer make coverage-manifest mandatory, Stage 2 step 5 + Stage 5 item 12), #57 (coverage-audit cap 8→15) shipped in commit `07f99c3`. #3 (coverage audit severity levels — CRITICAL/HIGH/MEDIUM classification, `gap_policy` context variable strict/balanced/relaxed, writer honors gap_policy in Stage 2 and Stage 5) shipped same session. #58 (quality loop score-extraction fix — `AGGREGATE_PIPELINE_SCORE:` reliable extraction in aggregate-diagnose + check step 3-tier fallback) shipped same session. 553 tests passing. |
