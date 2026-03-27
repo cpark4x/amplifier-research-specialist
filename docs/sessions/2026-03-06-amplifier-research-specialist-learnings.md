@@ -1,6 +1,6 @@
 # Session Learnings — 2026-03-06
 
-**Context:** Long ridecast2 build day. Used canvas-specialists pipeline (competitive analysis, mobile UI research) and the stories pipeline (story production) extensively. Also ran a direct comparison between stories and specialists on the same task. Reviewing tomorrow with fresh eyes before promoting to backlog.
+**Context:** Long ridecast2 build day. Used amplifier-research-specialist pipeline (competitive analysis, mobile UI research) and the stories pipeline (story production) extensively. Also ran a direct comparison between stories and specialists on the same task. Reviewing tomorrow with fresh eyes before promoting to backlog.
 
 ---
 
@@ -52,7 +52,7 @@ stories:storyteller (artifact production — deployable HTML)
 
 The storyteller's HTML deck went directly into a PR to `ramparte/amplifier-stories` today. The specialist writer output needed extra steps to become shareable. For any task where the goal is a shareable artifact, specialists needs a render/produce step at the end.
 
-**Open question:** Does canvas-specialists build a native Presentation Builder (Epic 07) or route to stories:storyteller as a dependency?
+**Open question:** Does amplifier-research-specialist build a native Presentation Builder (Epic 07) or route to stories:storyteller as a dependency?
 
 ---
 

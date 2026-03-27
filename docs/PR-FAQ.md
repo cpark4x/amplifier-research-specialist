@@ -1,8 +1,8 @@
-# canvas-specialists — PR/FAQ
+# amplifier-research-specialist — PR/FAQ
 
 ## Press Release
 
-**canvas-specialists gives Amplifier users research they can stake their reputation on.** Today, when you ask an AI to research something, you get a confident paragraph — but no sources, no confidence levels, and no way to tell what was verified versus invented. canvas-specialists replaces that single-pass guess with a multi-agent pipeline where every claim traces to a source, every inference traces to a finding, and every gap in the evidence is named rather than papered over. It's for the work where someone will read your output critically and ask where you got it — board briefs, vendor evaluations, competitive analyses, anything with a skeptical audience.
+**amplifier-research-specialist gives Amplifier users research they can stake their reputation on.** Today, when you ask an AI to research something, you get a confident paragraph — but no sources, no confidence levels, and no way to tell what was verified versus invented. amplifier-research-specialist replaces that single-pass guess with a multi-agent pipeline where every claim traces to a source, every inference traces to a finding, and every gap in the evidence is named rather than papered over. It's for the work where someone will read your output critically and ask where you got it — board briefs, vendor evaluations, competitive analyses, anything with a skeptical audience.
 
 **Two speeds match the tool to the stakes.** Quick mode (3–5 minutes) runs a researcher and writer for exploration — "what is X" gets a sourced answer fast. Deep mode (~15 minutes) adds source corroboration, fact/inference separation, and quality gates that fail loud when evidence is thin — "write me a brief on X for my VP" triggers the full pipeline automatically. You can always override in either direction.
 
@@ -14,7 +14,7 @@ A typical AI research response:
 
 > *"OpenAI holds a dominant position in the enterprise AI market, with strong adoption among Fortune 500 companies. Anthropic is gaining ground, particularly among safety-conscious organizations."*
 
-canvas-specialists on the same question:
+amplifier-research-specialist on the same question:
 
 ```
 FINDING [HIGH CONFIDENCE]
@@ -43,7 +43,7 @@ Every claim sourced. Inferences traced to the findings that support them. Gaps n
 
 ## Frequently Asked Questions
 
-### 1. What does canvas-specialists actually do?
+### 1. What does amplifier-research-specialist actually do?
 
 It's a bundle of specialist AI agents for Amplifier that handle knowledge work — research, analysis, competitive intelligence, writing, prioritization, and planning. Instead of one LLM doing everything in a single pass, each specialist handles one stage of the work and passes structured output to the next. The researcher finds and tiers sources. The analyzer draws labeled inferences. The writer produces the document. Each stage has a defined contract, so the output is traceable end to end.
 
@@ -52,7 +52,7 @@ It's a bundle of specialist AI agents for Amplifier that handle knowledge work �
 Two commands:
 
 ```bash
-amplifier bundle add git+https://github.com/cpark4x/canvas-specialists@main
+amplifier bundle add git+https://github.com/cpark4x/amplifier-research-specialist@main
 amplifier bundle use specialists --app
 ```
 
@@ -64,7 +64,7 @@ Yes. After installing, start a session and say: "Quick research on [any topic yo
 
 ### 4. How is this different from just asking Amplifier to research something?
 
-Default Amplifier research gives you a readable answer with no source accountability. canvas-specialists gives you structured output where every claim has a confidence label (high/medium/low), a source URL, and a tier (primary/secondary/tertiary). The pipeline includes a corroboration stage that searches for a second independent source for every claim. When evidence is thin, the output says so explicitly instead of writing a confident paragraph anyway.
+Default Amplifier research gives you a readable answer with no source accountability. amplifier-research-specialist gives you structured output where every claim has a confidence label (high/medium/low), a source URL, and a tier (primary/secondary/tertiary). The pipeline includes a corroboration stage that searches for a second independent source for every claim. When evidence is thin, the output says so explicitly instead of writing a confident paragraph anyway.
 
 ### 5. What specialists are included?
 
@@ -87,7 +87,7 @@ Default Amplifier research gives you a readable answer with no source accountabi
 
 ### 6. Is it slow?
 
-Quick mode takes 3–5 minutes. Deep mode takes about 15 minutes. That's the cost of corroboration, multi-stage processing, and quality gates. For casual questions — "what is X?" — just ask Amplifier directly; you don't need this. canvas-specialists is for the work where getting it wrong has consequences.
+Quick mode takes 3–5 minutes. Deep mode takes about 15 minutes. That's the cost of corroboration, multi-stage processing, and quality gates. For casual questions — "what is X?" — just ask Amplifier directly; you don't need this. amplifier-research-specialist is for the work where getting it wrong has consequences.
 
 ### 7. Does it cost more to run?
 

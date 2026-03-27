@@ -2,7 +2,7 @@
 
 > **Execution:** Use the subagent-driven-development workflow to implement this plan.
 
-**Goal:** A fresh clone of canvas-specialists loads all modules without errors and emits specialist narration on first run.
+**Goal:** A fresh clone of amplifier-research-specialist loads all modules without errors and emits specialist narration on first run.
 **Architecture:** Fix the hook-specialist-narration module (currently missing source files on disk — only stale `__pycache__/*.pyc` remain), remove the broken `tool-canvas-renderer` reference from the behavior YAML, and add a packaging health test that prevents regression.
 **Tech Stack:** Python 3.11+ (uses `tomllib` from stdlib), pytest, Amplifier module system (hooks)
 

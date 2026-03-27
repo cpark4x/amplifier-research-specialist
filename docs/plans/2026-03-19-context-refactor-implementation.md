@@ -379,13 +379,13 @@ Both the old file (`context/specialists-instructions.md`) and new file (`context
 
 **Step 1: Run the two updated test files**
 
-Run: `cd /Users/chrispark/Projects/specialists/canvas-specialists && python -m pytest tests/test_specialists_instructions_storyteller.py tests/test_conversational_chain_behavior.py -v`
+Run: `cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && python -m pytest tests/test_specialists_instructions_storyteller.py tests/test_conversational_chain_behavior.py -v`
 
 Expected: All tests PASS. If any fail, fix the content in `coordinator-routing.md` — do NOT change the test assertions (they validate real requirements).
 
 **Step 2: Run the full test suite**
 
-Run: `cd /Users/chrispark/Projects/specialists/canvas-specialists && python -m pytest tests/ -v`
+Run: `cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && python -m pytest tests/ -v`
 
 Expected: All tests PASS. No regressions.
 
@@ -395,7 +395,7 @@ If all tests pass, commit Tasks 1–5 together:
 
 Run:
 ```bash
-cd /Users/chrispark/Projects/specialists/canvas-specialists && \
+cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && \
 git add context/coordinator-routing.md tests/conftest.py tests/test_specialists_instructions_storyteller.py tests/test_conversational_chain_behavior.py && \
 git commit -m "refactor: create coordinator-routing.md and update test references"
 ```
@@ -483,7 +483,7 @@ Expected: `coordinator-routing.md` and `session-startup.md` are present. `specia
 
 **Step 3: Run tests to confirm nothing breaks**
 
-Run: `cd /Users/chrispark/Projects/specialists/canvas-specialists && python -m pytest tests/test_specialists_instructions_storyteller.py tests/test_conversational_chain_behavior.py -v`
+Run: `cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && python -m pytest tests/test_specialists_instructions_storyteller.py tests/test_conversational_chain_behavior.py -v`
 
 Expected: All tests PASS (they point at coordinator-routing.md now).
 
@@ -491,7 +491,7 @@ Expected: All tests PASS (they point at coordinator-routing.md now).
 
 Run:
 ```bash
-cd /Users/chrispark/Projects/specialists/canvas-specialists && \
+cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && \
 git add bundle.md behaviors/specialists.yaml && \
 git rm context/specialists-instructions.md && \
 git commit -m "refactor: wire coordinator-routing.md, remove specialist spawn context, delete old file"
@@ -546,7 +546,7 @@ Expected: You see `model_role: reasoning` on its own line, at column 1 (no inden
 
 Run:
 ```bash
-cd /Users/chrispark/Projects/specialists/canvas-specialists && \
+cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && \
 git add agents/data-analyzer.md && \
 git commit -m "feat: add model_role reasoning to data-analyzer"
 ```
@@ -628,7 +628,7 @@ Expected: No output. All three `@main` references are replaced.
 
 Run:
 ```bash
-cd /Users/chrispark/Projects/specialists/canvas-specialists && \
+cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && \
 git add bundle.md behaviors/specialists.yaml && \
 git commit -m "chore: pin external dependencies to current HEAD SHAs"
 ```
@@ -641,7 +641,7 @@ git commit -m "chore: pin external dependencies to current HEAD SHAs"
 
 **Step 1: Run full test suite**
 
-Run: `cd /Users/chrispark/Projects/specialists/canvas-specialists && python -m pytest tests/ -v`
+Run: `cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && python -m pytest tests/ -v`
 
 Expected: All tests PASS.
 

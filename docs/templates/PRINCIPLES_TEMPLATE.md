@@ -331,7 +331,7 @@ An append-only log where each entry records a real decision that was made. No pr
 - Fast-moving projects where principles emerge from actual decisions
 - When you prefer documenting retrospectively (principles earned, not assumed)
 
-**Example:** See `docs/01-vision/PRINCIPLES.md` in canvas-specialists for a live Decision-Log implementation.
+**Example:** See `docs/01-vision/PRINCIPLES.md` in amplifier-research-specialist for a live Decision-Log implementation.
 
 ---
 

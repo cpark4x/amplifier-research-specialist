@@ -1,8 +1,8 @@
-# canvas-specialists
+# amplifier-research-specialist
 
 You ask an AI to research something and write it up. It reads well. Then someone asks "where did this number come from?" and you don't know. The document is fluent and completely unverifiable.
 
-canvas-specialists is a different architecture for AI research. Separate agents handle research, analysis, and writing independently — the researcher finds and sources evidence, the analyzer draws inferences and labels each one with the specific findings that support it, the writer produces prose where facts read like facts and conclusions read like conclusions. No single model doing everything in one pass with no accountability.
+amplifier-research-specialist is a different architecture for AI research. Separate agents handle research, analysis, and writing independently — the researcher finds and sources evidence, the analyzer draws inferences and labels each one with the specific findings that support it, the writer produces prose where facts read like facts and conclusions read like conclusions. No single model doing everything in one pass with no accountability.
 
 What it won't do matters as much as what it will. Missing evidence is reported, not hidden. Low-confidence claims are hedged, not asserted. Inferences that don't survive adversarial challenge don't ship. The output is trustworthy because it's honest about its limits.
 
@@ -18,7 +18,7 @@ A typical AI research response:
 
 > *"OpenAI holds a dominant position in the enterprise AI market, with strong adoption among Fortune 500 companies. Anthropic is gaining ground, particularly among safety-conscious organizations."*
 
-canvas-specialists on the same question:
+amplifier-research-specialist on the same question:
 
 ```
 FINDING [HIGH CONFIDENCE]
@@ -68,10 +68,10 @@ Every claim sourced. Inferences traced to the findings that support them. Gaps n
 
 ## Quick start
 
-canvas-specialists runs on [Amplifier](https://github.com/microsoft/amplifier).
+amplifier-research-specialist runs on [Amplifier](https://github.com/microsoft/amplifier).
 
 ```bash
-amplifier bundle add git+https://github.com/cpark4x/canvas-specialists@main
+amplifier bundle add git+https://github.com/cpark4x/amplifier-research-specialist@main
 amplifier bundle use specialists --app
 ```
 

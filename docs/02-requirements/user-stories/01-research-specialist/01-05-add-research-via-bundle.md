@@ -13,7 +13,7 @@ A developer can add production-quality research capability to any Amplifier proj
 
 ## Done Looks Like
 
-1. Developer adds a single `includes` line to their `bundle.md` referencing `canvas-specialists`
+1. Developer adds a single `includes` line to their `bundle.md` referencing `amplifier-research-specialist`
 2. The `specialists:researcher` agent is immediately available to any orchestrator in that project
 3. No additional configuration required beyond the bundle include
 4. The researcher works with any Amplifier provider — not locked to a specific LLM

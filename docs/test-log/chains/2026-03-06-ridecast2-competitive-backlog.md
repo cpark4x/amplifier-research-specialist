@@ -33,7 +33,7 @@ action_items_promoted: false
 
 ## What Didn't / Concerns
 
-**Formatter wrote files to the user's active project, not the canvas-specialists repo.** The formatter identified `docs/plans/` in the ridecast2 project as the correct location based on project conventions. This was the right call contextually, but it's worth noting: the formatter made a judgment call to write to the user's project rather than returning the canonical block. In a different context this could be unexpected. Not a bug — but the side-effect of "formatter wrote files" should be documented as intentional behavior when project context is present.
+**Formatter wrote files to the user's active project, not the amplifier-research-specialist repo.** The formatter identified `docs/plans/` in the ridecast2 project as the correct location based on project conventions. This was the right call contextually, but it's worth noting: the formatter made a judgment call to write to the user's project rather than returning the canonical block. In a different context this could be unexpected. Not a bug — but the side-effect of "formatter wrote files" should be documented as intentional behavior when project context is present.
 
 **The formatter's contribution is invisible and hard to measure.** The user scored the chain 8.5/10 vs 6/10 without the chain — but when asked where the delta came from, attributed it almost entirely to researcher + data-analyzer. The formatter was described as "invisible, which is the right outcome." This is correct design but means the formatter's value is hard to validate in test logs. We have no signal on whether the formatter materially improved the data-analyzer's output quality. Worth designing a test that isolates formatter contribution.
 

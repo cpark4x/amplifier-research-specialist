@@ -142,7 +142,7 @@ class TestCompetitorsConfig:
 
 **Step 2: Run test to verify it fails**
 
-Run: `cd /Users/chrispark/Projects/specialists/canvas-specialists && python -m pytest tests/test_competitors_config.py -v`
+Run: `cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && python -m pytest tests/test_competitors_config.py -v`
 
 Expected: FAIL — every test errors with `AssertionError: competitors.yaml not found` because the file does not exist yet.
 
@@ -194,14 +194,14 @@ competitors:
 
 **Step 4: Run test to verify it passes**
 
-Run: `cd /Users/chrispark/Projects/specialists/canvas-specialists && python -m pytest tests/test_competitors_config.py -v`
+Run: `cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && python -m pytest tests/test_competitors_config.py -v`
 
 Expected: All 8 tests PASS.
 
 **Step 5: Commit**
 
 ```bash
-cd /Users/chrispark/Projects/specialists/canvas-specialists && \
+cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && \
 git add specs/evaluation/competitors.yaml tests/test_competitors_config.py && \
 git commit -m "feat: add competitor configuration for quality eval harness"
 ```
@@ -286,7 +286,7 @@ class TestEvalHarnessRecipe:
 
 **Step 2: Run test to verify it fails**
 
-Run: `cd /Users/chrispark/Projects/specialists/canvas-specialists && python -m pytest tests/test_eval_harness.py::TestTestTopics::test_has_competitive_eval_topics tests/test_eval_harness.py::TestTestTopics::test_competitive_eval_topics_have_profile -v`
+Run: `cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && python -m pytest tests/test_eval_harness.py::TestTestTopics::test_has_competitive_eval_topics tests/test_eval_harness.py::TestTestTopics::test_competitive_eval_topics_have_profile -v`
 
 Expected: FAIL — `test_has_competitive_eval_topics` fails with "Missing competitive eval topics: {'factual-deep-dive', 'strategy', 'survey'}" because the topics don't exist yet.
 
@@ -346,14 +346,14 @@ Open `specs/evaluation/test-topics.yaml`. Append the following 3 topics at the e
 
 **Step 4: Run test to verify it passes**
 
-Run: `cd /Users/chrispark/Projects/specialists/canvas-specialists && python -m pytest tests/test_eval_harness.py::TestTestTopics -v`
+Run: `cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && python -m pytest tests/test_eval_harness.py::TestTestTopics -v`
 
 Expected: All 8 tests PASS (6 existing + 2 new). The existing tests still pass because: (a) topic count is now 8 ≥ 5, (b) all new topics have the required schema fields, (c) all new topic IDs are unique.
 
 **Step 5: Commit**
 
 ```bash
-cd /Users/chrispark/Projects/specialists/canvas-specialists && \
+cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && \
 git add specs/evaluation/test-topics.yaml tests/test_eval_harness.py && \
 git commit -m "feat: add 3 competitive eval topics to test topic bank"
 ```
@@ -683,7 +683,7 @@ def test_capture_between_pipeline_and_evaluate() -> None:
 
 **Step 2: Run test to verify it fails**
 
-Run: `cd /Users/chrispark/Projects/specialists/canvas-specialists && python -m pytest tests/test_quality_eval_iteration_recipe.py -v`
+Run: `cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && python -m pytest tests/test_quality_eval_iteration_recipe.py -v`
 
 Expected: FAIL — `test_recipe_file_exists` fails with "recipes/quality-eval-iteration.yaml must exist". All other tests error in `load_recipe()` for the same reason.
 
@@ -905,14 +905,14 @@ steps:
 
 **Step 4: Run test to verify it passes**
 
-Run: `cd /Users/chrispark/Projects/specialists/canvas-specialists && python -m pytest tests/test_quality_eval_iteration_recipe.py -v`
+Run: `cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && python -m pytest tests/test_quality_eval_iteration_recipe.py -v`
 
 Expected: All tests PASS.
 
 **Step 5: Commit**
 
 ```bash
-cd /Users/chrispark/Projects/specialists/canvas-specialists && \
+cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && \
 git add recipes/quality-eval-iteration.yaml tests/test_quality_eval_iteration_recipe.py && \
 git commit -m "feat: add quality-eval-iteration sub-recipe for competitive evaluation"
 ```
@@ -1197,7 +1197,7 @@ def test_aggregate_before_save() -> None:
 
 **Step 2: Run test to verify it fails**
 
-Run: `cd /Users/chrispark/Projects/specialists/canvas-specialists && python -m pytest tests/test_quality_eval_recipe.py -v`
+Run: `cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && python -m pytest tests/test_quality_eval_recipe.py -v`
 
 Expected: FAIL — `test_recipe_file_exists` fails with "recipes/quality-eval.yaml must exist". All other tests error in `load_recipe()`.
 
@@ -1441,14 +1441,14 @@ steps:
 
 **Step 4: Run test to verify it passes**
 
-Run: `cd /Users/chrispark/Projects/specialists/canvas-specialists && python -m pytest tests/test_quality_eval_recipe.py -v`
+Run: `cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && python -m pytest tests/test_quality_eval_recipe.py -v`
 
 Expected: All tests PASS.
 
 **Step 5: Commit**
 
 ```bash
-cd /Users/chrispark/Projects/specialists/canvas-specialists && \
+cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && \
 git add recipes/quality-eval.yaml tests/test_quality_eval_recipe.py && \
 git commit -m "feat: add quality-eval main orchestrator recipe for competitive benchmarking"
 ```
@@ -1461,7 +1461,7 @@ git commit -m "feat: add quality-eval main orchestrator recipe for competitive b
 
 **Step 1: Run the complete test suite**
 
-Run: `cd /Users/chrispark/Projects/specialists/canvas-specialists && python -m pytest tests/ -v`
+Run: `cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && python -m pytest tests/ -v`
 
 Expected: ALL tests pass. Specifically verify:
 - `tests/test_competitors_config.py` — 8 tests PASS
@@ -1492,7 +1492,7 @@ Expected: `All YAML files valid`
 If any fixes were needed during the regression check, commit them:
 
 ```bash
-cd /Users/chrispark/Projects/specialists/canvas-specialists && \
+cd /Users/chrispark/Projects/specialists/amplifier-research-specialist && \
 git add -A && \
 git status
 ```

@@ -177,7 +177,7 @@ delegate(
   agent="specialists:writer",
   instruction="""
   Source material:
-  - The canvas-specialists writer runs a 5-stage pipeline.
+  - The amplifier-research-specialist writer runs a 5-stage pipeline.
   - Stage 2 is a coverage audit that runs before drafting begins.
   - Every output starts with a WRITER METADATA block.
   - The writer never generates claims not present in the source.
@@ -208,7 +208,7 @@ Re-read `specialists/writer/index.md` and find which instruction is ambiguous or
 **Step 1: Stage all changed files**
 
 ```bash
-cd /Users/chrispark/Projects/canvas-specialists
+cd /Users/chrispark/Projects/amplifier-research-specialist
 git add specialists/writer/index.md specialists/writer/README.md docs/01-vision/VISION.md docs/plans/2026-02-28-citation-mapping.md
 ```
 

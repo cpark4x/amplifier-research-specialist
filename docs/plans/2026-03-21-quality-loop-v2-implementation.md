@@ -407,7 +407,7 @@ def test_log_round_includes_cache_fields() -> None:
 
 Run:
 ```bash
-cd /Users/chrispark/Projects/specialists/canvas-specialists
+cd /Users/chrispark/Projects/specialists/amplifier-research-specialist
 python -m pytest tests/test_quality_loop_recipe.py -v 2>&1 | tail -30
 ```
 Expected: Multiple failures. The new tests for `initial-eval`, `cache-competitors`, `select-topics`, `topics_per_iteration`, version `2.0.0`, and cache context should all FAIL. The existing tests that haven't been changed should still PASS (except `test_recipe_version` which now expects `2.0.0`).

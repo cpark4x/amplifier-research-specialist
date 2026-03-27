@@ -8,7 +8,7 @@ A reusable, recipe-driven loop that runs any agent pipeline against competitor t
 
 Evaluating a pipeline on one topic against one competitor gives a data point. Data points are noisy — you can't tell whether a gap is structural or topic-specific. Running multiple topics against multiple competitors gives a distribution, which is trustworthy signal. The loop automates the full cycle: evaluate → diagnose → fix → re-evaluate, so the pipeline improves autonomously between human review sessions.
 
-The first customer is the canvas-specialists research pipeline, but the design is portable to any Amplifier project.
+The first customer is the amplifier-research-specialist research pipeline, but the design is portable to any Amplifier project.
 
 ## Approach
 

@@ -7,7 +7,7 @@ steps:
   - id: "collect-metadata"
     agent: "self"
     prompt: |
-      You are helping capture a structured test log for the canvas-specialists project.
+      You are helping capture a structured test log for the amplifier-research-specialist project.
 
       Infer the following four metadata values from this session's context:
 
@@ -103,7 +103,7 @@ steps:
       {the full 5-section log body}
       ```
 
-      Write the file to the project root at /Users/chrispark/Projects/canvas-specialists, creating any intermediate directories as needed.
+      Write the file to the project root at /Users/chrispark/Projects/amplifier-research-specialist, creating any intermediate directories as needed.
 
       Output only the relative file path that was written (e.g., `docs/test-log/chains/2026-03-02-notion-vs-obsidian.md`).
     output: "log_file_path"

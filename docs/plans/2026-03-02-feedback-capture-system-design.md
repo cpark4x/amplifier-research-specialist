@@ -6,7 +6,7 @@ Build a structured, low-friction system for capturing test log entries after spe
 
 ## Background
 
-The canvas-specialists project uses a test log (`docs/test-log/`) to record how specialist chains perform across different topics. A routing table already defines where different types of findings should land — quality gaps go to the backlog, edge cases go to specialist epics, cross-run patterns go to `adding-a-specialist.md`, and so on.
+The amplifier-research-specialist project uses a test log (`docs/test-log/`) to record how specialist chains perform across different topics. A routing table already defines where different types of findings should land — quality gaps go to the backlog, edge cases go to specialist epics, cross-run patterns go to `adding-a-specialist.md`, and so on.
 
 Today, this process is entirely ad-hoc. There is no consistent capture flow, no structured metadata on log entries, and no automated path from a test observation to a backlog item or epic note. Two log entries exist, but they have no front matter, making programmatic querying impossible. The routing table exists but is not wired to anything.
 

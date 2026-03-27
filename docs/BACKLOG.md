@@ -1,6 +1,6 @@
 # Product Backlog
 
-**Purpose:** Strategic planning view for canvas-specialists — a library of best-in-class, single-domain AI specialist agents for knowledge worker and consumer scenarios  
+**Purpose:** Strategic planning view for amplifier-research-specialist — a library of best-in-class, single-domain AI specialist agents for knowledge worker and consumer scenarios  
 **Owner:** Chris Park  
 **Last Updated:** March 26, 2026 (v6.1)  
 

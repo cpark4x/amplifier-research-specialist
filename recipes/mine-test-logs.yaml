@@ -296,7 +296,7 @@ stages:
       - id: "generate-report"
         agent: "self"
         prompt: |
-          You are a test-log mining analyst for the **canvas-specialists** project.
+          You are a test-log mining analyst for the **amplifier-research-specialist** project.
           Produce a single Markdown mining report from the pre-computed summary JSON
           below. This is a **report-only** workflow — do NOT edit any existing files
           (backlog, epics, specialist configs, etc.).

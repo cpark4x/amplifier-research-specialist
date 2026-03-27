@@ -177,7 +177,7 @@ Use the delegate tool to call `specialists:writer` with this input:
 
 ```
 Source material:
-- The canvas-specialists writer runs a 5-stage pipeline.
+- The amplifier-research-specialist writer runs a 5-stage pipeline.
 - Stage 2 is a coverage audit that runs before drafting begins.
 - Every output starts with a WRITER METADATA block.
 - The writer never generates claims not present in the source.
@@ -224,6 +224,6 @@ git push origin main
 
 **Step 4: Verify on GitHub**
 ```bash
-gh repo view cpark4x/canvas-specialists --web
+gh repo view cpark4x/amplifier-research-specialist --web
 ```
 Confirm latest commit is on main.

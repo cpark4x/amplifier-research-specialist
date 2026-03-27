@@ -10,7 +10,7 @@
 
 | Repo | Score | Key Strength |
 |---|---|---|
-| **canvas-specialists** | 9 | Problem-first, two speeds, adversarial quality signal |
+| **amplifier-research-specialist** | 9 | Problem-first, two speeds, adversarial quality signal |
 | **deckgen** | 9 | Command-forward, "15 seconds, one HTML file, zero dependencies" |
 | **ridecast** | 8.5 | Strong consumer voice, "45-min commute and 12 tabs" |
 | **amplifier-change-advisor** | 8.5 | "Should this change exist in this product?" + blast radius example |

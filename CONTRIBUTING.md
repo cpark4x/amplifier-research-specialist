@@ -1,4 +1,4 @@
-# Contributing to canvas-specialists
+# Contributing to amplifier-research-specialist
 
 Canvas Specialists is a library of best-in-class, single-domain AI specialist agents for knowledge worker and consumer scenarios. Contributions are welcome — whether you're adding a new specialist, improving an existing one, or fixing documentation.
 

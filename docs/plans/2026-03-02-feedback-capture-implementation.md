@@ -252,7 +252,7 @@ steps:
     agent: self
     instruction: |
       You are starting a feedback capture session for a specialist run in the
-      canvas-specialists project.
+      amplifier-research-specialist project.
 
       Infer from session context:
       - specialist: entry-point specialist tested (researcher, writer, or competitive-analysis)

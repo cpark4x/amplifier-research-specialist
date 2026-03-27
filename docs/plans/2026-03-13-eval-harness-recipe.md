@@ -2,7 +2,7 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Build a recipe-based adversarial evaluation harness that runs the canvas-specialists pipeline on test topics and scores output quality using three critic agents ported from the specials evaluation architecture.
+**Goal:** Build a recipe-based adversarial evaluation harness that runs the amplifier-research-specialist pipeline on test topics and scores output quality using three critic agents ported from the specials evaluation architecture.
 
 **Architecture:** The eval harness is a YAML recipe (`recipes/eval-harness.yaml`) that replicates the research-chain pipeline steps, then appends three adversarial critic steps (fact-checker, inference-challenger, consistency-auditor) and a scoring step. Each critic is an inline agent prompt within the recipe — no new specialist agents needed. A separate `specs/evaluation/test-topics.yaml` defines the topic bank. Score history is appended to `specs/evaluation/score-history.yaml` after each run.
 
@@ -761,7 +761,7 @@ class TestScoringRubric:
 **Step 2: Run tests to verify they fail (nothing exists yet)**
 
 ```bash
-cd /Users/chrispark/Projects/canvas-specialists
+cd /Users/chrispark/Projects/amplifier-research-specialist
 python -m pytest tests/test_eval_harness.py -v
 ```
 
