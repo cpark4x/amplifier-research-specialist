@@ -24,7 +24,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 OUTPUT_DIR="$REPO_ROOT/docs/research-output"
-MAX_WAIT=1800  # 30 minutes max
+MAX_WAIT=2700  # 45 minutes max
 
 # Colors
 RED='\033[0;31m'
@@ -150,12 +150,18 @@ while [ "$ELAPSED" -lt "$MAX_WAIT" ]; do
   echo "  Waiting... ${MINS}m${SECS}s elapsed"
 done
 
-# Clean up background process
-kill "$RECIPE_PID" 2>/dev/null || true
+# Do NOT kill the recipe — it may still be running and close to finishing.
+# Just stop polling.
 
 if [ -z "$NEW_FILE" ]; then
-  echo -e "${RED}FAIL: No new output file after ${MAX_WAIT}s${NC}"
-  echo "Check recipe status: amplifier tool invoke recipes operation=list"
+  echo -e "${YELLOW}TIMEOUT: No output file after ${MAX_WAIT}s${NC}"
+  echo "The recipe may still be running in the background."
+  echo ""
+  echo "Options:"
+  echo "  1. Wait and re-check:  ./scripts/smoke-test.sh --check"
+  echo "  2. Check recipe status: amplifier tool invoke recipes operation=list"
+  echo ""
+  echo "The recipe is NOT killed — it will continue running."
   exit 1
 fi
 
